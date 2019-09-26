@@ -8,16 +8,16 @@ import com.fundamental.services.Dao;
 import com.fundamental.model.EstacionConf;
 import com.fundamental.model.EstacionConfHead;
 import com.fundamental.model.Horario;
-import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Precio;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Turno;
 import com.fundamental.model.TurnoEmpleadoBomba;
-import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.generic.bean.Pais;
+import com.sisintegrados.generic.bean.Usuario;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -292,7 +292,7 @@ public class PrTurn extends Panel implements View {
                 result.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
-                        
+
                     }
                 });
                 return result;
@@ -536,7 +536,7 @@ public class PrTurn extends Panel implements View {
                 ctrTurnos = new ListContainer<>(Turno.class, new ArrayList());
                 cbxTurno.setContainerDataSource(ctrTurnos);
                 bcrPrecios.removeAllItems();
-                if (listStations.size()==1) {
+                if (listStations.size() == 1) {
                     cbxEstacion.setValue(listStations.get(0));
                 }
             }
@@ -868,7 +868,15 @@ public class PrTurn extends Panel implements View {
         lblHoraConf.setValue("Horario: " + echSelected.getHoraInicio() + " - " + echSelected.getHoraFin());
         if (turno.getTurnoId() == null || ultimoTurno.getTurnoId() == null) {
             SvcTurno service = new SvcTurno();
-            listPump = service.getBombasByEstacionConfheadId(echSelected.getEstacionconfheadId());
+            // ASG INICIA
+            Estacion est = new Estacion();  
+            if (cbxEstacion != null) {
+                est = (Estacion) cbxEstacion.getValue();
+            } else {
+                est.setEstacionId(0);
+            }
+            //ASG FINALIZA
+            listPump = service.getBombasByEstacionConfheadId(echSelected.getEstacionconfheadId(), est.getEstacionId()); //ASG
             bcrEmpPump.removeAllItems();
             service.closeConnections();
         }
@@ -913,5 +921,4 @@ public class PrTurn extends Panel implements View {
     public void enter(ViewChangeListener.ViewChangeEvent event) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
 }

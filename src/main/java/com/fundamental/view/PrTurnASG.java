@@ -730,7 +730,7 @@ public class PrTurnASG extends Panel implements View {
         lblHoraConf.setValue("Horario: " + echSelected.getHoraInicio() + " - " + echSelected.getHoraFin());
         if (turno.getTurnoId() == null || ultimoTurno.getTurnoId() == null) {
             SvcTurno service = new SvcTurno();
-            listPump = service.getBombasByEstacionConfheadId(echSelected.getEstacionconfheadId());
+            listPump = service.getBombasByEstacionConfheadId(echSelected.getEstacionconfheadId(),0);
             bcrEmpPump.removeAllItems();
             service.closeConnections();
         }
