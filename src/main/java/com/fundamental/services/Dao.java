@@ -1330,7 +1330,7 @@ public class Dao {
         }
         return result;
     }
-
+    
     public List<Bomba> getAllBombas(boolean includeInactive) {
         List<Bomba> result = new ArrayList();
         try {
