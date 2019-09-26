@@ -38,7 +38,7 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 /**
- * @author Henry Barrientos
+ * @author Henry Barrientos..
  */
 public class Dao {
 
