@@ -1,0 +1,12 @@
+target/*
+movies.txt
+.settings
+.classpath
+.project
+gwt-unitCache/
+/target}
+rebel.xml
+.DS_Store
+*.iml
+.idea/
+

@@ -1,0 +1,665 @@
+package com.fundamental.view;
+
+import com.fundamental.model.Bomba;
+import com.fundamental.services.Dao;
+import com.fundamental.model.Estacion;
+import com.fundamental.model.Marca;
+import com.fundamental.model.Pais;
+import com.fundamental.model.Producto;
+import com.fundamental.model.Usuario;
+import com.fundamental.model.Utils;
+import com.fundamental.model.dto.DtoGenericBean;
+import com.fundamental.services.SvcMntEstacion;
+import com.vaadin.data.Container;
+import com.vaadin.data.Container.Filterable;
+import com.vaadin.data.Item;
+import com.vaadin.data.Property;
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.PropertyId;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.demo.dashboard.event.DashboardEventBus;
+import com.vaadin.demo.dashboard.view.DashboardViewType;
+import com.vaadin.event.FieldEvents;
+import com.vaadin.event.ShortcutAction;
+import com.vaadin.event.ShortcutListener;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.server.Responsive;
+import com.vaadin.server.ThemeResource;
+import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.Position;
+import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Image;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.vaadin.maddon.ListContainer;
+
+/**
+ * @author Henry Barrientos
+ */
+public final class MntEstacion extends Panel implements View {
+
+    private TextField tfdFilter;
+    private Button btnFilterClear, 
+            btnAdd = new Button("Agregar", FontAwesome.PLUS),
+            btnSave = new Button("Guardar", FontAwesome.SAVE),
+            btnLubsAll, btnLubsNone;
+    private CssLayout filtering;
+    private Table tblStations, tblBombas, tblCombustibles, tblMiscelaneos;
+    private CheckBox chkMuestraPOS = new CheckBox("¿Mostrar facturación POS?:", false);
+//    @PropertyId("claveConexion")
+//    private TextField tfdDBClave = new TextField("Clave DB:");
+    @PropertyId("bu")
+    private TextField tfdBU = new TextField("Código BU:");
+    @PropertyId("deposito")
+    private TextField tfdDeposito = new TextField("Depósito:");
+    @PropertyId("codigo")
+    private TextField tfdCode;
+    @PropertyId("nombre")
+    private TextArea tfdName;
+    @PropertyId("codigoEnvoy")
+    private TextField tfdEnvoyCode;
+
+    private BeanContainer<Integer, Estacion> bcrStations = new BeanContainer<Integer, Estacion>(Estacion.class);
+    private BeanContainer<Integer, Bomba> bcrBombas = new BeanContainer<Integer, Bomba>(Bomba.class);
+    private BeanContainer<Integer, Producto> bcrCombustibles = new BeanContainer<Integer, Producto>(Producto.class),
+            //bcrLubricants = new BeanContainer<Integer, Producto>(Producto.class),
+            bcrMiscelaneos = new BeanContainer<Integer, Producto>(Producto.class);
+
+//    private FormLayout form = new FormLayout();
+    private VerticalLayout form = new VerticalLayout();
+    private BeanFieldGroup<Estacion> binder = new BeanFieldGroup<>(Estacion.class);
+    private Estacion estacion;
+    @PropertyId("pais")
+    private ComboBox cbxPais;
+    private Container ctrPais;
+    @PropertyId("brand")
+    private ComboBox cbxBrand;
+    private Container ctrBrand;
+    @PropertyId("status")
+    private ComboBox cbxStatus;
+    private List<DtoGenericBean> listStatus;
+    List<Bomba> Allbombas;
+    List<Producto> listCombustibles, listLubricants, listMiscelaneos;
+    String action;
+
+
+//
+    private final VerticalLayout vlRoot;
+    private Utils utils = new Utils();
+    private Usuario user;
+
+    public MntEstacion() {
+        addStyleName(ValoTheme.PANEL_BORDERLESS);
+        setSizeFull();
+        DashboardEventBus.register(this);
+
+        vlRoot = new VerticalLayout();
+        vlRoot.setSizeFull();
+        vlRoot.setMargin(true);
+        vlRoot.addStyleName("dashboard-view");
+        setContent(vlRoot);
+        Responsive.makeResponsive(vlRoot);
+        vlRoot.setId("vlRoot");
+
+        user = (Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName());
+        vlRoot.addComponent(utils.buildHeader("Estación", false, true));
+        vlRoot.addComponent(utils.buildSeparator());
+        getAllData();
+        initControls();
+//
+        buildTableData();
+        buildTableBomba();
+        buildTableProductos();
+        //buildTableLubricants();
+        buildTableMiscelaneos();
+
+        CssLayout content = new CssLayout();
+        content.setId("mainContent");
+        content.addStyleName("dashboard-panels");
+        Responsive.makeResponsive(content);
+
+        VerticalLayout vlLeft = new VerticalLayout(filtering, tblStations, btnAdd);
+        vlLeft.setSpacing(false);
+        vlLeft.setSizeUndefined();
+        vlLeft.setId("vlLeft");
+        vlLeft.setComponentAlignment(filtering, Alignment.MIDDLE_CENTER);
+        vlLeft.setComponentAlignment(btnAdd, Alignment.TOP_CENTER);
+        vlLeft.setMargin(new MarginInfo(false, true, true, false));
+        Responsive.makeResponsive(vlLeft);
+
+        
+HorizontalLayout hltButtons = new HorizontalLayout(btnLubsAll, btnLubsNone);
+hltButtons.setComponentAlignment(btnLubsAll, Alignment.TOP_LEFT);
+hltButtons.setComponentAlignment(btnLubsNone, Alignment.TOP_RIGHT);
+hltButtons.setSizeFull();
+Responsive.makeResponsive(hltButtons);
+/*VerticalLayout vltLubs = utils.buildVertical("vltLubs", false, false, true, false, null);
+vltLubs.addComponents(tblLubricants, hltButtons);
+vltLubs.setMargin(new MarginInfo(false, true, true, false));
+vltLubs.setSizeUndefined();
+Responsive.makeResponsive(vltLubs);*/
+
+        CssLayout cltTables = new CssLayout(utils.vlContainer(tblMiscelaneos));
+        cltTables.setSizeUndefined();
+        Responsive.makeResponsive(cltTables);
+
+        CssLayout dataPump = new CssLayout(form, utils.vlContainer(tblBombas), utils.vlContainer(tblCombustibles));
+        dataPump.setSizeUndefined();
+        Responsive.makeResponsive(dataPump);
+        
+        VerticalLayout vlRight = new VerticalLayout( //form, 
+                dataPump, cltTables, btnSave //cltButtons
+        );
+        vlRight.setSizeUndefined();
+        vlRight.setId("vlRight");
+        vlRight.setComponentAlignment(btnSave, Alignment.MIDDLE_CENTER);
+        Responsive.makeResponsive(vlRight);
+
+        content.addComponents(vlLeft, vlRight);
+
+        vlRoot.addComponent(content);
+        vlRoot.setExpandRatio(content, 1);
+
+        if (bcrStations.size() > 0) {
+            tblStations.setValue(bcrStations.getItemIds().get(0));
+        } else {
+            btnAdd.click();
+        }
+    }
+    
+    private void getAllData() {
+        bcrStations.setBeanIdProperty("estacionId");
+        bcrBombas.setBeanIdProperty("id");
+        bcrCombustibles.setBeanIdProperty("productoId");
+        //bcrLubricants.setBeanIdProperty("productoId");
+        bcrMiscelaneos.setBeanIdProperty("productoId");
+
+        SvcMntEstacion service = new SvcMntEstacion();
+        bcrStations.addAll(service.getAllEstaciones(true));
+        ctrPais = new ListContainer<Pais>(Pais.class, service.getAllPaises());
+        Allbombas = service.getAllBombas(false);
+
+        listCombustibles = service.getAllProductosByTypeMarca(1, true, null);
+        listLubricants = service.getAllProductosByTypeMarca(2, true, null);  //lubricants
+        listMiscelaneos = service.getAllProductosByTypeMarca(3, true, null);
+        ctrBrand = new ListContainer<Marca>(Marca.class, service.getAllBrands(false));
+        service.closeConnections();
+
+        if (bcrStations.getItemIds().size()>0) {
+            int firstItemId = bcrStations.getItemIds().get(0);
+            estacion = bcrStations.getItem(firstItemId).getBean();
+        }
+
+        listStatus = Arrays.asList(new DtoGenericBean("I", "Inactivo"), new DtoGenericBean("A", "Activo"));
+        defineSelectedBombas();
+        defineSelectedProducts();
+    }
+    
+    private void defineSelectedBombas() {
+        if (estacion!=null) {
+            for (Bomba b : Allbombas) {
+                b.setSelected(false);
+                b.setCorrPista(0);
+                for (Bomba eb : estacion.getBombas()) {
+                    if (b.getId().equals(eb.getId())) {
+                        b.setSelected(true);
+                        b.setCorrPista(eb.getCorrPista());
+                        break;
+                    }
+                }
+            }
+        }
+        bcrBombas.removeAllItems();
+        bcrBombas.addAll(Allbombas);
+    }
+    
+    private void defineSelectedProducts() {
+        if (estacion!=null) {
+        for (Producto p : listCombustibles) {
+            p.setSelected(false);
+            for (Producto ep : estacion.getProductos()) {
+                if (p.getProductoId().equals(ep.getProductoId())) {
+                    p.setSelected(true);
+                    break;
+                }
+            }
+        }
+        }
+        bcrCombustibles.removeAllItems();
+        bcrCombustibles.addAll(listCombustibles);
+
+        if (estacion!=null) {
+        for (Producto p : listLubricants) {
+            p.setSelected(false);
+            for (Producto ep : estacion.getProductos()) {
+                if (p.getProductoId().equals(ep.getProductoId())) {
+                    p.setSelected(true);
+                    break;
+                }
+            }
+        }
+        }
+        //bcrLubricants.removeAllItems();
+        //bcrLubricants.addAll(listLubricants);
+        
+        if (estacion!=null) {
+        for (Producto p : listMiscelaneos) {
+            p.setSelected(false);
+            for (Producto ep : estacion.getProductos()) {
+                if (p.getProductoId().equals(ep.getProductoId())) {
+                    p.setSelected(true);
+                    break;
+                }
+            }
+        }
+        }
+        bcrMiscelaneos.removeAllItems();
+        bcrMiscelaneos.addAll(listMiscelaneos);
+    }
+
+    private void initControls() {
+        tfdFilter = utils.buildTextFilter("Filtro búsqueda");
+        tfdFilter.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+        tfdFilter.addShortcutListener(new ShortcutListener("Clear", ShortcutAction.KeyCode.ESCAPE, null) {
+            @Override
+            public void handleAction(final Object sender, final Object target) {
+                tfdFilter.setValue("");
+                ((Filterable) tblStations.getContainerDataSource()).removeAllContainerFilters();
+            }
+        });
+        tfdFilter.addTextChangeListener(new FieldEvents.TextChangeListener() {
+            @Override
+            public void textChange(final FieldEvents.TextChangeEvent event) {
+                Container.Filterable data = (Container.Filterable) tblStations.getContainerDataSource();
+                data.removeAllContainerFilters();
+                data.addContainerFilter(new Container.Filter() {
+                    @Override
+                    public boolean passesFilter(final Object itemId, final Item item) {
+                        if (event.getText() == null || event.getText().equals("")) {
+                            return true;
+                        }
+                        return filterByProperty("paisNombre", item, event.getText())
+                                || filterByProperty("codigo", item, event.getText())
+                                || filterByProperty("nombre", item, event.getText());
+                    }
+                    @Override
+                    public boolean appliesToProperty(final Object propertyId) {
+                        return propertyId.equals("paisNombre")
+                                || propertyId.equals("codigo")
+                                || propertyId.equals("nombre");
+                    }
+                });
+            }
+        });
+        
+        btnFilterClear = new Button(FontAwesome.TIMES);
+        btnFilterClear.addStyleName(ValoTheme.BUTTON_SMALL);
+        btnFilterClear.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+                tfdFilter.setValue("");
+                ((Filterable) tblStations.getContainerDataSource()).removeAllContainerFilters();
+            }
+        });
+
+        filtering = new CssLayout();
+        filtering.addComponents(tfdFilter, btnFilterClear);
+        filtering.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+
+        
+        cbxPais = utils.buildCombobox("País(estación):", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, ctrPais);
+        cbxPais.setItemIconPropertyId("flag");
+    
+        cbxBrand = utils.buildCombobox("Marca", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, ctrBrand);
+        
+//tfdDBClave.setNullRepresentation("");
+//tfdDBClave.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+
+tfdBU.setNullRepresentation("");
+tfdBU.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+tfdDeposito.setNullRepresentation("");
+tfdDeposito.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+tfdCode = utils.buildTextField("Código E1:", "", false, 7, true, ValoTheme.TEXTAREA_SMALL);
+//tfdName = utils.buildTextField("Nombre:", "", false, 100, true, ValoTheme.TEXTAREA_SMALL);
+tfdName = utils.buildTextArea("Nombre:", 15, 2, 100, true, false, "", ValoTheme.TEXTAREA_SMALL);
+tfdEnvoyCode = utils.buildTextField("Código envoy:", "", false, 7, true, ValoTheme.TEXTAREA_SMALL);
+
+cbxStatus = utils.buildCombobox("Estado:", "name", false, true, ValoTheme.COMBOBOX_SMALL, new ListContainer<>(DtoGenericBean.class, listStatus));
+        
+        form = utils.buildVertical("formPrincipal", false, true, true, false, null);
+        form.addComponents(cbxPais, cbxBrand, tfdCode, tfdName);
+//        form.addComponent(binder.buildAndBind("Datos conexión:", "datosConexion"));
+//        ((TextField) form.getComponent(3)).setNullRepresentation(null);
+//        ((TextField) form.getComponent(3)).setNullRepresentation("");
+//        ((TextField) form.getComponent(3)).addStyleName(ValoTheme.TEXTFIELD_SMALL);
+//form.addComponent(tfdDBClave);
+        form.addComponents(tfdBU, tfdDeposito, tfdEnvoyCode, cbxStatus, chkMuestraPOS);
+        form.setSizeUndefined();
+        form.setId("formPrincipal");
+
+        //Importante
+        binder.bindMemberFields(this);
+        binder.setItemDataSource(estacion);
+
+        
+        
+        btnAdd.setStyleName(ValoTheme.BUTTON_PRIMARY);
+        btnAdd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+        btnAdd.addClickListener(new ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                estacion = new Estacion();
+                estacion.setEstado("A");
+//                binder.bindMemberFields(this);
+                binder.setItemDataSource(estacion);
+                action = Dao.ACTION_ADD;
+                chkMuestraPOS.setValue(Boolean.FALSE);
+                for (Integer bombaId : bcrBombas.getItemIds()) {
+                    bcrBombas.getItem(bombaId).getItemProperty("selected").setValue(false);
+                    bcrBombas.getItem(bombaId).getItemProperty("corrPista").setValue(0);
+                }
+                for (Integer prodId : bcrCombustibles.getItemIds()) {
+                    bcrCombustibles.getItem(prodId).getItemProperty("selected").setValue(false);
+                }
+                /*for (Integer prodId : bcrLubricants.getItemIds()) {
+                    bcrLubricants.getItem(prodId).getItemProperty("selected").setValue(false);
+                }*/
+                for (Integer prodId : bcrMiscelaneos.getItemIds()) {
+                    bcrMiscelaneos.getItem(prodId).getItemProperty("selected").setValue(false);
+                }
+            }
+        });
+        
+        btnSave.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+        btnSave.addClickListener(new ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                if (!binder.isValid()) {
+                    Notification.show("Los campos indicados son requeridos.", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
+                
+                try {
+                    binder.commit();
+                } catch (Exception ex) {
+                    Logger.getLogger(MntEstacion.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                estacion.setPaisId(estacion.getPais().getPaisId());
+                estacion.setCreadoPor(user.getUsername());
+                estacion.setModificadoPor(user.getUsername());
+                estacion.setFactElectronica(chkMuestraPOS.getValue() ? "S" : "N");
+                estacion.setEstado( ((DtoGenericBean)cbxStatus.getValue()).getStringId() );
+                estacion.setIdMarca( estacion.getBrand().getIdMarca() );
+                 
+                Bomba bomba;
+                estacion.setBombas(new ArrayList());
+                for (Integer bombaId : bcrBombas.getItemIds()) {
+                    bomba = bcrBombas.getItem(bombaId).getBean();
+                    if (bomba.getSelected() && bomba.getCorrPista()<=0) {
+                        Notification.show("Revise los correlativos de bomba en pista.", Notification.Type.ERROR_MESSAGE);
+                        return;
+                    } else if (bomba.getSelected() && bomba.getCorrPista()>0) {
+                        estacion.getBombas().add(bomba);
+                    }
+                }
+                
+                estacion.setProductos(new ArrayList());
+                Producto producto;
+                for (Integer prodId : bcrCombustibles.getItemIds()) {
+                    producto = bcrCombustibles.getItem(prodId).getBean();
+                    if (producto.getSelected()) {
+                        estacion.getProductos().add(producto);
+                    }
+                }
+                /*for (Integer prodId : bcrLubricants.getItemIds()) {
+                    producto = bcrLubricants.getItem(prodId).getBean();
+                    if (producto.getSelected()) {
+                        estacion.getProductos().add(producto);
+                    }
+                }*/
+                for (Integer prodId : bcrMiscelaneos.getItemIds()) {
+                    producto = bcrMiscelaneos.getItem(prodId).getBean();
+                    if (producto.getSelected()) {
+                        estacion.getProductos().add(producto);
+                    }
+                }
+                
+                SvcMntEstacion service = new SvcMntEstacion();
+                if (action.equals(Dao.ACTION_ADD)&&service.existeBU(estacion.getBu())) {
+                     Notification.show("El código BU ingresado ya fue utilizado por otra estación.");
+                     service.closeConnections();
+                     return;
+                }else if (action.equals(Dao.ACTION_ADD)&&service.existeCodEnvoy(estacion.getCodigoEnvoy())) {
+                    Notification.show("El código ENVOY ingresado ya fue utilizado por otra estación.");
+                    service.closeConnections();
+                    return;
+                }
+                //TODO: Completar guardado/modificado de productos asociados
+                //TODO: Bombas y productos son obligatorias
+                estacion = service.doAction(action, estacion);
+                service.closeConnections();
+                if (estacion.getEstacionId() != null) {
+                    Notification notif = new Notification("¡Exito!", "La acción se ha ejecutado correctamente.", Notification.Type.HUMANIZED_MESSAGE);
+                    notif.setDelayMsec(3000);
+                    notif.setPosition(Position.MIDDLE_CENTER);
+                    notif.show(Page.getCurrent());
+                    UI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_ESTACION.getViewName());
+                } else {
+                    Notification.show("Ocurrió un error al ejecutar la acción. \n" + estacion.getDescError(), Notification.Type.ERROR_MESSAGE);
+                }
+            }
+        });
+                
+        btnLubsAll = new Button("Todos", FontAwesome.CHECK_SQUARE);
+        btnLubsAll.addStyleName(ValoTheme.BUTTON_SMALL);
+        btnLubsAll.addStyleName(ValoTheme.BUTTON_LINK);
+        btnLubsAll.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+        btnLubsAll.addClickListener(new ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                for (Producto p : listLubricants) {
+                    p.setSelected(true);
+                }
+                //bcrLubricants.removeAllItems();
+                //bcrLubricants.addAll(listLubricants);
+                //tblLubricants.refreshRowCache();
+            }
+        });
+        
+        btnLubsNone = new Button("Ninguno", FontAwesome.SQUARE_O);
+        btnLubsNone.addStyleName(ValoTheme.BUTTON_SMALL);
+        btnLubsNone.addStyleName(ValoTheme.BUTTON_LINK);
+        btnLubsNone.addClickListener(new ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                for (Producto p : listLubricants) {
+                    p.setSelected(false);
+                }
+                //bcrLubricants.removeAllItems();
+                //bcrLubricants.addAll(listLubricants);
+                //tblLubricants.refreshRowCache();
+            }
+        });
+        
+    }
+
+    private void buildTableData() {
+        tblStations = utils.buildTable("Estaciones", 100f, 100f, bcrStations,
+                new String[]{"paisNombre", "codigo", "nombre","estado"},
+                new String[]{"País", "Código", "Nombre","Estado"});
+        tblStations.setStyleName(ValoTheme.TABLE_COMPACT);
+        tblStations.setStyleName(ValoTheme.TABLE_SMALL);
+        tblStations.setSelectable(true);
+        tblStations.setSizeUndefined();
+        tblStations.setWidth("300px");
+        tblStations.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                binder.setItemDataSource(bcrStations.getItem(tblStations.getValue()));
+                estacion = bcrStations.getItem(tblStations.getValue()).getBean();
+                chkMuestraPOS.setValue(estacion.getFactElectronica().equals("S") ? true : false);
+                defineSelectedBombas();
+                defineSelectedProducts();
+                action = Dao.ACTION_UPDATE;
+            }
+        });
+        tblStations.addGeneratedColumn("colEstado", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Label result  = new Label(bcrStations.getItem(itemId).getBean().getEstado().equals("A")?"Activo":"Inactivo");
+                Label result = new Label(bcrStations.getItem(itemId).getBean().getEstado().equals("A") ? "A" : "I");
+                result.setWidth("75px");
+                return result;
+            }
+        });
+        tblStations.addGeneratedColumn("colCountryFlag", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Image result = new Image("", new ThemeResource("img/" + bcrStations.getItem(itemId).getBean().getPais().getCodigo().toLowerCase() + ".gif" ));
+                return result;
+            }
+        });
+//        tblStations.setVisibleColumns(new Object[]{"paisNombre", "codigo", "nombre","colEstado"});
+        tblStations.setVisibleColumns(new Object[]{"colCountryFlag", "codigo", "nombre","colEstado"});
+        tblStations.setColumnHeaders(new String[]{"", "Código", "Nombre","Estado"});
+        tblStations.setColumnWidth("colCountryFlag", 30);
+        tblStations.setColumnAlignment("colCountryFlag", Table.Align.CENTER);
+    }
+
+    private void buildTableBomba() {
+        tblBombas = utils.buildTable("Bombas:", 100f, 100f, bcrBombas,
+                new String[]{"nombre"},
+                new String[]{"Nombre"});
+        tblBombas.addStyleName(ValoTheme.TABLE_COMPACT);
+        tblBombas.addStyleName(ValoTheme.TABLE_SMALL);
+        tblBombas.addGeneratedColumn("colSelected", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("selected");  //Atributo del bean
+                CheckBox cbxSelect = new CheckBox("", pro);
+                cbxSelect.addStyleName(ValoTheme.CHECKBOX_SMALL);
+                return cbxSelect;
+            }
+        });
+        tblBombas.addGeneratedColumn("colCorrPista", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("corrPista");  //Atributo del bean
+                TextField result = new TextField();
+                result.setPropertyDataSource(pro);
+                result.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+                result.addStyleName("align-right");
+                result.setWidth(75f, Unit.PIXELS);
+                return result;
+            }
+        });
+        tblBombas.setVisibleColumns(new Object[]{"colSelected", "nombre", "colCorrPista"});
+        tblBombas.setColumnHeaders(new String[]{"", "Nombre", "Corr. pista"});
+tblBombas.setSizeUndefined();
+        tblBombas.setHeight("300px");
+//        tblBombas.setWidth("275px");
+    }
+
+    private void buildTableProductos() {
+        tblCombustibles = utils.buildTable("Combustibles:", 100f, 100f, bcrCombustibles,
+                new String[]{"nombre"},
+                new String[]{"Nombre"});
+        tblCombustibles.addStyleName(ValoTheme.TABLE_COMPACT);
+        tblCombustibles.addStyleName(ValoTheme.TABLE_SMALL);
+        tblCombustibles.addGeneratedColumn("colSelected", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("selected");  //Atributo del bean
+                CheckBox cbxSelect = new CheckBox("", pro);
+                cbxSelect.addStyleName(ValoTheme.CHECKBOX_SMALL);
+                return cbxSelect;
+            }
+        });
+        tblCombustibles.setVisibleColumns(new Object[]{"colSelected", "nombre", "codigo"});
+        tblCombustibles.setColumnHeaders(new String[]{"", "Nombre", "Código"});
+        tblCombustibles.setHeight("300px");
+        tblCombustibles.setWidth("300px");
+    }
+    
+   /* private void buildTableLubricants() {
+        tblLubricants = utils.buildTable("Lubricantes:", 100f, 100f, bcrLubricants,
+                new String[]{"nombre"},
+                new String[]{"Nombre"});
+        tblLubricants.addStyleName(ValoTheme.TABLE_COMPACT);
+        tblLubricants.addStyleName(ValoTheme.TABLE_SMALL);
+        tblLubricants.addGeneratedColumn("colSelected", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("selected");  //Atributo del bean
+                CheckBox cbxSelect = new CheckBox("", pro);
+                cbxSelect.addStyleName(ValoTheme.CHECKBOX_SMALL);
+                return cbxSelect;
+            }
+        });
+        tblLubricants.setVisibleColumns(new Object[]{"colSelected", "nombre", "codigo"});
+        tblLubricants.setColumnHeaders(new String[]{"", "Nombre", "Código"});
+        tblLubricants.setHeight("200px");
+        tblLubricants.setWidth("400px");
+    }*/
+    
+    private void buildTableMiscelaneos() {
+        tblMiscelaneos = utils.buildTable("Otros productos:", 100f, 100f, bcrMiscelaneos,
+                new String[]{"nombre"},
+                new String[]{"Nombre"});
+        tblMiscelaneos.addStyleName(ValoTheme.TABLE_COMPACT);
+        tblMiscelaneos.addStyleName(ValoTheme.TABLE_SMALL);
+        tblMiscelaneos.addGeneratedColumn("colSelected", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("selected");  //Atributo del bean
+                CheckBox cbxSelect = new CheckBox("", pro);
+                cbxSelect.addStyleName(ValoTheme.COMBOBOX_SMALL);
+                return cbxSelect;
+            }
+        });
+        tblMiscelaneos.setVisibleColumns(new Object[]{"colSelected", "nombre"});
+        tblMiscelaneos.setColumnHeaders(new String[]{"", "Nombre"});
+        tblMiscelaneos.setHeight("200px");
+//        tblMiscelaneos.setWidth("350px");
+    }
+    
+    private boolean filterByProperty(final String prop, final Item item, final String text) {
+        if (item == null || item.getItemProperty(prop) == null || item.getItemProperty(prop).getValue() == null) {
+            return false;
+        }
+        String val = item.getItemProperty(prop).getValue().toString().trim().toLowerCase();
+        if (val.contains(text.toLowerCase().trim())) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void enter(ViewChangeListener.ViewChangeEvent event) {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+}

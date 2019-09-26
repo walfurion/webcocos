@@ -1,0 +1,270 @@
+package com.fundamental.model;
+
+import com.fundamental.model.dto.DtoGenericBean;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * @author Henry Barrientos
+ */
+public class Usuario {
+
+    private Integer usuarioId;
+    private String username, clave, nombre, apellido;
+    private Integer paisId;
+    private String estado, creadoPor, modificadoPor;
+    private Date creadoEl;
+    private Date modificadoEl;
+    private String estacion, pais, correo;
+    //Adicionales
+    private List<Rol> roles;
+    private Estacion estacionLogin; //Estacion elegida al ingresar al login
+    private String nombreLogin;
+    private Pais paisLogin;
+    private String rolLogin;
+    private boolean sysadmin;
+    private boolean gerente;
+    private boolean administrativo;
+    private boolean jefePais;
+    private String descError;
+    private DtoGenericBean status;
+    private List<Estacion> stations;
+//    private EstacionUsuario estacionUsuario;
+
+    public Usuario(Integer usuarioId, String username, String clave, String nombre, String apellido, String estado, String creadoPor) {
+        this.usuarioId = usuarioId;
+        this.username = username;
+        this.clave = clave;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.estado = estado;
+        this.creadoPor = creadoPor;
+    }
+
+    public Usuario(Integer usuarioId, String username, String clave, String nombre, String apellido, String estado, String creadoPor, String estacion, String pais) {
+        this.usuarioId = usuarioId;
+        this.username = username;
+        this.clave = clave;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.estado = estado;
+        this.creadoPor = creadoPor;
+        this.estacion = estacion;
+        this.pais = pais;
+    }
+
+    public Usuario() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public Integer getUsuarioId() {
+        return usuarioId;
+    }
+
+    public void setUsuarioId(Integer usuarioId) {
+        this.usuarioId = usuarioId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getClave() {
+        return clave;
+    }
+
+    public void setClave(String clave) {
+        this.clave = clave;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre.toUpperCase();
+    }
+
+    public String getApellido() {
+        return apellido;
+    }
+
+    public void setApellido(String apellido) {
+        this.apellido = apellido.toUpperCase();
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getCreadoPor() {
+        return creadoPor;
+    }
+
+    public void setCreadoPor(String creadoPor) {
+        this.creadoPor = creadoPor;
+    }
+
+    public Date getCreadoEl() {
+        return creadoEl;
+    }
+
+    public void setCreadoEl(Date creadoEl) {
+        this.creadoEl = creadoEl;
+    }
+
+    public String getModificadoPor() {
+        return modificadoPor;
+    }
+
+    public void setModificadoPor(String modificadoPor) {
+        this.modificadoPor = modificadoPor;
+    }
+
+    public Date getModificadoEl() {
+        return modificadoEl;
+    }
+
+    public void setModificadoEl(Date modificadoEl) {
+        this.modificadoEl = modificadoEl;
+    }
+
+    public List<Rol> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Rol> roles) {
+        this.roles = roles;
+    }
+
+    public String getEstacion() {
+        return estacion;
+    }
+
+    public void setEstacion(String estacion) {
+        this.estacion = estacion;
+    }
+
+    public String getPais() {
+        return pais;
+    }
+
+    public void setPais(String pais) {
+        this.pais = pais;
+    }
+
+    /**
+     * Estacion elegida por el usuario que se loggea al iniciar sesion.
+     */
+    public Estacion getEstacionLogin() {
+        return estacionLogin;
+    }
+
+    public void setEstacionLogin(Estacion estacionLogin) {
+        this.estacionLogin = estacionLogin;
+    }
+
+    public String getNombreLogin() {
+        return nombreLogin;
+    }
+
+    public void setNombreLogin(String nombreLogin) {
+        this.nombreLogin = nombreLogin;
+    }
+
+    public Pais getPaisLogin() {
+        return paisLogin;
+    }
+
+    public void setPaisLogin(Pais paisLogin) {
+        this.paisLogin = paisLogin;
+    }
+
+    public String getRolLogin() {
+        return rolLogin;
+    }
+
+    public void setRolLogin(String rolLogin) {
+        this.rolLogin = rolLogin;
+    }
+
+    public boolean isSysadmin() {
+        return sysadmin;
+    }
+
+    public void setSysadmin(boolean sysadmin) {
+        this.sysadmin = sysadmin;
+    }
+
+    public boolean isGerente() {
+        return gerente;
+    }
+
+    public void setGerente(boolean gerente) {
+        this.gerente = gerente;
+    }
+
+    public boolean isAdministrativo() {
+        return administrativo;
+    }
+
+    public void setAdministrativo(boolean administrativo) {
+        this.administrativo = administrativo;
+    }
+
+    public String getDescError() {
+        return descError;
+    }
+
+    public void setDescError(String descError) {
+        this.descError = descError;
+    }
+
+    public Integer getPaisId() {
+        return paisId;
+    }
+
+    public void setPaisId(Integer paisId) {
+        this.paisId = paisId;
+    }
+
+    public boolean isJefePais() {
+        return jefePais;
+    }
+
+    public void setJefePais(boolean jefePais) {
+        this.jefePais = jefePais;
+    }
+
+    public DtoGenericBean getStatus() {
+        return status;
+    }
+
+    public void setStatus(DtoGenericBean status) {
+        this.status = status;
+    }
+
+    public String getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
+    public List<Estacion> getStations() {
+        return stations;
+    }
+
+    public void setStations(List<Estacion> stations) {
+        this.stations = stations;
+    }
+}

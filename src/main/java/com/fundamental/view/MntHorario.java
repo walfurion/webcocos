@@ -1,0 +1,372 @@
+package com.fundamental.view;
+
+import com.fundamental.model.Estacion;
+import com.fundamental.model.EstacionConfHead;
+import com.fundamental.model.Horario;
+import com.sisintegrados.generic.bean.Pais;
+import com.sisintegrados.generic.bean.Usuario;
+import com.fundamental.model.Utils;
+import com.fundamental.model.dto.DtoGenericBean;
+import com.fundamental.services.Dao;
+import com.fundamental.services.SvcGeneral;
+import com.fundamental.utils.Constant;
+import com.vaadin.data.Container;
+import com.vaadin.data.Property;
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.fieldgroup.PropertyId;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.demo.dashboard.event.DashboardEventBus;
+import com.vaadin.demo.dashboard.view.DashboardViewType;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.server.Responsive;
+import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.Position;
+import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.datefield.Resolution;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.PopupDateField;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.vaadin.maddon.ListContainer;
+
+/**
+ * @author Henry Barrientos
+ */
+public class MntHorario extends Panel implements View {
+
+    Button btnSave, btnAdd;
+
+    @PropertyId("horaIDate")
+    PopupDateField pdfHourStart;
+    @PropertyId("horaFDate")
+    PopupDateField pdfHourEnd;
+    @PropertyId("nombre")
+    TextField tfdName;
+    @PropertyId("descripcion")
+    TextArea txaDescription;
+    @PropertyId("status")
+    ComboBox cbxStatus;
+    List<DtoGenericBean> listStatus = new ArrayList();
+
+    ComboBox cbxCountry;
+    List<Pais> listCountries = new ArrayList();
+    Table tblSchedules;
+    BeanContainer<Integer, Horario> bcrSchedule = new BeanContainer<Integer, Horario>(Horario.class);
+    Table tblStations;
+    BeanContainer<Integer, Estacion> bcrStations = new BeanContainer<Integer, Estacion>(Estacion.class);
+
+    BeanFieldGroup<Horario> binder = new BeanFieldGroup<Horario>(Horario.class);
+    List<Estacion> listStations = new ArrayList();
+    List<EstacionConfHead> listEstConfHead, allEstConfHead;
+    Horario horario;
+    String action = Dao.ACTION_ADD;
+
+//template
+    private VerticalLayout vlRoot;
+    private Utils utils = new Utils();
+    private Usuario user;
+
+    public MntHorario() {
+        addStyleName(ValoTheme.PANEL_BORDERLESS);
+        setSizeFull();
+        DashboardEventBus.register(this);
+
+        vlRoot = new VerticalLayout();
+        vlRoot.setSizeFull();
+//        vlRoot.setSizeUndefined();
+        vlRoot.setMargin(true);
+        vlRoot.addStyleName("dashboard-view");
+        setContent(vlRoot);
+        Responsive.makeResponsive(vlRoot);
+        vlRoot.setId("vlRoot");
+
+        user = (Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName());
+        vlRoot.addComponent(utils.buildHeader("Horarios", false, true));
+        vlRoot.addComponent(utils.buildSeparator());
+        getAllData();
+//template
+        buildControls();
+        buildTables();
+        buildButtons();
+
+        VerticalLayout vltLeft = utils.buildVertical("vltLeft", true, false, true, false, null);
+        vltLeft.addComponents(tblSchedules, btnAdd);
+        vltLeft.setMargin(new MarginInfo(false, true, true, false));
+        vltLeft.setComponentAlignment(btnAdd, Alignment.TOP_CENTER);
+        vltLeft.setSizeUndefined();
+
+        VerticalLayout vltCenter = utils.buildVertical("vltCenter", true, false, true, false, null);
+        vltCenter.addComponents(pdfHourStart, pdfHourEnd, tfdName, cbxStatus, txaDescription, btnSave);
+        vltCenter.setMargin(new MarginInfo(false, true, true, false));
+        vltCenter.setComponentAlignment(btnSave, Alignment.MIDDLE_CENTER);
+        vltCenter.setSizeUndefined();
+
+        VerticalLayout vltRight = utils.buildVertical("vltRight", false, true, true, false, null);
+        vltRight.addComponents(cbxCountry, tblStations);
+        vltRight.setComponentAlignment(cbxCountry, Alignment.MIDDLE_CENTER);
+        vltRight.setMargin(new MarginInfo(false, true, true, false));
+        vltRight.setSizeUndefined();
+
+        CssLayout cltPrincipal = new CssLayout(vltLeft, vltCenter, vltRight);
+        cltPrincipal.setId("cltPrincipal");
+        cltPrincipal.setSizeUndefined();
+        cltPrincipal.setResponsive(true);
+        Responsive.makeResponsive(cltPrincipal);
+
+        vlRoot.addComponents(cltPrincipal);
+        vlRoot.setExpandRatio(cltPrincipal, 1);
+
+        if (bcrSchedule.size()==0) {
+            btnAdd.click();
+        }
+    }
+
+    private void getAllData() {
+        bcrSchedule.setBeanIdProperty("horarioId");
+        bcrStations.setBeanIdProperty("estacionId");
+        bcrStations.addAll(new ArrayList());
+
+        SvcGeneral service = new SvcGeneral();
+        listCountries = service.getAllPaises();
+        listStatus = Arrays.asList(new DtoGenericBean("I", "Inactivo"), new DtoGenericBean("A", "Activo"));
+        bcrSchedule.addAll(service.getHorarios(true));
+        listStations = service.getAllEstaciones(false);
+        bcrStations.addAll(listStations);
+        listEstConfHead = service.getAllConfiguracionHead(false);
+        allEstConfHead = service.getAllConfiguracionheadPais();
+        service.closeConnections();
+    }
+
+    private void buildControls() {
+        pdfHourStart = utils.buildPopupDateField("Hora inicio:", new Date(), "HH:mm", true, Resolution.MINUTE, new Date(), new Date(), new Locale("es", "ES"), ValoTheme.DATEFIELD_SMALL);
+        pdfHourStart.setDescription("La hora esta en formato de 24H");
+        
+        pdfHourEnd = utils.buildPopupDateField("Hora fin:", new Date(), "HH:mm", true, Resolution.MINUTE, new Date(), new Date(), new Locale("es", "ES"), ValoTheme.DATEFIELD_SMALL);
+        pdfHourEnd.setDescription("La hora esta en formato de 24H");
+        
+        tfdName = utils.buildTextField("Nombre:", "", false, 75, true, ValoTheme.TEXTFIELD_SMALL);
+
+        cbxStatus = utils.buildCombobox("Estado:", "name", false, true, ValoTheme.COMBOBOX_SMALL, new ListContainer<DtoGenericBean>(DtoGenericBean.class, listStatus));
+
+        txaDescription = utils.buildTextArea("Descripción:", 20, 3, 150, false, true, "", ValoTheme.TEXTFIELD_SMALL);
+
+        cbxCountry = utils.buildCombobox("País:", "nombre", false, false, ValoTheme.COMBOBOX_SMALL, new ListContainer<Pais>(Pais.class, listCountries));
+        cbxCountry.setItemIconPropertyId("flag");
+        cbxCountry.setSizeUndefined();
+        cbxCountry.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                if (cbxCountry.getValue()!=null) {
+                    int countryId = ((Pais) cbxCountry.getValue()).getPaisId();
+                    bcrStations.removeAllItems();
+                    List<Estacion> tmpListStation = new ArrayList();
+                    for (Estacion item : new ArrayList<Estacion>(listStations)) {
+                        item.setSelected(false);
+                        item.setEstacionConfHead(null);
+                        if (item.getPaisId()==countryId) {
+                            tmpListStation.add(item);   //It only has stations for selected country
+                            listStations.remove(item);
+                        }
+                    }
+                    boolean firstime = true;
+                    for (Estacion item0 : horario.getListStations()) {
+                        for (Estacion item : tmpListStation) {
+                            if (Objects.equals(item0.getEstacionId(), item.getEstacionId()) && item0.isSelected()) {
+                                item.setSelected(true);
+                                item.setEstacionConfHead(item0.getEstacionConfHead());
+                            }
+                            bcrStations.addBean(item);
+                            if (firstime) listStations.add(item);   //add only the first time
+                        }
+                        firstime = false;
+                    }
+                    if (!(bcrStations.size()>0)) {
+                        bcrStations.addAll(tmpListStation);
+                    }
+                    tblStations.refreshRowCache();
+                }
+            }
+        });
+
+        //Importante
+        binder.bindMemberFields(this);
+        binder.setItemDataSource(horario);
+    }
+
+    private void buildTables() {
+        tblStations = utils.buildTable("Estaciones:", 300f, 200f, bcrStations, new Object[]{"nombre", "codigo", "bu"}, new String[]{"Estación", "Código", "BU"});
+        tblStations.addStyleName(ValoTheme.TABLE_COMPACT);
+        tblStations.addStyleName(ValoTheme.TABLE_SMALL);
+        tblStations.setSizeUndefined();
+        tblStations.setHeight("450px");
+        tblStations.addGeneratedColumn("colSelected", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("selected");  //Atributo del bean
+                CheckBox cbxSelect = new CheckBox("", pro);
+                cbxSelect.addStyleName(ValoTheme.CHECKBOX_SMALL);
+                return cbxSelect;
+            }
+        });
+        tblStations.addGeneratedColumn("colEstConfHead", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("estacionConfHead");  //Atributo del bean
+                List<EstacionConfHead> echTemp = new ArrayList();
+                for (EstacionConfHead ech : allEstConfHead) {
+                    if (ech.getEstacionId().equals(itemId)) {
+                        echTemp.add(ech);
+                    }
+                }
+                
+                Container contEstConfHead = new ListContainer<>(EstacionConfHead.class, echTemp);
+                final ComboBox combo = new ComboBox("", contEstConfHead);
+                combo.setItemCaptionPropertyId("nombre");   //atributo de medio de pago
+                combo.setPropertyDataSource(pro);
+                combo.setNullSelectionAllowed(false);
+                combo.addStyleName(ValoTheme.COMBOBOX_SMALL);
+                return combo;
+            }
+        });
+        tblStations.setVisibleColumns("colSelected", "paisNombre", "nombre", "codigo", "colEstConfHead");
+        tblStations.setColumnHeaders("", "País", "Estación", "Código", "Configuracion");
+
+        tblSchedules = utils.buildTable("Horarios:", 300f, 200f, bcrSchedule, new Object[]{"nombre", "horaInicio", "horaFin"}, new String[]{"Nombre", "Inicio", "Fin"});
+        tblSchedules.addStyleName(ValoTheme.TABLE_COMPACT);
+        tblSchedules.addStyleName(ValoTheme.TABLE_SMALL);
+        tblSchedules.setSizeUndefined();
+        tblSchedules.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                if (tblSchedules.getValue() != null) {
+                    action = Dao.ACTION_UPDATE;
+                    horario = bcrSchedule.getItem(tblSchedules.getValue()).getBean();
+                    Calendar cal = Calendar.getInstance();
+                    cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(horario.getHoraInicio().split(":")[0]));
+                    cal.set(Calendar.MINUTE, Integer.parseInt(horario.getHoraInicio().split(":")[1]));
+                    horario.setHoraIDate(cal.getTime());
+                    cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(horario.getHoraFin().split(":")[0]));
+                    cal.set(Calendar.MINUTE, Integer.parseInt(horario.getHoraFin().split(":")[1]));
+                    horario.setHoraFDate(cal.getTime());
+                    binder.setItemDataSource(horario);
+                    bcrStations.removeAllItems();
+                    tblStations.refreshRowCache();
+                    cbxCountry.setValue(null);
+                }
+            }
+        });
+        tblSchedules.setValue((bcrSchedule.size() > 0) ? bcrSchedule.getIdByIndex(0) : null);
+        tblSchedules.addGeneratedColumn("colEstado", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Label result  = new Label();
+                String estado = bcrSchedule.getItem(itemId).getBean().getEstado();
+                result.setValue(estado.equals("A")?"Activo":"Inactivo");
+                result.setWidth("75px");
+                return result;
+            }
+        });
+        tblSchedules.setVisibleColumns(new Object[]{"nombre", "horaInicio", "horaFin","colEstado"});
+        tblSchedules.setColumnHeaders(new String[]{"Nombre", "Inicio", "Fin","Estado"});
+
+    }
+
+    private void buildButtons() {
+        btnAdd = utils.buildButton("Agregar", FontAwesome.PLUS, ValoTheme.BUTTON_PRIMARY);
+        btnAdd.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+                listStations.stream().forEach((Estacion item) -> {
+                    item.setSelected(false);
+                });
+                action = Dao.ACTION_ADD;
+                horario = new Horario();
+                horario.setListStations(new ArrayList());
+                binder.setItemDataSource(horario);
+                cbxCountry.setValue(null);
+                bcrStations.removeAllItems();
+                tblStations.refreshRowCache();
+                tblSchedules.setValue(null);
+            }
+        });
+
+        btnSave = utils.buildButton("Guardar", FontAwesome.SAVE, ValoTheme.BUTTON_FRIENDLY);
+        btnSave.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+                horario.setListStations(new ArrayList());
+                for (Integer itemId : bcrStations.getItemIds()) {
+                    if (bcrStations.getItem(itemId).getBean().isSelected() && bcrStations.getItem(itemId).getBean().getEstacionConfHead()!=null) {
+                        horario.getListStations().add(bcrStations.getItem(itemId).getBean());
+                    } else if (bcrStations.getItem(itemId).getBean().isSelected() && bcrStations.getItem(itemId).getBean().getEstacionConfHead()==null) {
+                        //checkbox on and without estacionConfHead
+                        Notification.show("Las estaciones marcadas deben tener asociada una configuración de despacho.", Notification.Type.ERROR_MESSAGE);
+                        return;
+                    }
+                }
+                if (!pdfHourStart.isValid() || !pdfHourEnd.isValid() || !tfdName.isValid()) {
+                    Notification.show("Los campos marcados son requeridos.", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
+                if (horario.getListStations().isEmpty()) {
+                    Notification.show("Por favor, elija almenos una estación.", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
+                try {
+                    binder.commit();
+                } catch (FieldGroup.CommitException ex) {
+                    Logger.getLogger(MntHorario.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                horario.setHoraInicio(Constant.SDF_HHmm.format(pdfHourStart.getValue()));
+                horario.setHoraFin(Constant.SDF_HHmm.format(pdfHourEnd.getValue()));
+                horario.setCreadoPor(user.getUsername());
+                horario.setModificadoPor(user.getUsername());
+                horario.setEstado(((DtoGenericBean) cbxStatus.getValue()).getStringId());
+//                horario.setPaisestacionId( ((Pais)cbxCountry.getValue()).getPaisId() );
+                SvcGeneral service = new SvcGeneral();
+                horario = service.doActionHorario(action, horario);
+                service.closeConnections();
+                if (horario.getHorarioId() > 0) {
+                    Notification notif = new Notification("¡Exito!", "La acción se ha ejecutado correctamente.", Notification.Type.HUMANIZED_MESSAGE);
+                    notif.setDelayMsec(3000);
+                    notif.setPosition(Position.MIDDLE_CENTER);
+                    notif.show(Page.getCurrent());
+                    UI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_SCHEDULE.getViewName());
+                } else {
+                    Notification.show("Ocurrió un error al ejecutar la acción. \n" + horario.getDescError(), Notification.Type.ERROR_MESSAGE);
+                }
+            }
+        });
+
+    }
+
+    @Override
+    public void enter(ViewChangeListener.ViewChangeEvent event) {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+}

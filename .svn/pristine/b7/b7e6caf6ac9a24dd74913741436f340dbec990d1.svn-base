@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="cocospu" transaction-type="RESOURCE_LOCAL">
+    <class>com.fundamental.model.Usuario</class>
+    <class>com.fundamental.model.Estacion</class>
+    <class>com.fundamental.model.Turno</class>
+    <class>com.fundamental.model.EstacionUsuario</class>
+    <class>com.fundamental.model.Estado</class>
+    <class>com.fundamental.model.Parametro</class>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:XE"/>
+      <property name="javax.persistence.jdbc.user" value="ecoco"/>
+      <property name="javax.persistence.jdbc.driver" value="oracle.jdbc.OracleDriver"/>
+      <property name="javax.persistence.jdbc.password" value="ecoco"/>
+    </properties>
+  </persistence-unit>
+</persistence>

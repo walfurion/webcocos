@@ -1,0 +1,149 @@
+package com.fundamental.services;
+
+import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Pais;
+import com.fundamental.model.Rol;
+import com.sisintegrados.generic.bean.Usuario;
+import com.fundamental.model.dto.DtoGenericBean;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Henry Barrientos
+ */
+public class SvcMntUser extends Dao {
+    
+    private String query;
+    public SvcMntUser() {}
+    
+/*    public List<Usuario> getAllUsuarios(boolean onlyActive) {
+        List<Usuario> result = new ArrayList();
+        query = (onlyActive) ? " WHERE u.estado = 'A' " : "";
+        query = "SELECT u.usuario_id, u.username, u.clave, u.nombre, u.apellido, u.estado, es.nombre, pa.NOMBRE, es.estacion_id "
+                + ", p.pais_id, p.nombre, p.codigo "
+                + "FROM usuario u "
+                + "LEFT OUTER JOIN ESTACION_USUARIO eu on u.USUARIO_ID=eu.USUARIO_ID "
+                + "LEFT OUTER JOIN estacion es on eu.ESTACION_ID=es.ESTACION_ID "
+                + "LEFT OUTER JOIN pais pa on es.pais_id = pa.pais_id " 
+                + "LEFT OUTER JOIN pais p on u.pais_id = p.pais_id "
+                + query
+                + "ORDER BY u.USUARIO_ID ASC";
+        ResultSet rst = null;
+        try {
+            List<Estacion> allEstaciones = getAllEstaciones(true);
+            
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            Usuario user;
+            while (rst.next()) {
+                user = new Usuario(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getString(6), null, rst.getString(7), rst.getString(8));
+                user.setRoles(getRolesByUserid(rst.getInt(1)));
+                for (Estacion est : allEstaciones) {
+                    if (rst.getObject(9)!=null &&  est.getEstacionId() == rst.getInt(9)) {
+                        user.setEstacionLogin(est); 
+                        user.setPaisLogin(est.getPais());
+                        break;
+                    }
+                }
+                if (user.getPaisLogin()==null && rst.getString(10)!=null) {
+                    user.setPaisLogin(new Pais(rst.getInt(10), rst.getString(11), rst.getString(12), null, null, null, null));
+                    user.setPais(rst.getString(11));
+                }
+                query = (rst.getString(5).equals("A")) ? "Activo" : "Inactivo";
+                user.setStatus(new DtoGenericBean(rst.getString(5), query));
+                result.add(user);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try { rst.close(); pst.close(); } catch (Exception ignore) { }
+        }
+        return result;
+    }
+*/
+    
+    public List<Usuario> getAllUsuarios(boolean onlyActive) {
+        List<Usuario> result = new ArrayList();
+        ResultSet rst = null;
+        try {
+            List<Estacion> associated = getStationsAssignedUser();
+            query = (onlyActive) ? " WHERE u.estado = 'A' " : "";
+            query = "SELECT u.usuario_id, u.username, u.clave, u.nombre, u.apellido, u.estado, u.correo  "
+                    + "FROM usuario u "
+                    + query
+                    + "ORDER BY u.usuario_id ASC";
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            Usuario user;
+            while (rst.next()) {
+                user = new Usuario(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getString(6), null, null, null);
+                //TODO: Hacer mas eficiente la llamada siguiente, obteniendo previamente el listado de roles asignados.
+                user.setRoles(getRolesByUserid(rst.getInt(1)));
+                user.setStations(new ArrayList());
+                for (Estacion est : associated) {
+                    if (rst.getString(1).equals(est.getCreadoPor())) {   //idUser
+                        user.getStations().add(est);
+                    }
+                }
+                query = (rst.getString(6).equals("A")) ? "Activo" : "Inactivo";
+                user.setStatus(new DtoGenericBean(rst.getString(6), query));
+                user.setCorreo(rst.getString(7));
+                result.add(user);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+//                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
+    public List<Rol> getAllRoles(boolean onlyActive) {
+        List<Rol> result = new ArrayList();
+        query = (onlyActive) ? " WHERE estado = 'A' " : "";
+        query = "SELECT rol_id, nombre, descripcion, rolpadre_id, estado "
+                + "FROM rol " 
+                + query
+                + "ORDER BY nombre";
+        try {
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            while (rst.next()) {
+                result.add(new Rol(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5) ));
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try { pst.close(); } catch (Exception ignore) { }
+        }
+        return result;
+    }
+    
+    public List<Estacion> getStationsAssignedUser() {
+        List<Estacion> result = new ArrayList();
+        query = "SELECT e.estacion_id, e.nombre, e.codigo, e.bu, e.deposito, e.pais_id, e.codigo_envoy, e.fact_electronica, e.estado, e.id_marca, eu.usuario_id "
+                + "FROM estacion e, estacion_usuario eu "
+                + "WHERE e.estacion_id = eu.estacion_id";
+        try {
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            Estacion estacion;
+            while (rst.next()) {
+                estacion = new Estacion(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(6), rst.getString(9), rst.getString(8));
+                estacion.setCreadoPor(rst.getString(11));   //associated user
+                result.add(estacion);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try { pst.close(); } catch (Exception ignore) { }
+        }
+        return result;
+    }
+     
+}
