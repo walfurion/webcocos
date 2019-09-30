@@ -12,21 +12,21 @@ public class Lectura {
     private Integer lecturaId, estacionId, turnoId;
     private String creadoPor;
     private Date creadoEl;
-    private String creadoPersona, modificadoPor, descError, nombrePistero, nombreJefe;
+    private String creadoPersona, modificadoPor, descError  /**, nombrePistero, nombreJefe**/;
     private Date modificadoEl;
     private List<LecturaDetalle> lecturaDetalle = new ArrayList();
     private List<Lecturafinal> lecturafinal = new ArrayList();
     private Integer empleadoId;
 
     public Lectura(Integer lecturaId, Integer estacionId, Integer turnoId
-                    , String creadoPor, String creadoPersona, String nombrePistero, String nombreJefe) {
+                    , String creadoPor, String creadoPersona/**, String nombrePistero, String nombreJefe**/) {
         this.lecturaId = lecturaId;
         this.estacionId = estacionId;
         this.turnoId = turnoId;
         this.creadoPor = creadoPor;
         this.creadoPersona = creadoPersona;
-        this.nombrePistero = nombrePistero;
-        this.nombreJefe = nombreJefe;
+        //this.nombrePistero = nombrePistero;
+        //this.nombreJefe = nombreJefe;
     }
 
     public Lectura() {
@@ -121,21 +121,21 @@ public class Lectura {
         this.lecturafinal = lecturafinal;
     }
 
-    public String getNombrePistero() {
-        return nombrePistero;
-    }
-
-    public void setNombrePistero(String nombrePistero) {
-        this.nombrePistero = nombrePistero;
-    }
-
-    public String getNombreJefe() {
-        return nombreJefe;
-    }
-
-    public void setNombreJefe(String nombreJefe) {
-        this.nombreJefe = nombreJefe;
-    }
+//    public String getNombrePistero() {
+//        return nombrePistero;
+//    }
+//
+//    public void setNombrePistero(String nombrePistero) {
+//        this.nombrePistero = nombrePistero;
+//    }
+//
+//    public String getNombreJefe() {
+//        return nombreJefe;
+//    }
+//
+//    public void setNombreJefe(String nombreJefe) {
+//        this.nombreJefe = nombreJefe;
+//    }
 
     public Integer getEmpleadoId() {
         return empleadoId;
