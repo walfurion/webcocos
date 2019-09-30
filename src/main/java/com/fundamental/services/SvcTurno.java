@@ -384,12 +384,13 @@ public class SvcTurno extends Dao {
         return result;
     }
 
-    public List<Bomba> getBombasByEstacionConfheadId(int estacionConfheadId) {
+    public List<Bomba> getBombasByEstacionConfheadId(int estacionConfheadId, int idstation) {
         List<Bomba> result = new ArrayList();
         try {
             miQuery = "SELECT b.bomba_id, b.nombre, b.estado, b.creado_por, b.creado_el "
                     + "FROM estacion_conf ec, bomba b "
-                    + "WHERE ec.bomba_id = b.bomba_id AND ec.estacionconfhead_id = " + estacionConfheadId;
+                    + "WHERE ec.bomba_id = b.bomba_id AND ec.estacionconfhead_id = " + estacionConfheadId
+                    + "AND ec.estacion_id = " + idstation; //ASG   
             pst = getConnection().prepareStatement(miQuery);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
