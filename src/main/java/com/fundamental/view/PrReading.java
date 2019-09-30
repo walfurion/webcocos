@@ -83,7 +83,7 @@ public class PrReading extends VerticalLayout implements View {
     Label labelStation, labelTurno, labelCreadopor,
             lblUltimoDía = new Label("Último día:"),
             lblUltimoTurno = new Label("Último turno:");
-    TextField tfdNameSeller, tfdNameChief;
+    //TextField tfdNameSeller, tfdNameChief;
     DateField dfdFecha = new DateField("Fecha:");
     ComboBox cbxEmpleado,
             cbxCountry = new ComboBox("País:"),
@@ -461,9 +461,9 @@ public class PrReading extends VerticalLayout implements View {
         });
         cbxTurno.setValue(turno);
 
-        tfdNameSeller = utils.buildTextField("Pistero:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
+        //tfdNameSeller = utils.buildTextField("Pistero:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
 
-        tfdNameChief = utils.buildTextField("Jefe de pista:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
+        //tfdNameChief = utils.buildTextField("Jefe de pista:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
 
 //        determinarPermisos();
     }
@@ -553,11 +553,12 @@ public class PrReading extends VerticalLayout implements View {
                     Notification.show("ERROR:", "NO hay acciones que realizar.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
-                if (!tfdNameSeller.isValid() || tfdNameSeller.getValue().trim().isEmpty()
-                        || !tfdNameChief.isValid() || tfdNameChief.getValue().trim().isEmpty() || !cbxEmpleado.isValid()) {
-                    Notification.show("ERROR:", "Todos los campos marcados son requeridos.", Notification.Type.ERROR_MESSAGE);
-                    return;
-                }
+                /*Se elimino validación de ingreso de Pistero y Jefe de Pista porque ya no se utilizaran*/
+//                if (!tfdNameSeller.isValid() || tfdNameSeller.getValue().trim().isEmpty()
+//                        || !tfdNameChief.isValid() || tfdNameChief.getValue().trim().isEmpty() || !cbxEmpleado.isValid()) {
+//                    Notification.show("ERROR:", "Todos los campos marcados son requeridos.", Notification.Type.ERROR_MESSAGE);
+//                    return;
+//                }
 
                 //Identificar lecturas finales que sean menores que la inicial
                 DtoLectura dlectura;
@@ -582,7 +583,7 @@ public class PrReading extends VerticalLayout implements View {
 
                 if (turno.getTurnoId() != null) {
                     Integer turnoId = turno.getTurnoId();
-                    Lectura lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), tfdNameSeller.getValue(), tfdNameChief.getValue());
+                    Lectura lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin()/**, tfdNameSeller.getValue(), tfdNameChief.getValue()**/);
                     lectura.setEmpleadoId(((Empleado) cbxEmpleado.getValue()).getEmpleadoId());
 
                     LecturaDetalle ldetalle;
@@ -943,7 +944,7 @@ public class PrReading extends VerticalLayout implements View {
 
         HorizontalLayout cltToolbar = utils.buildHorizontal("cltToolbar", false, true, true, false);
 //        cltToolbar.setSizeUndefined();
-        cltToolbar.addComponents(cbxCountry, cbxEstacion, dfdFecha, cbxTurno, tfdNameSeller, tfdNameChief);
+        cltToolbar.addComponents(cbxCountry, cbxEstacion, dfdFecha, cbxTurno /**, tfdNameSeller, tfdNameChief**/);
 
         VerticalLayout vlItems = utils.buildVertical("vlItems", false, true, true, false, null);
 //        vlItems.setSizeUndefined();
@@ -966,8 +967,8 @@ public class PrReading extends VerticalLayout implements View {
         cbxEmpleado.addValueChangeListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
-                tfdNameSeller.setValue(null);
-                tfdNameChief.setValue(null);
+                //tfdNameSeller.setValue(null);
+                //tfdNameChief.setValue(null);
                 for (Integer itemId : bcrBombas.getItemIds()) {
                     bcrBombas.getItem(itemId).getItemProperty("selected").setValue(false);
                     onChangeCheckboxBomba(itemId, false);
@@ -1466,8 +1467,8 @@ public class PrReading extends VerticalLayout implements View {
                 if (lecturaFinalTurnoActual) {    //cerrado
                     for (DtoLectura dlec : lecturasTurnoActivoElectronicas) {
                         if (dlec.getBombaId().equals(itemId) && dlec.getProductoId().equals(p.getProductoId()) && dlec.getTipodespachoId().equals(bomba.getTipoDespachoId())) {
-                            tfdNameSeller.setValue(dlec.getNombrePistero());
-                            tfdNameChief.setValue(dlec.getNombreJefe());
+                            //tfdNameSeller.setValue(dlec.getNombrePistero());
+                            //tfdNameChief.setValue(dlec.getNombreJefe());
                             dla.seteInicial(dlec.getmInicial());
                             dla.seteFinal(dlec.getmFinal());
 //                                            dla.setmCalibracion(dlec.getmCalibracion());
@@ -1522,8 +1523,8 @@ public class PrReading extends VerticalLayout implements View {
 //                                if (turno.getEstadoId()==2 || (turno.getEstadoId()==1 && lecturasTurnoActivoMecanicas.size()>0)) {    //cerrado
                 if (lecturaFinalTurnoActual) {    //cerrado
                     for (DtoLectura dlec : lecturasTurnoActivoMecanicas) {
-                        tfdNameSeller.setValue(dlec.getNombrePistero());
-                        tfdNameChief.setValue(dlec.getNombreJefe());
+                        //tfdNameSeller.setValue(dlec.getNombrePistero());
+                        //tfdNameChief.setValue(dlec.getNombreJefe());
                         if (dlec.getBombaId().equals(itemId) && dlec.getProductoId().equals(p.getProductoId()) && dlec.getTipodespachoId().equals(bomba.getTipoDespachoId())) {
                             dla.setmInicial(dlec.getmInicial());
                             dla.setmFinal(dlec.getmFinal());
