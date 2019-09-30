@@ -7,7 +7,7 @@ import com.fundamental.model.Empleado;
 import com.fundamental.model.Estacion;
 import com.fundamental.services.Dao;
 import com.fundamental.model.dto.DtoLectura;
-import com.fundamental.model.Lectura;
+import com.sisintegrados.generic.bean.Lectura;
 import com.fundamental.model.LecturaDetalle;
 import com.fundamental.model.Lecturafinal;
 import com.sisintegrados.generic.bean.Pais;
