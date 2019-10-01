@@ -5,7 +5,7 @@ import com.fundamental.model.Empleado;
 import com.fundamental.model.Estacion;
 import static com.fundamental.services.Dao.ACTION_ADD;
 import static com.fundamental.services.Dao.ACTION_UPDATE;
-import com.fundamental.model.Lectura;
+import com.sisintegrados.generic.bean.Lectura;
 import com.fundamental.model.LecturaDetalle;
 import com.fundamental.model.Lecturafinal;
 import com.fundamental.model.dto.DtoLectura;

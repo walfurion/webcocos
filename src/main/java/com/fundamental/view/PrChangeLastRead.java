@@ -3,7 +3,7 @@ package com.fundamental.view;
 import com.fundamental.model.Bomba;
 import com.fundamental.services.Dao;
 import com.fundamental.model.Estacion;
-import com.fundamental.model.Lectura;
+import com.sisintegrados.generic.bean.Lectura;
 import com.fundamental.model.LecturaDetalle;
 import com.fundamental.model.Lecturafinal;
 import com.sisintegrados.generic.bean.Pais;
@@ -352,7 +352,7 @@ public class PrChangeLastRead extends Panel implements View {
                 }
                 SvcReading svcLectura = new SvcReading();
                 Turno turno = svcLectura.getTurnoActivoByEstacionid(estacion.getEstacionId());
-                Lectura lectura = new Lectura(null, estacion.getEstacionId(), turno.getTurnoId(), null, null, null, null);
+                Lectura lectura = new Lectura(null, estacion.getEstacionId(), turno.getTurnoId(), null, null/*,null, null*/);
                 lectura.setLecturaDetalle(new ArrayList<LecturaDetalle>());
                 LecturaDetalle ldetail;
                 boolean existe = false;

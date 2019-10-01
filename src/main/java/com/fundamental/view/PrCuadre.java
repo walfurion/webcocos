@@ -247,7 +247,7 @@ public class PrCuadre extends Panel implements View {
         cltTaDiff.setSizeFull();
         cltTaDiff.addComponent(btnSave);
 
-        CssLayout cltEmpleado = new CssLayout(utils.vlContainer(cbxEmpleado), utils.vlContainer(tfdNameSeller), utils.vlContainer(tfdNameChief));
+        CssLayout cltEmpleado = new CssLayout(utils.vlContainer(cbxEmpleado)/**, utils.vlContainer(tfdNameSeller), utils.vlContainer(tfdNameChief)**/);
         cltEmpleado.setSizeUndefined();
         Responsive.makeResponsive(cltEmpleado);
 
@@ -430,8 +430,10 @@ public class PrCuadre extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 estacion = (Estacion) cbxEstacion.getValue();
+                System.out.println("estacion: "+estacion.getEstacionId());
                 dfdFecha.setValue(null);
                 contTurnos = new ListContainer<>(Turno.class, new ArrayList());
+                System.out.println("contTurnos: "+contTurnos.size());
                 cbxTurno.setContainerDataSource(contTurnos);
                 cbxTurno.setValue(null);
                 contArqueos = new ListContainer<>(Arqueocaja.class, new ArrayList());
@@ -439,6 +441,7 @@ public class PrCuadre extends Panel implements View {
                 cbxArqueos.setValue(null);
                 SvcCuadre service = new SvcCuadre();
                 List<Producto> prodAdicionales = service.getProdAdicionalesByEstacionid(estacion.getEstacionId());
+                System.out.println("prodAdicionales: "+prodAdicionales.size());
                 bcrProducto.removeAllItems();
                 bcrProducto.addAll(prodAdicionales);
                 ultimoDia = (ultimoDia.getFecha() == null) ? service.getUltimoDiaByEstacionid(estacion.getEstacionId()) : ultimoDia;
@@ -518,15 +521,24 @@ public class PrCuadre extends Panel implements View {
         cbxTurno.addValueChangeListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
+//                turno = (Turno) cbxTurno.getValue();
+//                System.out.println("turno: "+turno.getTurnoId().toString());
+//                SvcCuadre service = new SvcCuadre();
+//                listEmpleados = service.getEmpleadosByTurnoid(turno.getTurnoId());
+//                System.out.println("listEmpleados: "+listEmpleados.size());
+//                service.closeConnections();
+//                cbxEmpleado.setContainerDataSource(new ListContainer<>(Empleado.class, listEmpleados));
+//                actionComboboxTurno();
+//                determinarPermisos();
                 turno = (Turno) cbxTurno.getValue();
                 SvcCuadre service = new SvcCuadre();
                 listEmpleados = service.getEmpleadosByTurnoid(turno.getTurnoId());
-                service.closeConnections();
                 cbxEmpleado.setContainerDataSource(new ListContainer<>(Empleado.class, listEmpleados));
                 actionComboboxTurno();
                 determinarPermisos();
             }
         });
+        
 //        cbxTurno.setValue(turno);
 
         cbxArqueos = utils.buildCombobox("Arqueos:", "nombre", false, false, ValoTheme.COMBOBOX_SMALL, contArqueos);
@@ -778,12 +790,13 @@ public class PrCuadre extends Panel implements View {
                     Notification.show("ADVERTENCIA:", "No existe calculo de ventas", Notification.Type.WARNING_MESSAGE);
                     return;
                 }
-                if (!cbxEmpleado.isValid()
-                        || !tfdNameChief.isValid() || tfdNameChief.getValue().trim().isEmpty()
-                        || !tfdNameSeller.isValid() || tfdNameSeller.getValue().trim().isEmpty()) {
-                    Notification.show("Existen campos vacios que son obligatorios.", Notification.Type.ERROR_MESSAGE);
-                    return;
-                }
+                /*Eliminado porque ya no se usaran combos tfdNameChief tfdNameSeller*/
+//                if (!cbxEmpleado.isValid()
+//                        || !tfdNameChief.isValid() || tfdNameChief.getValue().trim().isEmpty()
+//                        || !tfdNameSeller.isValid() || tfdNameSeller.getValue().trim().isEmpty()) {
+//                    Notification.show("Existen campos vacios que son obligatorios.", Notification.Type.ERROR_MESSAGE);
+//                    return;
+//                }
 
                 final double diferencia = (totalMediosPago + totalEfectivo) - (totalArqueoElectronico + totalProducto);
                 String messageComp = "";
