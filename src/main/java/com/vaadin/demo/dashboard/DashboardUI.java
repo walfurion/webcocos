@@ -1,6 +1,5 @@
 package com.vaadin.demo.dashboard;
 
-import com.fundamental.services.Dao;
 import com.sisintegrados.generic.bean.Usuario;
 import java.util.Locale;
 
@@ -24,8 +23,6 @@ import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 @Theme("dashboard")
 @Widgetset("com.vaadin.demo.dashboard.DashboardWidgetSet")
