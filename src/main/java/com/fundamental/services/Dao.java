@@ -436,6 +436,39 @@ public class Dao {
         }
         return result;
     }
+    public Turno getUltimoTurnoByEstacionid2(Integer estacionId,Date Fecha) {
+        Turno result = new Turno();
+        ResultSet rst = null;
+        String dateString = Constant.SDF_ddMMyyyy.format(Fecha);
+        try {
+            miQuery = "SELECT t.turno_id, t.estacion_id, t.usuario_id, t.estado_id, t.fecha, t.creado_persona, t.estacionconfhead_id "
+                    + ", h.horario_id, h.nombre, h.hora_inicio, h.hora_fin, h.estado, h.descripcion "
+                    + "FROM turno t, horario h "
+                    + "WHERE t.horario_id = h.horario_id AND t.estacion_id = ? "
+                    + "AND fecha = to_date('"+dateString+"','dd/mm/yyyy')"
+                    + " ORDER BY t.turno_id DESC";
+            pst = getConnection().prepareStatement(miQuery);
+            pst.setObject(1, estacionId);
+            rst = pst.executeQuery();
+            if (rst.next()) {
+                result = new Turno(rst.getInt(1), rst.getInt(2), rst.getInt(3), rst.getInt(4), rst.getDate(5), null, rst.getString(6));
+                result.setEstacionconfheadId(rst.getInt(7));
+                Horario h = new Horario(rst.getInt(8), rst.getString(9), rst.getString(10), rst.getString(11), rst.getString(12), rst.getString(13));
+                h.setNombreHoras(rst.getString(10) + " - " + rst.getString(11));
+                result.setHorario(h);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
 
     public List<Bomba> getBombasByEstacionidTurnoid(Integer estacionId, Integer turnoId) {
         List<Bomba> result = new ArrayList<Bomba>();

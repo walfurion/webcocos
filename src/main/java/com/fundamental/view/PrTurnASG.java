@@ -182,7 +182,7 @@ public class PrTurnASG extends Panel implements View {
                 if (cbxEstacion.getValue() != null) {
                     estacion = (Estacion) cbxEstacion.getValue();
                     SvcTurno svcTurno = new SvcTurno();
-                    List<Horario> listSchedules = svcTurno.getHorarioByEstacionid(estacion.getEstacionId(),1);
+                    List<Horario> listSchedules = svcTurno.getHorarioByEstacionid(estacion.getEstacionId());
                     cbxSchedule.setContainerDataSource(new ListContainer<>(Horario.class, listSchedules));
                     //Limpiar
                     dfdFecha.setValue(null);
