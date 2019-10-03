@@ -1331,6 +1331,45 @@ public class Dao {
         return result;
     }
     
+    public List<Empleado> getEmpleadosByTurnoid2(int turnoId) {
+        List<Empleado> result = new ArrayList();
+        try {
+            miQuery = "SELECT DISTINCT e.empleado_id, e.nombre, e.estado, a.arqueocaja_id, a.estacion_id, a.turno_id, a.fecha, a.estado_id "
+                    + "FROM empleado e, turno_empleado_bomba teb "
+                    + "LEFT JOIN arqueocaja a ON teb.empleado_id = a.empleado_id AND teb.turno_id = a.turno_id "
+                    + "WHERE teb.empleado_id = e.empleado_id AND teb.turno_id = " + turnoId
+                    + " ORDER BY e.nombre";
+            pst = getConnection().prepareStatement(miQuery);
+            ResultSet rst = pst.executeQuery();
+            Empleado emp;
+            while (rst.next()) {
+                emp = new Empleado(rst.getInt(1), rst.getString(2));
+                if (rst.getString(4) != null) {
+                    emp.setArqueo(new Arqueocaja(rst.getInt(4), rst.getInt(5), rst.getInt(6), rst.getDate(7), rst.getInt(8), null, null, null));
+                }
+                result.add(emp);
+            }
+            closePst();
+            for (Empleado item : result) {
+                item.setBombas(new ArrayList());
+                miQuery = "SELECT b.bomba_id, b.nombre, b.estado, b.creado_por, b.creado_el, b.isla "
+                        + "FROM turno_empleado_bomba bee, empleado e, bomba b "
+                        + "WHERE bee.bomba_id = b.bomba_id AND bee.empleado_id = e.empleado_id AND bee.turno_id = " + turnoId + " AND bee.empleado_id = " + item.getEmpleadoId();
+                pst = getConnection().prepareStatement(miQuery);
+                rst = pst.executeQuery();
+                while (rst.next()) {
+                    item.getBombas().add(new Bomba(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), new java.util.Date(rst.getDate(5).getTime()), null));
+                }
+                closePst();
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
+    
     public List<Bomba> getAllBombas(boolean includeInactive) {
         List<Bomba> result = new ArrayList();
         try {
