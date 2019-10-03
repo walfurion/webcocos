@@ -29,6 +29,7 @@ import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.Mail;
+import com.fundamental.utils.Util;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -87,7 +88,7 @@ import org.vaadin.ui.NumberField;
  */
 public class PrCuadre extends Panel implements View {
 
-    static final DecimalFormat numberFmt = new DecimalFormat("### ###,##0.00;-#");
+    static final DecimalFormat numberFmt = new DecimalFormat("### ###,##0.00");
     static final DecimalFormat numberFmt3D = new DecimalFormat("### ###,##0.000;-#");
     static final String HEIGHT_TABLE = "300px";
 
@@ -167,7 +168,7 @@ public class PrCuadre extends Panel implements View {
     int tmpInt;
     List<Pais> allCountries;
     String[] uniqueStation;
-    
+
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
@@ -342,9 +343,12 @@ public class PrCuadre extends Panel implements View {
 
         List<Arqueocaja> arqueos = service.getArqueocajaByTurnoid(turno.getTurnoId());
         Arqueocaja acaja = new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), new Date(), 1, null, null, null, null, null);
+        System.out.println("CAJA "+ acaja);
         acaja.setNombre("Nuevo cuadre");
         arqueos.add(0, acaja);
         contArqueos = new ListContainer<Arqueocaja>(Arqueocaja.class, arqueos);
+        System.out.println("ARQUEOS "+ contArqueos);
+        
 
         contCustomerCredit = new ListContainer<Cliente>(Cliente.class, service.getCustomersByStationidType(estacion.getEstacionId(), "C"));
         contCustomerPrepaid = new ListContainer<Cliente>(Cliente.class, service.getCustomersByStationidType(estacion.getEstacionId(), "P"));
@@ -695,6 +699,7 @@ public class PrCuadre extends Panel implements View {
         tableCalc.setColumnFooter("volumen", volumenSymbol + numberFmt.format(totalArqueoVol));
         tableCalc.setColumnFooter("venta", currencySymbol + numberFmt.format(totalArqueoCurr));
         tableCalc.setColumnFooter("diferencia", currencySymbol + numberFmt.format(totalArqueoDif));
+        System.out.println("RECALCULAR " +totalArqueoDif);
 
         totalProducto = 0D;
         tblProd.setColumnFooter("nombre", "Total:");
@@ -803,13 +808,14 @@ public class PrCuadre extends Panel implements View {
                         }
                     }
                 } else {
+                   // Notification.show("DIFERENCIA",Double.toString(diferencia),Notification.Type.ERROR_MESSAGE);
                     messageComp = (diferencia < -0.009 || diferencia > 0.009)
                             ? "<h3>El turno tiene diferencia de: <strong>" + lblDiferencia + "</strong></h3>\n" : "";
                     if (diferencia < -0.009 || diferencia > 0.009) {
                         Notification.show("Existe diferencia, asociela con el medio de pago correspondiente.", Notification.Type.ERROR_MESSAGE);
                         return;
                     }
-                    if (diferencia < 0 && tempFile != null) {
+                    if (diferencia < 0.00 && tempFile != null) {
                         Notification.show("ADVERTENCIA:", "Existe diferencia en sus calculos, debe adjuntar un documento", Notification.Type.WARNING_MESSAGE);
                         return;
                     }
@@ -827,6 +833,8 @@ public class PrCuadre extends Panel implements View {
 //TODO: Considerar hacer con commit y rollback este conjunto de interacciones a base de datos.
                                 Arqueocaja arqueo = ((Empleado) cbxEmpleado.getValue()).getArqueo();
                                 String myAction = (arqueo == null || arqueo.getArqueocajaId() == null) ? Dao.ACTION_ADD : Dao.ACTION_UPDATE;
+                                System.out.println("ADD "+Dao.ACTION_ADD);
+                                System.out.println("UPDATE "+Dao.ACTION_UPDATE);
                                 arqueo = (arqueo == null || arqueo.getArqueocajaId() == null)
                                         ? new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), turno.getFecha(), 1, user.getUsername(), user.getNombreLogin(), ((Empleado) cbxEmpleado.getValue()).getEmpleadoId(), tfdNameChief.getValue(), tfdNameSeller.getValue())
                                         : arqueo;
@@ -910,8 +918,8 @@ public class PrCuadre extends Panel implements View {
                                         mail.run();
                                     }
 
-                                    myAction = (myAction.equals(Dao.ACTION_ADD)) ? "cerrado" : "actualizado";
-                                    Notification notif = new Notification("ÉXITO:", "Se han " + myAction + " las bombas con éxito.", Notification.Type.HUMANIZED_MESSAGE);
+                                    myAction = (myAction.equals(Dao.ACTION_ADD)) ? "cuadrado" : "actualizado";
+                                    Notification notif = new Notification("ÉXITO:", "Se ha " + myAction + " las bombas con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                                     notif.setDelayMsec(3000);
                                     notif.setPosition(Position.MIDDLE_CENTER);
                                     //notif.setStyleName("mystyle");
@@ -1291,11 +1299,22 @@ public class PrCuadre extends Panel implements View {
                 nfd.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
-//                        String value = nfd.getValue();
+                        
+//                        String value = nfd.getValue()==null?"0":nfd.getValue();
+//                        System.out.println("evento cambiar "+value);
+//                        if (Double.valueOf(value) < 0) {
+//                        Notification.show("AVISO:", "No puede ingresar cantidades negativas.", Notification.Type.WARNING_MESSAGE);
+//                        return;
+//                        }
+                        
 //                        value = (value != null) ? value.replaceAll(",", "").trim() : value;
 //                        if (value != null && !value.isEmpty() && value.matches("(\\d+(\\.\\d+)?)|(\\.\\d+)")) {
                         if (bcEfectivo.getItem(itemId).getBean().getMedioPago() == null) {
                             Notification.show("AVISO:", "Seleccione por favor un medio de pago.", Notification.Type.WARNING_MESSAGE);
+                            return;
+                        }
+                        if(!Util.isDoublePositive(bcEfectivo.getItem(itemId).getBean().getValue().toString().replaceAll(",", ""))){
+                            Notification.show("AVISO", "Monto no valido.", Notification.Type.WARNING_MESSAGE);
                             return;
                         }
                         sumarEfectivo();
@@ -1620,6 +1639,8 @@ public class PrCuadre extends Panel implements View {
         tblCxC.setColumnAlignments(Align.LEFT, Align.RIGHT, Align.CENTER);
         tblCxC.setSizeUndefined();
         tblCxC.setHeight(200f, Unit.PIXELS);
+        
+      
 
         btnAddCustomer = new Button("Agregar", FontAwesome.PLUS);
         btnAddCustomer.addStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -1767,6 +1788,7 @@ public class PrCuadre extends Panel implements View {
                 nfd.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
+                        
                         updateTableFooterPrepaid();
                     }
                 });
@@ -2070,6 +2092,9 @@ public class PrCuadre extends Panel implements View {
             }
             totalEfectivo = 0D;
             tblEfectivo.setColumnFooter("colMonto", currencySymbol + numberFmt.format(totalEfectivo));
+          
+            
+          
             updateTotalPagos(0D);
             svcArqueo.closeConnections();
 
