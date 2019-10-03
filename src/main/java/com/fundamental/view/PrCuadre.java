@@ -167,7 +167,7 @@ public class PrCuadre extends Panel implements View {
     int tmpInt;
     List<Pais> allCountries;
     String[] uniqueStation;
-
+    
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
@@ -793,7 +793,8 @@ public class PrCuadre extends Panel implements View {
 //                    return;
 //                }
 
-                final double diferencia = (totalMediosPago + totalEfectivo) - (totalArqueoElectronico + totalProducto);
+                final double diferencia = (totalMediosPago  + totalEfectivo) - (totalArqueoElectronico + totalProducto);
+
                 String messageComp = "";
                 if (diferencia > 0) {
                     for (Integer itemId : bcrProducto.getItemIds()) {

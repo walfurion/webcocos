@@ -33,7 +33,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
@@ -314,7 +313,7 @@ public class Dao {
         try {
             rst = getConnection().prepareStatement(miQuery).executeQuery();
             while (rst.next()) {
-                result.add(new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5),false));
+                result.add(new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5), null));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -1127,7 +1126,7 @@ public class Dao {
             while (rst.next()) {
                 estacion = new Estacion(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5), rst.getString(7));
                 estacion.setPaisNombre(rst.getString(6));
-                estacion.setPais(new Pais(rst.getInt(4), rst.getString(6), rst.getString(8), "", "", "",false));
+                estacion.setPais(new Pais(rst.getInt(4), rst.getString(6), rst.getString(8), "", "", "", null));
                 estacion.setBombas(new ArrayList());
                 estacion.setProductos(new ArrayList());
                 estacion.getBombas().addAll(getBombasByEstacionid(rst.getInt(1)));
@@ -1330,7 +1329,7 @@ public class Dao {
         }
         return result;
     }
-    
+
     public List<Bomba> getAllBombas(boolean includeInactive) {
         List<Bomba> result = new ArrayList();
         try {
@@ -1481,6 +1480,14 @@ public class Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
+            try {
+                if (rst != null) {
+                    rst.close();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
             closePst();
         }
         return result;
@@ -1535,6 +1542,5 @@ public class Dao {
         }
         return result;
     }
-    
-    
+
 }

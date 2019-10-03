@@ -1,25 +1,17 @@
 package com.vaadin.demo.dashboard.view;
 
-import com.fundamental.model.Estacion;
-import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
-import com.fundamental.services.SvcEstacion;
-import com.fundamental.services.SvcPais;
 import com.fundamental.services.SvcUsuario;
 import com.fundamental.utils.Constant;
-import com.vaadin.data.Container;
-import com.vaadin.data.Property;
 import com.vaadin.demo.dashboard.event.DashboardEvent.UserLoginRequestedEvent;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Responsive;
-import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Label;
@@ -28,11 +20,6 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import org.vaadin.maddon.ListContainer;
 
 @SuppressWarnings("serial")
 public class LoginView extends VerticalLayout {

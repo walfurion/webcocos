@@ -13,6 +13,8 @@ import com.fundamental.model.Horario;
 import com.fundamental.model.Precio;
 import com.fundamental.model.Turno;
 import com.fundamental.model.TurnoEmpleadoBomba;
+import com.fundamental.utils.Constant;
+import com.sisintegrados.generic.bean.Pais;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -482,11 +484,12 @@ public class SvcTurno extends Dao {
         return result;
     }
 
-    public List<Horario> getHorarioByEstacionid(int estationId) {
+    public List<Horario> getHorarioByEstacionid(int estationId, int idpais) {
         List<Horario> result = new ArrayList();
         query = "SELECT h.horario_id, h.nombre, h.hora_inicio, h.hora_fin, h.estado, h.descripcion, eh.estacionconfhead_id "
                 + "FROM estacion_horario eh, horario h "
                 + "WHERE eh.horario_id = h.horario_id AND h.estado = 'A' AND eh.estacion_id = " + estationId
+                + "and eh.paisestacion_id = " + idpais
                 + " ORDER BY h.hora_inicio";
         try {
             pst = getConnection().prepareStatement(query);
@@ -506,4 +509,73 @@ public class SvcTurno extends Dao {
         return result;
     }
 
+    public Pais getPais(Integer paisid) throws SQLException {
+        Pais pais = new Pais();
+        query = "Select pais_id,nombre,codigo,moneda_simbolo,estado,creado_por,creado_el,modificado_por,modificado_el,vol_simbolo \n"
+                + "from pais\n"
+                + "where pais_id = " + paisid;
+
+        ResultSet rst = null;
+
+        try {
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            if (rst.next()) {
+                pais.setPaisId(rst.getInt(1));
+                pais.setNombre(rst.getString(2));
+                pais.setCodigo(rst.getString(3));
+                pais.setMonedaSimbolo(rst.getString(4));
+                pais.setEstado(rst.getString(5));
+                pais.setCreadoPor(rst.getString(6));
+                pais.setCreadoEl(rst.getDate(7));
+                pais.setModificadoPor(rst.getString(8));
+                pais.setModificadoEl(rst.getDate(9));
+                pais.setVolSimbolo(rst.getString(10));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (rst != null) {
+                rst.close();
+            }
+        }
+        return pais;
+    }
+
+    public Integer validaTurnodia(Integer idestacion, Integer idconfhead, Date Fecha) {
+        Integer cant = 0;
+        String dateString = Constant.SDF_ddMMyyyy.format(Fecha);
+        query = "select count(*) cantidad "
+                + "from turno "
+                + "where fecha = to_date('"+dateString+"','dd/mm/yyyy') "
+                + "and estacion_id = "+idestacion
+                + " and estacionconfhead_id = "+idconfhead;
+
+        ResultSet rst = null;
+        System.out.println(" query "+query);
+        try {
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            if (rst.next()) {
+                cant = rst.getInt(1);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (pst != null) {
+                    pst.close();
+                }
+                if (rst != null) {
+                    rst.close();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return cant;
+    }
 }

@@ -33,7 +33,7 @@ import java.util.Random;
  * @author Henry Barrientos
  */
 public class Utils {
-    
+
     public HorizontalLayout buildHeader(String caption, boolean spacing, boolean responsive) {
         HorizontalLayout header = new HorizontalLayout();
         header.addStyleName("viewheader");
@@ -118,7 +118,25 @@ public class Utils {
     public VerticalLayout vlContainer(Component component) {
         VerticalLayout result = new VerticalLayout();
         result.addComponent(component);
-        result.setMargin(new MarginInfo(false, true, true, false));
+        result.setMargin(new MarginInfo(false, true, false, false));
+        result.setSizeUndefined();
+        Responsive.makeResponsive(result);
+        return result;
+    }
+
+    public VerticalLayout vlContainer2(Component component) {
+        VerticalLayout result = new VerticalLayout();
+        result.addComponent(component);
+        result.setMargin(new MarginInfo(false, true, false, false));
+        result.setSizeUndefined();
+        Responsive.makeResponsive(result);
+        return result;
+    }
+
+    public VerticalLayout vlContainerTable(Component component) {
+        VerticalLayout result = new VerticalLayout();
+        result.addComponent(component);
+        result.setMargin(new MarginInfo(true, true, true, false));
         result.setSizeUndefined();
         Responsive.makeResponsive(result);
         return result;
@@ -212,14 +230,18 @@ public class Utils {
             }
         };
     }
-    
+
     public DateField buildDateField(String caption, String dateFormat, Locale locale, String styleName, Date rangeStart, Date rangeEnd, boolean required, Resolution resolution, Date value) {
         DateField result = new DateField(caption, value);
         result.setDateFormat(dateFormat);
         result.setLocale(locale);
         result.addStyleName(styleName);
-        if (rangeStart!=null) result.setRangeStart(rangeStart);
-        if (rangeEnd!=null) result.setRangeEnd(rangeEnd);
+        if (rangeStart != null) {
+            result.setRangeStart(rangeStart);
+        }
+        if (rangeEnd != null) {
+            result.setRangeEnd(rangeEnd);
+        }
         result.setRequired(required);
         result.setResolution(resolution);
         return result;
@@ -232,17 +254,19 @@ public class Utils {
         result.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
         return result;
     }
-    
+
     public ComboBox buildCombobox(String caption, Object propertyId, boolean nullSelectionAllowed, boolean required, String styleName, Container newDataSource) {
         ComboBox result = new ComboBox(caption);
         result.setItemCaptionPropertyId(propertyId);
         result.setNullSelectionAllowed(nullSelectionAllowed);
         result.setRequired(required);
-        if (styleName!=null) result.addStyleName(styleName);
+        if (styleName != null) {
+            result.addStyleName(styleName);
+        }
         result.setContainerDataSource(newDataSource);
         return result;
     }
-    
+
     public int getRandomNumberInRange(int min, int max) {
         if (min >= max) {
             throw new IllegalArgumentException("max must be greater than min");
@@ -250,17 +274,19 @@ public class Utils {
         Random r = new Random();
         return r.nextInt((max - min) + 1) + min;
     }
-    
+
     public TextField buildTextField(String caption, String nullRepresentation, boolean nullSettingAllowed, int maxLength, boolean required, String style) {
         TextField result = new TextField(caption);
         result.setNullRepresentation(nullRepresentation);
         result.setNullSettingAllowed(nullSettingAllowed);
         result.setMaxLength(maxLength);
         result.setRequired(required);
-        if (style!=null) result.addStyleName(style);
+        if (style != null) {
+            result.addStyleName(style);
+        }
         return result;
     }
-    
+
     public Button buildButton(String caption, Resource icon, String style) {
         Button result = new Button(caption, icon);
         result.addStyleName(style);
@@ -274,12 +300,18 @@ public class Utils {
         result.setRequired(required);
         result.setResponsive(true);
         result.setResolution(resolution);
-        if (startDate!=null) result.setRangeStart(startDate);
-        if (endDate!=null) result.setRangeEnd(endDate);
-        if (style!=null) result.addStyleName(style);
+        if (startDate != null) {
+            result.setRangeStart(startDate);
+        }
+        if (endDate != null) {
+            result.setRangeEnd(endDate);
+        }
+        if (style != null) {
+            result.addStyleName(style);
+        }
         return result;
     }
-            
+
     public TextArea buildTextArea(String caption, int columns, int rows, int maxLength, boolean required, boolean nullSettingAllowed, String nullRepresentation, String style) {
         TextArea result = new TextArea(caption);
         result.setColumns(columns);
@@ -288,7 +320,9 @@ public class Utils {
         result.setMaxLength(maxLength);
         result.setNullSettingAllowed(nullSettingAllowed);
         result.setNullRepresentation(nullRepresentation);
-        if (style!=null) result.addStyleName(style);
+        if (style != null) {
+            result.addStyleName(style);
+        }
         result.setResponsive(true);
         return result;
     }

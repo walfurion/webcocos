@@ -114,7 +114,7 @@ public class SvcGeneral extends Dao {
                 lpo.setProductoNombre(rst.getString(11));
                 lpo.setMarca(new Marca(rst.getInt(12), rst.getString(13), rst.getString(14)));
                 lpo.setMarcaNombre(rst.getString(13));
-                lpo.setPais(new Pais(rst.getInt(2), rst.getString(9), rst.getString(15), null, null, null,false));
+                lpo.setPais(new Pais(rst.getInt(2), rst.getString(9), rst.getString(15), null, null, null,null));
                 lpo.setProducto(new Producto(rst.getInt(4), rst.getString(11), rst.getString(16), null, null, null));
                 result.add(lpo);
             }
