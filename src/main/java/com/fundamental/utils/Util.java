@@ -13,11 +13,12 @@ public class Util {
     public static void main(String ars[]){
         double valor1 = 100.5665888;
         double d = 100;
-        System.out.println("formateado = "+Math.ceil(valor1));
-        double valor2 = valor1*d;
-        System.out.println("formateado = "+valor2);
-        System.out.println("formateado = "+Math.ceil(valor2));
-        System.out.println("formateado = "+(Math.ceil(valor2))/d);
+        System.out.println("dd "+isDoublePositive("0.0"));
+//        System.out.println("formateado = "+Math.ceil(valor1));
+//        double valor2 = valor1*d;
+//        System.out.println("formateado = "+valor2);
+//        System.out.println("formateado = "+Math.ceil(valor2));
+//        System.out.println("formateado = "+(Math.ceil(valor2))/d);
         
     }
     public static double toDoubleFormat(double n){
@@ -32,5 +33,25 @@ public class Util {
             valor2 = (Math.ceil(valor2))/d;
             return valor2;
     }
-    
+    public static double isNumber(String s){
+        double newD = 0;
+        if(s.matches("\\d+")){
+            newD = Double.parseDouble(s);
+        }
+    return newD;
+    }
+    public static boolean isDoublePositive(String s){
+        try{
+            double n = Double.parseDouble(s);
+            if(n>0){
+                return true;
+            }
+            return false;
+        }catch(Exception e){
+            return false;
+        }
+    }
+    public static boolean isPositive(double n){
+        return n>0?true:false;
+    }
 }

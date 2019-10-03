@@ -29,6 +29,7 @@ import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.Mail;
+import com.fundamental.utils.Util;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -807,7 +808,7 @@ public class PrCuadre extends Panel implements View {
                         }
                     }
                 } else {
-                    Notification.show("DIFERENCIA",Double.toString(diferencia),Notification.Type.ERROR_MESSAGE);
+                   // Notification.show("DIFERENCIA",Double.toString(diferencia),Notification.Type.ERROR_MESSAGE);
                     messageComp = (diferencia < -0.009 || diferencia > 0.009)
                             ? "<h3>El turno tiene diferencia de: <strong>" + lblDiferencia + "</strong></h3>\n" : "";
                     if (diferencia < -0.009 || diferencia > 0.009) {
@@ -1298,11 +1299,22 @@ public class PrCuadre extends Panel implements View {
                 nfd.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
-//                        String value = nfd.getValue();
+                        
+//                        String value = nfd.getValue()==null?"0":nfd.getValue();
+//                        System.out.println("evento cambiar "+value);
+//                        if (Double.valueOf(value) < 0) {
+//                        Notification.show("AVISO:", "No puede ingresar cantidades negativas.", Notification.Type.WARNING_MESSAGE);
+//                        return;
+//                        }
+                        
 //                        value = (value != null) ? value.replaceAll(",", "").trim() : value;
 //                        if (value != null && !value.isEmpty() && value.matches("(\\d+(\\.\\d+)?)|(\\.\\d+)")) {
                         if (bcEfectivo.getItem(itemId).getBean().getMedioPago() == null) {
                             Notification.show("AVISO:", "Seleccione por favor un medio de pago.", Notification.Type.WARNING_MESSAGE);
+                            return;
+                        }
+                        if(!Util.isDoublePositive(bcEfectivo.getItem(itemId).getBean().getValue().toString().replaceAll(",", ""))){
+                            Notification.show("AVISO", "Monto no valido.", Notification.Type.WARNING_MESSAGE);
                             return;
                         }
                         sumarEfectivo();
@@ -1627,6 +1639,8 @@ public class PrCuadre extends Panel implements View {
         tblCxC.setColumnAlignments(Align.LEFT, Align.RIGHT, Align.CENTER);
         tblCxC.setSizeUndefined();
         tblCxC.setHeight(200f, Unit.PIXELS);
+        
+      
 
         btnAddCustomer = new Button("Agregar", FontAwesome.PLUS);
         btnAddCustomer.addStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -1774,6 +1788,7 @@ public class PrCuadre extends Panel implements View {
                 nfd.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
+                        
                         updateTableFooterPrepaid();
                     }
                 });
@@ -2077,6 +2092,9 @@ public class PrCuadre extends Panel implements View {
             }
             totalEfectivo = 0D;
             tblEfectivo.setColumnFooter("colMonto", currencySymbol + numberFmt.format(totalEfectivo));
+          
+            
+          
             updateTotalPagos(0D);
             svcArqueo.closeConnections();
 
