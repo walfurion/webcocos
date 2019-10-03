@@ -248,7 +248,10 @@ public class PrCuadre extends Panel implements View {
         cltTaDiff.setSizeFull();
         cltTaDiff.addComponent(btnSave);
 
-        CssLayout cltEmpleado = new CssLayout(utils.vlContainer(cbxEmpleado)/**, utils.vlContainer(tfdNameSeller), utils.vlContainer(tfdNameChief)**/);
+        CssLayout cltEmpleado = new CssLayout(utils.vlContainer(cbxEmpleado)/**
+         * , utils.vlContainer(tfdNameSeller), utils.vlContainer(tfdNameChief)*
+         */
+        );
         cltEmpleado.setSizeUndefined();
         Responsive.makeResponsive(cltEmpleado);
 
@@ -344,12 +347,11 @@ public class PrCuadre extends Panel implements View {
 
         List<Arqueocaja> arqueos = service.getArqueocajaByTurnoid(turno.getTurnoId());
         Arqueocaja acaja = new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), new Date(), 1, null, null, null, null, null);
-        System.out.println("CAJA "+ acaja);
+        System.out.println("CAJA " + acaja);
         acaja.setNombre("Nuevo cuadre");
         arqueos.add(0, acaja);
         contArqueos = new ListContainer<Arqueocaja>(Arqueocaja.class, arqueos);
-        System.out.println("ARQUEOS "+ contArqueos);
-        
+        System.out.println("ARQUEOS " + contArqueos);
 
         contCustomerCredit = new ListContainer<Cliente>(Cliente.class, service.getCustomersByStationidType(estacion.getEstacionId(), "C"));
         contCustomerPrepaid = new ListContainer<Cliente>(Cliente.class, service.getCustomersByStationidType(estacion.getEstacionId(), "P"));
@@ -431,10 +433,10 @@ public class PrCuadre extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 estacion = (Estacion) cbxEstacion.getValue();
-                System.out.println("estacion: "+estacion.getEstacionId());
+                System.out.println("estacion: " + estacion.getEstacionId());
                 dfdFecha.setValue(null);
                 contTurnos = new ListContainer<>(Turno.class, new ArrayList());
-                System.out.println("contTurnos: "+contTurnos.size());
+                System.out.println("contTurnos: " + contTurnos.size());
                 cbxTurno.setContainerDataSource(contTurnos);
                 cbxTurno.setValue(null);
                 contArqueos = new ListContainer<>(Arqueocaja.class, new ArrayList());
@@ -442,7 +444,7 @@ public class PrCuadre extends Panel implements View {
                 cbxArqueos.setValue(null);
                 SvcCuadre service = new SvcCuadre();
                 List<Producto> prodAdicionales = service.getProdAdicionalesByEstacionid(estacion.getEstacionId());
-                System.out.println("prodAdicionales: "+prodAdicionales.size());
+                System.out.println("prodAdicionales: " + prodAdicionales.size());
                 bcrProducto.removeAllItems();
                 bcrProducto.addAll(prodAdicionales);
                 ultimoDia = (ultimoDia.getFecha() == null) ? service.getUltimoDiaByEstacionid(estacion.getEstacionId()) : ultimoDia;
@@ -532,16 +534,17 @@ public class PrCuadre extends Panel implements View {
 //                actionComboboxTurno();
 //                determinarPermisos();
                 turno = (Turno) cbxTurno.getValue();
-                SvcCuadre service = new SvcCuadre();
-                listEmpleados = service.getEmpleadosByTurnoid(turno.getTurnoId());
-                cbxEmpleado.setContainerDataSource(new ListContainer<>(Empleado.class, listEmpleados));
-                actionComboboxTurno();
-                determinarPermisos();
+                if (turno != null) {
+                    SvcCuadre service = new SvcCuadre();
+                    listEmpleados = service.getEmpleadosByTurnoid2(turno.getTurnoId());
+                    cbxEmpleado.setContainerDataSource(new ListContainer<>(Empleado.class, listEmpleados));
+                    actionComboboxTurno();
+                    determinarPermisos();
+                }
             }
         });
-        
-//        cbxTurno.setValue(turno);
 
+//        cbxTurno.setValue(turno);
         cbxArqueos = utils.buildCombobox("Arqueos:", "nombre", false, false, ValoTheme.COMBOBOX_SMALL, contArqueos);
 //        cbxArqueos.setContainerDataSource(contArqueos);
 //        cbxArqueos.setItemCaptionPropertyId("nombre");
@@ -700,7 +703,7 @@ public class PrCuadre extends Panel implements View {
         tableCalc.setColumnFooter("volumen", volumenSymbol + numberFmt.format(totalArqueoVol));
         tableCalc.setColumnFooter("venta", currencySymbol + numberFmt.format(totalArqueoCurr));
         tableCalc.setColumnFooter("diferencia", currencySymbol + numberFmt.format(totalArqueoDif));
-        System.out.println("RECALCULAR " +totalArqueoDif);
+        System.out.println("RECALCULAR " + totalArqueoDif);
 
         totalProducto = 0D;
         tblProd.setColumnFooter("nombre", "Total:");
@@ -808,7 +811,7 @@ public class PrCuadre extends Panel implements View {
                         }
                     }
                 } else {
-                   // Notification.show("DIFERENCIA",Double.toString(diferencia),Notification.Type.ERROR_MESSAGE);
+                    // Notification.show("DIFERENCIA",Double.toString(diferencia),Notification.Type.ERROR_MESSAGE);
                     messageComp = (diferencia < -0.009 || diferencia > 0.009)
                             ? "<h3>El turno tiene diferencia de: <strong>" + lblDiferencia + "</strong></h3>\n" : "";
                     if (diferencia < -0.009 || diferencia > 0.009) {
@@ -833,8 +836,8 @@ public class PrCuadre extends Panel implements View {
 //TODO: Considerar hacer con commit y rollback este conjunto de interacciones a base de datos.
                                 Arqueocaja arqueo = ((Empleado) cbxEmpleado.getValue()).getArqueo();
                                 String myAction = (arqueo == null || arqueo.getArqueocajaId() == null) ? Dao.ACTION_ADD : Dao.ACTION_UPDATE;
-                                System.out.println("ADD "+Dao.ACTION_ADD);
-                                System.out.println("UPDATE "+Dao.ACTION_UPDATE);
+                                System.out.println("ADD " + Dao.ACTION_ADD);
+                                System.out.println("UPDATE " + Dao.ACTION_UPDATE);
                                 arqueo = (arqueo == null || arqueo.getArqueocajaId() == null)
                                         ? new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), turno.getFecha(), 1, user.getUsername(), user.getNombreLogin(), ((Empleado) cbxEmpleado.getValue()).getEmpleadoId(), tfdNameChief.getValue(), tfdNameSeller.getValue())
                                         : arqueo;
@@ -1209,9 +1212,7 @@ public class PrCuadre extends Panel implements View {
     }
 
     private void buildTableEfectivo() {
-        tblEfectivo = utils.buildTable("Efectivo:", 100f, 100f, bcEfectivo,
-                new String[]{"noDocto"},
-                new String[]{"No. docto"});
+        tblEfectivo = utils.buildTable("Efectivo:", 100f, 100f, bcEfectivo, new String[]{"noDocto"}, new String[]{"No. docto"});
         tblEfectivo.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
         tblEfectivo.addStyleName(ValoTheme.TABLE_COMPACT);
         tblEfectivo.addStyleName(ValoTheme.TABLE_SMALL);
@@ -1299,21 +1300,26 @@ public class PrCuadre extends Panel implements View {
                 nfd.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
-                        
+
 //                        String value = nfd.getValue()==null?"0":nfd.getValue();
 //                        System.out.println("evento cambiar "+value);
 //                        if (Double.valueOf(value) < 0) {
 //                        Notification.show("AVISO:", "No puede ingresar cantidades negativas.", Notification.Type.WARNING_MESSAGE);
 //                        return;
 //                        }
-                        
 //                        value = (value != null) ? value.replaceAll(",", "").trim() : value;
 //                        if (value != null && !value.isEmpty() && value.matches("(\\d+(\\.\\d+)?)|(\\.\\d+)")) {
                         if (bcEfectivo.getItem(itemId).getBean().getMedioPago() == null) {
                             Notification.show("AVISO:", "Seleccione por favor un medio de pago.", Notification.Type.WARNING_MESSAGE);
                             return;
                         }
-                        if(!Util.isDoublePositive(bcEfectivo.getItem(itemId).getBean().getValue().toString().replaceAll(",", ""))){
+                        if (!Util.isDoublePositive(bcEfectivo.getItem(itemId).getBean().getValue().toString().replaceAll(",", ""))) {
+                            System.out.println("valida: " + bcEfectivo.getItem(itemId).getBean().getValue().toString().replaceAll(",", ""));
+                            Double valorCero = 0.00;
+                            if (bcEfectivo.getItem(itemId).getBean().getValue() < 0) {
+                                bcEfectivo.getItem(itemId).getBean().setValue(valorCero);
+                                totalEfectivo = 0D;
+                            }
                             Notification.show("AVISO", "Monto no valido.", Notification.Type.WARNING_MESSAGE);
                             return;
                         }
@@ -1639,8 +1645,6 @@ public class PrCuadre extends Panel implements View {
         tblCxC.setColumnAlignments(Align.LEFT, Align.RIGHT, Align.CENTER);
         tblCxC.setSizeUndefined();
         tblCxC.setHeight(200f, Unit.PIXELS);
-        
-      
 
         btnAddCustomer = new Button("Agregar", FontAwesome.PLUS);
         btnAddCustomer.addStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -1788,7 +1792,7 @@ public class PrCuadre extends Panel implements View {
                 nfd.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
-                        
+
                         updateTableFooterPrepaid();
                     }
                 });
@@ -2092,9 +2096,7 @@ public class PrCuadre extends Panel implements View {
             }
             totalEfectivo = 0D;
             tblEfectivo.setColumnFooter("colMonto", currencySymbol + numberFmt.format(totalEfectivo));
-          
-            
-          
+
             updateTotalPagos(0D);
             svcArqueo.closeConnections();
 
