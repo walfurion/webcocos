@@ -58,7 +58,7 @@ import java.util.Locale;
 import org.vaadin.maddon.ListContainer;
 
 /**
- * @author Henry Barrientos
+ * @author Mery Gil
  */
 public class PrTurnoCierre extends Panel implements View {
 
@@ -777,5 +777,4 @@ actionComboboxTurno();
     public void enter(ViewChangeListener.ViewChangeEvent event) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
 }
