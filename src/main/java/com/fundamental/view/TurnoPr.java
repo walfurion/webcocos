@@ -94,6 +94,7 @@ public class TurnoPr extends Panel implements View {
     Button btnGuardar = new Button("Crear Turno");
     Button btnModificar = new Button("Modificar precio", FontAwesome.EDIT);
     Button btnAddEmpPump;
+    BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
 
     public TurnoPr() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
@@ -102,7 +103,6 @@ public class TurnoPr extends Panel implements View {
         DashboardEventBus.register(this);
         usuario = VaadinSession.getCurrent().getAttribute(Usuario.class);
         super.setContent(components.createVertical(Constant.styleTransactions, "100%", false, true, true, new Component[]{buildForm()}));
-        /*Carga Informacion relacionada al usuario logeado*/
         cargaInfoSesion();
     }
 
@@ -147,14 +147,14 @@ public class TurnoPr extends Panel implements View {
     private Component buildHeader() {
         bcrPrecios.setBeanIdProperty("productoId");
         bcrPrecios.removeAllItems();
-//        cargaTablaPrecios();
-        BeanItemContainer<Pais> cont = new BeanItemContainer<Pais>(Pais.class);
-        cont.addAll(dao.getAllPaises());
+        cargaTablaPrecios();
+        contPais = new BeanItemContainer<Pais>(Pais.class);
+        contPais.addAll(dao.getAllPaises());
 
         BeanItemContainer<Horario> contHorario = new BeanItemContainer<Horario>(Horario.class);
         BeanItemContainer<Estacion> contEstacion = new BeanItemContainer<Estacion>(Estacion.class);
 
-        cmbPais = new ComboBox("País:", cont);
+        cmbPais = new ComboBox("País:", contPais);
         cmbPais.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
         cmbPais.setItemCaptionPropertyId("nombre");
         cmbPais.setItemIconPropertyId("flag");
@@ -168,6 +168,8 @@ public class TurnoPr extends Panel implements View {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
                 cmbEstacion.removeAllItems();
+                cmbHorario.removeAllItems();
+                cmbTurno.removeAllItems();
                 cmbFecha.setValue(null);
                 SvcEstacion svcEstacion = new SvcEstacion();
                 Pais pais = new Pais();
@@ -200,41 +202,42 @@ public class TurnoPr extends Panel implements View {
         cmbFecha.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
-                cmbHorario.removeAllItems();
-                cmbTurno.removeAllItems();
-                estacion = new Estacion();
-                estacion = (Estacion) cmbEstacion.getValue();
-                pais = new Pais();
-                pais = (Pais) cmbPais.getValue();
-                contHorario.addAll(dao.getHorarioByEstacionid(estacion.getEstacionId(), pais.getPaisId()));
-                cmbHorario.setContainerDataSource(contHorario);
+                if (cmbFecha.getValue() != null) {
+                    cmbHorario.removeAllItems();
+                    cmbTurno.removeAllItems();
+                    estacion = new Estacion();
+                    estacion = (Estacion) cmbEstacion.getValue();
+                    pais = new Pais();
+                    pais = (Pais) cmbPais.getValue();
+                    cmbHorario.setValue(null);
+                    contHorario.addAll(dao.getHorarioByEstacionid2(estacion.getEstacionId(), pais.getPaisId()));
+                    cmbHorario.setContainerDataSource(contHorario);
 
-                ultimoDia = dao.getUltimoDiaByEstacionid(estacion.getEstacionId());
-                if (dia == null || dia.getFecha() == null) {    //La primera vez
-                    dia = dao.getDiaActivoByEstacionid(estacion.getEstacionId());
-                    dia = (dia.getEstadoId() == null) ? ultimoDia : dia;
-                }
+                    ultimoDia = dao.getUltimoDiaByEstacionid(estacion.getEstacionId());
+                    if (dia == null || dia.getFecha() == null) {    //La primera vez
+                        dia = dao.getDiaActivoByEstacionid(estacion.getEstacionId());
+                        dia = (dia.getEstadoId() == null) ? ultimoDia : dia;
+                    }
 
-                ultimoTurno = dao.getUltimoTurnoByEstacionid(estacion.getEstacionId());
-                //Solo puede haber un turno activo para cada estacion
-                if (turno == null || turno.getTurnoId() == null) {
-                    turno = dao.getTurnoActivoByEstacionid(estacion.getEstacionId());
-                    turno = (turno.getEstadoId() == null) ? ultimoTurno : turno;
-                }
+                    ultimoTurno = dao.getUltimoTurnoByEstacionid2(estacion.getEstacionId(), cmbFecha.getValue());
+                    //Solo puede haber un turno activo para cada estacion
+                    if (turno == null || turno.getTurnoId() == null) {
+                        turno = dao.getTurnoActivoByEstacionid(estacion.getEstacionId());
+                        turno = (turno.getEstadoId() == null) ? ultimoTurno : turno;
+                    }
 
-                if (turno.getHorario() != null || ultimoTurno.getHorario() != null) {
-                    Horario h = (turno.getHorario() != null) ? turno.getHorario() : ultimoTurno.getHorario();
-                    int i = 0;
-                    for (i = 0; i < contHorario.size(); i++) {
-                        Horario hh = new Horario();
-                        hh = contHorario.getIdByIndex(i);
-                        if (h.getHorarioId() == hh.getHorarioId()) {
-                            cmbHorario.setValue(hh);
+                    if (turno.getHorario() != null || ultimoTurno.getHorario() != null) {
+                        Horario h = (turno.getHorario() != null) ? turno.getHorario() : ultimoTurno.getHorario();
+                        int i = 0;
+                        for (i = 0; i < contHorario.size(); i++) {
+                            Horario hh = new Horario();
+                            hh = contHorario.getIdByIndex(i);
+                            if (h.getHorarioId() == hh.getHorarioId()) {
+                                cmbHorario.setValue(hh);
+                            }
                         }
                     }
-                }
 
-                if (cmbFecha.getValue() != null) {
                     //se obtiene de base de datos pues necesitamos saber el estado.
                     BeanItemContainer<Turno> contTurno = new BeanItemContainer<Turno>(Turno.class);
                     dia = dao.getDiaByEstacionidFecha(estacion.getEstacionId(), cmbFecha.getValue());
@@ -246,7 +249,7 @@ public class TurnoPr extends Panel implements View {
 //                        turno = (Turno) ((ArrayList) ctrTurnos.getItemIds()).get(listTurno.size() - 1);
                         turno = contTurno.getIdByIndex(contTurno.size() - 1);
                         cmbTurno.setValue(turno);
-                        cargaTablaPrecios();
+
                     } else {
                         //La siguiente validacion es importante pues permite a un usuario crear un nuevo turno cuando es la PRIMERISIMA vez que este se crea para una estacion.
                         if (ultimoDia.getFecha() != null) {
@@ -254,7 +257,8 @@ public class TurnoPr extends Panel implements View {
                         }
                         turno = new Turno();
                     }
-                    cargaTablaPrecios();
+                    getDataPrecios();
+//                    cargaTablaPrecios();
                     /*Agrego la tabla de precios y Empleados y sus Bombas*/
                     toolbarContainerTables.removeAllComponents();
                     toolbarContainerTables.addComponent(buildTables());
@@ -262,35 +266,17 @@ public class TurnoPr extends Panel implements View {
 
                 /*Operaciones con el turno*/
                 //Validar si existen turnos sobre el dia
-                if (dao.validaTurnodia(estacion.getEstacionId(), contHorario.getIdByIndex(0).getEstacionconfheadId(), cmbFecha.getValue()) > 0) {
-                    cmbTurno.setEnabled(true);
-                } else {
-                    cmbTurno.setEnabled(false);
+                if ((cmbEstacion.getValue()!= null) && (cmbFecha.getValue()!= null) && (cmbFecha.getValue()!= null) ) {
+                    if (dao.validaTurnodia(estacion.getEstacionId(), contHorario.getIdByIndex(0).getEstacionconfheadId(), cmbFecha.getValue()) > 0) {
+                        cmbTurno.setEnabled(true);
+                    } else {
+                        cmbTurno.setEnabled(false);
+                    }
                 }
-
-                cargaTablaPrecios();
+                //cargaTablaPrecios();
                 /*Agrego la tabla de precios y Empleados y sus Bombas*/
                 toolbarContainerTables.removeAllComponents();
                 toolbarContainerTables.addComponent(buildTables());
-            }
-        });
-
-        cmbTurno = new ComboBox("Turno:");
-        cmbTurno.setItemCaptionPropertyId("nombre");
-        cmbTurno.setWidth("115px");
-        cmbTurno.setNullSelectionAllowed(false);
-        cmbTurno.addStyleName(ValoTheme.COMBOBOX_SMALL);
-        cmbTurno.addValueChangeListener(new Property.ValueChangeListener() {
-            @Override
-            public void valueChange(Property.ValueChangeEvent event) {
-                turno = (Turno) cmbTurno.getValue();
-                if (turno != null) {
-                    cargaTablaPrecios();
-                    /*Agrego la tabla de precios y Empleados y sus Bombas*/
-                    toolbarContainerTables.removeAllComponents();
-                    toolbarContainerTables.addComponent(buildTables());
-                    dao.closeConnections();
-                }
             }
         });
 
@@ -320,6 +306,36 @@ public class TurnoPr extends Panel implements View {
             }
         });
 
+        cmbTurno = new ComboBox("Turno:");
+        cmbTurno.setItemCaptionPropertyId("nombre");
+        cmbTurno.setWidth("115px");
+        cmbTurno.setNullSelectionAllowed(false);
+        cmbTurno.addStyleName(ValoTheme.COMBOBOX_SMALL);
+        cmbTurno.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                turno = (Turno) cmbTurno.getValue();
+                if (turno != null) {
+//                    cargaTablaPrecios();
+                    getDataPrecios();
+                    /*Agrego la tabla de precios y Empleados y sus Bombas*/
+                    toolbarContainerTables.removeAllComponents();
+                    toolbarContainerTables.addComponent(buildTables());
+                    dao.closeConnections();
+
+                    Integer h = dao.getIdHorario(turno.getTurnoId());
+                    int i = 0;
+                    for (i = 0; i < contHorario.size(); i++) {
+                        Horario hh = new Horario();
+                        hh = contHorario.getIdByIndex(i);
+                        if (h == hh.getHorarioId()) {
+                            cmbHorario.setValue(hh);
+                        }
+                    }
+                }
+            }
+        });
+
         Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(cmbPais), utils.vlContainer(cmbEstacion), utils.vlContainer(cmbFecha), utils.vlContainer(cmbHorario), utils.vlContainer(cmbTurno)});
         VerticalLayout v = new VerticalLayout(toolBar);
         return components.createHorizontal(Constant.styleViewheader, Constant.sizeFull, false, false, true, new Component[]{v});
@@ -341,12 +357,6 @@ public class TurnoPr extends Panel implements View {
     }
 
     private void cargaTablaPrecios() {
-        getDataPrecios();
-        tablaPrecio.removeGeneratedColumn("colSC");
-        tablaPrecio.removeGeneratedColumn("colAS");
-        tablaPrecio.removeAllItems();
-
-        tablaPrecio = new Table("Precios:");
         tablaPrecio.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
         tablaPrecio.addStyleName(ValoTheme.TABLE_COMPACT);
         tablaPrecio.setContainerDataSource(bcrPrecios);
@@ -600,21 +610,15 @@ public class TurnoPr extends Panel implements View {
 
     private void cargaInfoSesion() {
         if (usuario.getPaisId() != null) {
-            dao.getAllPaises().forEach(item -> {
-                if (item.getPaisId().toString().equals(usuario.getPaisId())) {
-                    cmbPais.setValue(item);
-                    return;
+            int i = 0;
+            for (i = 0; i < contPais.size(); i++) {
+                Pais hh = new Pais();
+                hh = contPais.getIdByIndex(i);
+                if (usuario.getPaisId().toString().trim().equals(hh.getPaisId().toString().trim())) {
+                    cmbPais.setValue(contPais.getIdByIndex(i));
                 }
-            });
-//            Pais ps = new Pais();
-//            try {
-//                ps = dao.getPais(usuario.getPaisId());
-//                cmbPais.setValue(ps);
-//            } catch (Exception ex) {
-//                ex.printStackTrace();
-//            }
+            }
         }
-
     }
 
     @Override

@@ -484,7 +484,31 @@ public class SvcTurno extends Dao {
         return result;
     }
 
-    public List<Horario> getHorarioByEstacionid(int estationId, int idpais) {
+    public List<Horario> getHorarioByEstacionid(int estationId) {
+        List<Horario> result = new ArrayList();
+        query = "SELECT h.horario_id, h.nombre, h.hora_inicio, h.hora_fin, h.estado, h.descripcion, eh.estacionconfhead_id "
+                + "FROM estacion_horario eh, horario h "
+                + "WHERE eh.horario_id = h.horario_id AND h.estado = 'A' AND eh.estacion_id = " + estationId
+                + " ORDER BY h.hora_inicio";
+        try {
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            Horario schedule;
+            while (rst.next()) {
+                schedule = new Horario(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getString(6));
+                schedule.setEstacionconfheadId(rst.getInt(7));
+                schedule.setNombreHoras(rst.getString(3) + " - " + rst.getString(4));
+                result.add(schedule);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
+    
+    public List<Horario> getHorarioByEstacionid2(int estationId, int idpais) {
         List<Horario> result = new ArrayList();
         query = "SELECT h.horario_id, h.nombre, h.hora_inicio, h.hora_fin, h.estado, h.descripcion, eh.estacionconfhead_id "
                 + "FROM estacion_horario eh, horario h "
@@ -550,12 +574,11 @@ public class SvcTurno extends Dao {
         String dateString = Constant.SDF_ddMMyyyy.format(Fecha);
         query = "select count(*) cantidad "
                 + "from turno "
-                + "where fecha = to_date('"+dateString+"','dd/mm/yyyy') "
-                + "and estacion_id = "+idestacion
-                + " and estacionconfhead_id = "+idconfhead;
+                + "where fecha = to_date('" + dateString + "','dd/mm/yyyy') "
+                + "and estacion_id = " + idestacion
+                + " and estacionconfhead_id = " + idconfhead;
 
         ResultSet rst = null;
-        System.out.println(" query "+query);
         try {
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
@@ -578,4 +601,35 @@ public class SvcTurno extends Dao {
         }
         return cant;
     }
+
+    public Integer getIdHorario(Integer idturno) {
+        Integer id = 0;
+        query = "select horario_id "
+                + "from turno "
+                + "where turno_id = "+idturno;
+
+        ResultSet rst = null;
+        try {
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            if (rst.next()) {
+                id = rst.getInt(1);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (pst != null) {
+                    pst.close();
+                }
+                if (rst != null) {
+                    rst.close();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return id;
+    }
+
 }
