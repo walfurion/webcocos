@@ -450,6 +450,7 @@ public class PrCuadre extends Panel implements View {
                 dia = service.getDiaActivoByEstacionid(estacion.getEstacionId());
                 ultimoTurno = (ultimoTurno.getTurnoId() == null) ? service.getUltimoTurnoByEstacionid(estacion.getEstacionId()) : ultimoTurno;
                 turno = service.getTurnoActivoByEstacionid(estacion.getEstacionId());
+                turno = (turno.getEstadoId() == null) ? ultimoTurno : turno; ///ASG
                 tasacambio = service.getTasacambioByPaisFecha(pais.getPaisId(), turno.getFecha());
 
                 contCustomerCredit = new ListContainer<>(Cliente.class, service.getCustomersByStationidType(estacion.getEstacionId(), "C"));
@@ -459,7 +460,7 @@ public class PrCuadre extends Panel implements View {
                 bcrPrepaid.removeAllItems();
 
                 service.closeConnections();
-                determinarPermisos();
+//                determinarPermisos();
 
             }
         });
@@ -509,7 +510,7 @@ public class PrCuadre extends Panel implements View {
                             }
                         }
                     }
-                    determinarPermisos();
+//                    determinarPermisos();
                     buildLabelInfo();
                 }
             }
@@ -538,7 +539,7 @@ public class PrCuadre extends Panel implements View {
                     listEmpleados = service.getEmpleadosByTurnoid2(turno.getTurnoId());
                     cbxEmpleado.setContainerDataSource(new ListContainer<>(Empleado.class, listEmpleados));
                     actionComboboxTurno();
-                    determinarPermisos();
+//                    determinarPermisos();
                 }
             }
         });
@@ -651,7 +652,7 @@ public class PrCuadre extends Panel implements View {
         upload.setButtonCaption("Cargar comprobante");
         upload.addStyleName(ValoTheme.BUTTON_SMALL);
 
-        determinarPermisos();
+//        determinarPermisos();
 
     }
 

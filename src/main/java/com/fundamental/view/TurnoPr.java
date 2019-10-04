@@ -381,13 +381,12 @@ public class TurnoPr extends Panel implements View {
 //                FormImpuestos.open(new UnoImpuestos(), Constantes.nuevo);
             }
         });
-
-        v.addComponent(nombrePistero);
-        v.addComponent(nuevo);
-        v.addComponent(buildCheckBoxPumps());
-        v.setSpacing(true);
+        
+        Component adicionBar = components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(nombrePistero), utils.vlContainer(buildCheckBoxPumps()),utils.vlContainer(nuevo)});
+        
+        
 //        v.setComponentAlignment(btnAddEmpPump, Alignment.TOP_CENTER);
-        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tablaPrecio), utils.vlContainerTable(v)});
+        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tablaPrecio), utils.vlContainerTable(adicionBar)});
     }
 
     private Component buildCheckBoxPumps() {
