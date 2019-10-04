@@ -39,6 +39,7 @@ import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
@@ -95,6 +96,22 @@ public class TurnoPr extends Panel implements View {
     Button btnModificar = new Button("Modificar precio", FontAwesome.EDIT);
     Button btnAddEmpPump;
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
+
+    /*Para Asignar Bombas Pistero*/
+    Button nuevo = new Button();
+    TextField nombrePistero = new TextField();
+    CheckBox chkBomba1 = new CheckBox();
+    CheckBox chkBomba2 = new CheckBox();
+    CheckBox chkBomba3 = new CheckBox();
+    CheckBox chkBomba4 = new CheckBox();
+    CheckBox chkBomba5 = new CheckBox();
+    CheckBox chkBomba6 = new CheckBox();
+    CheckBox chkBomba7 = new CheckBox();
+    CheckBox chkBomba8 = new CheckBox();
+    CheckBox chkBomba9 = new CheckBox();
+    CheckBox chkBomba10 = new CheckBox();
+    CheckBox chkBomba11 = new CheckBox();
+    CheckBox chkBomba12 = new CheckBox();
 
     public TurnoPr() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
@@ -266,7 +283,7 @@ public class TurnoPr extends Panel implements View {
 
                 /*Operaciones con el turno*/
                 //Validar si existen turnos sobre el dia
-                if ((cmbEstacion.getValue()!= null) && (cmbFecha.getValue()!= null) && (cmbFecha.getValue()!= null) ) {
+                if ((cmbEstacion.getValue() != null) && (cmbFecha.getValue() != null) && (cmbFecha.getValue() != null)) {
                     if (dao.validaTurnodia(estacion.getEstacionId(), contHorario.getIdByIndex(0).getEstacionconfheadId(), cmbFecha.getValue()) > 0) {
                         cmbTurno.setEnabled(true);
                     } else {
@@ -349,11 +366,56 @@ public class TurnoPr extends Panel implements View {
 
     private Component buildTables() {
         VerticalLayout v = new VerticalLayout();
-//        v.addComponent(tableEmployeePump);
-//        v.addComponent(btnAddEmpPump);
+        nombrePistero = new TextField("Nombre Pistero");
+        nombrePistero.setRequired(true);
+        nombrePistero.setRequiredError("Debe ingresar un nombre y un apellido.");
+        nombrePistero.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+
+        nuevo = new Button("Add");
+        nuevo.setIcon(FontAwesome.PLUS_CIRCLE);
+        nuevo.setDescription("Agregar");
+        //nuevo.addStyleName(ValoTheme.BUTTON_TINY);
+        nuevo.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(final Button.ClickEvent event) {
+//                FormImpuestos.open(new UnoImpuestos(), Constantes.nuevo);
+            }
+        });
+
+        v.addComponent(nombrePistero);
+        v.addComponent(nuevo);
+        v.addComponent(buildCheckBoxPumps());
         v.setSpacing(true);
 //        v.setComponentAlignment(btnAddEmpPump, Alignment.TOP_CENTER);
-        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tablaPrecio), v});
+        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tablaPrecio), utils.vlContainerTable(v)});
+    }
+
+    private Component buildCheckBoxPumps() {
+        chkBomba1 = new CheckBox();
+        chkBomba1.setDescription("1");
+        chkBomba2 = new CheckBox();
+        chkBomba2.setDescription("2");
+        chkBomba3 = new CheckBox();
+        chkBomba3.setDescription("2");
+        chkBomba4 = new CheckBox();
+        chkBomba4.setDescription("2");
+        chkBomba5 = new CheckBox();
+        chkBomba5.setDescription("2");
+        chkBomba6 = new CheckBox();
+        chkBomba6.setDescription("2");
+        chkBomba7 = new CheckBox();
+        chkBomba7.setDescription("2");
+        chkBomba8 = new CheckBox();
+        chkBomba8.setDescription("2");
+        chkBomba9 = new CheckBox();
+        chkBomba9.setDescription("2");
+        chkBomba10 = new CheckBox();
+        chkBomba10.setDescription("2");
+        chkBomba11 = new CheckBox();
+        chkBomba11.setDescription("2");
+        chkBomba12 = new CheckBox();
+        chkBomba12.setDescription("2");
+        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{chkBomba1,chkBomba2,chkBomba3,chkBomba4,chkBomba5,chkBomba6,chkBomba7,chkBomba8,chkBomba9,chkBomba10,chkBomba11,chkBomba12});
     }
 
     private void cargaTablaPrecios() {
