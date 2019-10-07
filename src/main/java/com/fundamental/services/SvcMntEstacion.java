@@ -1,7 +1,7 @@
 package com.fundamental.services;
 
 import com.fundamental.model.Bomba;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Rol;
 import java.sql.ResultSet;

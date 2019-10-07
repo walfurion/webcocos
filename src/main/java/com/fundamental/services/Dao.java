@@ -6,7 +6,7 @@ import com.fundamental.model.Bomba;
 import com.fundamental.model.BombaEstacion;
 import com.fundamental.model.Dia;
 import com.fundamental.model.Empleado;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.EstacionConf;
 import com.fundamental.model.EstacionConfHead;
 import com.fundamental.model.Horario;

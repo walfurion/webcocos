@@ -124,6 +124,33 @@ public class Utils {
         return result;
     }
 
+    public VerticalLayout vlContainerRB(Component component) {
+        VerticalLayout result = new VerticalLayout();
+        result.addComponent(component);
+        result.setMargin(new MarginInfo(false, true, true, false));
+        result.setSizeUndefined();
+        Responsive.makeResponsive(result);
+        return result;
+    }
+
+    public VerticalLayout vlContainerChkBox(Component component) {
+        VerticalLayout result = new VerticalLayout();
+        result.addComponent(component);
+        result.setMargin(new MarginInfo(false, false, false, false));
+        result.setSizeUndefined();
+        Responsive.makeResponsive(result);
+        return result;
+    }
+
+    public VerticalLayout vlContainerChkBoxCenter(Component component) {
+        VerticalLayout result = new VerticalLayout();
+        result.addComponent(component);
+        result.setMargin(new MarginInfo(false, true, false, true));
+        result.setSizeUndefined();
+        Responsive.makeResponsive(result);
+        return result;
+    }
+
     public VerticalLayout vlContainer2(Component component) {
         VerticalLayout result = new VerticalLayout();
         result.addComponent(component);

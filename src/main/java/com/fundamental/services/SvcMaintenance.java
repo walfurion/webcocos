@@ -1,7 +1,7 @@
 package com.fundamental.services;
 
 import com.fundamental.model.Acceso;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Marca;
 import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Pais;

@@ -1,7 +1,7 @@
 package com.fundamental.services;
 
 import com.fundamental.model.Cliente;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.EstacionConfHead;
 import com.fundamental.model.Horario;
 import com.fundamental.model.Lubricanteprecio;
