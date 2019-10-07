@@ -227,8 +227,9 @@ public class PrCuadre extends Panel implements View {
         cltVentas.setSizeFull();
         Responsive.makeResponsive(cltVentas);
 //
+        Label lbEspacio= new Label(" ");
         VerticalLayout vltEfectivo = utils.buildVertical("vlEfectivo", false, true, true, true, null);
-        vltEfectivo.addComponents(tblEfectivo, btnAdd);
+        vltEfectivo.addComponents(tblEfectivo, btnAdd,lbEspacio);
         vltEfectivo.setExpandRatio(tblEfectivo, 0.9f);
         vltEfectivo.setExpandRatio(btnAdd, 0.1f);
         vltEfectivo.setComponentAlignment(btnAdd, Alignment.TOP_CENTER);
@@ -238,10 +239,14 @@ public class PrCuadre extends Panel implements View {
         CssLayout cltMedios = new CssLayout(utils.vlContainer(tblMediospago), vltEfectivo, utils.vlContainer(lblTotalVentas2));
         cltMedios.setSizeFull();
         Responsive.makeResponsive(cltMedios);
+        
 
         CssLayout cltUpload = new CssLayout(utils.vlContainer(upload));
         cltUpload.setSizeFull();
+        cltUpload.setVisible(false);
         Responsive.makeResponsive(cltUpload);
+        
+         
 
         CssLayout cltTaDiff = buildDetalleMontos();
         cltTaDiff.setSizeFull();
@@ -1405,10 +1410,12 @@ public class PrCuadre extends Panel implements View {
                 bcEfectivo.removeAllItems();
                 listaEfectivo.add(new DtoEfectivo(itemId, null, 0D));
                 bcEfectivo.addAll(listaEfectivo);
+                  
             }
         });
 
     }
+   
 
     private void buildTableFactElect() {
         tblFactElect = utils.buildTable("Datos facturación electrónica", 100f, 100f, bcFactElect,
