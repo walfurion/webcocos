@@ -124,6 +124,7 @@ public class PrReading extends VerticalLayout implements View {
     Dia dia, ultimoDia;
     File tempFile;
     String[] uniqueStation;
+    TextField txtNumeroCaso;
 
     public PrReading() {
         setSizeFull();
@@ -177,7 +178,7 @@ public class PrReading extends VerticalLayout implements View {
 //        hlBombasButton.setComponentAlignment(btnAll, Alignment.BOTTOM_RIGHT);
 //        hlBombasButton.setComponentAlignment(btnNone, Alignment.BOTTOM_LEFT);
 
-        vlBombas.addComponents(cbxEmpleado, tableBombas);//, hlBombasButton);
+        vlBombas.addComponents(txtNumeroCaso, cbxEmpleado,  tableBombas);//, hlBombasButton);
         vlBombas.setExpandRatio(tableBombas, 0.85f);
 //        vlBombas.setExpandRatio(hlBombasButton, 0.15f);
 
@@ -202,12 +203,14 @@ public class PrReading extends VerticalLayout implements View {
         CssLayout cltButtons = new CssLayout(utils.vlContainer(upload),
                 vlButton);
         cltButtons.setResponsive(true);
-
+       cltButtons.setVisible(true);
+       upload.setVisible(false);
+        
         root.addComponents(hlHeader,
                 //                cltInfo,
                 //                cltToolbar,
-                cbxEmpleado,
-                hlContent, //btnSave
+                cbxEmpleado,txtNumeroCaso,
+                hlContent, //b tnSave
                 cltButtons);
         root.setExpandRatio(hlHeader, 0.30f);
 //        root.setExpandRatio(cltInfo, 0.05f);
@@ -462,6 +465,7 @@ public class PrReading extends VerticalLayout implements View {
         cbxTurno.setValue(turno);
 
         //tfdNameSeller = utils.buildTextField("Pistero:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
+        txtNumeroCaso = utils.buildTextField("Número Caso:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
 
         //tfdNameChief = utils.buildTextField("Jefe de pista:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
 
