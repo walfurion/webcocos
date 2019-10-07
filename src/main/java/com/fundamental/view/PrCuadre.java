@@ -1171,9 +1171,9 @@ public class PrCuadre extends Panel implements View {
                 return tfdValue;
             }
         });
-        tblMediospago.setVisibleColumns(new Object[]{"nombre", "colCantDoctos", "colMonto"});
-        tblMediospago.setColumnHeaders(new String[]{"Nombre", "Cant doctos", "Monto"});
-        tblMediospago.setColumnAlignment("colCantDoctos", Align.RIGHT);
+        tblMediospago.setVisibleColumns(new Object[]{"nombre", /**"colCantDoctos",**/ "colMonto"});
+        tblMediospago.setColumnHeaders(new String[]{"Nombre", /**"Cant doctos",**/ "Monto"});
+        //tblMediospago.setColumnAlignment("colCantDoctos", Align.RIGHT);
         tblMediospago.setColumnAlignment("colMonto", Align.RIGHT);
         tblMediospago.setFooterVisible(true);
         tblMediospago.setColumnFooter("nombre", "Total:");
@@ -1384,9 +1384,9 @@ public class PrCuadre extends Panel implements View {
             }
         });
 
-        tblEfectivo.setVisibleColumns(new String[]{"colMPname", "colBoleta", "colMonto", "colDelete"});
-        tblEfectivo.setColumnHeaders(new String[]{"Tipo", "# boleta", "Monto", "Borrar"});
-        tblEfectivo.setColumnAlignments(Align.LEFT, Align.RIGHT, Align.RIGHT, Align.CENTER);
+        tblEfectivo.setVisibleColumns(new String[]{"colMPname", /**"colBoleta",**/ "colMonto", "colDelete"});
+        tblEfectivo.setColumnHeaders(new String[]{"Tipo", /**"# boleta",**/ "Monto", "Borrar"});
+        tblEfectivo.setColumnAlignments(Align.LEFT, /**Align.RIGHT,**/ Align.RIGHT, Align.CENTER);
         tblEfectivo.setFooterVisible(true);
         tblEfectivo.setColumnFooter("colMPname", "Total:");
         tblEfectivo.setColumnFooter("colMonto", currencySymbol + numberFmt.format(totalEfectivo));
