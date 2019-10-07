@@ -27,6 +27,10 @@ public class Efectivo {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    public Efectivo(Integer arqueocajaId, Integer mediopagoId, Double value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     public Integer getArqueocajaId() {
         return arqueocajaId;
     }
