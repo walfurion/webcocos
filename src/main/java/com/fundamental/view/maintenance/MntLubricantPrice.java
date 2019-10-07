@@ -1,6 +1,6 @@
 package com.fundamental.view.maintenance;
 
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Lubricanteprecio;
 import com.fundamental.model.Marca;
 import com.sisintegrados.generic.bean.Pais;

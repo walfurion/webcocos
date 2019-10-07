@@ -2,7 +2,7 @@ package com.fundamental.services;
 
 import com.fundamental.model.Bomba;
 import com.fundamental.model.Empleado;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import static com.fundamental.services.Dao.ACTION_ADD;
 import static com.fundamental.services.Dao.ACTION_UPDATE;
 import com.sisintegrados.generic.bean.Lectura;

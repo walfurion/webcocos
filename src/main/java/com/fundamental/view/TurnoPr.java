@@ -5,22 +5,25 @@
  */
 package com.fundamental.view;
 
+import com.fundamental.model.Bomba;
 import com.fundamental.model.Dia;
-import com.fundamental.model.Estacion;
+import com.fundamental.model.Empleado;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.EstacionConf;
 import com.fundamental.model.EstacionConfHead;
 import com.fundamental.model.Horario;
 import com.fundamental.model.Precio;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Turno;
-import com.fundamental.model.TurnoEmpleadoBomba;
 import com.fundamental.model.Utils;
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
+import com.sisintegrados.generic.bean.EmpleadoBombaTurno;
 import com.sisintegrados.generic.bean.Pais;
+import com.sisintegrados.generic.bean.TurnoEmpleadoBomba;
 import com.sisintegrados.generic.bean.Usuario;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -28,6 +31,7 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import com.vaadin.demo.dashboard.view.DashboardViewType;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -35,6 +39,7 @@ import com.vaadin.server.Page;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.Position;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
@@ -42,6 +47,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -52,16 +58,11 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.vaadin.maddon.ListContainer;
 
 /**
  *
@@ -81,6 +82,7 @@ public class TurnoPr extends Panel implements View {
     SvcTurno dao = new SvcTurno();
     Utils utils = new Utils();
     Table tablaPrecio = new Table("Precios:");
+    Table tablaAsignacion = new Table();
     BeanContainer<Integer, Producto> bcrPrecios = new BeanContainer<Integer, Producto>(Producto.class);
     Boolean showAutoservicio = false;
     List<Producto> combustibles;
@@ -98,6 +100,8 @@ public class TurnoPr extends Panel implements View {
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
 
     /*Para Asignar Bombas Pistero*/
+    BeanItemContainer<EmpleadoBombaTurno> bcrEmpPump = new BeanItemContainer<EmpleadoBombaTurno>(EmpleadoBombaTurno.class);
+    BeanItemContainer<Bomba> contBomba = new BeanItemContainer<Bomba>(Bomba.class);
     Button nuevo = new Button();
     TextField nombrePistero = new TextField();
     CheckBox chkBomba1 = new CheckBox();
@@ -274,11 +278,11 @@ public class TurnoPr extends Panel implements View {
                         }
                         turno = new Turno();
                     }
-                    getDataPrecios();
+//                    getDataPrecios();
 //                    cargaTablaPrecios();
                     /*Agrego la tabla de precios y Empleados y sus Bombas*/
-                    toolbarContainerTables.removeAllComponents();
-                    toolbarContainerTables.addComponent(buildTables());
+//                    toolbarContainerTables.removeAllComponents();
+//                    toolbarContainerTables.addComponent(buildTables());
                 }
 
                 /*Operaciones con el turno*/
@@ -357,64 +361,324 @@ public class TurnoPr extends Panel implements View {
         VerticalLayout v = new VerticalLayout(toolBar);
         return components.createHorizontal(Constant.styleViewheader, Constant.sizeFull, false, false, true, new Component[]{v});
     }
-    private HorizontalLayout toolbarContainerTables;
+    private CssLayout toolbarContainerTables;
 
     private Component buildToolbar2() {
-        toolbarContainerTables = new HorizontalLayout();
-        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{toolbarContainerTables});
+        toolbarContainerTables = new CssLayout();
+        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarContainerTables)});
     }
 
     private Component buildTables() {
         VerticalLayout v = new VerticalLayout();
-        nombrePistero = new TextField("Nombre Pistero");
+        Label lblpistero = new Label("Nombre Pistero");
+        lblpistero.setStyleName(ValoTheme.LABEL_TINY);
+        lblpistero.setWidth("100px");
+        nombrePistero = new TextField();
         nombrePistero.setRequired(true);
         nombrePistero.setRequiredError("Debe ingresar un nombre y un apellido.");
-        nombrePistero.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+        nombrePistero.setStyleName(ValoTheme.TEXTFIELD_TINY);
+        nombrePistero.setResponsive(true);
+//        Component adicionBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{lblpistero, utils.vlContainer(nombrePistero)});
+        Component adicionBar = components.createCssLayout(Constant.styleViewheader2, Constant.sizeUndefined, false, false, true, new Component[]{lblpistero, utils.vlContainer(nombrePistero),buildCheckBoxPumps()});
+        v.addComponent(adicionBar);
+//        v.addComponent(buildCheckBoxPumps());
+        //tabla
+        v.addComponent(ConstruyeTablaAsignacion());
+        v.setSpacing(true);
 
-        nuevo = new Button("Add");
-        nuevo.setIcon(FontAwesome.PLUS_CIRCLE);
-        nuevo.setDescription("Agregar");
-        //nuevo.addStyleName(ValoTheme.BUTTON_TINY);
-        nuevo.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(final Button.ClickEvent event) {
-//                FormImpuestos.open(new UnoImpuestos(), Constantes.nuevo);
-            }
-        });
-        
-        Component adicionBar = components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(nombrePistero), utils.vlContainer(buildCheckBoxPumps()),utils.vlContainer(nuevo)});
-        
-        
 //        v.setComponentAlignment(btnAddEmpPump, Alignment.TOP_CENTER);
-        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tablaPrecio), utils.vlContainerTable(adicionBar)});
+        return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tablaPrecio), utils.vlContainerTable(v)});
+    }
+
+    private Component ConstruyeTablaAsignacion() {
+        BeanItemContainer<EmpleadoBombaTurno> contEmpleadoBombaTurno = new BeanItemContainer<EmpleadoBombaTurno>(EmpleadoBombaTurno.class);
+        tablaAsignacion = new Table();
+        tablaAsignacion.addStyleName(ValoTheme.TABLE_COMPACT);
+        tablaAsignacion.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
+        Turno tt = new Turno();
+        tt = (Turno) cmbTurno.getValue();
+        if (tt != null) {
+            bcrEmpPump = new BeanItemContainer<EmpleadoBombaTurno>(EmpleadoBombaTurno.class);
+            bcrEmpPump.addAll(dao.getTurnoEmpBombaByTurnoid2(tt.getTurnoId()));
+            tablaAsignacion.setContainerDataSource(bcrEmpPump);
+            tablaAsignacion.addGeneratedColumn("colNombre", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("nombre"); //Atributo del bean
+                    TextField txtNombre = new TextField(pro);
+                    txtNombre.setEnabled(false);
+                    txtNombre.addStyleName("align-left");
+                    txtNombre.setWidth("120px");
+                    txtNombre.setStyleName(ValoTheme.TEXTFIELD_TINY);
+                    txtNombre.setNullRepresentation("");
+                    return txtNombre;
+                }
+            });
+
+            tablaAsignacion.addGeneratedColumn("colBomba1", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba1"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba2", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba2"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba3", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba3"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba4", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba4"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba5", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba5"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba6", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba6"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba7", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba7"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba8", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba8"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba9", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba9"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba10", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba10"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba11", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba11"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba12", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba12"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+
+            tablaAsignacion.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, final Object itemId, Object columnId) {
+                    Button btnDelete = new Button(FontAwesome.TRASH);
+                    btnDelete.addStyleName(ValoTheme.BUTTON_DANGER);
+                    btnDelete.addStyleName(ValoTheme.BUTTON_TINY);
+                    btnDelete.addClickListener(new Button.ClickListener() {
+                        @Override
+                        public void buttonClick(Button.ClickEvent event) {
+//                            if (bcrEmpPump.getItem(itemId).getBean().getPump() != null) {
+//                                listPump.add(bcrEmpPump.getItem(itemId).getBean().getPump());
+//                            }
+                            bcrEmpPump.removeItem(itemId);
+                            tablaAsignacion.refreshRowCache();
+                        }
+                    });
+                    return btnDelete;
+                }
+            });
+
+        }
+
+        Object[] visCols = new Object[]{"colNombre", "colBomba1", "colBomba2", "colBomba3", "colBomba4", "colBomba5", "colBomba6", "colBomba7", "colBomba8", "colBomba9", "colBomba10", "colBomba11", "colBomba12", "colDelete"};
+        String[] colHeads = new String[]{"Pistero", "Bomba1", "Bomba2", "Bomba3", "Bomba4", "Bomba5", "Bomba6", "Bomba7", "Bomba8", "Bomba9", "Bomba10", "Bomba11", "Bomba12", "Accion"};
+
+        tablaAsignacion.setVisibleColumns(visCols);
+        tablaAsignacion.setColumnHeaders(colHeads);
+        tablaAsignacion.setHeight("220px");
+        Responsive.makeResponsive(tablaAsignacion);
+        return tablaAsignacion;
     }
 
     private Component buildCheckBoxPumps() {
-        chkBomba1 = new CheckBox();
-        chkBomba1.setDescription("1");
-        chkBomba2 = new CheckBox();
-        chkBomba2.setDescription("2");
-        chkBomba3 = new CheckBox();
-        chkBomba3.setDescription("2");
-        chkBomba4 = new CheckBox();
-        chkBomba4.setDescription("2");
-        chkBomba5 = new CheckBox();
-        chkBomba5.setDescription("2");
-        chkBomba6 = new CheckBox();
-        chkBomba6.setDescription("2");
-        chkBomba7 = new CheckBox();
-        chkBomba7.setDescription("2");
-        chkBomba8 = new CheckBox();
-        chkBomba8.setDescription("2");
-        chkBomba9 = new CheckBox();
-        chkBomba9.setDescription("2");
-        chkBomba10 = new CheckBox();
-        chkBomba10.setDescription("2");
-        chkBomba11 = new CheckBox();
-        chkBomba11.setDescription("2");
-        chkBomba12 = new CheckBox();
-        chkBomba12.setDescription("2");
-        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{chkBomba1,chkBomba2,chkBomba3,chkBomba4,chkBomba5,chkBomba6,chkBomba7,chkBomba8,chkBomba9,chkBomba10,chkBomba11,chkBomba12});
+        HorizontalLayout h = new HorizontalLayout();
+        ArrayList<CheckBox> bombasChk = new ArrayList<CheckBox>();
+        contBomba = new BeanItemContainer<Bomba>(Bomba.class);
+        Horario hh = new Horario();
+        hh = (Horario) cmbHorario.getValue();
+        if (hh != null) {
+            contBomba.addAll(dao.getBombasByEstacionConfheadId(hh.getEstacionconfheadId(), estacion.getEstacionId()));
+            nuevo = new Button(FontAwesome.PLUS_CIRCLE);
+            nuevo.addStyleName(ValoTheme.BUTTON_TINY);
+            nuevo.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+            nuevo.setDescription("Agregar");
+            nuevo.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(final Button.ClickEvent event) {
+//                FormImpuestos.open(new UnoImpuestos(), Constantes.nuevo);
+                }
+            });
+
+            chkBomba1 = new CheckBox("1");
+            chkBomba1.setDescription("1");
+            chkBomba1.setStyleName(ValoTheme.CHECKBOX_SMALL);
+            bombasChk.add(chkBomba1);
+            chkBomba2 = new CheckBox("2");
+            chkBomba2.setDescription("2");
+            chkBomba2.setStyleName(ValoTheme.CHECKBOX_SMALL);
+            bombasChk.add(chkBomba2);
+            chkBomba3 = new CheckBox("3");
+            chkBomba3.setDescription("3");
+            chkBomba3.setStyleName(ValoTheme.CHECKBOX_SMALL);
+            bombasChk.add(chkBomba3);
+            chkBomba4 = new CheckBox("4");
+            chkBomba4.setDescription("4");
+            chkBomba4.setStyleName(ValoTheme.CHECKBOX_SMALL);
+            bombasChk.add(chkBomba4);
+            chkBomba5 = new CheckBox("5");
+            chkBomba5.setDescription("5");
+            chkBomba5.setStyleName(ValoTheme.CHECKBOX_SMALL);
+            bombasChk.add(chkBomba5);
+            chkBomba6 = new CheckBox("6");
+            chkBomba6.setDescription("6");
+            chkBomba6.setStyleName(ValoTheme.CHECKBOX_SMALL);
+            bombasChk.add(chkBomba6);
+            chkBomba7 = new CheckBox("7");
+            chkBomba7.setDescription("7");
+            chkBomba7.setStyleName(ValoTheme.CHECKBOX_SMALL);
+            bombasChk.add(chkBomba7);
+            chkBomba8 = new CheckBox("8");
+            chkBomba8.setDescription("8");
+            chkBomba8.setStyleName(ValoTheme.CHECKBOX_SMALL);
+            bombasChk.add(chkBomba8);
+            chkBomba9 = new CheckBox("9");
+            chkBomba9.setDescription("9");
+            chkBomba9.setStyleName(ValoTheme.CHECKBOX_SMALL);
+            bombasChk.add(chkBomba9);
+            chkBomba10 = new CheckBox("10");
+            chkBomba10.setDescription("10");
+            chkBomba10.setStyleName(ValoTheme.CHECKBOX_SMALL);
+            bombasChk.add(chkBomba10);
+            chkBomba11 = new CheckBox("11");
+            chkBomba11.setDescription("11");
+            chkBomba11.setStyleName(ValoTheme.CHECKBOX_SMALL);
+            bombasChk.add(chkBomba11);
+            chkBomba12 = new CheckBox("12");
+            chkBomba12.setDescription("12");
+            chkBomba12.setStyleName(ValoTheme.CHECKBOX_SMALL);
+            bombasChk.add(chkBomba12);
+            for (Bomba bomba : contBomba.getItemIds()) {
+                h.addComponent(bombasChk.get(bomba.getId() - 1));
+            }
+            h.addComponent(nuevo);
+            h.setSpacing(true);
+            h.setResponsive(true);
+        }
+        return h;
     }
 
     private void cargaTablaPrecios() {
@@ -426,8 +690,10 @@ public class TurnoPr extends Panel implements View {
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 Property prop = source.getItem(itemId).getItemProperty("priceSC"); //Atributo del bean
                 TextField tfdSC = new TextField(utils.getPropertyFormatterDouble(prop));
+                tfdSC.setWidth("100px");
                 tfdSC.addStyleName("align-right");
                 tfdSC.setNullRepresentation("0.00");
+                tfdSC.setStyleName(ValoTheme.TEXTFIELD_TINY);
                 tfdSC.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
@@ -460,7 +726,7 @@ public class TurnoPr extends Panel implements View {
         }
         tablaPrecio.setVisibleColumns(visCols);
         tablaPrecio.setColumnHeaders(colHeads);
-        tablaPrecio.setHeight("250px");
+        tablaPrecio.setHeight("160px");
         Responsive.makeResponsive(tablaPrecio);
     }
 

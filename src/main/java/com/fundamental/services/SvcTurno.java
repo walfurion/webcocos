@@ -12,9 +12,11 @@ import com.fundamental.model.FactelectronicaPos;
 import com.fundamental.model.Horario;
 import com.fundamental.model.Precio;
 import com.fundamental.model.Turno;
-import com.fundamental.model.TurnoEmpleadoBomba;
+import com.sisintegrados.generic.bean.TurnoEmpleadoBomba;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.generic.bean.EmpleadoBombaTurno;
 import com.sisintegrados.generic.bean.Pais;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -365,6 +367,90 @@ public class SvcTurno extends Dao {
         return result;
     }
 
+    public List<EmpleadoBombaTurno> getTurnoEmpBombaByTurnoid2(Integer turnoId) {
+        List<EmpleadoBombaTurno> result = new ArrayList();
+        ResultSet rst = null;
+        try {
+            query = "SELECT teb.turno_id,e.empleado_id,e.nombre "
+                    + "FROM turno_empleado_bomba teb, empleado e, bomba b "
+                    + "WHERE teb.bomba_id = b.bomba_id AND teb.empleado_id = e.empleado_id AND teb.turno_id = " + turnoId
+                    + " GROUP BY e.nombre,e.empleado_id,TEB.TURNO_ID ORDER BY e.empleado_id";
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            EmpleadoBombaTurno item;
+            while (rst.next()) {
+                item = new EmpleadoBombaTurno(rst.getInt(1), rst.getInt(2), rst.getString(3));
+                PreparedStatement pstB = null;
+                ResultSet rstB = null;
+                
+                String query2 = "SELECT teb.turno_id,e.empleado_id,e.nombre,teb.bomba_id "
+                        + "FROM turno_empleado_bomba teb, empleado e, bomba b "
+                        + "WHERE teb.bomba_id = b.bomba_id AND teb.empleado_id = e.empleado_id AND teb.turno_id = " + turnoId
+                        + " AND e.empleado_id = " + item.getEmpleadoid()
+                        + " ORDER BY e.empleado_id";
+                pstB = getConnection().prepareStatement(query2);
+                rstB = pstB.executeQuery();
+
+                while (rstB.next()) {
+                    if (rstB.getInt(4) == 1) {
+                        item.setBomba1(true);
+                    }
+                    if (rstB.getInt(4) == 2) {
+                        item.setBomba2(true);
+                    }
+                    if (rstB.getInt(4) == 3) {
+                        item.setBomba3(true);
+                    }
+                    if (rstB.getInt(4) == 4) {
+                        item.setBomba4(true);
+                    }
+                    if (rstB.getInt(4) == 5) {
+                        item.setBomba5(true);
+                    }
+                    if (rstB.getInt(4) == 6) {
+                        item.setBomba6(true);
+                    }
+                    if (rstB.getInt(4) == 7) {
+                        item.setBomba7(true);
+                    }
+                    if (rstB.getInt(4) == 8) {
+                        item.setBomba8(true);
+                    }
+                    if (rstB.getInt(4) == 9) {
+                        item.setBomba9(true);
+                    }
+                    if (rstB.getInt(4) == 10) {
+                        item.setBomba10(true);
+                    }
+                    if (rstB.getInt(4) == 11) {
+                        item.setBomba11(true);
+                    }
+                    if (rstB.getInt(4) == 12) {
+                        item.setBomba12(true);
+                    }
+                }
+                result.add(item);
+                rstB.close();
+                pstB.close();
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                if (pst != null) {
+                    pst.close();
+                }
+
+                if (rst != null) {
+                    rst.close();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return result;
+    }
+
     public List<Empleado> getEmpleados(boolean onlyActive) {
         List<Empleado> result = new ArrayList();
         try {
@@ -507,7 +593,7 @@ public class SvcTurno extends Dao {
         }
         return result;
     }
-    
+
     public List<Horario> getHorarioByEstacionid2(int estationId, int idpais) {
         List<Horario> result = new ArrayList();
         query = "SELECT h.horario_id, h.nombre, h.hora_inicio, h.hora_fin, h.estado, h.descripcion, eh.estacionconfhead_id "
@@ -606,7 +692,7 @@ public class SvcTurno extends Dao {
         Integer id = 0;
         query = "select horario_id "
                 + "from turno "
-                + "where turno_id = "+idturno;
+                + "where turno_id = " + idturno;
 
         ResultSet rst = null;
         try {

@@ -4,7 +4,7 @@ import com.fundamental.model.Bomba;
 import com.fundamental.model.BombaEmpleadoEstacion;
 import com.fundamental.model.Dia;
 import com.fundamental.model.Empleado;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.services.Dao;
 import com.fundamental.model.dto.DtoLectura;
 import com.sisintegrados.generic.bean.Lectura;
@@ -562,9 +562,13 @@ public class PrReading extends VerticalLayout implements View {
 
                 //Identificar lecturas finales que sean menores que la inicial
                 DtoLectura dlectura;
+                DtoLectura dlectura2;
                 boolean existCalibration = false;
                 for (Integer id : (List<Integer>) tableManuales.getItemIds()) {
                     dlectura = (DtoLectura) ((BeanItem) tableManuales.getItem(id)).getBean();
+                    dlectura2 = (DtoLectura) ((BeanItem) tableElectronicas.getItem(id)).getBean();
+                    System.out.println("valor final elec "+dlectura2.geteFinal());
+                    System.out.println("valor final manual "+dlectura.getmFinal());                    
                     if (dlectura.getmTotal() < 0) {
                         Notification notif = new Notification("ADVERTENCIA:", "Tiene un registro de ventas negativa (" + dlectura.getBomba() + " -> " + dlectura.getProducto() + ").", Notification.Type.WARNING_MESSAGE);
                         notif.setDelayMsec(4000);
@@ -574,6 +578,14 @@ public class PrReading extends VerticalLayout implements View {
                     }
                     if (dlectura.getmCalibracion() > 0) {
                         existCalibration = true;
+                    }
+                    Double masmenos = dlectura2.geteFinal()-dlectura.getmFinal();
+                    if (masmenos > 5 || masmenos < -5) {
+                        Notification notif = new Notification("ADVERTENCIA:", "Valor Final no puede tener una diferencia de mayor a 5 o menor a -5 (" + dlectura.getBomba() + " -> " + dlectura.getProducto() + ").", Notification.Type.WARNING_MESSAGE);
+                        notif.setDelayMsec(4000);
+                        notif.setPosition(Position.MIDDLE_CENTER);
+                        notif.show(Page.getCurrent());
+                        return;
                     }
                 }
                 if (existCalibration && tempFile != null) {

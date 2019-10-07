@@ -1,5 +1,6 @@
 package com.fundamental.model;
 
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.dto.DtoGenericBean;
 import java.util.Date;
 import java.util.List;

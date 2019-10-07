@@ -1,6 +1,5 @@
 package com.sisintegrados.generic.bean;
 
-import com.fundamental.model.Estacion;
 import com.fundamental.model.Rol;
 import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.dto.DtoGenericBean;

@@ -1,7 +1,7 @@
 package com.fundamental.view;
 
 import com.fundamental.model.Bomba;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.EstacionConf;
 import com.fundamental.model.EstacionConfHead;
 import com.sisintegrados.generic.bean.Pais;
