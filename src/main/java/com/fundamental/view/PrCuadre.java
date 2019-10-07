@@ -176,7 +176,7 @@ public class PrCuadre extends Panel implements View {
 
         user = (Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName());
         currencySymbol = (user.getPaisLogin() == null) ? "" : user.getPaisLogin().getMonedaSimbolo() + ". ";
-        volumenSymbol = "AG ";
+        volumenSymbol = "L"; //MG volSimbolo
 
         root = utils.buildVertical("vlMainLayout", true, true, true, true, "dashboard-view");
         root.setSizeFull();
@@ -305,6 +305,8 @@ public class PrCuadre extends Panel implements View {
         pais = (user.getPaisLogin() != null)
                 ? user.getPaisLogin() : ((pais != null) ? pais : new Pais());
         allCountries = service.getAllPaises();
+//        currencySymbol = (user.getPaisLogin() == null) ? "" : user.getPaisLogin().getMonedaSimbolo() + ". ";
+//        volumenSymbol = "L"; //MG volSimbolo
 
         estacion = (Estacion) ((user.getEstacionLogin() != null)
                 ? user.getEstacionLogin() : ((cbxEstacion != null && cbxEstacion.getValue() != null) ? cbxEstacion.getValue() : new Estacion()));
@@ -419,6 +421,10 @@ public class PrCuadre extends Panel implements View {
                 if (listStations.size() == 1) {
                     cbxEstacion.setValue(listStations.get(0));
                 }
+                currencySymbol = pais.getMonedaSimbolo()+ " ";
+                volumenSymbol = pais.getVolSimbolo()+ " ";
+                System.out.println("PAIS "+pais.toString());
+
             }
         });
 
@@ -653,7 +659,6 @@ public class PrCuadre extends Panel implements View {
         upload.addStyleName(ValoTheme.BUTTON_SMALL);
 
 //        determinarPermisos();
-
     }
 
     private void determinarPermisos() {
@@ -802,7 +807,7 @@ public class PrCuadre extends Panel implements View {
 //                    return;
 //                }
 
-                final double diferencia = (totalMediosPago  + totalEfectivo) - (totalArqueoElectronico + totalProducto);
+                final double diferencia = (totalMediosPago + totalEfectivo) - (totalArqueoElectronico + totalProducto);
 
                 String messageComp = "";
                 if (diferencia > 0) {
@@ -1008,6 +1013,7 @@ public class PrCuadre extends Panel implements View {
         String[] cHeaders = new String[]{"Despacho", "Producto", "Volumen", "Venta"};
         Align[] cAlignments = new Align[]{Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT};
         if (pais.getPaisId() != null && pais.getPaisId() == 320) {  //Guatemala
+            System.out.println("PAIS " + pais.getPaisId());
             vColumns = new Object[]{"nombreDespacho", "nombreProducto", "volumen", "venta", "diferencia"};
             cHeaders = new String[]{"Despacho", "Producto", "Volumen", "Venta", "Diferencia"};
             cAlignments = new Align[]{Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT};
@@ -1120,7 +1126,7 @@ public class PrCuadre extends Panel implements View {
                 Property pro = source.getItem(itemId).getItemProperty("value");  //Atributo del bean
                 final TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
                 tfdValue.setValue("0.00");
-                tfdValue.setWidth("100px");
+                tfdValue.setWidth("125px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
