@@ -437,7 +437,9 @@ public class PrReading extends VerticalLayout implements View {
                     turno = new Turno();
                     if (!contTurnos.getItemIds().isEmpty()) {
                         int lastIndex = listTurno.size() - 1;
+                        System.out.println("lastIndex "+lastIndex);
                         turno = (Turno) ((ArrayList) contTurnos.getItemIds()).get(lastIndex);
+                        System.out.println("turno "+turno.toString());
                         cbxTurno.setValue(turno);
                         actionComboboxTurno();
                     }
@@ -566,9 +568,7 @@ public class PrReading extends VerticalLayout implements View {
                 boolean existCalibration = false;
                 for (Integer id : (List<Integer>) tableManuales.getItemIds()) {
                     dlectura = (DtoLectura) ((BeanItem) tableManuales.getItem(id)).getBean();
-                    dlectura2 = (DtoLectura) ((BeanItem) tableElectronicas.getItem(id)).getBean();
-                    System.out.println("valor final elec "+dlectura2.geteFinal());
-                    System.out.println("valor final manual "+dlectura.getmFinal());                    
+                    dlectura2 = (DtoLectura) ((BeanItem) tableElectronicas.getItem(id)).getBean();               
                     if (dlectura.getmTotal() < 0) {
                         Notification notif = new Notification("ADVERTENCIA:", "Tiene un registro de ventas negativa (" + dlectura.getBomba() + " -> " + dlectura.getProducto() + ").", Notification.Type.WARNING_MESSAGE);
                         notif.setDelayMsec(4000);
@@ -579,14 +579,18 @@ public class PrReading extends VerticalLayout implements View {
                     if (dlectura.getmCalibracion() > 0) {
                         existCalibration = true;
                     }
-                    Double masmenos = dlectura2.geteFinal()-dlectura.getmFinal();
-                    if (masmenos > 5 || masmenos < -5) {
-                        Notification notif = new Notification("ADVERTENCIA:", "Valor Final no puede tener una diferencia de mayor a 5 o menor a -5 (" + dlectura.getBomba() + " -> " + dlectura.getProducto() + ").", Notification.Type.WARNING_MESSAGE);
-                        notif.setDelayMsec(4000);
-                        notif.setPosition(Position.MIDDLE_CENTER);
-                        notif.show(Page.getCurrent());
-                        return;
-                    }
+                    Dao dao = new Dao();                    
+                    Parametro parametro = dao.getParameterByName("LECTURAS_OBLIGATORIAS_ME");
+                    if("true".equals(parametro.getValor())){
+                        Double masmenos = dlectura2.geteFinal()-dlectura.getmFinal();
+                        if (masmenos > 5 || masmenos < -5) {
+                            Notification notif = new Notification("ADVERTENCIA:", "Valor Final no puede tener una diferencia de mayor a 5 o menor a -5 (" + dlectura.getBomba() + " -> " + dlectura.getProducto() + ").", Notification.Type.WARNING_MESSAGE);
+                            notif.setDelayMsec(4000);
+                            notif.setPosition(Position.MIDDLE_CENTER);
+                            notif.show(Page.getCurrent());
+                            return;
+                        }
+                    }                    
                 }
                 if (existCalibration && tempFile != null) {
                     Notification.show("ADVERTENCIA:", "Tiene por lo menos un dato de calibración, debe adjuntar un documento", Notification.Type.WARNING_MESSAGE);

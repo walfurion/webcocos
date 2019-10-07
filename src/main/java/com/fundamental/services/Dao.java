@@ -1311,6 +1311,7 @@ public class Dao {
         miQuery = "SELECT parametro_id, nombre, valor, descripcion, estado, creado_por, creado_el "
                 + "FROM parametro "
                 + "WHERE nombre = ?";
+        System.out.println("parametro "+miQuery);
         try {
             pst = getConnection().prepareStatement(miQuery);
             pst.setString(1, name);
