@@ -1,6 +1,6 @@
 package com.fundamental.services;
 
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Rol;
 import com.sisintegrados.generic.bean.Usuario;

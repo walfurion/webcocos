@@ -10,7 +10,7 @@ import com.fundamental.model.Dia;
 import com.fundamental.services.Dao;
 import com.fundamental.model.Efectivo;
 import com.fundamental.model.Empleado;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.FactelectronicaPos;
 import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Pais;

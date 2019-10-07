@@ -1,6 +1,6 @@
 package com.vaadin.demo.dashboard.view;
 
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.services.SvcEstacion;

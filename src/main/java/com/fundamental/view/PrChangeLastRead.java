@@ -2,7 +2,7 @@ package com.fundamental.view;
 
 import com.fundamental.model.Bomba;
 import com.fundamental.services.Dao;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.Lectura;
 import com.fundamental.model.LecturaDetalle;
 import com.fundamental.model.Lecturafinal;
