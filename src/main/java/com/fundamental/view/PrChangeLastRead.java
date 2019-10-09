@@ -352,7 +352,7 @@ public class PrChangeLastRead extends Panel implements View {
                 }
                 SvcReading svcLectura = new SvcReading();
                 Turno turno = svcLectura.getTurnoActivoByEstacionid(estacion.getEstacionId());
-                Lectura lectura = new Lectura(null, estacion.getEstacionId(), turno.getTurnoId(), null, null/*,null, null*/);
+                Lectura lectura = new Lectura(null, estacion.getEstacionId(), turno.getTurnoId(), null, null, null/*,null, null*/);
                 lectura.setLecturaDetalle(new ArrayList<LecturaDetalle>());
                 LecturaDetalle ldetail;
                 boolean existe = false;

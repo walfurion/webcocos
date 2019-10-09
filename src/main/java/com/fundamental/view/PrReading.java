@@ -66,6 +66,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import static org.eclipse.persistence.jpa.rs.util.JPARSLogger.exception;
 import org.vaadin.maddon.ListContainer;
 import org.vaadin.ui.NumberField;
 
@@ -124,7 +125,7 @@ public class PrReading extends VerticalLayout implements View {
     Dia dia, ultimoDia;
     File tempFile;
     String[] uniqueStation;
-    TextField txtNumeroCaso;
+    public TextField txtNumeroCaso;
 
     public PrReading() {
         setSizeFull();
@@ -177,11 +178,11 @@ public class PrReading extends VerticalLayout implements View {
 //        hlBombasButton.addComponents(btnAll, btnNone);
 //        hlBombasButton.setComponentAlignment(btnAll, Alignment.BOTTOM_RIGHT);
 //        hlBombasButton.setComponentAlignment(btnNone, Alignment.BOTTOM_LEFT);
-
-        vlBombas.addComponents(txtNumeroCaso, cbxEmpleado,  tableBombas);//, hlBombasButton);
+        txtNumeroCaso = utils.buildTextField("Número Caso:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
+        vlBombas.addComponents(cbxEmpleado, tableBombas);//, hlBombasButton);
         vlBombas.setExpandRatio(tableBombas, 0.85f);
-//        vlBombas.setExpandRatio(hlBombasButton, 0.15f);
 
+//        vlBombas.setExpandRatio(hlBombasButton, 0.15f);
 //        hlContent.addComponents(vlBombas);
 //        if (paisId != null && paisId == Constant.CAT_PAIS_GUATEMALA) {
         hlContent.addComponents(tableElectronicas);
@@ -203,13 +204,20 @@ public class PrReading extends VerticalLayout implements View {
         CssLayout cltButtons = new CssLayout(utils.vlContainer(upload),
                 vlButton);
         cltButtons.setResponsive(true);
-       cltButtons.setVisible(true);
-       upload.setVisible(false);
-        
+        cltButtons.setVisible(true);
+        upload.setVisible(false);
+        txtNumeroCaso = utils.buildTextField("Caso Help Desk:", "", false, 15, true, ValoTheme.TEXTFIELD_SMALL);
+
+        HorizontalLayout h = new HorizontalLayout();
+        h.addComponent(cbxEmpleado);
+        h.addComponent(txtNumeroCaso);
+        h.setSpacing(true);
+        txtNumeroCaso.setVisible(false);
+
         root.addComponents(hlHeader,
                 //                cltInfo,
                 //                cltToolbar,
-                cbxEmpleado,txtNumeroCaso,
+                h,
                 hlContent, //b tnSave
                 cltButtons);
         root.setExpandRatio(hlHeader, 0.30f);
@@ -350,7 +358,7 @@ public class PrReading extends VerticalLayout implements View {
                 cbxTurno.setContainerDataSource(contTurnos);
                 cbxTurno.setValue(null);
                 bcrPrecios.removeAllItems();
-                if (listStations.size()==1) {
+                if (listStations.size() == 1) {
                     cbxEstacion.setValue(listStations.get(0));
                 }
             }
@@ -440,9 +448,9 @@ public class PrReading extends VerticalLayout implements View {
                     turno = new Turno();
                     if (!contTurnos.getItemIds().isEmpty()) {
                         int lastIndex = listTurno.size() - 1;
-                        System.out.println("lastIndex "+lastIndex);
+                        System.out.println("lastIndex " + lastIndex);
                         turno = (Turno) ((ArrayList) contTurnos.getItemIds()).get(lastIndex);
-                        System.out.println("turno "+turno.toString());
+                        System.out.println("turno " + turno.toString());
                         cbxTurno.setValue(turno);
                         actionComboboxTurno();
                     }
@@ -467,10 +475,8 @@ public class PrReading extends VerticalLayout implements View {
         cbxTurno.setValue(turno);
 
         //tfdNameSeller = utils.buildTextField("Pistero:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
-        txtNumeroCaso = utils.buildTextField("Número Caso:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
-
+        //  txtNumeroCaso = utils.buildTextField("Número Caso:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
         //tfdNameChief = utils.buildTextField("Jefe de pista:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
-
 //        determinarPermisos();
     }
 
@@ -572,7 +578,7 @@ public class PrReading extends VerticalLayout implements View {
                 boolean existCalibration = false;
                 for (Integer id : (List<Integer>) tableManuales.getItemIds()) {
                     dlectura = (DtoLectura) ((BeanItem) tableManuales.getItem(id)).getBean();
-                    dlectura2 = (DtoLectura) ((BeanItem) tableElectronicas.getItem(id)).getBean();               
+                    dlectura2 = (DtoLectura) ((BeanItem) tableElectronicas.getItem(id)).getBean();
                     if (dlectura.getmTotal() < 0) {
                         Notification notif = new Notification("ADVERTENCIA:", "Tiene un registro de ventas negativa (" + dlectura.getBomba() + " -> " + dlectura.getProducto() + ").", Notification.Type.WARNING_MESSAGE);
                         notif.setDelayMsec(4000);
@@ -583,10 +589,10 @@ public class PrReading extends VerticalLayout implements View {
                     if (dlectura.getmCalibracion() > 0) {
                         existCalibration = true;
                     }
-                    Dao dao = new Dao();                    
+                    Dao dao = new Dao();
                     Parametro parametro = dao.getParameterByName("LECTURAS_OBLIGATORIAS_ME");
-                    if("true".equals(parametro.getValor())){
-                        Double masmenos = dlectura2.geteFinal()-dlectura.getmFinal();
+                    if ("true".equals(parametro.getValor())) {
+                        Double masmenos = dlectura2.geteFinal() - dlectura.getmFinal();
                         if (masmenos > 5 || masmenos < -5) {
                             Notification notif = new Notification("ADVERTENCIA:", "Valor Final no puede tener una diferencia de mayor a 5 o menor a -5 (" + dlectura.getBomba() + " -> " + dlectura.getProducto() + ").", Notification.Type.WARNING_MESSAGE);
                             notif.setDelayMsec(4000);
@@ -594,7 +600,7 @@ public class PrReading extends VerticalLayout implements View {
                             notif.show(Page.getCurrent());
                             return;
                         }
-                    }                    
+                    }
                 }
                 if (existCalibration && tempFile != null) {
                     Notification.show("ADVERTENCIA:", "Tiene por lo menos un dato de calibración, debe adjuntar un documento", Notification.Type.WARNING_MESSAGE);
@@ -603,7 +609,20 @@ public class PrReading extends VerticalLayout implements View {
 
                 if (turno.getTurnoId() != null) {
                     Integer turnoId = turno.getTurnoId();
-                    Lectura lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin()/**, tfdNameSeller.getValue(), tfdNameChief.getValue()**/);
+                    Lectura lectura = new Lectura();
+                    if (txtNumeroCaso.getValue() != null) {
+                        lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), txtNumeroCaso.getValue()/**
+                         * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
+                         */
+                        );
+                    } else {
+
+                        lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), null/**
+                         * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
+                         */
+                        );
+                    }
+
                     lectura.setEmpleadoId(((Empleado) cbxEmpleado.getValue()).getEmpleadoId());
 
                     LecturaDetalle ldetalle;
@@ -964,7 +983,10 @@ public class PrReading extends VerticalLayout implements View {
 
         HorizontalLayout cltToolbar = utils.buildHorizontal("cltToolbar", false, true, true, false);
 //        cltToolbar.setSizeUndefined();
-        cltToolbar.addComponents(cbxCountry, cbxEstacion, dfdFecha, cbxTurno /**, tfdNameSeller, tfdNameChief**/);
+        cltToolbar.addComponents(cbxCountry, cbxEstacion, dfdFecha, cbxTurno /**
+         * , tfdNameSeller, tfdNameChief*
+         */
+        );
 
         VerticalLayout vlItems = utils.buildVertical("vlItems", false, true, true, false, null);
 //        vlItems.setSizeUndefined();
@@ -1358,6 +1380,17 @@ public class PrReading extends VerticalLayout implements View {
                         DtoLectura dtol = bcrManuales.getItem(itemId).getBean();
                         Double diff = dtol.getmFinal() - dtol.getmInicial() - Double.parseDouble(nfd.getValue());
                         bcrManuales.getItem(itemId).getItemProperty("mTotal").setValue(diff);
+                        try {
+                            Double cantConvertida = Double.valueOf(nfd.getValue());
+                            if (cantConvertida > 0) {
+                                txtNumeroCaso.setVisible(true);
+                            } else {
+                                txtNumeroCaso.setVisible(false);
+                            }
+                        } catch (Exception e) {
+
+                        }
+
                     }
                 });
                 return nfd;
