@@ -897,11 +897,7 @@ public class PrCuadre extends Panel implements View {
                                 for (Integer id : lecturasIds) {
                                     dtoE = (DtoEfectivo) ((BeanItem) tblEfectivo.getItem(id)).getBean();
                                     if (dtoE.getValue() > 0 && dtoE.getMedioPago() != null) {
-<<<<<<< HEAD
                                         efectivo = new Efectivo(arqueo.getArqueocajaId(), dtoE.getMedioPago().getMediopagoId(), 0, dtoE.getValue());
-=======
-                                        efectivo = new Efectivo(arqueo.getArqueocajaId(), dtoE.getMedioPago().getMediopagoId(),  dtoE.getValue());
->>>>>>> 3b57735117c9adb1c275588a1e60eac6b76cdeee
                                         efectivo.setTasa(dtoE.getTasa());
                                         efectivo.setMonExtranjera(dtoE.getMonExtranjera());
                                         svcTurno.doActionEfectivo(Dao.ACTION_ADD, efectivo);
