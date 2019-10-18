@@ -36,8 +36,13 @@ public enum DashboardViewType {
     //    REPORTS("reports", ReportsView.class, FontAwesome.FILE_TEXT_O, true), 
     //    SCHEDULE("schedule", ScheduleView.class, FontAwesome.CALENDAR_O, false)
 
+<<<<<<< HEAD
     PR_TURN("PR_TURN", PrTurn.class, FontAwesome.TABLE, false),
 //    PR_TURN("PR_TURN", TurnoPr.class, FontAwesome.TABLE, false),
+=======
+   PR_TURN("PR_TURN", PrTurn.class, FontAwesome.TABLE, false),
+   // PR_TURN("PR_TURN", TurnoPr.class, FontAwesome.TABLE, false),
+>>>>>>> 3b57735117c9adb1c275588a1e60eac6b76cdeee
     PR_READING("PR_READING", PrReading.class, FontAwesome.TABLE, false), 
     PR_SQUAREUP("PR_SQUAREUP", PrCuadre.class, FontAwesome.MONEY, false), 
     PR_TURN_CLOSE("PR_TURN_CLOSE", PrTurnoCierre.class, FontAwesome.CLOSE, false), 

@@ -30,6 +30,7 @@ public class Lectura {
     private List<LecturaDetalle> lecturaDetalle = new ArrayList();
     private List<Lecturafinal> lecturafinal = new ArrayList();
     private Integer empleadoId;
+    private String numeroCaso;
 
     public Lectura(Integer lecturaId, Integer estacionId, Integer turnoId,
             String creadoPor, String creadoPersona, String nombrePistero, String nombreJefe) {
@@ -43,7 +44,7 @@ public class Lectura {
     }
 
     public Lectura(Integer lecturaId, Integer estacionId, Integer turnoId,
-            String creadoPor, String creadoPersona) {
+            String creadoPor, String creadoPersona, String numeroCaso) {
         this.lecturaId = lecturaId;
         this.estacionId = estacionId;
         this.turnoId = turnoId;
@@ -51,5 +52,7 @@ public class Lectura {
         this.creadoPersona = creadoPersona;
         this.nombrePistero = nombrePistero;
         this.nombreJefe = nombreJefe;
+        this.numeroCaso = numeroCaso;
+        
     }
 }
