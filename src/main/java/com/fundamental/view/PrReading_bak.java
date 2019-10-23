@@ -550,7 +550,7 @@ public class PrReading_bak extends VerticalLayout implements View {
 
                 if (turno.getTurnoId() != null) {
                     Integer turnoId = turno.getTurnoId();
-                    Lectura lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin()/*, tfdNameSeller.getValue(), tfdNameChief.getValue()*/);
+                    Lectura lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(),null/*, tfdNameSeller.getValue(), tfdNameChief.getValue()*/);
 
                     LecturaDetalle ldetalle;
                     boolean crearNuevaLectura = false;
