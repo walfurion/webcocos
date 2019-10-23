@@ -59,6 +59,29 @@ public class SvcUsuario extends Dao {
             rst.close();
             pst.close();
 
+            result = getLastTurnLastDay(result);
+
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+
+        return result;
+    }
+
+    public Usuario getLastTurnLastDay(Usuario usuario) {
+        GenericDia ultDia = new GenericDia();
+        GenericTurno ultTurno = new GenericTurno();
+        ResultSet rst = null;
+        Usuario user = new Usuario();
+        user = usuario;
+        try {
+
             /*Recupera*/
  /*Datos de pais y estacion asignada al usuario*/
             query = "SELECT a.ESTACION_ID,a.PAIS_ID\n"
@@ -67,13 +90,14 @@ public class SvcUsuario extends Dao {
                     + " AND b.USUARIO_ID  = ? \n"
                     + " AND (SELECT COUNT(*) FROM estacion_usuario where usuario_id = b.USUARIO_ID) = 1";
             pst = getConnection().prepareStatement(query);
-            pst.setInt(1, result.getUsuarioId());
+            pst.setInt(1, usuario.getUsuarioId());
             rst = pst.executeQuery();
 
             if (rst.next()) {
-                result.setPaisId(rst.getInt(2));
-                result.setEstacionid(rst.getInt(1));
+                user.setPaisId(rst.getInt(2));
+                user.setEstacionid(rst.getInt(1));
             }
+
             rst.close();
             pst.close();
 
@@ -86,13 +110,13 @@ public class SvcUsuario extends Dao {
                     + "where d.fecha = (select max(fecha) from dia where estacion_id = d.ESTACION_ID)\n"
                     + "and estacion_id = ?";
             pst = getConnection().prepareStatement(query);
-            pst.setInt(1, result.getEstacionid());
+            pst.setInt(1, user.getEstacionid());
             rst = pst.executeQuery();
 
             if (rst.next()) {
                 ultDia.setDia(rst.getString(1));
                 ultDia.setEstado(rst.getString(2));
-                result.setDia(ultDia);
+                user.setDia(ultDia);
             }
             rst.close();
             pst.close();
@@ -109,17 +133,17 @@ public class SvcUsuario extends Dao {
                     + "and d.horario_id = h.HORARIO_ID\n"
                     + "and d.estacion_id = ?";
             pst = getConnection().prepareStatement(query);
-            pst.setInt(1, result.getEstacionid());
+            pst.setInt(1, user.getEstacionid());
             rst = pst.executeQuery();
 
             if (rst.next()) {
                 ultTurno.setTurno(rst.getString(1));
                 ultTurno.setEstado(rst.getString(2));
-                result.setTurno(ultTurno);
+                user.setTurno(ultTurno);
             }
             rst.close();
             pst.close();
-            
+
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
@@ -129,8 +153,6 @@ public class SvcUsuario extends Dao {
             } catch (Exception ignore) {
             }
         }
-
-        return result;
+        return user;
     }
-
 }

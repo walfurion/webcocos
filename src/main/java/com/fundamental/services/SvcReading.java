@@ -1,7 +1,7 @@
 package com.fundamental.services;
 
 import com.fundamental.model.Bomba;
-import com.fundamental.model.Empleado;
+import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Estacion;
 import static com.fundamental.services.Dao.ACTION_ADD;
 import static com.fundamental.services.Dao.ACTION_UPDATE;

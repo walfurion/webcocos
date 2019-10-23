@@ -7,7 +7,7 @@ import com.fundamental.model.ArqueocajaProducto;
 import com.fundamental.model.Bomba;
 import com.fundamental.model.Dia;
 import com.fundamental.model.Efectivo;
-import com.fundamental.model.Empleado;
+import com.sisintegrados.generic.bean.Empleado;
 import com.fundamental.model.FactelectronicaPos;
 import com.fundamental.model.Horario;
 import com.fundamental.model.Precio;
@@ -370,6 +370,7 @@ public class SvcTurno extends Dao {
     public List<EmpleadoBombaTurno> getTurnoEmpBombaByTurnoid2(Integer turnoId) {
         List<EmpleadoBombaTurno> result = new ArrayList();
         ResultSet rst = null;
+        Integer maxBombas = 0;
         try {
             query = "SELECT teb.turno_id,e.empleado_id,e.nombre "
                     + "FROM turno_empleado_bomba teb, empleado e, bomba b "
@@ -378,11 +379,26 @@ public class SvcTurno extends Dao {
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             EmpleadoBombaTurno item;
+
+            String Vquery = "SELECT max(teb.bomba_id) MaxBomba "
+                    + "FROM turno_empleado_bomba teb, empleado e, bomba b "
+                    + "WHERE teb.bomba_id = b.bomba_id AND teb.empleado_id = e.empleado_id AND teb.turno_id = " + turnoId
+                    + " ORDER BY e.empleado_id";
+
+            PreparedStatement pstC = null;
+            ResultSet rstC = null;
+            pstC = getConnection().prepareStatement(Vquery);
+            rstC = pstC.executeQuery();
+
+            while (rstC.next()) {
+                maxBombas = rstC.getInt(1);
+            }
+
             while (rst.next()) {
                 item = new EmpleadoBombaTurno(rst.getInt(1), rst.getInt(2), rst.getString(3));
                 PreparedStatement pstB = null;
                 ResultSet rstB = null;
-                
+
                 String query2 = "SELECT teb.turno_id,e.empleado_id,e.nombre,teb.bomba_id "
                         + "FROM turno_empleado_bomba teb, empleado e, bomba b "
                         + "WHERE teb.bomba_id = b.bomba_id AND teb.empleado_id = e.empleado_id AND teb.turno_id = " + turnoId
@@ -429,6 +445,9 @@ public class SvcTurno extends Dao {
                         item.setBomba12(true);
                     }
                 }
+                item.setMaxBombas(maxBombas);
+                pstC.close();
+                rstC.close();
                 result.add(item);
                 rstB.close();
                 pstB.close();
@@ -462,6 +481,27 @@ public class SvcTurno extends Dao {
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Empleado(rst.getInt(1), rst.getString(2)));
+            }
+            closePst();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
+
+    public List<Empleado> getEmpleados2(boolean onlyActive) {
+        List<Empleado> result = new ArrayList();
+        try {
+            miQuery = (onlyActive) ? " AND e.estado = 'A' " : "";
+            miQuery = "SELECT e.empleado_id, e.nombre, e.estado "
+                    + "FROM empleado e "
+                    + "WHERE 1 = 1 " + miQuery;
+            pst = getConnection().prepareStatement(miQuery);
+            ResultSet rst = pst.executeQuery();
+            while (rst.next()) {
+                result.add(new Empleado(rst.getInt(1), rst.getString(2),rst.getString(3)));
             }
             closePst();
         } catch (Exception exc) {
@@ -718,4 +758,32 @@ public class SvcTurno extends Dao {
         return id;
     }
 
+    public Integer getnext() {
+        Integer id = 0;
+        query = "SELECT seq_empleado.nextval \n"
+                + "FROM DUAL";
+
+        ResultSet rst = null;
+        try {
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            if (rst.next()) {
+                id = rst.getInt(1);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (pst != null) {
+                    pst.close();
+                }
+                if (rst != null) {
+                    rst.close();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return id;
+    }
 }

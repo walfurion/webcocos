@@ -9,7 +9,7 @@ import com.fundamental.model.Cliente;
 import com.fundamental.model.Dia;
 import com.fundamental.services.Dao;
 import com.fundamental.model.Efectivo;
-import com.fundamental.model.Empleado;
+import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.FactelectronicaPos;
 import com.fundamental.model.Mediopago;

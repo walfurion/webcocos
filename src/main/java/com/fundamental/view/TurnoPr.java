@@ -7,7 +7,7 @@ package com.fundamental.view;
 
 import com.fundamental.model.Bomba;
 import com.fundamental.model.Dia;
-import com.fundamental.model.Empleado;
+import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.EstacionConf;
 import com.fundamental.model.EstacionConfHead;
@@ -19,11 +19,12 @@ import com.fundamental.model.Utils;
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcTurno;
+import com.fundamental.services.SvcUsuario;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
+import com.sisint.view.form.FormEmpleado;
 import com.sisintegrados.generic.bean.EmpleadoBombaTurno;
 import com.sisintegrados.generic.bean.Pais;
-import com.sisintegrados.generic.bean.TurnoEmpleadoBomba;
 import com.sisintegrados.generic.bean.Usuario;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -31,7 +32,6 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import com.vaadin.demo.dashboard.view.DashboardViewType;
-import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -39,7 +39,6 @@ import com.vaadin.server.Page;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.Position;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
@@ -78,6 +77,7 @@ public class TurnoPr extends Panel implements View {
     DateField cmbFecha = new DateField("Fecha:");
     ComboBox cmbHorario = new ComboBox();
     ComboBox cmbTurno = new ComboBox();
+    ComboBox cmbEmpleado = new ComboBox();
     Usuario usuario = new Usuario();
     SvcTurno dao = new SvcTurno();
     Utils utils = new Utils();
@@ -102,6 +102,7 @@ public class TurnoPr extends Panel implements View {
     /*Para Asignar Bombas Pistero*/
     BeanItemContainer<EmpleadoBombaTurno> bcrEmpPump = new BeanItemContainer<EmpleadoBombaTurno>(EmpleadoBombaTurno.class);
     BeanItemContainer<Bomba> contBomba = new BeanItemContainer<Bomba>(Bomba.class);
+    BeanItemContainer<Empleado> contEmpleado = new BeanItemContainer<Empleado>(Empleado.class);
     Button nuevo = new Button();
     TextField nombrePistero = new TextField();
     CheckBox chkBomba1 = new CheckBox();
@@ -117,6 +118,13 @@ public class TurnoPr extends Panel implements View {
     CheckBox chkBomba11 = new CheckBox();
     CheckBox chkBomba12 = new CheckBox();
 
+    Button addEmpleado = new Button();
+    Button editEmpleado = new Button();
+    FormEmpleado frmEmpleado;
+    Empleado empleado = new Empleado();
+    Integer varMaxBomba = 0;
+    Integer bombaMasAltaOld = 0;
+
     public TurnoPr() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
         super.addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -128,7 +136,6 @@ public class TurnoPr extends Panel implements View {
     }
 
     private Component buildForm() {
-//        return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), buildToolBar2(), buildTable()});
         return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), buildToolbar2(), buildButtons()});
     }
 
@@ -141,7 +148,17 @@ public class TurnoPr extends Panel implements View {
         return components.createHorizontal(Constant.styleViewheader, Constant.sizeUndefined, true, false, false, new Component[]{title, toolBar});
     }
 
+    private CssLayout toolBar2;
+
     private Component buildToolbar() {
+        toolBar2 = new CssLayout();
+        VerticalLayout v = new VerticalLayout(toolBar2);
+        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{v});
+    }
+
+    private void cargaUltTurnoDia() {
+        SvcUsuario svu = new SvcUsuario();
+        usuario = svu.getLastTurnLastDay(usuario);
         if (usuario.getDia() == null) {
             lblUltimoDia.setValue("SIN DATOS REGISTRADOS");
             lblUltimoTurno.setValue("SIN DATOS REGISTRADOS");
@@ -160,9 +177,9 @@ public class TurnoPr extends Panel implements View {
         lblUltimoTurno.addStyleName(ValoTheme.LABEL_COLORED);
         lblUltimoTurno.setSizeUndefined();
 
-        Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer2(lblUltimoDia), utils.vlContainer2(lblUltimoTurno)});
-        VerticalLayout v = new VerticalLayout(toolBar);
-        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{v});
+        toolBar2.removeAllComponents();
+        toolBar2.addComponent(utils.vlContainer2(lblUltimoDia));
+        toolBar2.addComponent(utils.vlContainer2(lblUltimoTurno));
     }
 
     private Component buildHeader() {
@@ -183,7 +200,6 @@ public class TurnoPr extends Panel implements View {
         cmbPais.setRequired(true);
         cmbPais.setNullSelectionAllowed(false);
         cmbPais.setRequiredError("Debe seleccionar un país");
-//        cmbPais.setFilteringMode(FilteringMode.CONTAINS);
         cmbPais.addStyleName(ValoTheme.COMBOBOX_SMALL);
         cmbPais.addListener(new Property.ValueChangeListener() {
             @Override
@@ -213,6 +229,15 @@ public class TurnoPr extends Panel implements View {
         cmbEstacion.setRequiredError("Debe seleccionar una estacion");
         cmbEstacion.setWidth("250px");
         cmbEstacion.addStyleName(ValoTheme.COMBOBOX_SMALL);
+        cmbEstacion.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                if (cmbEstacion.getValue() != null) {
+                    cargaUltTurnoDia();
+                }
+
+            }
+        });
 
         cmbFecha.setWidth("120px");
         cmbFecha.setDateFormat("dd-MM-yyyy");
@@ -278,11 +303,11 @@ public class TurnoPr extends Panel implements View {
                         }
                         turno = new Turno();
                     }
-//                    getDataPrecios();
+                    getDataPrecios();
 //                    cargaTablaPrecios();
                     /*Agrego la tabla de precios y Empleados y sus Bombas*/
-//                    toolbarContainerTables.removeAllComponents();
-//                    toolbarContainerTables.addComponent(buildTables());
+                    toolbarContainerTables.removeAllComponents();
+                    toolbarContainerTables.addComponent(buildTables());
                 }
 
                 /*Operaciones con el turno*/
@@ -294,10 +319,10 @@ public class TurnoPr extends Panel implements View {
                         cmbTurno.setEnabled(false);
                     }
                 }
-                //cargaTablaPrecios();
+//                cargaTablaPrecios();
                 /*Agrego la tabla de precios y Empleados y sus Bombas*/
-                toolbarContainerTables.removeAllComponents();
-                toolbarContainerTables.addComponent(buildTables());
+//                toolbarContainerTables.removeAllComponents();
+//                toolbarContainerTables.addComponent(buildTables());
             }
         });
 
@@ -310,6 +335,7 @@ public class TurnoPr extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (cmbHorario.getValue() != null) {
+                    bombaMasAltaOld = 0;
                     List<EstacionConfHead> configs = dao.getConfiguracionHeadByEstacionidHorario(estacion.getEstacionId(), ((Horario) cmbHorario.getValue()).getHorarioId());
                     estConfHead = configs.get(0);
                     dao.closeConnections();
@@ -321,8 +347,10 @@ public class TurnoPr extends Panel implements View {
                             }
                         }
                     }
-//                    contConfigs = new ListContainer<EstacionConfHead>(EstacionConfHead.class, configs);
                     nuevoMetodoConfhead(configs.get(0));    //solo traera 1
+                    /*Agrego la tabla de precios y Empleados y sus Bombas*/
+                    toolbarContainerTables.removeAllComponents();
+                    toolbarContainerTables.addComponent(buildTables());
                 }
             }
         });
@@ -337,7 +365,6 @@ public class TurnoPr extends Panel implements View {
             public void valueChange(Property.ValueChangeEvent event) {
                 turno = (Turno) cmbTurno.getValue();
                 if (turno != null) {
-//                    cargaTablaPrecios();
                     getDataPrecios();
                     /*Agrego la tabla de precios y Empleados y sus Bombas*/
                     toolbarContainerTables.removeAllComponents();
@@ -368,38 +395,112 @@ public class TurnoPr extends Panel implements View {
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarContainerTables)});
     }
 
+    private void formEmpleados(String tipo) {
+        if (tipo.equals("Editar")) {
+            if (cmbEmpleado.getValue() != null) {
+                Empleado empleado = new Empleado();
+                empleado = (Empleado) cmbEmpleado.getValue();
+                frmEmpleado = new FormEmpleado(tipo, empleado);
+                frmEmpleado.addCloseListener((e) -> {
+                    cmbEmpleado.removeAllItems();
+                    contEmpleado.removeAllItems();
+                    contEmpleado = new BeanItemContainer<Empleado>(Empleado.class);
+                    contEmpleado.addAll(dao.getEmpleados2(true));
+                    cmbEmpleado.setContainerDataSource(contEmpleado);
+                    cmbEmpleado.setItemCaptionPropertyId("nombre");
+                    cmbEmpleado.setStyleName(ValoTheme.COMBOBOX_TINY);
+                    cmbEmpleado.setRequired(true);
+                    cmbEmpleado.setRequiredError("Debe Seleccionar empleado");
+                    cmbEmpleado.setNullSelectionAllowed(false);
+                    toolbarContainerCmbEmpleados.removeAllComponents();
+                    toolbarContainerCmbEmpleados.addComponent(cmbEmpleado);
+                });
+                getUI().addWindow(frmEmpleado);
+                frmEmpleado.focus();
+            } else {
+                Notification.show("Warning!!!", "Debe seleccionar un empleado, para modificar", Notification.Type.WARNING_MESSAGE);
+            }
+        } else if (tipo.equals("Nuevo")) {
+            Empleado empleado = new Empleado();
+            empleado = (Empleado) cmbEmpleado.getValue();
+            frmEmpleado = new FormEmpleado(tipo, empleado);
+            frmEmpleado.addCloseListener((e) -> {
+                cmbEmpleado.removeAllItems();
+                contEmpleado.removeAllItems();
+                contEmpleado = new BeanItemContainer<Empleado>(Empleado.class);
+                contEmpleado.addAll(dao.getEmpleados2(true));
+                cmbEmpleado.setContainerDataSource(contEmpleado);
+                cmbEmpleado.setItemCaptionPropertyId("nombre");
+                cmbEmpleado.setStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbEmpleado.setRequired(true);
+                cmbEmpleado.setRequiredError("Debe Seleccionar empleado");
+                cmbEmpleado.setNullSelectionAllowed(false);
+                toolbarContainerCmbEmpleados.removeAllComponents();
+                toolbarContainerCmbEmpleados.addComponent(cmbEmpleado);
+            });
+            getUI().addWindow(frmEmpleado);
+            frmEmpleado.focus();
+        }
+    }
+
+    private CssLayout toolbarContainerCmbEmpleados;
+    private CssLayout toolbarContainerTableAsignacion;
+
     private Component buildTables() {
         VerticalLayout v = new VerticalLayout();
-        Label lblpistero = new Label("Nombre Pistero");
+        HorizontalLayout h = new HorizontalLayout();
+        Label lblpistero = new Label("Nombre Empleado");
         lblpistero.setStyleName(ValoTheme.LABEL_TINY);
         lblpistero.setWidth("100px");
-        nombrePistero = new TextField();
-        nombrePistero.setRequired(true);
-        nombrePistero.setRequiredError("Debe ingresar un nombre y un apellido.");
-        nombrePistero.setStyleName(ValoTheme.TEXTFIELD_TINY);
-        nombrePistero.setResponsive(true);
-//        Component adicionBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{lblpistero, utils.vlContainer(nombrePistero)});
-        Component adicionBar = components.createCssLayout(Constant.styleViewheader2, Constant.sizeUndefined, false, false, true, new Component[]{lblpistero, utils.vlContainer(nombrePistero),buildCheckBoxPumps()});
-        v.addComponent(adicionBar);
-//        v.addComponent(buildCheckBoxPumps());
-        //tabla
-        v.addComponent(ConstruyeTablaAsignacion());
-        v.setSpacing(true);
+        contEmpleado = new BeanItemContainer<Empleado>(Empleado.class);
+        contEmpleado.addAll(dao.getEmpleados2(true));
+        cmbEmpleado.setContainerDataSource(contEmpleado);
+        cmbEmpleado.setItemCaptionPropertyId("nombre");
+        cmbEmpleado.setStyleName(ValoTheme.COMBOBOX_TINY);
+        cmbEmpleado.setRequired(true);
+        cmbEmpleado.setRequiredError("Debe Seleccionar Empleado");
+        cmbEmpleado.setNullSelectionAllowed(false);
 
-//        v.setComponentAlignment(btnAddEmpPump, Alignment.TOP_CENTER);
+        addEmpleado = new Button(FontAwesome.PLUS_CIRCLE);
+        addEmpleado.addStyleName(ValoTheme.BUTTON_TINY);
+        addEmpleado.addStyleName(ValoTheme.BUTTON_ICON_ONLY);
+        addEmpleado.setDescription("Nuevo Empleado");
+        addEmpleado.addClickListener(clickEvent -> formEmpleados("Nuevo"));
+
+        editEmpleado = new Button(FontAwesome.EDIT);
+        editEmpleado.addStyleName(ValoTheme.BUTTON_TINY);
+        editEmpleado.addStyleName(ValoTheme.BUTTON_ICON_ONLY);
+        editEmpleado.setDescription("Editar Empleado");
+        editEmpleado.addClickListener(clickEvent -> formEmpleados("Editar"));
+        toolbarContainerCmbEmpleados = new CssLayout();
+        toolbarContainerTableAsignacion = new CssLayout();
+        toolbarContainerCmbEmpleados.addComponent(cmbEmpleado);
+        h.addComponent(lblpistero);
+        h.addComponent(toolbarContainerCmbEmpleados);
+        h.addComponent(addEmpleado);
+        h.addComponent(editEmpleado);
+        h.setSpacing(true);
+        Component adicionBar = components.createCssLayout(Constant.styleViewheader2, Constant.sizeUndefined, false, false, true, new Component[]{h});
+        v.addComponent(adicionBar);
+
+        //tabla
+        v.addComponent(buildCheckBoxPumps());
+        v.addComponent(toolbarContainerTableAsignacion);
+        v.setSpacing(true);
+        toolbarContainerTableAsignacion.removeAllComponents();
+        ConstruyeTablaAsignacion();
+        toolbarContainerTableAsignacion.addComponent(tablaAsignacion);
         return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tablaPrecio), utils.vlContainerTable(v)});
     }
 
-    private Component ConstruyeTablaAsignacion() {
-        BeanItemContainer<EmpleadoBombaTurno> contEmpleadoBombaTurno = new BeanItemContainer<EmpleadoBombaTurno>(EmpleadoBombaTurno.class);
+    private void ConstruyeTablaAsignacion() {
         tablaAsignacion = new Table();
         tablaAsignacion.addStyleName(ValoTheme.TABLE_COMPACT);
         tablaAsignacion.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
         Turno tt = new Turno();
         tt = (Turno) cmbTurno.getValue();
+        Integer maxBomba = 0;
         if (tt != null) {
-            bcrEmpPump = new BeanItemContainer<EmpleadoBombaTurno>(EmpleadoBombaTurno.class);
-            bcrEmpPump.addAll(dao.getTurnoEmpBombaByTurnoid2(tt.getTurnoId()));
             tablaAsignacion.setContainerDataSource(bcrEmpPump);
             tablaAsignacion.addGeneratedColumn("colNombre", new Table.ColumnGenerator() {
                 @Override
@@ -414,7 +515,6 @@ public class TurnoPr extends Panel implements View {
                     return txtNombre;
                 }
             });
-
             tablaAsignacion.addGeneratedColumn("colBomba1", new Table.ColumnGenerator() {
                 @Override
                 public Object generateCell(Table source, Object itemId, Object columnId) {
@@ -571,7 +671,6 @@ public class TurnoPr extends Panel implements View {
                     return chk;
                 }
             });
-
             tablaAsignacion.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
                 @Override
                 public Object generateCell(Table source, final Object itemId, Object columnId) {
@@ -581,9 +680,6 @@ public class TurnoPr extends Panel implements View {
                     btnDelete.addClickListener(new Button.ClickListener() {
                         @Override
                         public void buttonClick(Button.ClickEvent event) {
-//                            if (bcrEmpPump.getItem(itemId).getBean().getPump() != null) {
-//                                listPump.add(bcrEmpPump.getItem(itemId).getBean().getPump());
-//                            }
                             bcrEmpPump.removeItem(itemId);
                             tablaAsignacion.refreshRowCache();
                         }
@@ -592,16 +688,376 @@ public class TurnoPr extends Panel implements View {
                 }
             });
 
+            for (EmpleadoBombaTurno empturno : bcrEmpPump.getItemIds()) {
+                maxBomba = empturno.getMaxBombas();
+            }
+
+            List<Object> columnas = new ArrayList<Object>();
+            List<String> encabezados = new ArrayList<String>();
+            columnas.add("colNombre");
+            encabezados.add("Pistero");
+            if (maxBomba > 0) {
+                for (int i = 1; i <= maxBomba; i++) {
+                    columnas.add("colBomba" + i);
+                    encabezados.add("Bomba" + i);
+                }
+            }
+            columnas.add("colDelete");
+            encabezados.add("Accion");
+            Object[] colCols = columnas.toArray(new Object[0]);
+            String[] colheads = encabezados.toArray(new String[0]);
+
+            tablaAsignacion.setVisibleColumns(colCols);
+            tablaAsignacion.setColumnHeaders(colheads);
+            tablaAsignacion.setHeight("220px");
+            Responsive.makeResponsive(tablaAsignacion);
+
+        } else {
+            tablaAsignacion.setContainerDataSource(bcrEmpPump);
+            tablaAsignacion.addGeneratedColumn("colNombre", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("nombre"); //Atributo del bean
+                    TextField txtNombre = new TextField(pro);
+                    txtNombre.setEnabled(false);
+                    txtNombre.addStyleName("align-left");
+                    txtNombre.setWidth("120px");
+                    txtNombre.setStyleName(ValoTheme.TEXTFIELD_TINY);
+                    txtNombre.setNullRepresentation("");
+                    return txtNombre;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba1", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba1"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba2", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba2"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba3", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba3"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba4", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba4"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba5", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba5"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba6", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba6"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba7", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba7"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba8", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba8"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba9", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba9"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba10", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba10"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba11", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba11"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colBomba12", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, Object itemId, Object columnId) {
+                    Property pro = source.getItem(itemId).getItemProperty("bomba12"); //Atributo del bean
+                    CheckBox chk = new CheckBox();
+                    chk.setStyleName(ValoTheme.CHECKBOX_SMALL);
+                    boolean bool = (boolean) pro.getValue();
+                    chk.setValue(bool);
+                    chk.setEnabled(false);
+                    chk.addStyleName("align-center");
+                    return chk;
+                }
+            });
+            tablaAsignacion.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
+                @Override
+                public Object generateCell(Table source, final Object itemId, Object columnId) {
+                    Button btnDelete = new Button(FontAwesome.TRASH);
+                    btnDelete.addStyleName(ValoTheme.BUTTON_DANGER);
+                    btnDelete.addStyleName(ValoTheme.BUTTON_TINY);
+                    btnDelete.addClickListener(new Button.ClickListener() {
+                        @Override
+                        public void buttonClick(Button.ClickEvent event) {
+                            bcrEmpPump.removeItem(itemId);
+                            tablaAsignacion.refreshRowCache();
+                            /*Recupera valores de bombas*/
+                            validaBombas("I");
+                            reactivaBombas((EmpleadoBombaTurno) itemId);
+                            toolbarContainerTableAsignacion.removeAllComponents();
+                            ConstruyeTablaAsignacion();
+                            toolbarContainerTableAsignacion.addComponent(tablaAsignacion);
+
+                        }
+                    });
+                    return btnDelete;
+                }
+            });
+
+            List<Object> columnas = new ArrayList<Object>();
+            List<String> encabezados = new ArrayList<String>();
+            columnas.add("colNombre");
+            encabezados.add("Pistero");
+            if (varMaxBomba > 0) {
+                for (int i = 1; i <= varMaxBomba; i++) {
+                    columnas.add("colBomba" + i);
+                    encabezados.add("Bomba" + i);
+                }
+            }
+            columnas.add("colDelete");
+            encabezados.add("Accion");
+            Object[] colCols = columnas.toArray(new Object[0]);
+            String[] colheads = encabezados.toArray(new String[0]);
+
+            tablaAsignacion.setVisibleColumns(colCols);
+            tablaAsignacion.setColumnHeaders(colheads);
+            tablaAsignacion.setHeight("220px");
+            Responsive.makeResponsive(tablaAsignacion);
+
+        }
+    }
+
+    private void validaBombas(String val) {
+        varMaxBomba = 0;
+        Integer bombaMasAlta = 0;
+        bcrEmpPump.sort(new Object[]{"empleadoid"}, new boolean[]{true});
+
+        for (EmpleadoBombaTurno empleado : bcrEmpPump.getItemIds()) {
+            if (empleado.isBomba1()) {
+                varMaxBomba++;
+                bombaMasAlta = 1;
+                chkBomba1.setEnabled(false);
+            }
+            if (empleado.isBomba2()) {
+                varMaxBomba++;
+                bombaMasAlta = 2;
+                chkBomba2.setEnabled(false);
+            }
+            if (empleado.isBomba3()) {
+                varMaxBomba++;
+                bombaMasAlta = 3;
+                chkBomba3.setEnabled(false);
+            }
+            if (empleado.isBomba4()) {
+                varMaxBomba++;
+                bombaMasAlta = 4;
+                chkBomba4.setEnabled(false);
+            }
+            if (empleado.isBomba5()) {
+                varMaxBomba++;
+                bombaMasAlta = 5;
+                chkBomba5.setEnabled(false);
+            }
+            if (empleado.isBomba6()) {
+                varMaxBomba++;
+                bombaMasAlta = 6;
+                chkBomba6.setEnabled(false);
+            }
+            if (empleado.isBomba7()) {
+                varMaxBomba++;
+                bombaMasAlta = 7;
+                chkBomba7.setEnabled(false);
+            }
+            if (empleado.isBomba8()) {
+                varMaxBomba++;
+                bombaMasAlta = 8;
+                chkBomba8.setEnabled(false);
+            }
+            if (empleado.isBomba9()) {
+                varMaxBomba++;
+                bombaMasAlta = 9;
+                chkBomba9.setEnabled(false);
+            }
+            if (empleado.isBomba10()) {
+                varMaxBomba++;
+                bombaMasAlta = 10;
+                chkBomba10.setEnabled(false);
+            }
+
+            if (empleado.isBomba11()) {
+                varMaxBomba++;
+                bombaMasAlta = 11;
+                chkBomba11.setEnabled(false);
+            }
+
+            if (empleado.isBomba12()) {
+                varMaxBomba++;
+                bombaMasAlta = 12;
+                chkBomba12.setEnabled(false);
+            }
+        }
+        System.out.println("VAL " + val);
+        if (val.equals("A")) {
+            if (bombaMasAlta > bombaMasAltaOld) {
+                bombaMasAltaOld = bombaMasAlta;
+                varMaxBomba = bombaMasAlta;
+            } else {
+                varMaxBomba = bombaMasAltaOld;
+            }
+        } else {
+            System.out.println("BOMBA MAS ALTA " + bombaMasAlta);
+            System.out.println("BOMBA MAS ALTA OLD" + bombaMasAltaOld);
+            if (bombaMasAlta < bombaMasAltaOld) {
+                bombaMasAltaOld = bombaMasAlta;
+                varMaxBomba = bombaMasAlta;
+            } else {
+                varMaxBomba = bombaMasAltaOld;
+            }
         }
 
-        Object[] visCols = new Object[]{"colNombre", "colBomba1", "colBomba2", "colBomba3", "colBomba4", "colBomba5", "colBomba6", "colBomba7", "colBomba8", "colBomba9", "colBomba10", "colBomba11", "colBomba12", "colDelete"};
-        String[] colHeads = new String[]{"Pistero", "Bomba1", "Bomba2", "Bomba3", "Bomba4", "Bomba5", "Bomba6", "Bomba7", "Bomba8", "Bomba9", "Bomba10", "Bomba11", "Bomba12", "Accion"};
+    }
 
-        tablaAsignacion.setVisibleColumns(visCols);
-        tablaAsignacion.setColumnHeaders(colHeads);
-        tablaAsignacion.setHeight("220px");
-        Responsive.makeResponsive(tablaAsignacion);
-        return tablaAsignacion;
+    private void reactivaBombas(EmpleadoBombaTurno accion) {
+        if (accion.isBomba1()) {
+            chkBomba1.setEnabled(true);
+        }
+        if (accion.isBomba2()) {
+            chkBomba2.setEnabled(true);
+        }
+        if (accion.isBomba3()) {
+            chkBomba3.setEnabled(true);
+        }
+        if (accion.isBomba4()) {
+            chkBomba4.setEnabled(true);
+        }
+        if (accion.isBomba5()) {
+            chkBomba5.setEnabled(true);
+        }
+        if (accion.isBomba6()) {
+            chkBomba6.setEnabled(true);
+        }
+        if (accion.isBomba7()) {
+            chkBomba7.setEnabled(true);
+        }
+        if (accion.isBomba8()) {
+            chkBomba8.setEnabled(true);
+        }
+        if (accion.isBomba9()) {
+            chkBomba9.setEnabled(true);
+        }
+        if (accion.isBomba10()) {
+            chkBomba10.setEnabled(true);
+        }
+
+        if (accion.isBomba11()) {
+            chkBomba11.setEnabled(true);
+        }
+        if (accion.isBomba12()) {
+            chkBomba12.setEnabled(true);
+        }
     }
 
     private Component buildCheckBoxPumps() {
@@ -610,19 +1066,9 @@ public class TurnoPr extends Panel implements View {
         contBomba = new BeanItemContainer<Bomba>(Bomba.class);
         Horario hh = new Horario();
         hh = (Horario) cmbHorario.getValue();
+
         if (hh != null) {
             contBomba.addAll(dao.getBombasByEstacionConfheadId(hh.getEstacionconfheadId(), estacion.getEstacionId()));
-            nuevo = new Button(FontAwesome.PLUS_CIRCLE);
-            nuevo.addStyleName(ValoTheme.BUTTON_TINY);
-            nuevo.addStyleName(ValoTheme.BUTTON_FRIENDLY);
-            nuevo.setDescription("Agregar");
-            nuevo.addClickListener(new Button.ClickListener() {
-                @Override
-                public void buttonClick(final Button.ClickEvent event) {
-//                FormImpuestos.open(new UnoImpuestos(), Constantes.nuevo);
-                }
-            });
-
             chkBomba1 = new CheckBox("1");
             chkBomba1.setDescription("1");
             chkBomba1.setStyleName(ValoTheme.CHECKBOX_SMALL);
@@ -674,11 +1120,67 @@ public class TurnoPr extends Panel implements View {
             for (Bomba bomba : contBomba.getItemIds()) {
                 h.addComponent(bombasChk.get(bomba.getId() - 1));
             }
+
+            nuevo = new Button("Asignar");
+            nuevo.setIcon(FontAwesome.CHECK_SQUARE_O);
+            nuevo.addStyleName(ValoTheme.BUTTON_TINY);
+            nuevo.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+            nuevo.setDescription("Agregar Asignacion");
+            nuevo.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(final Button.ClickEvent event) {
+                    if (cmbEmpleado.getValue() == null) {
+                        Notification.show("Error !!! ", "Debe seleccionar un empleado", Notification.Type.ERROR_MESSAGE);
+                        return;
+                    }
+                    if ((chkBomba1.getValue()) || (chkBomba2.getValue()) || (chkBomba3.getValue()) || (chkBomba4.getValue()) || (chkBomba5.getValue()) || (chkBomba6.getValue()) || (chkBomba7.getValue()) || (chkBomba8.getValue()) || (chkBomba9.getValue()) || (chkBomba10.getValue()) || (chkBomba11.getValue()) || (chkBomba12.getValue())) {
+                        empleado = new Empleado();
+                        empleado = (Empleado) cmbEmpleado.getValue();
+                        boolean val = false;
+                        if (bcrEmpPump.size() > 0) {
+                            for (EmpleadoBombaTurno bombaturno : bcrEmpPump.getItemIds()) {
+                                if (bombaturno.getEmpleadoid() == empleado.getEmpleadoId()) {
+                                    val = true;
+                                }
+                            }
+                        }
+                        if (!val) {
+                            bcrEmpPump.addItem(new EmpleadoBombaTurno(0, empleado.getEmpleadoId(), empleado.getNombre(), varMaxBomba, chkBomba1.getValue(), chkBomba2.getValue(), chkBomba3.getValue(), chkBomba4.getValue(), chkBomba5.getValue(), chkBomba6.getValue(), chkBomba7.getValue(), chkBomba8.getValue(), chkBomba9.getValue(), chkBomba10.getValue(), chkBomba11.getValue(), chkBomba12.getValue()));
+                            cmbEmpleado.setValue(null);
+                            reiniciaCheckBox();
+                            /*Carga Tabla Asignaciones*/
+                            validaBombas("A");
+                            toolbarContainerTableAsignacion.removeAllComponents();
+                            ConstruyeTablaAsignacion();
+                            toolbarContainerTableAsignacion.addComponent(tablaAsignacion);
+                        }
+                    } else {
+                        Notification.show("Error !!! ", "Debe seleccionar bombas", Notification.Type.ERROR_MESSAGE);
+                        return;
+                    }
+                }
+            });
+
             h.addComponent(nuevo);
             h.setSpacing(true);
             h.setResponsive(true);
         }
         return h;
+    }
+
+    private void reiniciaCheckBox() {
+        chkBomba1.setValue(false);
+        chkBomba2.setValue(false);
+        chkBomba3.setValue(false);
+        chkBomba4.setValue(false);
+        chkBomba5.setValue(false);
+        chkBomba6.setValue(false);
+        chkBomba7.setValue(false);
+        chkBomba8.setValue(false);
+        chkBomba9.setValue(false);
+        chkBomba10.setValue(false);
+        chkBomba11.setValue(false);
+        chkBomba12.setValue(false);
     }
 
     private void cargaTablaPrecios() {
@@ -756,6 +1258,11 @@ public class TurnoPr extends Panel implements View {
         }
         bcrPrecios.removeAllItems();
         bcrPrecios.addAll(combustibles);
+
+        bcrEmpPump = new BeanItemContainer<EmpleadoBombaTurno>(EmpleadoBombaTurno.class);
+        bcrEmpPump.removeAllItems();
+        bcrEmpPump.addAll(dao.getTurnoEmpBombaByTurnoid2(turnoId));
+
     }
 
     private void nuevoMetodoConfhead(EstacionConfHead echSelected) {
@@ -812,10 +1319,10 @@ public class TurnoPr extends Panel implements View {
                         return;
                     }
                 }
-//                if (bcrEmpPump.getItemIds().isEmpty()) {
-//                    Notification.show("ERROR:", "Debe asociar almenos un empleado con una bomba.", Notification.Type.ERROR_MESSAGE);
-//                    return;
-//                }
+                if (bcrEmpPump.getItemIds().isEmpty()) {
+                    Notification.show("ERROR:", "Debe asociar almenos un empleado con una bomba.", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
 //                TurnoEmpleadoBomba teb;
 //                for (Integer itemId : bcrEmpPump.getItemIds()) {
 //                    teb = bcrEmpPump.getItem(itemId).getBean();

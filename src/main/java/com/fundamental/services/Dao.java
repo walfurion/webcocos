@@ -5,7 +5,7 @@ import com.fundamental.model.Arqueocaja;
 import com.fundamental.model.Bomba;
 import com.fundamental.model.BombaEstacion;
 import com.fundamental.model.Dia;
-import com.fundamental.model.Empleado;
+import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.EstacionConf;
 import com.fundamental.model.EstacionConfHead;

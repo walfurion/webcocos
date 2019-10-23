@@ -2,7 +2,7 @@ package com.fundamental.services;
 
 import com.fundamental.model.Bomba;
 import com.fundamental.model.Cliente;
-import com.fundamental.model.Empleado;
+import com.sisintegrados.generic.bean.Empleado;
 import com.fundamental.model.Producto;
 import com.fundamental.model.TasaCambio;
 import com.fundamental.utils.Constant;

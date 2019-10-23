@@ -3,7 +3,7 @@ package com.fundamental.view;
 import com.fundamental.model.Bomba;
 import com.fundamental.model.BombaEmpleadoEstacion;
 import com.fundamental.model.Dia;
-import com.fundamental.model.Empleado;
+import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.services.Dao;
 import com.fundamental.model.dto.DtoLectura;

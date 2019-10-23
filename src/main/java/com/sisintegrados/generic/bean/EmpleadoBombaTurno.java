@@ -15,11 +15,13 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class EmpleadoBombaTurno {
 
     private int turnoid;
-    private int empleadoid;
+    public int empleadoid;
     private String nombre;
+    private int maxBombas;
     private boolean bomba1 = false;
     private boolean bomba2 = false;
     private boolean bomba3 = false;
