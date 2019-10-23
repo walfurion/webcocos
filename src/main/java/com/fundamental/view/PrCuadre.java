@@ -12,6 +12,7 @@ import com.fundamental.model.Efectivo;
 import com.fundamental.model.Empleado;
 import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.FactelectronicaPos;
+import com.fundamental.model.Lubricanteprecio;
 import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Parametro;
@@ -28,12 +29,16 @@ import com.fundamental.services.SvcCuadre;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
+import com.fundamental.utils.CreateComponents;
 import com.fundamental.utils.Mail;
 import com.fundamental.utils.Util;
+import com.fundamental.view.forms.FormDetalleVenta;
+import com.fundamental.view.forms.FormDetalleVenta2;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import com.vaadin.demo.dashboard.view.DashboardViewType;
 import com.vaadin.event.MouseEvents;
@@ -51,6 +56,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
@@ -87,7 +93,8 @@ import org.vaadin.ui.NumberField;
  * @author Mery Gil
  */
 public class PrCuadre extends Panel implements View {
-
+    
+    ComboBox cmbLubricante = new ComboBox("Lubricantes:");
     static final DecimalFormat numberFmt = new DecimalFormat("### ###,##0.00");
     static final DecimalFormat numberFmt3D = new DecimalFormat("### ###,##0.000;-#");
     static final String HEIGHT_TABLE = "300px";
@@ -104,7 +111,8 @@ public class PrCuadre extends Panel implements View {
             return super.formatPropertyValue(rowId, colId, property);
         }
     };
-    Button btnSave, btnAll, btnNone, btnAdd, btnAddCustomer, btnAddLubs, btnAddPrep, btnAddCreditC;
+    Button btnSave, btnAll, btnNone, btnAdd, btnAddCustomer, btnAddLubs, btnAddPrep, btnAddCreditC,btnDetail, btnDetalles;
+    FormDetalleVenta frmDetalle;
     Label lblTotalVentas1 = new Label("0"),
             lblTotalVentas2 = new Label("0"),
             lblDiferencia = new Label("0"),
@@ -118,6 +126,7 @@ public class PrCuadre extends Panel implements View {
             cbxEstacion = new ComboBox("Estación:"),
             cbxTurno = new ComboBox("Turno:"),
             cbxArqueos = new ComboBox("Cuadre:");
+            
     TextField tfdNameSeller, tfdNameChief;
     DateField dfdFecha = new DateField("Fecha:");
     Upload upload;
@@ -168,7 +177,8 @@ public class PrCuadre extends Panel implements View {
     int tmpInt;
     List<Pais> allCountries;
     String[] uniqueStation;
-
+BeanItemContainer<Lubricanteprecio> contLubricante = new BeanItemContainer<Lubricanteprecio>(Lubricanteprecio.class);
+CreateComponents components = new CreateComponents();
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
@@ -259,41 +269,52 @@ public class PrCuadre extends Panel implements View {
         cltEmpleado.setSizeUndefined();
         Responsive.makeResponsive(cltEmpleado);
 
-//Detalle ventas credito
-        buildTableCxC();
-        VerticalLayout vltCxC = utils.buildVertical("vltCxC", false, false, true, false, null);
-        vltCxC.addComponents(tblCxC, btnAddCustomer);
-        vltCxC.setComponentAlignment(btnAddCustomer, Alignment.TOP_CENTER);
-//Detalle venta lubricantes
-        buildTableLubsDet();
-        VerticalLayout vltLubs = utils.buildVertical("vltLubs", false, false, true, false, null);
-        vltLubs.addComponents(tblLubricantes, btnAddLubs);
-        vltLubs.setComponentAlignment(btnAddLubs, Alignment.TOP_CENTER);
-//Detalle venta lubricantes
-        buildTablePrepago();
-        VerticalLayout vltPrego = utils.buildVertical("vltPrego", false, false, true, false, null);
-        vltPrego.addComponents(tblPrepaid, btnAddPrep);
-        vltPrego.setComponentAlignment(btnAddPrep, Alignment.TOP_CENTER);
-//Detalle venta lubricantes
-        buildTableCreditCard();
-        VerticalLayout vltCreditCard = utils.buildVertical("vltCreditCard", false, false, true, false, null);
-        vltCreditCard.addComponents(tblCreditCard, btnAddCreditC);
-        vltCreditCard.setComponentAlignment(btnAddCreditC, Alignment.TOP_CENTER);
+////Detalle ventas credito
+//        buildTableCxC();
+//        VerticalLayout vltCxC = utils.buildVertical("vltCxC", false, false, true, false, null);
+//        vltCxC.addComponents(tblCxC, btnAddCustomer);
+//        vltCxC.setComponentAlignment(btnAddCustomer, Alignment.TOP_CENTER);
+////Detalle venta lubricantes
+//        buildTableLubsDet();
+//        VerticalLayout vltLubs = utils.buildVertical("vltLubs", false, false, true, false, null);
+//        vltLubs.addComponents(tblLubricantes, btnAddLubs);
+//        vltLubs.setComponentAlignment(btnAddLubs, Alignment.TOP_CENTER);
+////Detalle venta lubricantes
+//        buildTablePrepago();
+//        VerticalLayout vltPrego = utils.buildVertical("vltPrego", false, false, true, false, null);
+//        vltPrego.addComponents(tblPrepaid, btnAddPrep);
+//        vltPrego.setComponentAlignment(btnAddPrep, Alignment.TOP_CENTER);
+////Detalle venta lubricantes
+//        buildTableCreditCard();
+//        VerticalLayout vltCreditCard = utils.buildVertical("vltCreditCard", false, false, true, false, null);
+//        vltCreditCard.addComponents(tblCreditCard, btnAddCreditC);
+//        vltCreditCard.setComponentAlignment(btnAddCreditC, Alignment.TOP_CENTER);
+//
+//        final CssLayout cltCxc = new CssLayout(utils.vlContainer(vltCxC), utils.vlContainer(vltPrego), utils.vlContainer(vltLubs), utils.vlContainer(vltCreditCard));
+//        cltCxc.setSizeUndefined();
+//        cltCxc.setVisible(false);
+//        Responsive.makeResponsive(cltCxc);
+//        Panel pnlDetalles = new Panel("Detalles de venta", cltCxc);
+//        pnlDetalles.setSizeFull();
+//        pnlDetalles.addClickListener(new MouseEvents.ClickListener() {
+//            @Override
+//            public void click(MouseEvents.ClickEvent event) {
+//                cltCxc.setVisible(!cltCxc.isVisible());
+//            }
+//        });
+        
+        btnDetalles = new Button("Detalle venta"/**, cltCxc**/);
+        btnDetalles.setIcon(FontAwesome.EDIT);
+        btnDetalles.addClickListener(clickEvent -> formLubricantes("Nuevo"));
+//        btnDetalles.addClickListener((final Button.ClickEvent event) -> {
+          //FormDetalleVenta.open();
+//            @Override
+//           public void click(MouseEvents.ClickEvent event) {
+          //    cltCxc.setVisible(!cltCxc.isVisible());
+//           }
+//       });
 
-        final CssLayout cltCxc = new CssLayout(utils.vlContainer(vltCxC), utils.vlContainer(vltPrego), utils.vlContainer(vltLubs), utils.vlContainer(vltCreditCard));
-        cltCxc.setSizeUndefined();
-        cltCxc.setVisible(false);
-        Responsive.makeResponsive(cltCxc);
-        Panel pnlDetalles = new Panel("Detalles de venta", cltCxc);
-        pnlDetalles.setSizeFull();
-        pnlDetalles.addClickListener(new MouseEvents.ClickListener() {
-            @Override
-            public void click(MouseEvents.ClickEvent event) {
-                cltCxc.setVisible(!cltCxc.isVisible());
-            }
-        });
-
-        CssLayout cltMain = new CssLayout(hlLabels, hlCombo, cltEmpleado, pnlDetalles, cltVentas, cltMedios, //utils.vlContainer(tblPartida), 
+        CssLayout cltMain = new CssLayout(hlLabels, hlCombo, cltEmpleado, btnDetalles, cltVentas, cltMedios, //utils.vlContainer(tblPartida), 
                 cltUpload, cltTaDiff);
         Responsive.makeResponsive(cltMain);
         tabsheet.addTab(cltMain, "Principal", FontAwesome.LIST);
@@ -302,6 +323,91 @@ public class PrCuadre extends Panel implements View {
         root.setExpandRatio(tabsheet, 1);
 
         defineInitialCountryStation();
+    }
+    
+    private void formLubricantes(String tipo) {
+        if (tipo.equals("Editar")) {
+            if (cmbLubricante.getValue() != null) {
+                Lubricanteprecio lubricante = new Lubricanteprecio();
+                lubricante = (Lubricanteprecio) cmbLubricante.getValue();
+                frmDetalle = new FormDetalleVenta(tipo, lubricante);
+                frmDetalle.addCloseListener((e) -> {
+                    cmbLubricante.removeAllItems();
+                    contLubricante.removeAllItems();
+                    contLubricante = new BeanItemContainer<Lubricanteprecio>(Lubricanteprecio.class);
+//                    contLubricante.addAll(dao.getEmpleados2(true));
+                    cmbLubricante.setContainerDataSource(contLubricante);
+                    cmbLubricante.setItemCaptionPropertyId("nombre");
+                    cmbLubricante.setStyleName(ValoTheme.COMBOBOX_TINY);
+                    cmbLubricante.setRequired(true);
+                    cmbLubricante.setRequiredError("Debe Seleccionar empleado");
+                    cmbLubricante.setNullSelectionAllowed(false);
+                    toolbarContainerCmbLubricantes.removeAllComponents();
+                    toolbarContainerCmbLubricantes.addComponent(cmbLubricante);
+                });
+                getUI().addWindow(frmDetalle);
+                frmDetalle.focus();
+            } else {
+                Notification.show("Warning!!!", "Debe seleccionar un empleado, para modificar", Notification.Type.WARNING_MESSAGE);
+            }
+        } else if (tipo.equals("Nuevo")) {
+            Lubricanteprecio lub = new Lubricanteprecio();
+            lub = (Lubricanteprecio) cmbLubricante.getValue();
+            frmDetalle = new FormDetalleVenta(tipo, lub);
+            frmDetalle.addCloseListener((e) -> {
+                cmbLubricante.removeAllItems();
+                contLubricante.removeAllItems();
+                contLubricante = new BeanItemContainer<Lubricanteprecio>(Lubricanteprecio.class);
+//                contLubricante.addAll(dao.getEmpleados2(true));
+                cmbLubricante.setContainerDataSource(contLubricante);
+                cmbLubricante.setItemCaptionPropertyId("nombre");
+                cmbLubricante.setStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbLubricante.setRequired(true);
+                cmbLubricante.setRequiredError("Debe Seleccionar empleado");
+                cmbLubricante.setNullSelectionAllowed(false);
+                toolbarContainerCmbLubricantes.removeAllComponents();
+                toolbarContainerCmbLubricantes.addComponent(cmbLubricante);
+            });
+            getUI().addWindow(frmDetalle);
+            frmDetalle.focus();
+        }
+    }
+    private CssLayout toolbarContainerCmbLubricantes;
+    private CssLayout toolbarContainerTableAsignacion;
+
+    private Component buildTables() {
+        VerticalLayout v = new VerticalLayout();
+        HorizontalLayout h = new HorizontalLayout();
+        Label lblpistero = new Label("Nombre Empleado");
+        lblpistero.setStyleName(ValoTheme.LABEL_TINY);
+        lblpistero.setWidth("100px");
+        contLubricante = new BeanItemContainer<Lubricanteprecio>(Lubricanteprecio.class);
+//        contLubricante.addAll(dao.getEmpleados2(true));
+        cmbLubricante.setContainerDataSource(contLubricante);
+        cmbLubricante.setItemCaptionPropertyId("nombre");
+        cmbLubricante.setStyleName(ValoTheme.COMBOBOX_TINY);
+        cmbLubricante.setRequired(true);
+        cmbLubricante.setRequiredError("Debe Seleccionar Empleado");
+        cmbLubricante.setNullSelectionAllowed(false);
+
+        toolbarContainerCmbLubricantes = new CssLayout();
+        toolbarContainerTableAsignacion = new CssLayout();
+        toolbarContainerCmbLubricantes.addComponent(cmbLubricante);
+        h.addComponent(lblpistero);
+        h.addComponent(toolbarContainerCmbLubricantes);
+        h.setSpacing(true);
+        Component adicionBar = components.createCssLayout(Constant.styleViewheader2, Constant.sizeUndefined, false, false, true, new Component[]{h});
+        v.addComponent(adicionBar);
+
+        //tabla
+//        v.addComponent(buildCheckBoxPumps());
+        v.addComponent(toolbarContainerTableAsignacion);
+        v.setSpacing(true);
+        toolbarContainerTableAsignacion.removeAllComponents();
+//        ConstruyeTablaAsignacion();
+//        toolbarContainerTableAsignacion.addComponent(tablaAsignacion);
+//        v.setComponentAlignment(btnAddEmpPump, Alignment.TOP_CENTER);
+        return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(v)});
     }
 
     private void getAllData() {
@@ -897,7 +1003,7 @@ public class PrCuadre extends Panel implements View {
                                 for (Integer id : lecturasIds) {
                                     dtoE = (DtoEfectivo) ((BeanItem) tblEfectivo.getItem(id)).getBean();
                                     if (dtoE.getValue() > 0 && dtoE.getMedioPago() != null) {
-                                        efectivo = new Efectivo(arqueo.getArqueocajaId(), dtoE.getMedioPago().getMediopagoId(), dtoE.getNoDocto().intValue(), dtoE.getValue());
+                                        efectivo = new Efectivo(arqueo.getArqueocajaId(), dtoE.getMedioPago().getMediopagoId(), 0, dtoE.getValue());
                                         efectivo.setTasa(dtoE.getTasa());
                                         efectivo.setMonExtranjera(dtoE.getMonExtranjera());
                                         svcTurno.doActionEfectivo(Dao.ACTION_ADD, efectivo);
@@ -1663,16 +1769,19 @@ public class PrCuadre extends Panel implements View {
         btnAddCustomer = new Button("Agregar", FontAwesome.PLUS);
         btnAddCustomer.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnAddCustomer.addStyleName(ValoTheme.BUTTON_SMALL);
-        btnAddCustomer.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                bcrClientes.removeAllItems();
-                DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
-                dtoprod.setValor(0D);
-                listCustomers.add(dtoprod);
-                bcrClientes.addAll(listCustomers);
-            }
-        });
+        btnAddCustomer.addClickListener((final Button.ClickEvent event) -> {
+//            FormDetalleVenta.open();
+            });
+//        btnAddCustomer.addClickListener(new Button.ClickListener() {
+//            @Override
+//            public void buttonClick(Button.ClickEvent event) {
+//                bcrClientes.removeAllItems();
+//                DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
+//                dtoprod.setValor(0D);
+//                listCustomers.add(dtoprod);
+//                bcrClientes.addAll(listCustomers);
+//            }
+//        });
     }
 
     public void buildTableLubsDet() {
@@ -1760,18 +1869,21 @@ public class PrCuadre extends Panel implements View {
         btnAddLubs = new Button("Agregar", FontAwesome.PLUS);
         btnAddLubs.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnAddLubs.addStyleName(ValoTheme.BUTTON_SMALL);
-        btnAddLubs.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                bcrLubs.removeAllItems();
-                DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
-                dtoprod.setValor(0D);
-                dtoprod.setCantidad(0);
-                dtoprod.setTotal(0D);
-                listLubs.add(dtoprod);
-                bcrLubs.addAll(listLubs);
-            }
-        });
+        btnAddLubs.addClickListener((final Button.ClickEvent event) -> {
+            FormDetalleVenta2.open();
+            });
+//            @Override
+//            public void buttonClick(Button.ClickEvent event) {
+//                FormDetalleVenta2.open();
+//                bcrLubs.removeAllItems();
+//                DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
+//                dtoprod.setValor(0D);
+//                dtoprod.setCantidad(0);
+//                dtoprod.setTotal(0D);
+//                listLubs.add(dtoprod);
+//                bcrLubs.addAll(listLubs);
+//            }
+//        });
     }
 
     public void buildTablePrepago() {
