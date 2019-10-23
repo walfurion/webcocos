@@ -145,8 +145,8 @@ public class SvcReading extends Dao {
                 Integer lecturaId = (rst.next()) ? rst.getInt(1) : 0;
                 lectura.setLecturaId(lecturaId);
                 closePst();
-                query = "INSERT INTO lectura (lectura_id, estacion_id, turno_id, creado_por, creado_persona, nombre_pistero, nombre_jefe, empleado_id) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                query = "INSERT INTO lectura (lectura_id, estacion_id, turno_id, creado_por, creado_persona, nombre_pistero, nombre_jefe, empleado_id, numerocaso) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 pst = getConnection().prepareStatement(query);
                 pst.setInt(1, lectura.getLecturaId());
                 pst.setInt(2, lectura.getEstacionId());
@@ -156,6 +156,7 @@ public class SvcReading extends Dao {
                 pst.setString(6, lectura.getNombrePistero());
                 pst.setString(7, lectura.getNombreJefe());
                 pst.setInt(8, lectura.getEmpleadoId());
+                pst.setString(9, lectura.getNumeroCaso()); //JJ --> Se agrega numero de caso 
                 pst.executeUpdate();
                 closePst();
                 result = lectura;
