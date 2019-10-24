@@ -32,8 +32,8 @@ import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
 import com.fundamental.utils.Mail;
 import com.fundamental.utils.Util;
-import com.fundamental.view.forms.FormDetalleVenta;
-import com.fundamental.view.forms.FormDetalleVenta2;
+import com.sisintegrados.view.form.FormDetalleVenta;
+import com.sisintegrados.view.form.FormDetalleVenta2;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -1769,19 +1769,19 @@ CreateComponents components = new CreateComponents();
         btnAddCustomer = new Button("Agregar", FontAwesome.PLUS);
         btnAddCustomer.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnAddCustomer.addStyleName(ValoTheme.BUTTON_SMALL);
-        btnAddCustomer.addClickListener((final Button.ClickEvent event) -> {
+       // btnAddCustomer.addClickListener((final Button.ClickEvent event) -> {
 //            FormDetalleVenta.open();
-            });
-//        btnAddCustomer.addClickListener(new Button.ClickListener() {
-//            @Override
-//            public void buttonClick(Button.ClickEvent event) {
-//                bcrClientes.removeAllItems();
-//                DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
-//                dtoprod.setValor(0D);
-//                listCustomers.add(dtoprod);
-//                bcrClientes.addAll(listCustomers);
-//            }
-//        });
+          //  });
+        btnAddCustomer.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+                bcrClientes.removeAllItems();
+                DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
+                dtoprod.setValor(0D);
+                listCustomers.add(dtoprod);
+                bcrClientes.addAll(listCustomers);
+            }
+        });
     }
 
     public void buildTableLubsDet() {
@@ -1870,7 +1870,7 @@ CreateComponents components = new CreateComponents();
         btnAddLubs.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnAddLubs.addStyleName(ValoTheme.BUTTON_SMALL);
         btnAddLubs.addClickListener((final Button.ClickEvent event) -> {
-            FormDetalleVenta2.open();
+           // FormDetalleVenta2.open();
             });
 //            @Override
 //            public void buttonClick(Button.ClickEvent event) {
