@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fundamental.view.forms;
+package com.sisintegrados.view.form;
 
 import com.fundamental.model.Arqueocaja;
 import com.fundamental.model.Cliente;
@@ -12,8 +12,10 @@ import com.fundamental.model.Mediopago;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoProducto;
+import com.fundamental.services.SvcCuadre;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
+import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.Usuario;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
@@ -61,10 +63,10 @@ public class FormDetalleVenta extends Window {
     BeanFieldGroup<Arqueocaja> fieldGroup;
     Arqueocaja obj;
     Utils utils = new Utils();
-    Button btnSave, btnAll, btnNone, btnAdd, btnAddCustomer, btnEliminar, guardar,cancelar, btnAddLubs ;
+    Button btnSave, btnAll, btnNone, btnAdd, btnAddCustomer, btnEliminar, guardar, cancelar, btnAddLubs;
     String tipo;
     VerticalLayout v = new VerticalLayout();
-    TextField producto            = new TextField();
+    TextField producto = new TextField();
     TextField precio;
     TextField cantidad;
     TextField total;
@@ -95,12 +97,13 @@ public class FormDetalleVenta extends Window {
     BeanContainer<Integer, Mediopago> bcrMediopago = new BeanContainer<Integer, Mediopago>(Mediopago.class),
             bcrPartida = new BeanContainer<Integer, Mediopago>(Mediopago.class);
     VerticalLayout root;
-    
-    
-    
-    public FormDetalleVenta(String tipo, Lubricanteprecio lubricante) {
-        this.tipo = tipo;
-        this.lubricante = lubricante;
+    VerticalLayout vltLubs;
+    Estacion estacion;
+
+    //public FormDetalleVenta(String tipo, Lubricanteprecio lubricante) {
+    public FormDetalleVenta(Estacion estacion) {
+        
+        this.estacion = estacion;
         addStyleName(Constant.stylePopUps);
         Responsive.makeResponsive(this);
         setModal(true);
@@ -124,9 +127,14 @@ public class FormDetalleVenta extends Window {
 
         detailsWrapper.addComponent(buildFields());
         content.addComponent(buildButtons());
-       // cargaEmpleado();
+//        buildTableLubsDet();
+//        vltLubs = utils.buildVertical("vltLubs", false, false, true, false, null);
+//        vltLubs.addComponents(tblLubricantes, btnAddLubs);
+//        vltLubs.setComponentAlignment(btnAddLubs, Alignment.TOP_CENTER);
+        // cargaEmpleado();
     }
-     private Component buildButtons() {
+
+    private Component buildButtons() {
         guardar = new Button("Guardar");
         guardar.addStyleName(ValoTheme.BUTTON_PRIMARY);
         guardar.addStyleName(ValoTheme.BUTTON_SMALL);
@@ -183,8 +191,8 @@ public class FormDetalleVenta extends Window {
         regresa.setIcon(FontAwesome.CAR);
         FormLayout form = new FormLayout();
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        regresa.addComponent(form);
-        regresa.setExpandRatio(form, 1);
+        //regresa.addComponent(form);
+        //regresa.setExpandRatio(form, 1);
 
         HorizontalLayout hlDoc1 = (HorizontalLayout) components.createHorizontal(Constant.styleForm, "100%", false, false, false, null);
         hlDoc1.setHeight("55px");
@@ -196,13 +204,110 @@ public class FormDetalleVenta extends Window {
         precio.setRequiredError("Debe ingresar precio");
         precio.setStyleName(ValoTheme.TEXTFIELD_SMALL);
 
-        
-       // form.addComponent(precio);
-        buildTableLubsDet();
-        form.addComponent(tblLubricantes);
+        // form.addComponent(precio);
+//        buildTableLubsDet();
+//        vltLubs = utils.buildVertical("vltLubs", false, false, true, false, null);
+//        vltLubs.addComponents(tblLubricantes, btnAddLubs);
+//        vltLubs.setComponentAlignment(btnAddLubs, Alignment.TOP_CENTER);
+        SvcCuadre service = new SvcCuadre();
+        contLubs = new ListContainer<Producto>(Producto.class, service.getLubricantsByCountryStation(true, estacion.getPaisId(), estacion.getEstacionId()));
+        bcrLubs.setBeanIdProperty("productoId");
+        tblLubricantes = utils.buildTable("Detalle lubricantes:", 100f, 100f, bcrLubs,
+                new String[]{"nombre"},
+                new String[]{"Nombre"}
+        );
+        tblLubricantes.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
+        tblLubricantes.addStyleName(ValoTheme.TABLE_COMPACT);
+        tblLubricantes.addStyleName(ValoTheme.TABLE_SMALL);
+        tblLubricantes.setImmediate(true);
+        tblLubricantes.addGeneratedColumn("colProducto", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("producto");  //Atributo del bean
+                final ComboBox cbxProducto = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, contLubs);
+                cbxProducto.setPropertyDataSource(pro);
+                cbxProducto.setFilteringMode(FilteringMode.CONTAINS);
+                cbxProducto.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+                        bcrLubs.getItem(itemId).getItemProperty("valor").setValue(((Producto) cbxProducto.getValue()).getPrecio());
+                    }
+                });
+                return cbxProducto;
+            }
+        });
+        tblLubricantes.addGeneratedColumn("colCantidad", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("cantidad");  //Atributo del bean
+                final TextField nfd = new TextField(pro);
+//                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
+//                nfd.setValue(numberFmt.format(value));
+                nfd.setWidth("60px");
+                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+                nfd.addStyleName("align-right");
+                nfd.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+                        if (nfd.getValue() != null && !nfd.getValue().trim().isEmpty() && nfd.getValue().matches("\\d+")) {
+                            int cantidad = Integer.parseInt(nfd.getValue().trim());
+                            double precio = Double.parseDouble(bcrLubs.getItem(itemId).getItemProperty("valor").getValue().toString());
+                            bcrLubs.getItem(itemId).getItemProperty("total").setValue(cantidad * precio);
+                            updateTableFooterLubs();
+                        } else {
+                            nfd.setValue("0");
+                        }
+                    }
+                });
+                return nfd;
+            }
+        });
+        tblLubricantes.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Button btnDelete = new Button(FontAwesome.TRASH);
+                btnDelete.addStyleName(ValoTheme.BUTTON_DANGER);
+                btnDelete.addStyleName(ValoTheme.BUTTON_SMALL);
+                btnDelete.addClickListener(new Button.ClickListener() {
+                    @Override
+                    public void buttonClick(Button.ClickEvent event) {
+                        bcrLubs.removeItem(itemId);
+                        List<DtoProducto> tempList = new ArrayList();
+                        for (DtoProducto deo : listLubs) {
+                            if (deo.getProductoId() != itemId) {
+                                tempList.add(deo);
+                            }
+                        }
+                        listLubs = tempList;
+                        updateTableFooterLubs();
+                    }
+                });
+                return btnDelete;
+            }
+        });
+        tblLubricantes.setVisibleColumns(new Object[]{"colProducto", "valor", "colCantidad", "total", "colDelete"});
+        tblLubricantes.setColumnHeaders(new String[]{"Producto", "Precio", "Cantidad", "Total", "Borrar"});
+        tblLubricantes.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.CENTER);
+        tblLubricantes.setSizeUndefined();
+        tblLubricantes.setHeight(200f, Unit.PIXELS);
+        tblLubricantes.setColumnWidth("valor", 100);
+        tblLubricantes.setColumnWidth("total", 100);
+
+        btnAddLubs = new Button("Agregar", FontAwesome.PLUS);
+        btnAddLubs.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        btnAddLubs.addStyleName(ValoTheme.BUTTON_SMALL);
+        btnAddLubs.addClickListener((final Button.ClickEvent event) -> {
+            //FormDetalleVenta2.open();
+            System.out.println("hola mundo");
+        });
+
+        vltLubs = utils.buildVertical("vltLubs", false, false, true, false, null);
+        vltLubs.addComponents(tblLubricantes, btnAddLubs);
+        vltLubs.setComponentAlignment(btnAddLubs, Alignment.TOP_CENTER);
+        regresa.addComponent(vltLubs);
         return regresa;
     }
-    
+
     public void buildTableLubsDet() {
         tblLubricantes = utils.buildTable("Detalle lubricantes:", 100f, 100f, bcrLubs,
                 new String[]{"nombre"},
@@ -290,21 +395,11 @@ public class FormDetalleVenta extends Window {
         btnAddLubs.addStyleName(ValoTheme.BUTTON_SMALL);
         btnAddLubs.addClickListener((final Button.ClickEvent event) -> {
 //            FormDetalleVenta2.open();
-            });
-//            @Override
-//            public void buttonClick(Button.ClickEvent event) {
-//                FormDetalleVenta2.open();
-//                bcrLubs.removeAllItems();
-//                DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
-//                dtoprod.setValor(0D);
-//                dtoprod.setCantidad(0);
-//                dtoprod.setTotal(0D);
-//                listLubs.add(dtoprod);
-//                bcrLubs.addAll(listLubs);
-//            }
-//        });
+        });
+
     }
-   public void updateTableFooterLubs() {
+
+    public void updateTableFooterLubs() {
         tmpInt = 0;
         tmpDouble = 0;
         for (Integer itemId : bcrLubs.getItemIds()) {
@@ -322,5 +417,5 @@ public class FormDetalleVenta extends Window {
             }
         }
     }
-    
+
 }

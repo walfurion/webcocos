@@ -32,8 +32,8 @@ import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
 import com.fundamental.utils.Mail;
 import com.fundamental.utils.Util;
-import com.fundamental.view.forms.FormDetalleVenta;
-import com.fundamental.view.forms.FormDetalleVenta2;
+import com.sisintegrados.view.form.FormDetalleVenta;
+import com.sisintegrados.view.form.FormDetalleVenta2;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -326,89 +326,22 @@ CreateComponents components = new CreateComponents();
     }
     
     private void formLubricantes(String tipo) {
-        if (tipo.equals("Editar")) {
-            if (cmbLubricante.getValue() != null) {
-                Lubricanteprecio lubricante = new Lubricanteprecio();
-                lubricante = (Lubricanteprecio) cmbLubricante.getValue();
-                frmDetalle = new FormDetalleVenta(tipo, lubricante);
-                frmDetalle.addCloseListener((e) -> {
-                    cmbLubricante.removeAllItems();
-                    contLubricante.removeAllItems();
-                    contLubricante = new BeanItemContainer<Lubricanteprecio>(Lubricanteprecio.class);
-//                    contLubricante.addAll(dao.getEmpleados2(true));
-                    cmbLubricante.setContainerDataSource(contLubricante);
-                    cmbLubricante.setItemCaptionPropertyId("nombre");
-                    cmbLubricante.setStyleName(ValoTheme.COMBOBOX_TINY);
-                    cmbLubricante.setRequired(true);
-                    cmbLubricante.setRequiredError("Debe Seleccionar empleado");
-                    cmbLubricante.setNullSelectionAllowed(false);
-                    toolbarContainerCmbLubricantes.removeAllComponents();
-                    toolbarContainerCmbLubricantes.addComponent(cmbLubricante);
-                });
-                getUI().addWindow(frmDetalle);
-                frmDetalle.focus();
-            } else {
-                Notification.show("Warning!!!", "Debe seleccionar un empleado, para modificar", Notification.Type.WARNING_MESSAGE);
-            }
-        } else if (tipo.equals("Nuevo")) {
-            Lubricanteprecio lub = new Lubricanteprecio();
+        Lubricanteprecio lub = new Lubricanteprecio();
             lub = (Lubricanteprecio) cmbLubricante.getValue();
-            frmDetalle = new FormDetalleVenta(tipo, lub);
+            frmDetalle = new FormDetalleVenta(estacion);
             frmDetalle.addCloseListener((e) -> {
-                cmbLubricante.removeAllItems();
-                contLubricante.removeAllItems();
-                contLubricante = new BeanItemContainer<Lubricanteprecio>(Lubricanteprecio.class);
-//                contLubricante.addAll(dao.getEmpleados2(true));
-                cmbLubricante.setContainerDataSource(contLubricante);
-                cmbLubricante.setItemCaptionPropertyId("nombre");
-                cmbLubricante.setStyleName(ValoTheme.COMBOBOX_TINY);
-                cmbLubricante.setRequired(true);
-                cmbLubricante.setRequiredError("Debe Seleccionar empleado");
-                cmbLubricante.setNullSelectionAllowed(false);
-                toolbarContainerCmbLubricantes.removeAllComponents();
-                toolbarContainerCmbLubricantes.addComponent(cmbLubricante);
+                /*
+                    Manejaremos salida de la ventana adicional
+                */
             });
             getUI().addWindow(frmDetalle);
             frmDetalle.focus();
-        }
+        
     }
     private CssLayout toolbarContainerCmbLubricantes;
     private CssLayout toolbarContainerTableAsignacion;
 
-    private Component buildTables() {
-        VerticalLayout v = new VerticalLayout();
-        HorizontalLayout h = new HorizontalLayout();
-        Label lblpistero = new Label("Nombre Empleado");
-        lblpistero.setStyleName(ValoTheme.LABEL_TINY);
-        lblpistero.setWidth("100px");
-        contLubricante = new BeanItemContainer<Lubricanteprecio>(Lubricanteprecio.class);
-//        contLubricante.addAll(dao.getEmpleados2(true));
-        cmbLubricante.setContainerDataSource(contLubricante);
-        cmbLubricante.setItemCaptionPropertyId("nombre");
-        cmbLubricante.setStyleName(ValoTheme.COMBOBOX_TINY);
-        cmbLubricante.setRequired(true);
-        cmbLubricante.setRequiredError("Debe Seleccionar Empleado");
-        cmbLubricante.setNullSelectionAllowed(false);
-
-        toolbarContainerCmbLubricantes = new CssLayout();
-        toolbarContainerTableAsignacion = new CssLayout();
-        toolbarContainerCmbLubricantes.addComponent(cmbLubricante);
-        h.addComponent(lblpistero);
-        h.addComponent(toolbarContainerCmbLubricantes);
-        h.setSpacing(true);
-        Component adicionBar = components.createCssLayout(Constant.styleViewheader2, Constant.sizeUndefined, false, false, true, new Component[]{h});
-        v.addComponent(adicionBar);
-
-        //tabla
-//        v.addComponent(buildCheckBoxPumps());
-        v.addComponent(toolbarContainerTableAsignacion);
-        v.setSpacing(true);
-        toolbarContainerTableAsignacion.removeAllComponents();
-//        ConstruyeTablaAsignacion();
-//        toolbarContainerTableAsignacion.addComponent(tablaAsignacion);
-//        v.setComponentAlignment(btnAddEmpPump, Alignment.TOP_CENTER);
-        return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(v)});
-    }
+    
 
     private void getAllData() {
         SvcCuadre service = new SvcCuadre();

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sisint.view.form;
+package com.sisintegrados.view.form;
 
 import com.fundamental.services.SvcEmpleado;
 import com.fundamental.services.SvcTurno;
