@@ -16,6 +16,7 @@ import com.sisintegrados.generic.bean.TurnoEmpleadoBomba;
 import com.fundamental.utils.Constant;
 import com.sisintegrados.generic.bean.EmpleadoBombaTurno;
 import com.sisintegrados.generic.bean.Pais;
+import com.vaadin.data.util.BeanItemContainer;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -501,7 +502,7 @@ public class SvcTurno extends Dao {
             pst = getConnection().prepareStatement(miQuery);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
-                result.add(new Empleado(rst.getInt(1), rst.getString(2),rst.getString(3)));
+                result.add(new Empleado(rst.getInt(1), rst.getString(2), rst.getString(3)));
             }
             closePst();
         } catch (Exception exc) {
@@ -529,6 +530,127 @@ public class SvcTurno extends Dao {
             exc.printStackTrace();
         } finally {
             closePst();
+        }
+        return result;
+    }
+
+    public boolean doCreateTurn2(boolean crearDia, Dia dia, Turno turno, List<Precio> listPrice, BeanItemContainer<EmpleadoBombaTurno> listTurnoEmpPump,String creadoPor) {
+        boolean result = false;
+        ArrayList<EmpleadoBombaTurno> listAsigna = new ArrayList<EmpleadoBombaTurno>();
+        try {
+            getConnection().setAutoCommit(false);
+            if (crearDia) {
+                miQuery = "INSERT INTO dia (estado_id, creado_por, creado_persona, estacion_id, fecha, creado_el) "
+                        + "VALUES (?, ?, ?, ?, ?, SYSDATE)";
+                pst = getConnection().prepareStatement(miQuery);
+                pst.setInt(1, dia.getEstadoId());
+                pst.setString(2, dia.getCreadoPor());
+                pst.setString(3, dia.getCreadoPersona());
+                pst.setInt(4, dia.getEstacionId());
+                pst.setDate(5, new java.sql.Date(dia.getFecha().getTime()));
+                pst.executeQuery();
+                closePst();
+            }
+
+            miQuery = "SELECT turno_seq.NEXTVAL FROM DUAL";
+            pst = getConnection().prepareStatement(miQuery);
+            ResultSet rst = pst.executeQuery();
+            Integer turnoId = (rst.next()) ? rst.getInt(1) : 0;
+            closePst();
+            miQuery = "INSERT INTO turno (turno_id, estacion_id, usuario_id, estado_id, creado_por, creado_persona, turno_fusion, estacionconfhead_id, fecha, horario_id) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            pst = getConnection().prepareStatement(miQuery);
+            pst.setInt(1, turnoId);
+            pst.setInt(2, turno.getEstacionId());
+            pst.setInt(3, turno.getUsuarioId());
+            pst.setInt(4, turno.getEstadoId());
+            pst.setString(5, turno.getCreadoPor());
+            pst.setString(6, turno.getCreadoPersona());
+            pst.setString(7, turno.getTurnoFusion());
+            pst.setObject(8, turno.getEstacionconfheadId());    //setObject, puesto que puede ser NULL.
+            pst.setDate(9, new java.sql.Date(turno.getFecha().getTime()));
+            pst.setInt(10, turno.getHorarioId());
+            pst.executeUpdate();
+            closePst();
+
+            miQuery = "INSERT INTO precio (turno_id, producto_id, tipodespacho_id, precio, creado_por, creado_persona, creado_el) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, SYSDATE)";
+            
+             System.out.println("PRECIO ENVIE GUARDAR "+ listPrice.size());
+            for (Precio precio : listPrice) {
+                System.out.println("PRECIO ENVIE GUARDAR "+precio.getPrecio()+"  "+precio.getProductoId());
+                pst = getConnection().prepareStatement(miQuery);
+                pst.setInt(1, turnoId);
+                pst.setInt(2, precio.getProductoId());
+                pst.setInt(3, precio.getTipodespachoId());
+                pst.setDouble(4, precio.getPrecio());
+                pst.setString(5, precio.getCreadoPor());
+                pst.setString(6, precio.getCreadoPersona());
+                pst.executeUpdate();
+                closePst();
+            }
+
+            /*Desgloza las asignaciones por bomba*/
+            for (EmpleadoBombaTurno rstB : listTurnoEmpPump.getItemIds()) {
+                if (rstB.isBomba1()) {
+                    listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 1));
+                }
+                if (rstB.isBomba2()) {
+                    listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 2));
+                }
+                if (rstB.isBomba3()) {
+                    listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 3));
+                }
+                if (rstB.isBomba4()) {
+                    listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 4));
+                }
+                if (rstB.isBomba5()) {
+                    listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 5));
+                }
+                if (rstB.isBomba6()) {
+                    listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 6));
+                }
+                if (rstB.isBomba7()) {
+                    listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 7));
+                }
+                if (rstB.isBomba8()) {
+                    listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 8));
+                }
+                if (rstB.isBomba9()) {
+                    listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 9));
+                }
+                if (rstB.isBomba10()) {
+                    listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 10));
+                }
+                if (rstB.isBomba11()) {
+                    listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 11));
+                }
+                if (rstB.isBomba12()) {
+                    listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 12));
+                }
+            }
+
+            miQuery = "INSERT INTO turno_empleado_bomba (turno_id, empleado_id, bomba_id, creado_por) "
+                    + "VALUES (?, ?, ?, ?)";
+            for (EmpleadoBombaTurno item : listAsigna) {
+                pst = getConnection().prepareStatement(miQuery);
+                pst.setInt(1, turnoId);
+                pst.setInt(2, item.getEmpleadoid());
+                pst.setInt(3, item.getBombaid());
+                pst.setString(4,creadoPor);
+                pst.executeUpdate();
+                closePst();
+            }
+
+            result = true;
+            getConnection().commit();
+        } catch (Exception exc) {
+            try {
+                getConnection().rollback();
+            } catch (SQLException ex) {
+//                Logger.getLogger(SvcTurno.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            exc.printStackTrace();
         }
         return result;
     }

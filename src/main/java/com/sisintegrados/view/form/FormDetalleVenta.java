@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fundamental.view.forms;
+package com.sisintegrados.view.form;
 
 import com.fundamental.model.Arqueocaja;
 import com.fundamental.model.Cliente;

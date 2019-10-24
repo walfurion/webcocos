@@ -25,6 +25,7 @@ import com.fundamental.model.dto.DtoArqueo;
 import com.fundamental.model.dto.DtoEfectivo;
 import com.fundamental.model.dto.DtoProducto;
 import com.fundamental.services.SvcArqueo;
+import com.fundamental.services.SvcClientePrepago;
 import com.fundamental.services.SvcCuadre;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
@@ -32,8 +33,9 @@ import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
 import com.fundamental.utils.Mail;
 import com.fundamental.utils.Util;
-import com.fundamental.view.forms.FormDetalleVenta;
-import com.fundamental.view.forms.FormDetalleVenta2;
+import com.sisintegrados.view.form.FormDetalleVenta;
+import com.sisintegrados.view.form.FormDetalleVenta2;
+import com.sisintegrados.view.form.FormClientePrepago;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -41,7 +43,6 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import com.vaadin.demo.dashboard.view.DashboardViewType;
-import com.vaadin.event.MouseEvents;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -77,6 +78,7 @@ import de.steinwedel.messagebox.MessageBox;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -86,6 +88,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.vaadin.maddon.ListContainer;
 import org.vaadin.ui.NumberField;
 
@@ -93,7 +97,7 @@ import org.vaadin.ui.NumberField;
  * @author Mery Gil
  */
 public class PrCuadre extends Panel implements View {
-    
+
     ComboBox cmbLubricante = new ComboBox("Lubricantes:");
     static final DecimalFormat numberFmt = new DecimalFormat("### ###,##0.00");
     static final DecimalFormat numberFmt3D = new DecimalFormat("### ###,##0.000;-#");
@@ -111,7 +115,15 @@ public class PrCuadre extends Panel implements View {
             return super.formatPropertyValue(rowId, colId, property);
         }
     };
-    Button btnSave, btnAll, btnNone, btnAdd, btnAddCustomer, btnAddLubs, btnAddPrep, btnAddCreditC,btnDetail, btnDetalles;
+    Button btnSave, btnAll, btnNone, btnAdd, btnAddCustomer, btnAddLubs, btnAddPrep, btnAddCreditC, btnDetail;
+
+    /*Botones Detalles*/ //ASG
+    Button btnLubricante;
+    Button btnClienteCredito;
+    Button btnClientePrepago;
+    Button btnTarjetaCredito;
+    /*fin */
+
     FormDetalleVenta frmDetalle;
     Label lblTotalVentas1 = new Label("0"),
             lblTotalVentas2 = new Label("0"),
@@ -126,7 +138,7 @@ public class PrCuadre extends Panel implements View {
             cbxEstacion = new ComboBox("Estación:"),
             cbxTurno = new ComboBox("Turno:"),
             cbxArqueos = new ComboBox("Cuadre:");
-            
+
     TextField tfdNameSeller, tfdNameChief;
     DateField dfdFecha = new DateField("Fecha:");
     Upload upload;
@@ -164,7 +176,6 @@ public class PrCuadre extends Panel implements View {
             bcDiferencias = new BeanContainer<Integer, DtoProducto>(DtoProducto.class),
             bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class),
             bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class),
-            bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class),
             bcrCreditC = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
 
     Double totalArqueoVol = 0D, totalArqueoCurr = 0D, totalArqueoDif = 0D, totalArqueoElectronico = 0D;
@@ -177,8 +188,14 @@ public class PrCuadre extends Panel implements View {
     int tmpInt;
     List<Pais> allCountries;
     String[] uniqueStation;
-BeanItemContainer<Lubricanteprecio> contLubricante = new BeanItemContainer<Lubricanteprecio>(Lubricanteprecio.class);
-CreateComponents components = new CreateComponents();
+    BeanItemContainer<Lubricanteprecio> contLubricante = new BeanItemContainer<Lubricanteprecio>(Lubricanteprecio.class);
+    CreateComponents components = new CreateComponents();
+
+    /*Detalle Clientes Prepago*/
+    FormClientePrepago formClientePrepago;
+    BeanContainer<Integer, DtoProducto> bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+    SvcClientePrepago dao = new SvcClientePrepago();
+
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
@@ -237,9 +254,9 @@ CreateComponents components = new CreateComponents();
         cltVentas.setSizeFull();
         Responsive.makeResponsive(cltVentas);
 //
-        Label lbEspacio= new Label(" ");
+        Label lbEspacio = new Label(" ");
         VerticalLayout vltEfectivo = utils.buildVertical("vlEfectivo", false, true, true, true, null);
-        vltEfectivo.addComponents(tblEfectivo, btnAdd,lbEspacio);
+        vltEfectivo.addComponents(tblEfectivo, btnAdd, lbEspacio);
         vltEfectivo.setExpandRatio(tblEfectivo, 0.9f);
         vltEfectivo.setExpandRatio(btnAdd, 0.1f);
         vltEfectivo.setComponentAlignment(btnAdd, Alignment.TOP_CENTER);
@@ -249,20 +266,32 @@ CreateComponents components = new CreateComponents();
         CssLayout cltMedios = new CssLayout(utils.vlContainer(tblMediospago), vltEfectivo, utils.vlContainer(lblTotalVentas2));
         cltMedios.setSizeFull();
         Responsive.makeResponsive(cltMedios);
-        
 
         CssLayout cltUpload = new CssLayout(utils.vlContainer(upload));
         cltUpload.setSizeFull();
         cltUpload.setVisible(false);
         Responsive.makeResponsive(cltUpload);
-        
-         
 
         CssLayout cltTaDiff = buildDetalleMontos();
         cltTaDiff.setSizeFull();
         cltTaDiff.addComponent(btnSave);
 
-        CssLayout cltEmpleado = new CssLayout(utils.vlContainer(cbxEmpleado)/**
+        /*ASG botones de detalles*/
+        HorizontalLayout hl = new HorizontalLayout();
+        hl.setSpacing(true);
+        hl.setMargin(new MarginInfo(true, false, true, false));
+        Label lblpuesto = new Label("Puesto");
+        lblpuesto.setStyleName(ValoTheme.LABEL_SMALL);
+        lblpuesto.setWidth("45px");
+        hl.addComponent(lblpuesto);
+        hl.addComponent(cbxEmpleado);
+        hl.addComponent(btnLubricante);
+        hl.addComponent(btnClienteCredito);
+        hl.addComponent(btnClientePrepago);
+        hl.addComponent(btnTarjetaCredito);
+
+        /*fin botones detalle*/
+        CssLayout cltEmpleado = new CssLayout(hl /**
          * , utils.vlContainer(tfdNameSeller), utils.vlContainer(tfdNameChief)*
          */
         );
@@ -302,19 +331,17 @@ CreateComponents components = new CreateComponents();
 //                cltCxc.setVisible(!cltCxc.isVisible());
 //            }
 //        });
-        
-        btnDetalles = new Button("Detalle venta"/**, cltCxc**/);
-        btnDetalles.setIcon(FontAwesome.EDIT);
-        btnDetalles.addClickListener(clickEvent -> formLubricantes("Nuevo"));
-//        btnDetalles.addClickListener((final Button.ClickEvent event) -> {
-          //FormDetalleVenta.open();
-//            @Override
-//           public void click(MouseEvents.ClickEvent event) {
-          //    cltCxc.setVisible(!cltCxc.isVisible());
-//           }
-//       });
-
-        CssLayout cltMain = new CssLayout(hlLabels, hlCombo, cltEmpleado, btnDetalles, cltVentas, cltMedios, //utils.vlContainer(tblPartida), 
+//        btnDetalles = new Button("Detalle venta"/**, cltCxc**/);
+//        btnDetalles.setIcon(FontAwesome.EDIT);
+//        btnDetalles.addClickListener(clickEvent -> formLubricantes("Nuevo"));
+////        btnDetalles.addClickListener((final Button.ClickEvent event) -> {
+//          //FormDetalleVenta.open();
+////            @Override
+////           public void click(MouseEvents.ClickEvent event) {
+//          //    cltCxc.setVisible(!cltCxc.isVisible());
+////           }
+////       });
+        CssLayout cltMain = new CssLayout(hlLabels, hlCombo, cltEmpleado, cltVentas, cltMedios, //utils.vlContainer(tblPartida), 
                 cltUpload, cltTaDiff);
         Responsive.makeResponsive(cltMain);
         tabsheet.addTab(cltMain, "Principal", FontAwesome.LIST);
@@ -324,7 +351,7 @@ CreateComponents components = new CreateComponents();
 
         defineInitialCountryStation();
     }
-    
+
     private void formLubricantes(String tipo) {
         if (tipo.equals("Editar")) {
             if (cmbLubricante.getValue() != null) {
@@ -400,13 +427,9 @@ CreateComponents components = new CreateComponents();
         v.addComponent(adicionBar);
 
         //tabla
-//        v.addComponent(buildCheckBoxPumps());
         v.addComponent(toolbarContainerTableAsignacion);
         v.setSpacing(true);
         toolbarContainerTableAsignacion.removeAllComponents();
-//        ConstruyeTablaAsignacion();
-//        toolbarContainerTableAsignacion.addComponent(tablaAsignacion);
-//        v.setComponentAlignment(btnAddEmpPump, Alignment.TOP_CENTER);
         return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(v)});
     }
 
@@ -532,9 +555,9 @@ CreateComponents components = new CreateComponents();
                 if (listStations.size() == 1) {
                     cbxEstacion.setValue(listStations.get(0));
                 }
-                currencySymbol = pais.getMonedaSimbolo()+ " ";
-                volumenSymbol = pais.getVolSimbolo()+ " ";
-                System.out.println("PAIS "+pais.toString());
+                currencySymbol = pais.getMonedaSimbolo() + " ";
+                volumenSymbol = pais.getVolSimbolo() + " ";
+                System.out.println("PAIS " + pais.toString());
 
             }
         });
@@ -677,7 +700,7 @@ CreateComponents components = new CreateComponents();
             }
         });
 
-        cbxEmpleado = utils.buildCombobox("Puesto:", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, new ListContainer<>(Empleado.class, listEmpleados));
+        cbxEmpleado = utils.buildCombobox(null, "nombre", false, true, ValoTheme.COMBOBOX_SMALL, new ListContainer<>(Empleado.class, listEmpleados));
         cbxEmpleado.addValueChangeListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
@@ -704,6 +727,18 @@ CreateComponents components = new CreateComponents();
                     tfdNameSeller.setValue(arqueocaja.getNombrePistero());
                     tfdNameChief.setValue(arqueocaja.getNombreJefe());
                     onchangeCbxArqueo(arqueocaja.getArqueocajaId().toString());
+
+                    /*Recupera Detalle Cliente Prepago*/ //ASG
+                    bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrPrepaid = dao.getDetallePrepago(arqueocaja.getArqueocajaId());
+//                    for (Integer itemId : bcrPrepaid.getItemIds()) {
+//                        System.out.println(" CLIENTE ID "+bcrPrepaid.getItem(itemId).getBean().getCliente().getNombre());
+//                        System.out.println(" CLIENTE NOMBRE "+bcrPrepaid.getItem(itemId).getBean().getCliente().getNombre());
+//                        System.out.println(" MONTO "+bcrPrepaid.getItem(itemId).getBean().getValor());
+//                    }
+
+//                    System.out.println("ID CAJA RECUPERAR " + arqueocaja.getArqueocajaId());
+                    //Fin
                 }
 //                service.closeConnections();
 
@@ -866,6 +901,26 @@ CreateComponents components = new CreateComponents();
     }
 
     private void buildButtons() {
+
+        btnLubricante = new Button("Lubricantes", FontAwesome.PLUS);
+        btnLubricante.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        btnLubricante.addStyleName(ValoTheme.BUTTON_SMALL);
+//        btnLubricante.addClickListener(clickEvent -> metodo1());
+
+        btnClienteCredito = new Button("Clientes Credito", FontAwesome.PLUS);
+        btnClienteCredito.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        btnClienteCredito.addStyleName(ValoTheme.BUTTON_SMALL);
+//        btnClienteCredito.addClickListener(clickEvent -> metodo1());
+
+        btnClientePrepago = new Button("Clientes Prepago", FontAwesome.PLUS);
+        btnClientePrepago.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        btnClientePrepago.addStyleName(ValoTheme.BUTTON_SMALL);
+        btnClientePrepago.addClickListener(clickEvent -> formPrepago(estacion.getEstacionId(), currencySymbol, pais.getPaisId()));
+
+        btnTarjetaCredito = new Button("Tarjetas Credito", FontAwesome.PLUS);
+        btnTarjetaCredito.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        btnTarjetaCredito.addStyleName(ValoTheme.BUTTON_SMALL);
+//        btnTarjetaCredito.addClickListener(clickEvent -> metodo1());
 
         btnAll = new Button("Todas");
         btnAll.addStyleName(ValoTheme.BUTTON_BORDERLESS);
@@ -1038,6 +1093,14 @@ CreateComponents components = new CreateComponents();
                                         mail.run();
                                     }
 
+                                    //*Registro detalle de clientes*// ASG
+                                    try {
+                                        dao.CreaClienteDetalle(arqueo.getArqueocajaId(), bcrPrepaid, user.getUsername());
+                                    } catch (SQLException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                    /*fin registro detalle*/
+
                                     myAction = (myAction.equals(Dao.ACTION_ADD)) ? "cuadrado" : "actualizado";
                                     Notification notif = new Notification("ÉXITO:", "Se ha " + myAction + " las bombas con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                                     notif.setDelayMsec(3000);
@@ -1076,6 +1139,26 @@ CreateComponents components = new CreateComponents();
             }
         });
 
+    }
+
+    /*Metodo Llama Forma Clientes Prepago*///ASG
+    private void formPrepago(Integer idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxEmpleado.getValue() != null) {
+            formClientePrepago = new FormClientePrepago(idestacion, simboloMoneda, idpais,bcrPrepaid);
+            formClientePrepago.addCloseListener((e) -> {
+                bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                bcrPrepaid = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detallePrepago");
+                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("totalPrepago");
+                for (Integer itemId : bcrMediopago.getItemIds()) {
+                    if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_VENTA_PREPAGO) {
+                        bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDouble);
+                        break;
+                    }
+                }
+            });
+            getUI().addWindow(formClientePrepago);
+            formClientePrepago.focus();
+        }
     }
 
     private void buildTableBombas() {
@@ -1282,8 +1365,14 @@ CreateComponents components = new CreateComponents();
                 return tfdValue;
             }
         });
-        tblMediospago.setVisibleColumns(new Object[]{"nombre", /**"colCantDoctos",**/ "colMonto"});
-        tblMediospago.setColumnHeaders(new String[]{"Nombre", /**"Cant doctos",**/ "Monto"});
+        tblMediospago.setVisibleColumns(new Object[]{"nombre", /**
+             * "colCantDoctos",*
+             */
+            "colMonto"});
+        tblMediospago.setColumnHeaders(new String[]{"Nombre", /**
+             * "Cant doctos",*
+             */
+            "Monto"});
         //tblMediospago.setColumnAlignment("colCantDoctos", Align.RIGHT);
         tblMediospago.setColumnAlignment("colMonto", Align.RIGHT);
         tblMediospago.setFooterVisible(true);
@@ -1495,9 +1584,18 @@ CreateComponents components = new CreateComponents();
             }
         });
 
-        tblEfectivo.setVisibleColumns(new String[]{"colMPname", /**"colBoleta",**/ "colMonto", "colDelete"});
-        tblEfectivo.setColumnHeaders(new String[]{"Tipo", /**"# boleta",**/ "Monto", "Borrar"});
-        tblEfectivo.setColumnAlignments(Align.LEFT, /**Align.RIGHT,**/ Align.RIGHT, Align.CENTER);
+        tblEfectivo.setVisibleColumns(new String[]{"colMPname", /**
+             * "colBoleta",*
+             */
+            "colMonto", "colDelete"});
+        tblEfectivo.setColumnHeaders(new String[]{"Tipo", /**
+             * "# boleta",*
+             */
+            "Monto", "Borrar"});
+        tblEfectivo.setColumnAlignments(Align.LEFT, /**
+                 * Align.RIGHT,*
+                 */
+                Align.RIGHT, Align.CENTER);
         tblEfectivo.setFooterVisible(true);
         tblEfectivo.setColumnFooter("colMPname", "Total:");
         tblEfectivo.setColumnFooter("colMonto", currencySymbol + numberFmt.format(totalEfectivo));
@@ -1516,12 +1614,11 @@ CreateComponents components = new CreateComponents();
                 bcEfectivo.removeAllItems();
                 listaEfectivo.add(new DtoEfectivo(itemId, null, 0D));
                 bcEfectivo.addAll(listaEfectivo);
-                  
+
             }
         });
 
     }
-   
 
     private void buildTableFactElect() {
         tblFactElect = utils.buildTable("Datos facturación electrónica", 100f, 100f, bcFactElect,
@@ -1771,7 +1868,7 @@ CreateComponents components = new CreateComponents();
         btnAddCustomer.addStyleName(ValoTheme.BUTTON_SMALL);
         btnAddCustomer.addClickListener((final Button.ClickEvent event) -> {
 //            FormDetalleVenta.open();
-            });
+        });
 //        btnAddCustomer.addClickListener(new Button.ClickListener() {
 //            @Override
 //            public void buttonClick(Button.ClickEvent event) {
@@ -1871,7 +1968,7 @@ CreateComponents components = new CreateComponents();
         btnAddLubs.addStyleName(ValoTheme.BUTTON_SMALL);
         btnAddLubs.addClickListener((final Button.ClickEvent event) -> {
             FormDetalleVenta2.open();
-            });
+        });
 //            @Override
 //            public void buttonClick(Button.ClickEvent event) {
 //                FormDetalleVenta2.open();
