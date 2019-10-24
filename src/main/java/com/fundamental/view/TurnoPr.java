@@ -94,7 +94,7 @@ public class TurnoPr extends Panel implements View {
     Estacion estacion;
     Pais pais;
     EstacionConfHead estConfHead;
-    Button btnGuardar = new Button("Crear Turno");
+    Button btnGuardar = new Button("Guardar");
     Button btnModificar = new Button("Modificar precio", FontAwesome.EDIT);
     Button btnAddEmpPump;
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
@@ -1145,7 +1145,7 @@ public class TurnoPr extends Panel implements View {
                             }
                         }
                         if (!val) {
-                            bcrEmpPump.addItem(new EmpleadoBombaTurno(0, empleado.getEmpleadoId(), empleado.getNombre(), varMaxBomba, chkBomba1.getValue(), chkBomba2.getValue(), chkBomba3.getValue(), chkBomba4.getValue(), chkBomba5.getValue(), chkBomba6.getValue(), chkBomba7.getValue(), chkBomba8.getValue(), chkBomba9.getValue(), chkBomba10.getValue(), chkBomba11.getValue(), chkBomba12.getValue()));
+                            bcrEmpPump.addItem(new EmpleadoBombaTurno(0, empleado.getEmpleadoId(), empleado.getNombre(), varMaxBomba, chkBomba1.getValue(), chkBomba2.getValue(), chkBomba3.getValue(), chkBomba4.getValue(), chkBomba5.getValue(), chkBomba6.getValue(), chkBomba7.getValue(), chkBomba8.getValue(), chkBomba9.getValue(), chkBomba10.getValue(), chkBomba11.getValue(), chkBomba12.getValue(),-1));
                             cmbEmpleado.setValue(null);
                             reiniciaCheckBox();
                             /*Carga Tabla Asignaciones*/
@@ -1323,21 +1323,21 @@ public class TurnoPr extends Panel implements View {
                     Notification.show("ERROR:", "Debe asociar almenos un empleado con una bomba.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
-//                TurnoEmpleadoBomba teb;
-//                for (Integer itemId : bcrEmpPump.getItemIds()) {
+//                EmpleadoBombaTurno teb;
+//                for (EmpleadoBombaTurno itemId : bcrEmpPump.getItemIds()) {
 //                    teb = bcrEmpPump.getItem(itemId).getBean();
-//                    if (teb.getEmployee() == null || teb.getPump() == null) {
+//                    if (teb.getEmpleadoid() == null || teb.getPump() == null) {
 //                        Notification.show("ERROR:", "Las asociaciones de bomba/empleado debe ser válidas.", Notification.Type.ERROR_MESSAGE);
 //                        return;
 //                    }
 //                }
 
                 boolean crearDia = false;
-                Turno turno = new Turno(null, usuario.getEstacionLogin().getEstacionId(), usuario.getUsuarioId(), 1, usuario.getUsername(), cmbFecha.getValue(), usuario.getNombreLogin());
+                Turno turno = new Turno(null, usuario.getEstacionid(), usuario.getUsuarioId(), 1, usuario.getUsername(), cmbFecha.getValue(), usuario.getUsername());
                 turno.setEstacionconfheadId(estConfHead.getEstacionconfheadId());
                 //El dia se manda crear solo si es necesario
                 if (ultimoDia.getFecha() == null || (ultimoDia.getFecha() != null && !ultimoDia.getFecha().equals(cmbFecha.getValue()))) {
-                    dia = new Dia(usuario.getEstacionLogin().getEstacionId(), cmbFecha.getValue(), 1, usuario.getUsername(), usuario.getNombreLogin());
+                    dia = new Dia(usuario.getEstacionid(), cmbFecha.getValue(), 1, usuario.getUsername(), usuario.getUsername());
                     if (cmbFecha.isEnabled()) {
                         crearDia = true;
                     }
@@ -1350,37 +1350,37 @@ public class TurnoPr extends Panel implements View {
                 for (Integer pi : (List<Integer>) tablaPrecio.getItemIds()) {
                     prod = (Producto) ((BeanItem) tablaPrecio.getItem(pi)).getBean();
                     if (showAutoservicio) {
-                        precio = new Precio(turno.getTurnoId(), pi, 1, prod.getPriceAS(), usuario.getUsername(), usuario.getNombreLogin());  //AutoServicio
+                        precio = new Precio(turno.getTurnoId(), pi, 1, prod.getPriceAS(), usuario.getUsername(), usuario.getUsername());  //AutoServicio
 //                        precio = dao.doActionPrecio(Dao.ACTION_ADD, precio);
                         listPrecio.add(precio);
                         conExito = (precio != null) ? conExito + 1 : conExito;
                     }
-                    precio = new Precio(turno.getTurnoId(), pi, 2, prod.getPriceSC(), usuario.getUsername(), usuario.getNombreLogin());  //Servicio completo
+                    precio = new Precio(turno.getTurnoId(), pi, 2, prod.getPriceSC(), usuario.getUsername(), usuario.getUsername());  //Servicio completo
 //                    precio = dao.doActionPrecio(Dao.ACTION_ADD, precio);
                     listPrecio.add(precio);
                     conExito = (precio.getTurnoId() != null) ? conExito + 1 : conExito;
                 }
-//                List<TurnoEmpleadoBomba> listTurnoEmpPump = new ArrayList();
+//                List<EmpleadoBombaTurno> listTurnoEmpPump = new ArrayList();
 //                for (Integer itemId : bcrEmpPump.getItemIds()) {
 //                    listTurnoEmpPump.add(bcrEmpPump.getItem(itemId).getBean());
 //                }
                 turno.setHorarioId(((Horario) cmbHorario.getValue()).getHorarioId());
 
-//                boolean everythingOk = dao.doCreateTurn(crearDia, dia, turno, listPrecio, listTurnoEmpPump);  //Descomentar
+                boolean everythingOk = dao.doCreateTurn2(crearDia, dia, turno, listPrecio, bcrEmpPump,usuario.getUsername());  //Descomentar
                 dao.closeConnections();
 
                 /*TODO EL IF DESCOMENTAR*/
-//                if (everythingOk) {
-//                    Notification notif = new Notification("ÉXITO:", "El registro de turno y precio se ha creado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
-//                    notif.setDelayMsec(3000);
-//                    notif.setPosition(Position.MIDDLE_CENTER);
-//                    notif.show(Page.getCurrent());
-//                    UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_TURN.getViewName());
-//                } else {
-//                    Notification.show("ERROR:", "Ocurrió un error al guardar el precio.\n", Notification.Type.ERROR_MESSAGE);
-//                    turno = dao.doActionTurno(Dao.ACTION_DELETE, turno);
-//                    return;
-//                }
+                if (everythingOk) {
+                    Notification notif = new Notification("ÉXITO:", "El registro de turno y precio se ha creado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
+                    notif.setDelayMsec(3000);
+                    notif.setPosition(Position.MIDDLE_CENTER);
+                    notif.show(Page.getCurrent());
+                    UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_TURN.getViewName());
+                } else {
+                    Notification.show("ERROR:", "Ocurrió un error al guardar el precio.\n", Notification.Type.ERROR_MESSAGE);
+                    turno = dao.doActionTurno(Dao.ACTION_DELETE, turno);
+                    return;
+                }
             }
         });
 
