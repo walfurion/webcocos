@@ -2,7 +2,7 @@ package com.fundamental.view;
 
 import com.fundamental.model.Acceso;
 import com.fundamental.model.Cliente;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;

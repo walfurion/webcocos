@@ -55,6 +55,11 @@ public class Constant {
 
     public static final short CAT_PAIS_GUATEMALA = 320;
     public static Map<String, String> MAP_MIMETYPES_EXT;
+    public static String FORMATONUMERO = "########0.00";
+    public static DecimalFormat numberFact = new DecimalFormat(FORMATONUMERO);
+    public static String FORMATONUMERO4DECIMALES = "########0.0000";
+    public static DecimalFormat NUMBER4DECIMAL = new DecimalFormat(FORMATONUMERO4DECIMALES);
+    
 
     public Constant() {
         MAP_MIMETYPES_EXT = new HashMap();

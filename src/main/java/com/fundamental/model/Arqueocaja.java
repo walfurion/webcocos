@@ -41,6 +41,17 @@ public class Arqueocaja {
         this.nombrePistero = nombrePistero;
         this.nombreJefe = nombreJefe;
     }
+    
+    public Arqueocaja(Integer arqueocajaId, Integer estacionId, Integer turnoId, Date fecha, Integer estado_id, String creado_por, String creado_persona, Integer empleadoId) {
+        this.arqueocajaId = arqueocajaId;
+        this.estacionId = estacionId;
+        this.turnoId = turnoId;
+        this.fecha = fecha;
+        this.estado_id = estado_id;
+        this.creado_por = creado_por;
+        this.creado_persona = creado_persona;
+        this.empleadoId = empleadoId;
+    }
 
     public Arqueocaja() {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

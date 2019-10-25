@@ -2,8 +2,8 @@ package com.fundamental.view;
 
 import com.fundamental.model.Bomba;
 import com.fundamental.model.Dia;
-import com.fundamental.model.Empleado;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Empleado;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.services.Dao;
 import com.fundamental.model.EstacionConf;
 import com.fundamental.model.EstacionConfHead;
@@ -11,7 +11,7 @@ import com.fundamental.model.Horario;
 import com.fundamental.model.Precio;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Turno;
-import com.fundamental.model.TurnoEmpleadoBomba;
+import com.sisintegrados.generic.bean.TurnoEmpleadoBomba;
 import com.fundamental.model.Utils;
 import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcTurno;
@@ -921,4 +921,5 @@ public class PrTurn extends Panel implements View {
     public void enter(ViewChangeListener.ViewChangeEvent event) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
 }

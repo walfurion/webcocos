@@ -1,7 +1,7 @@
 package com.fundamental.services;
 
 import com.fundamental.model.Acceso;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Marca;
 import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Pais;
@@ -438,7 +438,7 @@ public class SvcMaintenance extends Dao {
                 mediopago = new Mediopago(rst.getInt(1), rst.getString(2), rst.getInt(3), null, rst.getInt(5), rst.getString(8), rst.getBoolean(11), rst.getString(4));
                 mediopago.setPaisId(rst.getInt(6));
                 mediopago.setTipoprodId(rst.getInt(7));
-                mediopago.setCountry(new Pais(rst.getInt(6), rst.getString(8), rst.getString(12), null, null, null,false));
+                mediopago.setCountry(new Pais(rst.getInt(6), rst.getString(8), rst.getString(12), null, null, null,null));
                 query = (rst.getString(4).equals("A")) ? "Activo" : "Inactivo";
                 mediopago.setStatus(new DtoGenericBean(rst.getString(4), query));
                 mediopago.setPartidacontPor(rst.getDouble(9));
@@ -523,7 +523,7 @@ public class SvcMaintenance extends Dao {
         ResultSet rst = null; try {
             rst = getConnection().prepareStatement(miQuery).executeQuery();
             while (rst.next()) {
-                result.add(new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5), rst.getInt(7)>0));
+                result.add(new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5),null, rst.getInt(7)>0));
             }
         } catch (Exception exc) {
             exc.printStackTrace();

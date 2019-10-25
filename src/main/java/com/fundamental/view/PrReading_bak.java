@@ -3,11 +3,11 @@ package com.fundamental.view;
 import com.fundamental.model.Bomba;
 import com.fundamental.model.BombaEmpleadoEstacion;
 import com.fundamental.model.Dia;
-import com.fundamental.model.Empleado;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Empleado;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.services.Dao;
 import com.fundamental.model.dto.DtoLectura;
-import com.fundamental.model.Lectura;
+import com.sisintegrados.generic.bean.Lectura;
 import com.fundamental.model.LecturaDetalle;
 import com.fundamental.model.Lecturafinal;
 import com.sisintegrados.generic.bean.Pais;
@@ -550,7 +550,7 @@ public class PrReading_bak extends VerticalLayout implements View {
 
                 if (turno.getTurnoId() != null) {
                     Integer turnoId = turno.getTurnoId();
-                    Lectura lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), tfdNameSeller.getValue(), tfdNameChief.getValue());
+                    Lectura lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(),null/*, tfdNameSeller.getValue(), tfdNameChief.getValue()*/);
 
                     LecturaDetalle ldetalle;
                     boolean crearNuevaLectura = false;

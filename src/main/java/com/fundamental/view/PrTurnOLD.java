@@ -2,8 +2,8 @@ package com.fundamental.view;
 
 import com.fundamental.model.Bomba;
 import com.fundamental.model.Dia;
-import com.fundamental.model.Empleado;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Empleado;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.services.Dao;
 import com.fundamental.model.EstacionConf;
 import com.fundamental.model.EstacionConfHead;
@@ -12,7 +12,7 @@ import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Precio;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Turno;
-import com.fundamental.model.TurnoEmpleadoBomba;
+import com.sisintegrados.generic.bean.TurnoEmpleadoBomba;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.services.SvcEstacion;
@@ -553,7 +553,7 @@ public class PrTurnOLD extends Panel implements View {
                 if (cbxEstacion.getValue() != null) {
                     estacion = (Estacion) cbxEstacion.getValue();
                     SvcTurno svcTurno = new SvcTurno();
-                    List<Horario> listSchedules = svcTurno.getHorarioByEstacionid(estacion.getEstacionId());
+//                    List<Horario> listSchedules = svcTurno.getHorarioByEstacionid(estacion.getEstacionId());
                     cbxSchedule.setContainerDataSource(new ListContainer<>(Horario.class, listSchedules));
                     //Limpiar
                     dfdFecha.setValue(null);

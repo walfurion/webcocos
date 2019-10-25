@@ -3,7 +3,7 @@ package com.fundamental.view;
 import com.fundamental.model.Rol;
 import com.sisintegrados.generic.bean.Usuario;
 import com.sisintegrados.generic.bean.Pais;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoGenericBean;
 import com.fundamental.services.Dao;
