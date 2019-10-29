@@ -7,6 +7,7 @@ import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoGenericBean;
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcMaintenance;
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.PropertyId;
@@ -25,8 +26,10 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
@@ -36,7 +39,9 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.vaadin.maddon.ListContainer;
@@ -55,20 +60,20 @@ public class MntRol extends Panel implements View {
     @PropertyId("status")
     ComboBox cbxStatus;
     List<DtoGenericBean> listStatus = Arrays.asList(new DtoGenericBean("I", "Inactivo"), new DtoGenericBean("A", "Activo"));
-
     BeanContainer<Integer, Rol> bcrRol = new BeanContainer<Integer, Rol>(Rol.class);
     Table tblRoles;
     BeanContainer<Integer, Acceso> bcrAccess = new BeanContainer<Integer, Acceso>(Acceso.class);
     List<Acceso> listAcces = new ArrayList();
     Table tblAccess;
-    Button btnSave, btnAdd;
+    Button btnSave, btnAdd,btnCancel;
     String action;
-
+    OptionGroup group;
 //template
     private VerticalLayout vlRoot;
     private Utils utils = new Utils();
     private Usuario user;
-
+    CheckBox cbxVer,cbxCambiar,cbxEliminar,cbxAgregar;
+    Label lb;
     public MntRol() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
@@ -93,14 +98,24 @@ public class MntRol extends Panel implements View {
         buildButtons();
 
         VerticalLayout vltLeft = utils.buildVertical("vltLeft", false, true, true, false, null);
-        vltLeft.addComponents(tfdName, txaDescription, cbxStatus, tblAccess, btnSave);
+        HorizontalLayout hl2 = utils.buildHorizontal("hl2", false, true, true, false);
+        lb = new Label();
+        lb.setCaption("Pantallas:");
+        hl2.addComponents(cbxVer,cbxCambiar,cbxAgregar,cbxEliminar);
+        vltLeft.addComponents(tfdName, txaDescription, cbxStatus,lb,hl2,tblAccess, btnSave);
         vltLeft.setComponentAlignment(btnSave, Alignment.MIDDLE_CENTER);
         vltLeft.setSizeUndefined();
+//        vltLeft.setComponentAlignment(group,Alignment.TOP_CENTER);
         Responsive.makeResponsive(vltLeft);
 
         VerticalLayout vltRight = utils.buildVertical("vltRight", false, false, true, false, null);
-        vltRight.addComponents(tblRoles, btnAdd);
-        vltRight.setComponentAlignment(btnAdd, Alignment.TOP_CENTER);
+        HorizontalLayout hl = utils.buildHorizontal("hl", true, false, true, false);
+        hl.addComponents(btnAdd,btnCancel);
+        hl.setComponentAlignment(btnAdd, Alignment.TOP_CENTER);
+        hl.setComponentAlignment(btnCancel, Alignment.TOP_LEFT);
+        hl.setSpacing(true);
+        vltRight.addComponents(tblRoles,hl);
+        vltRight.setComponentAlignment(hl, Alignment.TOP_CENTER);
         vltRight.setSizeUndefined();
         Responsive.makeResponsive(vltRight);
 
@@ -161,39 +176,38 @@ public class MntRol extends Panel implements View {
                     bcrAccess.removeAllItems();
                     for (Acceso acc : listAcces) {
                         acc.setSelected(false);
+                        acc.setVer(false);
+                        acc.setCambiar(false);
+                        acc.setAgregar(false);
+                        acc.setEliminar(false);
                         for (Acceso item : rol.getAccesos()) {
                             if (item.getAccesoId().equals(acc.getAccesoId())) {
+//                                System.out.println(" - "+item.getVer()+" - "+item.getCambiar()+" "+item.getAgregar()+" "+item.getEliminar());
                                 acc.setSelected(true);
+                                acc.setVer(item.isVer());
+                                acc.setCambiar(item.isCambiar());
+                                acc.setAgregar(item.isAgregar());
+                                acc.setEliminar(item.isEliminar());
                                 break;
                             }
                         }
                     }
                     bcrAccess.addAll(listAcces);
                     tblAccess.refreshRowCache();
+                    cbxVer.setValue(Boolean.FALSE);
+                    cbxAgregar.setValue(Boolean.FALSE);
+                    cbxCambiar.setValue(Boolean.FALSE);
+                    cbxEliminar.setValue(Boolean.FALSE);
                 }
             }
         });
 
-        tblRoles.setVisibleColumns(new Object[]{"nombre", "estado", "colCanSave", "descripcion"});
-        tblRoles.setColumnHeaders(new String[]{"Nombre", "Estado", "¿Editar?", "Descripcion"});
+        tblRoles.setVisibleColumns(new Object[]{"nombre", "estado", "descripcion"});
+        tblRoles.setColumnHeaders(new String[]{"Nombre", "Estado", "Descripcion"});
         tblRoles.setColumnWidth("descripcion", 600);
         tblRoles.setColumnAlignment("colCanSave", Table.Align.CENTER);
         tblRoles.setColumnAlignment("estado", Table.Align.CENTER);
-
-//        tblRoles.addGeneratedColumn("colEstado", new Table.ColumnGenerator() {
-//                    @Override
-//                    public Object generateCell(Table source, final Object itemId, Object columnId) {
-//                        Label result = new Label();
-//                        String estado = bcrRol.getItem(itemId).getBean().getEstado();
-//                        result.setValue(estado.equals("A") ? "Activo" : "Inactivo");
-//                        result.setWidth("75px");
-//                        return result;
-//                    }
-//                });
-//        tblRoles.setVisibleColumns(new Object[]{"nombre", "estado", "descripcion", "colEstado"});
-//        tblRoles.setColumnHeaders(new String[]{"Nombre", "Estado", "Descripcion", "Estado"});
-
-        tblAccess = utils.buildTable("Pantallas:", 200, 500, bcrAccess, new Object[]{"titulo"}, new String[]{"Pantalla"});
+        tblAccess = utils.buildTable("", 200, 500, bcrAccess, new Object[]{"titulo"}, new String[]{"Pantalla"});
         tblAccess.setSizeUndefined();
         tblAccess.setHeight("250px");
         tblAccess.addStyleName(ValoTheme.TABLE_COMPACT);
@@ -207,9 +221,54 @@ public class MntRol extends Panel implements View {
                 return cbxSelect;
             }
         });
-        tblAccess.setVisibleColumns("colSelected", "nombrePadre", "titulo");
-        tblAccess.setColumnHeaders("", "Grupo", "Pantalla");
-
+//         tblAccess.addGeneratedColumn("colVer", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("ver");
+//                CheckBox cbxSelect = new CheckBox("",pro);
+//                cbxSelect.addStyleName(ValoTheme.CHECKBOX_SMALL);
+//                return cbxSelect;
+//            }
+//        });
+         tblAccess.addGeneratedColumn("colCambiar", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("cambiar");
+                CheckBox cbxSelect = new CheckBox("",pro);
+                cbxSelect.addStyleName(ValoTheme.CHECKBOX_SMALL);
+                return cbxSelect;
+            }
+        });
+         tblAccess.addGeneratedColumn("colAgregar", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("agregar");
+                CheckBox cbxSelect = new CheckBox("",pro);
+                cbxSelect.addStyleName(ValoTheme.CHECKBOX_SMALL);
+                return cbxSelect;
+            }
+        });
+         tblAccess.addGeneratedColumn("colEliminar", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("eliminar");
+                CheckBox cbxSelect = new CheckBox("",pro);
+                cbxSelect.addStyleName(ValoTheme.CHECKBOX_SMALL);
+                return cbxSelect;
+            }
+        });
+         
+//        tblAccess.setVisibleColumns("colSelected", "nombrePadre", "titulo");
+        tblAccess.setVisibleColumns("colSelected", "nombrePadre", "titulo","colCambiar","colAgregar","colEliminar");
+        tblAccess.setColumnHeaders("Ver", "Grupo", "Pantalla","Cambiar","Agregar","Eliminar");
+        tblAccess.setColumnAlignment("colSelected",Table.Align.CENTER);
+        tblAccess.setColumnAlignment("colCambiar",Table.Align.CENTER);
+        tblAccess.setColumnAlignment("colAgregar",Table.Align.CENTER);
+        tblAccess.setColumnAlignment("colEliminar",Table.Align.CENTER);
+        tblAccess.setColumnWidth("colSelected",100);
+        tblAccess.setColumnWidth("colCambiar",100);
+        tblAccess.setColumnWidth("colAgregar",100);
+        tblAccess.setColumnWidth("colEliminar",100);
         //Importante
         binder.bindMemberFields(this);
         binder.setItemDataSource(rol);
@@ -217,6 +276,7 @@ public class MntRol extends Panel implements View {
 
     private void buildButtons() {
         btnAdd = utils.buildButton("Agregar", FontAwesome.PLUS, ValoTheme.BUTTON_PRIMARY);
+        btnCancel = utils.buildButton("Cancelar", FontAwesome.ERASER, ValoTheme.BUTTON_PRIMARY);
         btnAdd.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
@@ -226,8 +286,13 @@ public class MntRol extends Panel implements View {
                 bcrAccess.removeAllItems();
                 for (Acceso acc : listAcces) {
                     acc.setSelected(false);
+                    acc.setAgregar(false);
+                    acc.setEliminar(false);
+                    acc.setCambiar(false);
+                    acc.setVer(false);
                 }
                 bcrAccess.addAll(listAcces);
+                tfdName.focus();
             }
         });
 
@@ -249,8 +314,9 @@ public class MntRol extends Panel implements View {
                 rol.setCreadoPor(user.getUsername());
                 rol.setModificadoPor(user.getUsername());
                 rol.setAccesos(new ArrayList());
-                for (Integer itemId : bcrAccess.getItemIds()) {
+                    for (Integer itemId : bcrAccess.getItemIds()) {
                     if (bcrAccess.getItem(itemId).getBean().isSelected()) {
+                        Acceso a = bcrAccess.getItem(itemId).getBean();
                         rol.getAccesos().add(bcrAccess.getItem(itemId).getBean());
                     }
                 }
@@ -268,11 +334,61 @@ public class MntRol extends Panel implements View {
                 }
             }
         });
+        btnCancel.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+                UI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_ROL.getViewName());
+            }
+        });
+        cbxVer = new CheckBox("Ver", false);
+        cbxVer.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                boolean checked = (boolean) event.getProperty().getValue();
+                setAllCheck("selected",checked);
+            }
+        });
+        cbxCambiar = new CheckBox("Cambiar", false);
+        cbxCambiar.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                System.out.println("event "+event);
+                System.out.println(" -- "+event.getProperty());
+                boolean checked = (boolean) event.getProperty().getValue();
+                setAllCheck("cambiar",checked);
+            }
+        });      
+        cbxAgregar = new CheckBox("Agregar", false);
+        cbxAgregar.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                System.out.println("event "+event);
+                System.out.println(" -- "+event.getProperty());
+                boolean checked = (boolean) event.getProperty().getValue();
+                setAllCheck("agregar",checked);
+            }
+        });  
+         cbxEliminar = new CheckBox("Eliminar", false);
+        cbxEliminar.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                System.out.println("event "+event);
+                System.out.println(" -- "+event.getProperty());
+                boolean checked = (boolean) event.getProperty().getValue();
+                setAllCheck("eliminar",checked);
+            }
+        });  
     }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    public void setAllCheck(String caption,boolean all){
+                for (Object itemId : tblAccess.getItemIds()) {
+                    Item row = tblAccess.getItem(itemId);
+                    row.getItemProperty(caption).setValue(all);
+                }
     }
 
 }

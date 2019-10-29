@@ -22,6 +22,8 @@ import com.fundamental.model.Turno;
 import com.fundamental.model.dto.DtoArqueo;
 import com.fundamental.model.dto.DtoGenericBean;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.generic.bean.Usuario;
+import com.vaadin.data.util.ListSet;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.CheckBox;
 import java.sql.Connection;
@@ -120,14 +122,24 @@ public class Dao {
     protected List<Rol> getRolesByUserid(Integer userId) {
         List<Rol> result = new ArrayList();
         ResultSet rst = null;
+        SvcMaintenance maintenace = new SvcMaintenance();
         try {
             miQuery = "SELECT r.rol_id, r.nombre, r.descripcion, r.rolpadre_id, r.estado "
                     + "FROM rol r, rol_usuario ru "
                     + "WHERE r.rol_id = ru.rol_id AND ru.usuario_id = " + userId;
             pst = getConnection().prepareStatement(miQuery);
+            System.out.println("getRoles "+miQuery);
             rst = pst.executeQuery();
             while (rst.next()) {
-                result.add(new Rol(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5)));
+                System.out.println("next");
+                Rol rl = new Rol(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5));
+                try{
+                List<Acceso> accesos = maintenace.getAccessByRolid(rst.getInt(1));
+                rl.setAccesos(accesos);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+                result.add(rl);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -1103,22 +1115,53 @@ public class Dao {
         List<Acceso> tempList = new ArrayList();
         ResultSet rst = null;
         try {
+            isSysadmin = false;
             //Si el usuario es SYSADMIN, trae todos los accesos.
+            /*modificado por cambios de seguridad anterior
             String isNotSysadmin = (isSysadmin) ? " WHERE a.estado = 'A' " : ", acceso_rol ar, rol_usuario ru, usuario u WHERE a.estado = 'A' AND a.acceso_id = ar.acceso_id AND ar.rol_id = ru.rol_id AND ru.usuario_id = u.usuario_id AND u.usuario_id = " + usuarioId;
-            miQuery = "SELECT DISTINCT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, a.estado "
+            
+             miQuery = "SELECT DISTINCT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, a.estado "
+                    + " ,ar.ver,ar.cambiar,ar.agregar,ar.eliminar "
                     + "FROM acceso a " + isNotSysadmin
                     + " CONNECT BY PRIOR a.acceso_id = a.padre "
-                    + "START WITH a.padre IS NULL "
-                    + "ORDER BY NVL(a.padre, 0), a.orden";
+                    + " START WITH a.padre IS NULL "
+                    + " ORDER BY NVL(a.padre, 0), a.orden";
+            System.out.println("valida user = "+miQuery);
+            */
+            String isNotSysadmin = (isSysadmin) ? " WHERE a.estado = 'A' " : ", acceso_rol ar, rol_usuario ru, usuario u WHERE a.estado = 'A' AND a.acceso_id = ar.acceso_id AND ar.rol_id = ru.rol_id AND ru.usuario_id = u.usuario_id AND u.usuario_id = " + usuarioId;
+            miQuery = "SELECT DISTINCT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, a.estado "
+//                    + " ,ar.ver,ar.cambiar,ar.agregar,ar.eliminar "
+                    + "FROM acceso a " + isNotSysadmin
+                    + " CONNECT BY PRIOR a.acceso_id = a.padre "
+                    + " ORDER BY NVL(a.padre, 0), a.orden";
+            System.out.println("valida user = "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
+            Acceso access;
             while (rst.next()) {
+                access = new Acceso();
+                access.setAccesoId(rst.getInt(1));
+                access.setTitulo(rst.getString(2));
+                access.setPadre(rst.getInt(3));
+                access.setOrden(rst.getInt(4));
+                access.setRecursoInterno(rst.getString(5));
+                access.setDescripcion(rst.getString(6));
+                access.setEstado(rst.getString(7));
+                access.setAccesos(new ArrayList<Acceso>());
+//                access.setVer(rst.getInt(8)==1?true:false);
+//                access.setCambiar(rst.getInt(9)==1?true:false);
+//                access.setAgregar(rst.getInt(10)==1?true:false);
+//                access.setEliminar(rst.getInt(11)==1?true:false);
+                
                 if (rst.getString(3) == null || rst.getInt(3) == 0) { //padres
-                    result.add(new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7)));
+                    result.add(access);
+////                    result.add(new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7)));
                 } else { //hijos
-                    tempList.add(new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7)));
+//                    tempList.add(new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7)));
+                    tempList.add(access);
                 }
             }
+            result = getParents();
             for (Acceso a : result) {
                 for (Acceso acc : tempList) {
                     if (a.getAccesoId().equals(acc.getPadre())) {
@@ -1615,5 +1658,52 @@ public class Dao {
         }
         return result;
     }
-
+    
+     public List<Acceso> getParents() {
+        List<Acceso> p = new ArrayList();
+        ResultSet rst = null;
+        try {
+            String query =  " select ACCESO_ID,TITULO,PADRE,ORDEN,DESCRIPCION " +
+                            " from acceso where PADRE is null and upper(estado)='A' order by orden";
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+             Acceso access;
+            while (rst.next()) {
+                access = new Acceso();
+                access.setAccesoId(rst.getInt(1));
+                access.setTitulo(rst.getString(2));
+                access.setPadre(rst.getInt(3));
+                access.setOrden(rst.getInt(4));
+                access.setDescripcion(rst.getString(5));
+                access.setAccesos(new ArrayList<Acceso>());
+                p.add(access);
+                
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return p;
+    }
+    public Acceso getAccess(String screen){
+        Acceso acceso = new Acceso();
+         Usuario user = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
+                for (Acceso a : user.getRoles().get(0).getAccesos()) {
+                    if (a.getRecursoInterno().trim().toUpperCase().equals(screen)) {
+                        System.out.println(screen + " - " + a.getTitulo() + " ACCIONES  " 
+                                + a.isVer() + " " + a.isCambiar() + " - " + a.isAgregar());
+                        acceso.setVer(true);
+                        acceso.setCambiar(a.isCambiar());
+                        acceso.setEliminar(a.isEliminar());
+                        acceso.setAgregar(a.isAgregar());
+                        return acceso;
+                    }
+                }
+                return acceso;
+    }    
 }
