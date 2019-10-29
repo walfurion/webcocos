@@ -534,7 +534,7 @@ public class SvcTurno extends Dao {
         return result;
     }
 
-    public boolean doCreateTurn2(boolean crearDia, Dia dia, Turno turno, List<Precio> listPrice, BeanItemContainer<EmpleadoBombaTurno> listTurnoEmpPump,String creadoPor) {
+    public boolean doCreateTurn2(boolean crearDia, Dia dia, Turno turno, List<Precio> listPrice, BeanItemContainer<EmpleadoBombaTurno> listTurnoEmpPump, String creadoPor) {
         boolean result = false;
         ArrayList<EmpleadoBombaTurno> listAsigna = new ArrayList<EmpleadoBombaTurno>();
         try {
@@ -575,10 +575,8 @@ public class SvcTurno extends Dao {
 
             miQuery = "INSERT INTO precio (turno_id, producto_id, tipodespacho_id, precio, creado_por, creado_persona, creado_el) "
                     + "VALUES (?, ?, ?, ?, ?, ?, SYSDATE)";
-            
-             System.out.println("PRECIO ENVIE GUARDAR "+ listPrice.size());
+
             for (Precio precio : listPrice) {
-                System.out.println("PRECIO ENVIE GUARDAR "+precio.getPrecio()+"  "+precio.getProductoId());
                 pst = getConnection().prepareStatement(miQuery);
                 pst.setInt(1, turnoId);
                 pst.setInt(2, precio.getProductoId());
@@ -637,7 +635,7 @@ public class SvcTurno extends Dao {
                 pst.setInt(1, turnoId);
                 pst.setInt(2, item.getEmpleadoid());
                 pst.setInt(3, item.getBombaid());
-                pst.setString(4,creadoPor);
+                pst.setString(4, creadoPor);
                 pst.executeUpdate();
                 closePst();
             }
@@ -653,6 +651,74 @@ public class SvcTurno extends Dao {
             exc.printStackTrace();
         }
         return result;
+    }
+
+    public void modificarTurno(Integer idturno, BeanItemContainer<EmpleadoBombaTurno> listTurnoEmpPump, String usuario) throws SQLException {
+        ArrayList<EmpleadoBombaTurno> listAsigna = new ArrayList<EmpleadoBombaTurno>();
+
+        PreparedStatement pst = null;
+
+        /*Elimina antes de volver asignar*/
+        try {
+            miQuery = "DELETE FROM turno_empleado_bomba WHERE turno_id = " + idturno;
+            pst = getConnection().prepareStatement(miQuery);
+            pst.executeUpdate();
+            closePst();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        /*Desgloza las asignaciones por bomba*/
+        for (EmpleadoBombaTurno rstB : listTurnoEmpPump.getItemIds()) {
+            if (rstB.isBomba1()) {
+                listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 1));
+            }
+            if (rstB.isBomba2()) {
+                listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 2));
+            }
+            if (rstB.isBomba3()) {
+                listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 3));
+            }
+            if (rstB.isBomba4()) {
+                listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 4));
+            }
+            if (rstB.isBomba5()) {
+                listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 5));
+            }
+            if (rstB.isBomba6()) {
+                listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 6));
+            }
+            if (rstB.isBomba7()) {
+                listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 7));
+            }
+            if (rstB.isBomba8()) {
+                listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 8));
+            }
+            if (rstB.isBomba9()) {
+                listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 9));
+            }
+            if (rstB.isBomba10()) {
+                listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 10));
+            }
+            if (rstB.isBomba11()) {
+                listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 11));
+            }
+            if (rstB.isBomba12()) {
+                listAsigna.add(new EmpleadoBombaTurno(rstB.getTurnoid(), rstB.getEmpleadoid(), "", 12));
+            }
+        }
+
+        miQuery = "INSERT INTO turno_empleado_bomba (turno_id, empleado_id, bomba_id, creado_por) "
+                + "VALUES (?, ?, ?, ?)";
+        for (EmpleadoBombaTurno item : listAsigna) {
+            pst = getConnection().prepareStatement(miQuery);
+            pst.setInt(1, idturno);
+            pst.setInt(2, item.getEmpleadoid());
+            pst.setInt(3, item.getBombaid());
+            pst.setString(4, usuario);
+            pst.executeUpdate();
+            closePst();
+        }
     }
 
     public boolean doCreateTurn(boolean crearDia, Dia dia, Turno turno, List<Precio> listPrice, List<TurnoEmpleadoBomba> listTurnoEmpPump) {
@@ -885,6 +951,36 @@ public class SvcTurno extends Dao {
         query = "SELECT seq_empleado.nextval \n"
                 + "FROM DUAL";
 
+        ResultSet rst = null;
+        try {
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            if (rst.next()) {
+                id = rst.getInt(1);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (pst != null) {
+                    pst.close();
+                }
+                if (rst != null) {
+                    rst.close();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return id;
+    }
+
+    public Integer getExistHorario(Integer idestacion, Integer idconfhead, Integer idhorario, String fecha) {
+        Integer id = -1;
+        query = "select count(*) from turno where estacion_id = " + idestacion
+                + " and estacionconfhead_id = "+idconfhead
+                + " and HORARIO_ID = "+idhorario
+                + " and fecha = to_date('"+fecha+"','dd/mm/yyyy')";
         ResultSet rst = null;
         try {
             pst = getConnection().prepareStatement(query);

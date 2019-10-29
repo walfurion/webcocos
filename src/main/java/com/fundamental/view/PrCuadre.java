@@ -1126,6 +1126,7 @@ public class PrCuadre extends Panel implements View {
                 for (Integer itemId : bcrMediopago.getItemIds()) {
                     if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_VENTA_PREPAGO) {
                         bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDouble);
+//                        bcrMediopago.getItem(itemId).getItemProperty("value").setReadOnly(true);
                         break;
                     }
                 }
@@ -1253,11 +1254,16 @@ public class PrCuadre extends Panel implements View {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("value");  //Atributo del bean
+                Property proid = source.getItem(itemId).getItemProperty("productoId");  //Atributo del bean
+                Property pronombre = source.getItem(itemId).getItemProperty("nombre");  //Atributo del bean
                 final TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
                 tfdValue.setValue("0.00");
                 tfdValue.setWidth("100px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
+                if((Integer) proid.getValue()==9||(Integer) proid.getValue()==10){
+                    tfdValue.setReadOnly(true);
+                }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
@@ -1329,11 +1335,15 @@ public class PrCuadre extends Panel implements View {
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 System.out.println("tblMediospago.colMonto::: " + source.getId());
                 Property pro = source.getItem(itemId).getItemProperty("value");  //Atributo del bean
+                Property desc = source.getItem(itemId).getItemProperty("mediopagoId");
                 final TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
                 tfdValue.setValue("0.00");
                 tfdValue.setWidth("125px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
+                if ((Integer) desc.getValue() == 6 || (Integer) desc.getValue() == 5) {
+                    tfdValue.setReadOnly(true);
+                }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
