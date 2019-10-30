@@ -1,7 +1,6 @@
 package com.sisintegrados.generic.bean;
 
 import com.fundamental.model.Bomba;
-import com.fundamental.model.Empleado;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;

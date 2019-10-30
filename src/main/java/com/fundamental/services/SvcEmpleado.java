@@ -5,18 +5,23 @@
  */
 package com.fundamental.services;
 
-import com.fundamental.model.Empleado;
+import com.sisintegrados.generic.bean.Empleado;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author 50230
  */
 public class SvcEmpleado extends Dao {
-    
+
     private String query;
+
     public SvcEmpleado() {
     }
 
@@ -28,16 +33,19 @@ public class SvcEmpleado extends Dao {
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
-                result.add(new Empleado(rst.getInt(1),rst.getString(2),rst.getString(3)));
+                result.add(new Empleado(rst.getInt(1), rst.getString(2), rst.getString(3)));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
-    
+
     public Empleado doAction(String action, Empleado empleado) {
         try {
             if (action.equals(Dao.ACTION_ADD)) {
@@ -73,5 +81,39 @@ public class SvcEmpleado extends Dao {
         }
         return empleado;
     }
-    
+
+    public void insert(String nombre, String estado, String usuario) throws SQLException {
+        PreparedStatement pst = null;
+        query = "INSERT INTO empleado (empleado_id, nombre, estado, creado_por, creado_el) "
+                + "VALUES (seq_empleado.nextval, ?, ?, ?,SYSDATE)";
+        try {
+            pst = getConnection().prepareStatement(query);
+            pst.setString(1, nombre);
+            pst.setString(2, estado);
+            pst.setString(3, usuario);
+            pst.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(SvcEmpleado.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+        }
+    }
+
+    public void update(Integer idempleado, String nombre, String estado, String usuario) throws SQLException {
+        PreparedStatement pst = null;
+        query = "UPDATE empleado set nombre = '" + nombre + "', estado = '" + estado + "', creado_por = '" + usuario + "', creado_el = sysdate where empleado_id = " + idempleado;
+        try {
+            pst = getConnection().prepareStatement(query);
+            pst.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(SvcEmpleado.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+        }
+    }
+
 }

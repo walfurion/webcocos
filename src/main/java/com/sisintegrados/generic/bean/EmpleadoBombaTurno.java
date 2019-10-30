@@ -15,11 +15,13 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class EmpleadoBombaTurno {
 
     private int turnoid;
-    private int empleadoid;
+    public int empleadoid;
     private String nombre;
+    private int maxBombas;
     private boolean bomba1 = false;
     private boolean bomba2 = false;
     private boolean bomba3 = false;
@@ -32,14 +34,22 @@ public class EmpleadoBombaTurno {
     private boolean bomba10 = false;
     private boolean bomba11 = false;
     private boolean bomba12 = false;
+    private int bombaid;
 
-    public EmpleadoBombaTurno(int turnoid,int empleadoid, String nombre) {
+    public EmpleadoBombaTurno(int turnoid, int empleadoid, String nombre) {
         this.turnoid = turnoid;
         this.empleadoid = empleadoid;
         this.nombre = nombre;
     }
 
+    public EmpleadoBombaTurno(int turnoid, int empleadoid, String nombre,int bombaid) {
+        this.turnoid = turnoid;
+        this.empleadoid = empleadoid;
+        this.nombre = nombre;
+        this.bombaid = bombaid;
+    }
+
     public String toString() {
-        return "EmpleadoTurno: { turnoid = "+turnoid+", empleadoid ="+empleadoid+", nombre = "+nombre+", bomba1 = "+bomba1+", bomba2 = "+bomba2+", bomba3 = "+bomba3+", bomba4 = "+bomba4+", bomba5 = "+bomba5+", bomba6 = "+bomba6+", bomba7 = "+bomba7+", bomba8 = "+bomba8+", bomba9 = "+bomba9+", bomba10 = "+bomba10+", bomba11 = "+bomba11+", bomba12 = "+bomba12+" }";
+        return "EmpleadoTurno: { turnoid = " + turnoid + ", empleadoid =" + empleadoid + ", nombre = " + nombre + ", bomba1 = " + bomba1 + ", bomba2 = " + bomba2 + ", bomba3 = " + bomba3 + ", bomba4 = " + bomba4 + ", bomba5 = " + bomba5 + ", bomba6 = " + bomba6 + ", bomba7 = " + bomba7 + ", bomba8 = " + bomba8 + ", bomba9 = " + bomba9 + ", bomba10 = " + bomba10 + ", bomba11 = " + bomba11 + ", bomba12 = " + bomba12 + " }";
     }
 }

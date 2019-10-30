@@ -32,6 +32,7 @@ public class Constant {
 
     //... el resto de paises ...
     public static final int MP_CRI_VENTA_LUBS_UNO = 10;
+    public static final int MP_CRI_VENTA_LUBS = 9;
 
     public static final int AUTOSERVICIO = 1;
     public static final int SERVICIO_COMPLETO = 2;

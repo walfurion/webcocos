@@ -3,7 +3,7 @@ package com.fundamental.view;
 import com.fundamental.model.Bomba;
 import com.fundamental.model.BombaEmpleadoEstacion;
 import com.fundamental.model.Dia;
-import com.fundamental.model.Empleado;
+import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.services.Dao;
 import com.fundamental.model.dto.DtoLectura;
@@ -126,6 +126,7 @@ public class PrReading extends VerticalLayout implements View {
     File tempFile;
     String[] uniqueStation;
     public TextField txtNumeroCaso;
+    Double cantCalibrar;
 
     public PrReading() {
         setSizeFull();
@@ -607,6 +608,20 @@ public class PrReading extends VerticalLayout implements View {
                     return;
                 }
 
+                if (txtNumeroCaso.getValue() != null) {
+                    try {
+                        if (cantCalibrar > 0.00 && txtNumeroCaso.getValue().length() == 0) {
+                            Notification.show("ADVERTENCIA:", "Tiene por lo menos un dato de calibración, debe ingresar un numero de caso", Notification.Type.WARNING_MESSAGE);
+                            return;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+                
+
                 if (turno.getTurnoId() != null) {
                     Integer turnoId = turno.getTurnoId();
                     Lectura lectura = new Lectura();
@@ -615,8 +630,8 @@ public class PrReading extends VerticalLayout implements View {
                          * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
                          */
                         );
-                    } else {
 
+                    } else {
                         lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), null/**
                          * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
                          */
@@ -766,10 +781,11 @@ public class PrReading extends VerticalLayout implements View {
                     svcLectura.closeConnections();
 
                     if (contador > 0) {
-                        if (crearNuevaLectura && existCalibration) {
-                            Mail mail = new Mail(parametro.getValor(), "Web COCOs - Calibración " + user.getEstacionLogin().getNombre(), "Se ingresado una lectura con calibraciones", new ArrayList(Arrays.asList(tempFile.getAbsolutePath())));
-                            mail.run();
-                        }
+                        // ----------17/10/2019 se omite correo
+//                        if (crearNuevaLectura && existCalibration) {
+//                            Mail mail = new Mail(parametro.getValor(), "Web COCOs - Calibración " + user.getEstacionLogin().getNombre(), "Se ingresado una lectura con calibraciones", new ArrayList(Arrays.asList(tempFile.getAbsolutePath())));
+//                            mail.run();
+//                        }
 
 //                    if (lectura.getLecturaId() != null) {
 //                        Notification.show("La lectura se ha creado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
@@ -1384,8 +1400,10 @@ public class PrReading extends VerticalLayout implements View {
                             Double cantConvertida = Double.valueOf(nfd.getValue());
                             if (cantConvertida > 0) {
                                 txtNumeroCaso.setVisible(true);
+                                cantCalibrar = 1.00;
                             } else {
                                 txtNumeroCaso.setVisible(false);
+                                cantCalibrar = 0.00;
                             }
                         } catch (Exception e) {
 
