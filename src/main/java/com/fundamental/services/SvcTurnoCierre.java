@@ -133,7 +133,7 @@ public class SvcTurnoCierre extends Dao {
             query = "select ARQ.ARQUEOCAJA_ID, ARQ.LOTE, SUM(ARQ.MONTO), TAR.NOMBRE, TAR.TARJETA_ID "
                     + "from ARQUEOCAJA_TC ARQ, TARJETA TAR "
                     + "where ARQ.TARJETA_ID=TAR.TARJETA_ID and ARQUEOCAJA_ID IN (" + arqueocajaId + ") "
-                    + "group by ARQ.ARQUEOCAJA_ID, ARQ.LOTE, TAR.NOMBRE, TAR.TARJETA_ID ";
+                    + "group by ARQ.ARQUEOCAJA_ID, ARQ.LOTE, TAR.NOMBRE, TAR.TARJETA_ID order by TAR.NOMBRE, ARQ.LOTE ";
             pst = getConnection().prepareStatement(query);
             System.out.println("entra a la tarjeta "+query);
             ResultSet rst = pst.executeQuery();
