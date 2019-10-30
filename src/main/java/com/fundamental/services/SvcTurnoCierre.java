@@ -11,6 +11,7 @@ import com.fundamental.model.Producto;
 import com.fundamental.model.dto.InventarioDto;
 import com.fundamental.model.dto.RecepcionDto;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.generic.bean.ArqueoTC;
 import com.vaadin.ui.CheckBox;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -81,6 +82,7 @@ public class SvcTurnoCierre extends Dao {
                     + "WHERE ad.mediopago_id = m.mediopago_id AND ad.arqueocaja_id IN (" + arqueoIds + ") "
                     + "GROUP BY m.mediopago_id, m.nombre, m.tipo "
                     + "ORDER BY m.mediopago_id";
+            System.out.println("query medio pago "+query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Mediopago mediopago;
@@ -106,6 +108,7 @@ public class SvcTurnoCierre extends Dao {
                     + "WHERE e.mediopago_id = m.mediopago_id AND e.arqueocaja_id IN (" + arqueoIds + ") "
                     + "GROUP BY m.mediopago_id, m.nombre, m.tipo, e.orden, e.efectivo_id "
                     + "ORDER BY efectivo_id, m.mediopago_id";
+            System.out.println("query efectivo "+query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Mediopago mediopago;
@@ -115,6 +118,29 @@ public class SvcTurnoCierre extends Dao {
                 mediopago.setValue(rst.getDouble(5));
                 mediopago.setEfectivoId(rst.getInt(6));
                 result.add(mediopago);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try { pst.close(); } catch (Exception ignore) { }
+        }
+        return result;
+    }
+    
+    public List<ArqueoTC> getArqueoTC(String arqueocajaId) {
+        List<ArqueoTC> result = new ArrayList();
+        try {
+            query = "select ARQ.ARQUEOCAJA_ID, ARQ.LOTE, SUM(ARQ.MONTO), TAR.NOMBRE, TAR.TARJETA_ID "
+                    + "from ARQUEOCAJA_TC ARQ, TARJETA TAR "
+                    + "where ARQ.TARJETA_ID=TAR.TARJETA_ID and ARQUEOCAJA_ID IN (" + arqueocajaId + ") "
+                    + "group by ARQ.ARQUEOCAJA_ID, ARQ.LOTE, TAR.NOMBRE, TAR.TARJETA_ID order by TAR.NOMBRE, ARQ.LOTE ";
+            pst = getConnection().prepareStatement(query);
+            System.out.println("entra a la tarjeta "+query);
+            ResultSet rst = pst.executeQuery();
+            ArqueoTC atc;
+            while (rst.next()) {
+                atc = new ArqueoTC(rst.getInt(1), rst.getString(2), rst.getDouble(3), rst.getString(4), rst.getInt(5));
+                result.add(atc);
             }
         } catch (Exception exc) {
             exc.printStackTrace();

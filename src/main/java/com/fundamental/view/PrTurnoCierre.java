@@ -17,6 +17,7 @@ import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.generic.bean.ArqueoTC;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -136,6 +137,16 @@ public class PrTurnoCierre extends Panel implements View {
             return super.formatPropertyValue(rowId, colId, property);
         }
     };
+    
+    Table tableTarjeta = new Table() {
+        @Override
+        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
+            if (colId.equals("value")) {
+                return numberFmt.format((property.getValue()==null) ? 0D : property.getValue());
+            }
+            return super.formatPropertyValue(rowId, colId, property);
+        }
+    };
 
     BeanContainer<Integer, Arqueocaja> bcrArqueocaja = new BeanContainer<Integer, Arqueocaja>(Arqueocaja.class);
     ;
@@ -144,6 +155,7 @@ public class PrTurnoCierre extends Panel implements View {
     BeanContainer<Integer, Producto> bcrProducto = new BeanContainer<Integer, Producto>(Producto.class);
     BeanContainer<Integer, Mediopago> bcrMediospago = new BeanContainer<Integer, Mediopago>(Mediopago.class);
     BeanContainer<Integer, Mediopago> bcrEfectivo = new BeanContainer<Integer, Mediopago>(Mediopago.class);
+    BeanContainer<Integer, ArqueoTC> bcrTarjeta = new BeanContainer<Integer, ArqueoTC>(ArqueoTC.class);
 
     Double totalVentas = 0D, totalDinero = 0D;
     String symCurrency, symVolumen;
@@ -179,6 +191,7 @@ public class PrTurnoCierre extends Panel implements View {
         buildTableProductos();
         buildTableMediosPago();
         buildTableEfectivo();
+        buildTableTarjeta();
         buildFilters();
         buildButtons();
 
@@ -236,7 +249,7 @@ public class PrTurnoCierre extends Panel implements View {
         Responsive.makeResponsive(content);
         content.addComponents(
                 utils.vlContainer(vlTableButtons), utils.vlContainer(tableBombas), utils.vlContainer(tableVentas), utils.vlContainer(tableProductos),
-                utils.vlContainer(tableMediosPago), utils.vlContainer(tableEfectivo) //                hlContent, hlContent2, //hlContent5, 
+                utils.vlContainer(tableMediosPago), utils.vlContainer(tableEfectivo), utils.vlContainer(tableTarjeta) //                hlContent, hlContent2, //hlContent5, 
                 //                hlContent3, 
                 , utils.vlContainer(hlContent4)
         );
@@ -264,6 +277,7 @@ public class PrTurnoCierre extends Panel implements View {
         bcrProducto.setBeanIdProperty("productoId");
         bcrMediospago.setBeanIdProperty("mediopagoId");
         bcrEfectivo.setBeanIdProperty("efectivoId");
+        bcrTarjeta.setBeanIdProperty("tarjetaId");
 
         SvcTurnoCierre service = new SvcTurnoCierre();
 
@@ -390,6 +404,7 @@ service.closeConnections();
                     bcrProducto.removeAllItems();
                     bcrMediospago.removeAllItems();
                     bcrEfectivo.removeAllItems();
+                    bcrTarjeta.removeAllItems();
 calcularSumas();
         
                     turno = new Turno();
@@ -608,10 +623,12 @@ actionComboboxTurno();
                         bcrMediospago.removeAllItems();
                         //Determinar medios de pago (efectivo)
                         bcrEfectivo.removeAllItems();
+                        bcrTarjeta.removeAllItems();
                         if (!arqueosIds.isEmpty()) {
                             bcrProducto.addAll(svcTC.getProductoByArqueoid(arqueosIds));
                             bcrMediospago.addAll(svcTC.getMediopagoByArqueoid(arqueosIds));
                             bcrEfectivo.addAll(svcTC.getEfectivoByArqueoid(arqueosIds));
+                            bcrTarjeta.addAll(svcTC.getArqueoTC(arqueosIds));
                         }
                         svcTC.closeConnections();
                         calcularSumas();
@@ -635,7 +652,7 @@ actionComboboxTurno();
 
     private void calcularSumas() {
         totalVentas = totalDinero = 0D;
-        Double tpVolumen = 0D, tpVentas = 0D, tpProducto = 0D, tpMediospago = 0D, tpEfectivo = 0D;
+        Double tpVolumen = 0D, tpVentas = 0D, tpProducto = 0D, tpMediospago = 0D, tpEfectivo = 0D, tpTarjeta = 0D;
         for (Integer id : bcrVentas.getItemIds()) {
             totalVentas += bcrVentas.getItem(id).getBean().getVenta();
             tpVentas += bcrVentas.getItem(id).getBean().getVenta();
@@ -653,6 +670,10 @@ actionComboboxTurno();
             totalDinero += bcrEfectivo.getItem(id).getBean().getValue();
             tpEfectivo += bcrEfectivo.getItem(id).getBean().getValue();
         }
+        for (Integer id : bcrTarjeta.getItemIds()) {
+//            totalDinero += bcrTarjeta.getItem(id).getBean().getValue();
+            tpTarjeta += bcrTarjeta.getItem(id).getBean().getValue();
+        }
 
         tableVentas.setFooterVisible(true);
         tableVentas.setColumnFooter("nombreDespacho", "Total:");
@@ -668,6 +689,10 @@ actionComboboxTurno();
         tableEfectivo.setFooterVisible(true);
         tableEfectivo.setColumnFooter("nombre", "Total:");
         tableEfectivo.setColumnFooter("value", symCurrency + numberFmt.format(tpEfectivo));
+        
+        tableTarjeta.setFooterVisible(true);
+        tableTarjeta.setColumnFooter("nombre", "Total:");
+        tableTarjeta.setColumnFooter("value", symCurrency + numberFmt.format(tpTarjeta));
         
     }
 
@@ -721,6 +746,16 @@ actionComboboxTurno();
         tableEfectivo.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT);
         tableEfectivo.setHeight(200f, Unit.PIXELS);
         tableEfectivo.addStyleName(ValoTheme.TABLE_SMALL);
+    }
+    
+    private void buildTableTarjeta() {
+        tableTarjeta.setCaption("Tarjeta:");
+        tableTarjeta.setContainerDataSource(bcrTarjeta);
+        tableTarjeta.setVisibleColumns(new Object[]{"nombre", "lote", "value"});
+        tableTarjeta.setColumnHeaders(new String[]{"Nombre", "Lote", "Monto"});
+        tableTarjeta.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT);
+        tableTarjeta.setHeight(200f, Unit.PIXELS);
+        tableTarjeta.addStyleName(ValoTheme.TABLE_SMALL);
     }
 
     private HorizontalLayout buildDetalleMontos() {

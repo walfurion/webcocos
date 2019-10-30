@@ -36,6 +36,18 @@ public class Producto {
         this.ordenPos = ordenPos;
     }
 
+    public Producto(Integer productoId, String nombre, String codigo, Integer idMarca, String estado, Double precio, String presentacion ) {
+        this.productoId = productoId;
+        this.nombre = nombre;
+        this.codigo = codigo;
+        this.idMarca = idMarca;
+        this.estado = estado;
+        this.precio = precio;
+        this.presentacion = presentacion;
+    }
+
+    
+
     public Producto(Integer productoId, String nombre, String codigo, Integer tipoId, Integer ordenPos, String estado, Integer codigoNumerico, String presentacion, String codigoBarras, Integer idMarca, String codigoEnvoy, String sku) {
         this.productoId = productoId;
         this.nombre = nombre;

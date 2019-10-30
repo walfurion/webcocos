@@ -27,15 +27,19 @@ import com.fundamental.model.dto.DtoProducto;
 import com.fundamental.services.SvcArqueo;
 import com.fundamental.services.SvcClientePrepago;
 import com.fundamental.services.SvcCuadre;
+import com.fundamental.services.SvcDetalleLubricantes;
+import com.fundamental.services.SvcProducto;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
 import com.fundamental.utils.Mail;
 import com.fundamental.utils.Util;
+import com.sisintegrados.generic.bean.GenericProduct;
 import com.sisintegrados.view.form.FormDetalleVenta;
 import com.sisintegrados.view.form.FormDetalleVenta2;
 import com.sisintegrados.view.form.FormClientePrepago;
+import com.sisintegrados.view.form.FormDetalleLubricantes;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -185,6 +189,7 @@ public class PrCuadre extends Panel implements View {
     String currencySymbol, volumenSymbol, tmpString;
     File tempFile;
     double tmpDouble;
+    double tmpDoublePr;
     int tmpInt;
     List<Pais> allCountries;
     String[] uniqueStation;
@@ -195,6 +200,14 @@ public class PrCuadre extends Panel implements View {
     FormClientePrepago formClientePrepago;
     BeanContainer<Integer, DtoProducto> bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
     SvcClientePrepago dao = new SvcClientePrepago();
+
+    /*Detalle Lubricantes*/
+    FormDetalleLubricantes formProductos;
+    BeanContainer<Integer, DtoProducto> bcrProduct = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+    //SvcProducto daoProd = new SvcProducto();
+    double tmpDoubleProdUno;
+    double tmpDoubleProdNoUno;
+    SvcDetalleLubricantes daoLubs = new SvcDetalleLubricantes();
 
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -352,53 +365,6 @@ public class PrCuadre extends Panel implements View {
         defineInitialCountryStation();
     }
 
-    private void formLubricantes(String tipo) {
-        if (tipo.equals("Editar")) {
-            if (cmbLubricante.getValue() != null) {
-                Lubricanteprecio lubricante = new Lubricanteprecio();
-                lubricante = (Lubricanteprecio) cmbLubricante.getValue();
-                frmDetalle = new FormDetalleVenta(tipo, lubricante);
-                frmDetalle.addCloseListener((e) -> {
-                    cmbLubricante.removeAllItems();
-                    contLubricante.removeAllItems();
-                    contLubricante = new BeanItemContainer<Lubricanteprecio>(Lubricanteprecio.class);
-//                    contLubricante.addAll(dao.getEmpleados2(true));
-                    cmbLubricante.setContainerDataSource(contLubricante);
-                    cmbLubricante.setItemCaptionPropertyId("nombre");
-                    cmbLubricante.setStyleName(ValoTheme.COMBOBOX_TINY);
-                    cmbLubricante.setRequired(true);
-                    cmbLubricante.setRequiredError("Debe Seleccionar empleado");
-                    cmbLubricante.setNullSelectionAllowed(false);
-                    toolbarContainerCmbLubricantes.removeAllComponents();
-                    toolbarContainerCmbLubricantes.addComponent(cmbLubricante);
-                });
-                getUI().addWindow(frmDetalle);
-                frmDetalle.focus();
-            } else {
-                Notification.show("Warning!!!", "Debe seleccionar un empleado, para modificar", Notification.Type.WARNING_MESSAGE);
-            }
-        } else if (tipo.equals("Nuevo")) {
-            Lubricanteprecio lub = new Lubricanteprecio();
-            lub = (Lubricanteprecio) cmbLubricante.getValue();
-            frmDetalle = new FormDetalleVenta(tipo, lub);
-            frmDetalle.addCloseListener((e) -> {
-                cmbLubricante.removeAllItems();
-                contLubricante.removeAllItems();
-                contLubricante = new BeanItemContainer<Lubricanteprecio>(Lubricanteprecio.class);
-//                contLubricante.addAll(dao.getEmpleados2(true));
-                cmbLubricante.setContainerDataSource(contLubricante);
-                cmbLubricante.setItemCaptionPropertyId("nombre");
-                cmbLubricante.setStyleName(ValoTheme.COMBOBOX_TINY);
-                cmbLubricante.setRequired(true);
-                cmbLubricante.setRequiredError("Debe Seleccionar empleado");
-                cmbLubricante.setNullSelectionAllowed(false);
-                toolbarContainerCmbLubricantes.removeAllComponents();
-                toolbarContainerCmbLubricantes.addComponent(cmbLubricante);
-            });
-            getUI().addWindow(frmDetalle);
-            frmDetalle.focus();
-        }
-    }
     private CssLayout toolbarContainerCmbLubricantes;
     private CssLayout toolbarContainerTableAsignacion;
 
@@ -598,6 +564,7 @@ public class PrCuadre extends Panel implements View {
                 contLubs = new ListContainer<>(Producto.class, service.getLubricantsByCountryStation(true, estacion.getPaisId(), estacion.getEstacionId()));
                 bcrClientes.removeAllItems();
                 bcrPrepaid.removeAllItems();
+                bcrLubs.removeAllItems();
 
                 service.closeConnections();
 //                determinarPermisos();
@@ -731,16 +698,13 @@ public class PrCuadre extends Panel implements View {
                     /*Recupera Detalle Cliente Prepago*/ //ASG
                     bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
                     bcrPrepaid = dao.getDetallePrepago(arqueocaja.getArqueocajaId());
-//                    for (Integer itemId : bcrPrepaid.getItemIds()) {
-//                        System.out.println(" CLIENTE ID "+bcrPrepaid.getItem(itemId).getBean().getCliente().getNombre());
-//                        System.out.println(" CLIENTE NOMBRE "+bcrPrepaid.getItem(itemId).getBean().getCliente().getNombre());
-//                        System.out.println(" MONTO "+bcrPrepaid.getItem(itemId).getBean().getValor());
-//                    }
+                    
+                    /*Recupera Detalle Lubricantes*/ //JLopez
+                    bcrLubs= new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrLubs = daoLubs.getDetalleProducto(arqueocaja.getArqueocajaId());
 
-//                    System.out.println("ID CAJA RECUPERAR " + arqueocaja.getArqueocajaId());
-                    //Fin
                 }
-//                service.closeConnections();
+
 
             }
         });
@@ -905,7 +869,7 @@ public class PrCuadre extends Panel implements View {
         btnLubricante = new Button("Lubricantes", FontAwesome.PLUS);
         btnLubricante.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnLubricante.addStyleName(ValoTheme.BUTTON_SMALL);
-//        btnLubricante.addClickListener(clickEvent -> metodo1());
+        btnLubricante.addClickListener(clickEvent -> formDetalleProd(estacion.getEstacionId(), currencySymbol, pais.getPaisId()));
 
         btnClienteCredito = new Button("Clientes Credito", FontAwesome.PLUS);
         btnClienteCredito.addStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -1100,6 +1064,16 @@ public class PrCuadre extends Panel implements View {
                                         ex.printStackTrace();
                                     }
                                     /*fin registro detalle*/
+                                    
+                                    //*Registro detalle de lubricantes*// JLopez
+                                    try {
+                                        daoLubs.CreaProductoDetalle(arqueo.getArqueocajaId(), bcrLubs, user.getUsername());
+                                    } catch (SQLException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                    /*fin registro detalle*/
+                                    
+                                    
 
                                     myAction = (myAction.equals(Dao.ACTION_ADD)) ? "cuadrado" : "actualizado";
                                     Notification notif = new Notification("ÉXITO:", "Se ha " + myAction + " las bombas con éxito.", Notification.Type.HUMANIZED_MESSAGE);
@@ -1159,6 +1133,43 @@ public class PrCuadre extends Panel implements View {
             });
             getUI().addWindow(formClientePrepago);
             formClientePrepago.focus();
+        }
+    }
+
+    /*Metodo Llama Forma Detalle Productos (Lubricantes) *///JJ
+    private void formDetalleProd(Integer idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxEmpleado.getValue() != null) {
+            formProductos = new FormDetalleLubricantes(idestacion, simboloMoneda, idpais, bcrLubs);
+            formProductos.addCloseListener((e) -> {
+                bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                bcrLubs = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detalleProducto");
+                tmpDoubleProdUno = (Double) VaadinSession.getCurrent().getAttribute("totalProductoUno");
+                tmpDoubleProdNoUno = (Double) VaadinSession.getCurrent().getAttribute("totalProducto");
+                tmpDoublePr = (Double) VaadinSession.getCurrent().getAttribute("totalProd");
+                System.out.println("tmpDoubleProdUno --------" + tmpDoubleProdUno);
+                System.out.println("tmpDoubleProdNoUno --------" + tmpDoubleProdNoUno);
+
+                for (Integer itemId : bcrProducto.getItemIds()) {
+                    System.out.println("bcrProducto.getItem(itemId).getBean().getProductoId()" + bcrProducto.getItem(itemId).getBean().getProductoId());
+                }
+                
+
+                for (Integer itemId : bcrProducto.getItemIds()) {
+                    if (bcrProducto.getItem(itemId).getBean().getProductoId() == Constant.MP_CRI_VENTA_LUBS_UNO) {
+                        bcrProducto.getItem(itemId).getItemProperty("value").setValue(tmpDoubleProdUno);
+                        break;
+                    }
+                }
+                
+                for (Integer itemId : bcrProducto.getItemIds()) {
+                    if (bcrProducto.getItem(itemId).getBean().getProductoId() == Constant.MP_CRI_VENTA_LUBS) {
+                        bcrProducto.getItem(itemId).getItemProperty("value").setValue(tmpDoubleProdNoUno);
+                        break;
+                    }
+                }
+            });
+            getUI().addWindow(formProductos);
+            formProductos.focus();
         }
     }
 
