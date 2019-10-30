@@ -808,9 +808,15 @@ public class Dao {
                     + "     FROM arqueocaja a, arqueocaja_producto ap  "
                     + "     WHERE a.arqueocaja_id = ap.arqueocaja_id AND a.turno_id = " + turnoId
                     + "     GROUP BY a.arqueocaja_id "
+                    + "UNION "
+                    + "     select a.ARQUEOCAJA_ID, SUM(tc.MONTO) monto  "
+                    + "     from ARQUEOCAJA a, ARQUEOCAJA_TC tc  "
+                    + "     where a.ARQUEOCAJA_ID = tc.ARQUEOCAJA_ID and a.TURNO_ID= " + turnoId
+                    + "     group by a.ARQUEOCAJA_ID "
                     + ") tabl "
                     + "GROUP BY tabl.arqueocaja_id "
                     + "ORDER BY tabl.arqueocaja_id";
+            System.out.println("mi query "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             while (rst.next()) {
