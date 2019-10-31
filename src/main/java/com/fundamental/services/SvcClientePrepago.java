@@ -98,6 +98,46 @@ public class SvcClientePrepago extends Dao {
         return bcrPrepaid;
     }
     
+  
+    public boolean CreaClienteDetalleCredito(Integer idarqueocaja, BeanContainer<Integer, DtoProducto> bcrClientes, String usuario) throws SQLException {
+        boolean result = false;
+        PreparedStatement pst = null;
+
+        /*Elimina antes de volver asignar*/
+        try {
+            query = "DELETE FROM ARQUEOCAJA_DET_CLI_CR WHERE arqueocaja_id = " + idarqueocaja;
+            pst = getConnection().prepareStatement(query);
+            pst.executeUpdate();
+            closePst();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        /*Asigna detalle clientes prepago al arqueo*/
+        try {
+            query = "INSERT INTO ARQUEOCAJA_DET_CLI_CR (idpk,arqueocaja_id, cliente_id, monto, creado_por,creado_el) "
+                    + "VALUES (seq_ARQUEOCAJA_DET_CLI_CR.nextval,?, ?, ?, ?,sysdate)";
+
+            for (Integer itemId : bcrClientes.getItemIds()) {
+                pst = getConnection().prepareStatement(query);
+                pst.setInt(1, idarqueocaja);
+                pst.setInt(2, bcrClientes.getItem(itemId).getBean().getCliente().getClienteId());
+                pst.setDouble(3, bcrClientes.getItem(itemId).getBean().getValor());
+                pst.setString(4, usuario);
+                pst.executeUpdate();
+                closePst();
+            }
+            result = true;
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+        }
+        return result;
+    }
+    
     public BeanContainer<Integer, DtoProducto> getDetalleCredito(Integer idarqueocaja) {
         BeanContainer<Integer, DtoProducto> bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
         ResultSet rst = null;
@@ -106,7 +146,7 @@ public class SvcClientePrepago extends Dao {
         try {
             query = "select a.arqueocaja_id,a.monto,a.creado_por,a.creado_el, "
                     + "b.cliente_id,b.codigo,b.nombre,b.estacion_id,b.estado,b.creado_por,b.creado_el,b.tipo,b.codigo_envoy,b.cedula_juridica "
-                    + "from arqueocaja_det_cxcprep a, "
+                    + "from ARQUEOCAJA_DET_CLI_CR a, "
                     + "cliente b "
                     + "where a.cliente_id = b.cliente_id "
                     + "and a.arqueocaja_id = " + idarqueocaja;
@@ -124,5 +164,5 @@ public class SvcClientePrepago extends Dao {
             ex.printStackTrace();
         }
         return bcrClientes;
-    }
+    }   
 }

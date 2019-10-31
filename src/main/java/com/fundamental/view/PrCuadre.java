@@ -29,6 +29,7 @@ import com.fundamental.services.SvcClientePrepago;
 import com.fundamental.services.SvcCuadre;
 import com.fundamental.services.SvcDetalleLubricantes;
 import com.fundamental.services.SvcProducto;
+import com.fundamental.services.SvcTarjetaCredito;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
@@ -36,10 +37,13 @@ import com.fundamental.utils.CreateComponents;
 import com.fundamental.utils.Mail;
 import com.fundamental.utils.Util;
 import com.sisintegrados.generic.bean.GenericProduct;
+import com.sisintegrados.generic.bean.GenericTarjeta;
 import com.sisintegrados.view.form.FormDetalleVenta;
 import com.sisintegrados.view.form.FormDetalleVenta2;
 import com.sisintegrados.view.form.FormClientePrepago;
+import com.sisintegrados.view.form.FormClientesCredito;
 import com.sisintegrados.view.form.FormDetalleLubricantes;
+import com.sisintegrados.view.form.FormTarjetasCredito;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -178,9 +182,7 @@ public class PrCuadre extends Panel implements View {
             bcrPartida = new BeanContainer<Integer, Mediopago>(Mediopago.class);
     BeanContainer<Integer, DtoProducto> bcFactElect = new BeanContainer<Integer, DtoProducto>(DtoProducto.class),
             bcDiferencias = new BeanContainer<Integer, DtoProducto>(DtoProducto.class),
-            bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class),
-            bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class),
-            bcrCreditC = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+            bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
 
     Double totalArqueoVol = 0D, totalArqueoCurr = 0D, totalArqueoDif = 0D, totalArqueoElectronico = 0D;
     Double totalProducto = 0D, totalMediosPago = 0D, totalEfectivo = 0D;
@@ -208,6 +210,18 @@ public class PrCuadre extends Panel implements View {
     double tmpDoubleProdUno;
     double tmpDoubleProdNoUno;
     SvcDetalleLubricantes daoLubs = new SvcDetalleLubricantes();
+
+    /*Detalle Clientes Credito*/
+    FormClientesCredito formClientesCredito;
+    BeanContainer<Integer, DtoProducto> bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+    /*Detalle Clientes Credito*/
+    double tmpDoubleCredito;
+
+    /*Detalle Tarjeta Credito*/
+    FormTarjetasCredito formTarjetasCredito;
+    BeanContainer<Integer, GenericTarjeta> bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+    SvcTarjetaCredito daoTrC = new SvcTarjetaCredito();
+    double tmpDoubleTarjetaCredito;
 
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -698,13 +712,20 @@ public class PrCuadre extends Panel implements View {
                     /*Recupera Detalle Cliente Prepago*/ //ASG
                     bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
                     bcrPrepaid = dao.getDetallePrepago(arqueocaja.getArqueocajaId());
-                    
+
                     /*Recupera Detalle Lubricantes*/ //JLopez
-                    bcrLubs= new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
                     bcrLubs = daoLubs.getDetalleProducto(arqueocaja.getArqueocajaId());
 
-                }
+                    /*Recupera Detalle Cliente Credito*/ //MAG
+                    bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrClientes = dao.getDetalleCredito(arqueocaja.getArqueocajaId());
 
+                    /*Recupera Detalle tarjeta de credito*/ //MAG
+                    bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+                    bcrCreditC = daoTrC.getDetalleTarjetaCredito(arqueocaja.getArqueocajaId());
+
+                }
 
             }
         });
@@ -874,7 +895,7 @@ public class PrCuadre extends Panel implements View {
         btnClienteCredito = new Button("Clientes Credito", FontAwesome.PLUS);
         btnClienteCredito.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnClienteCredito.addStyleName(ValoTheme.BUTTON_SMALL);
-//        btnClienteCredito.addClickListener(clickEvent -> metodo1());
+        btnClienteCredito.addClickListener(clickEvent -> formCredito(estacion.getEstacionId(), currencySymbol, pais.getPaisId()));
 
         btnClientePrepago = new Button("Clientes Prepago", FontAwesome.PLUS);
         btnClientePrepago.addStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -884,7 +905,7 @@ public class PrCuadre extends Panel implements View {
         btnTarjetaCredito = new Button("Tarjetas Credito", FontAwesome.PLUS);
         btnTarjetaCredito.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnTarjetaCredito.addStyleName(ValoTheme.BUTTON_SMALL);
-//        btnTarjetaCredito.addClickListener(clickEvent -> metodo1());
+        btnTarjetaCredito.addClickListener(clickEvent -> formTarjetaCredito(currencySymbol));
 
         btnAll = new Button("Todas");
         btnAll.addStyleName(ValoTheme.BUTTON_BORDERLESS);
@@ -1060,11 +1081,13 @@ public class PrCuadre extends Panel implements View {
                                     //*Registro detalle de clientes*// ASG
                                     try {
                                         dao.CreaClienteDetalle(arqueo.getArqueocajaId(), bcrPrepaid, user.getUsername());
+                                        dao.CreaClienteDetalleCredito(arqueo.getArqueocajaId(), bcrClientes, user.getUsername());//Clientes Credito
+                                        daoTrC.CreaDetalleTarjetaCredito(arqueo.getArqueocajaId(), bcrCreditC, user.getUsername());//Clientes Tarjeta credito
                                     } catch (SQLException ex) {
                                         ex.printStackTrace();
                                     }
                                     /*fin registro detalle*/
-                                    
+
                                     //*Registro detalle de lubricantes*// JLopez
                                     try {
                                         daoLubs.CreaProductoDetalle(arqueo.getArqueocajaId(), bcrLubs, user.getUsername());
@@ -1072,8 +1095,6 @@ public class PrCuadre extends Panel implements View {
                                         ex.printStackTrace();
                                     }
                                     /*fin registro detalle*/
-                                    
-                                    
 
                                     myAction = (myAction.equals(Dao.ACTION_ADD)) ? "cuadrado" : "actualizado";
                                     Notification notif = new Notification("ÉXITO:", "Se ha " + myAction + " las bombas con éxito.", Notification.Type.HUMANIZED_MESSAGE);
@@ -1108,8 +1129,6 @@ public class PrCuadre extends Panel implements View {
                             }
                         })
                         .open();
-                //Fin MessageBox
-
             }
         });
 
@@ -1146,13 +1165,10 @@ public class PrCuadre extends Panel implements View {
                 tmpDoubleProdUno = (Double) VaadinSession.getCurrent().getAttribute("totalProductoUno");
                 tmpDoubleProdNoUno = (Double) VaadinSession.getCurrent().getAttribute("totalProducto");
                 tmpDoublePr = (Double) VaadinSession.getCurrent().getAttribute("totalProd");
-                System.out.println("tmpDoubleProdUno --------" + tmpDoubleProdUno);
-                System.out.println("tmpDoubleProdNoUno --------" + tmpDoubleProdNoUno);
 
                 for (Integer itemId : bcrProducto.getItemIds()) {
                     System.out.println("bcrProducto.getItem(itemId).getBean().getProductoId()" + bcrProducto.getItem(itemId).getBean().getProductoId());
                 }
-                
 
                 for (Integer itemId : bcrProducto.getItemIds()) {
                     if (bcrProducto.getItem(itemId).getBean().getProductoId() == Constant.MP_CRI_VENTA_LUBS_UNO) {
@@ -1160,7 +1176,7 @@ public class PrCuadre extends Panel implements View {
                         break;
                     }
                 }
-                
+
                 for (Integer itemId : bcrProducto.getItemIds()) {
                     if (bcrProducto.getItem(itemId).getBean().getProductoId() == Constant.MP_CRI_VENTA_LUBS) {
                         bcrProducto.getItem(itemId).getItemProperty("value").setValue(tmpDoubleProdNoUno);
@@ -1170,6 +1186,45 @@ public class PrCuadre extends Panel implements View {
             });
             getUI().addWindow(formProductos);
             formProductos.focus();
+        }
+    }
+
+    /*Metodo Llama Forma Clientes Credito*///MAG
+    private void formCredito(Integer idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxEmpleado.getValue() != null) {
+            formClientesCredito = new FormClientesCredito(idestacion, simboloMoneda, idpais, bcrClientes);
+            formClientesCredito.addCloseListener((e) -> {
+                bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                bcrClientes = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detalleCredito");
+                tmpDoubleCredito = (Double) VaadinSession.getCurrent().getAttribute("totalCredito");
+                for (Integer itemId : bcrMediopago.getItemIds()) {
+                    if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_VENTA_CREDITO) {
+                        bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDoubleCredito);
+                        break;
+                    }
+                }
+            });
+            getUI().addWindow(formClientesCredito);
+            formClientesCredito.focus();
+        }
+    }
+
+    /*Metodo Llama Forma tarjeta credito*///MAG
+    private void formTarjetaCredito(String simboloMoneda) {
+        if (cbxEmpleado.getValue() != null) {
+            formTarjetasCredito = new FormTarjetasCredito(simboloMoneda, bcrCreditC);
+            formTarjetasCredito.addCloseListener((e) -> {
+                bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+                bcrCreditC = (BeanContainer<Integer, GenericTarjeta>) VaadinSession.getCurrent().getAttribute("detalleTarjetaCredito");
+                tmpDoubleTarjetaCredito = (Double) VaadinSession.getCurrent().getAttribute("totalTarjetaCredito");
+                for (Integer itemId : bcrMediopago.getItemIds()) {
+                    if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_TARJETAS) {
+                        bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDoubleTarjetaCredito);
+                    }
+                }
+            });
+            getUI().addWindow(formTarjetasCredito);
+            formTarjetasCredito.focus();
         }
     }
 
@@ -1261,7 +1316,7 @@ public class PrCuadre extends Panel implements View {
                 tfdValue.setWidth("100px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
-                if((Integer) proid.getValue()==9||(Integer) proid.getValue()==10){
+                if ((Integer) proid.getValue() == 9 || (Integer) proid.getValue() == 10) {
                     tfdValue.setReadOnly(true);
                 }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
@@ -1341,7 +1396,7 @@ public class PrCuadre extends Panel implements View {
                 tfdValue.setWidth("125px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
-                if ((Integer) desc.getValue() == 6 || (Integer) desc.getValue() == 5) {
+                if ((Integer) desc.getValue() == 6 || (Integer) desc.getValue() == 5 || (Integer) desc.getValue() == 108) {
                     tfdValue.setReadOnly(true);
                 }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
@@ -2087,112 +2142,111 @@ public class PrCuadre extends Panel implements View {
         });
     }
 
-    public void buildTableCreditCard() {
-
-        tblCreditCard = utils.buildTable("Detalle tarjetas de crédito:", 100f, 100f, bcrCreditC,
-                new String[]{"nombre"},
-                new String[]{"Nombre"}
-        );
-        tblCreditCard.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
-        tblCreditCard.addStyleName(ValoTheme.TABLE_COMPACT);
-        tblCreditCard.addStyleName(ValoTheme.TABLE_SMALL);
-        tblCreditCard.setImmediate(true);
-        tblCreditCard.addGeneratedColumn("colCliente", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
-                ComboBox cbxCliente = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, contCreditC);
-                cbxCliente.setPropertyDataSource(pro);
-                cbxCliente.setFilteringMode(FilteringMode.CONTAINS);
-                return cbxCliente;
-            }
-        });
-        tblCreditCard.addGeneratedColumn("colMonto", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("valor");  //Atributo del bean
-                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
-                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
-                nfd.setValue(numberFmt.format(value));
-                nfd.setWidth("100px");
-                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
-                nfd.addStyleName("align-right");
-                nfd.addValueChangeListener(new Property.ValueChangeListener() {
-                    @Override
-                    public void valueChange(Property.ValueChangeEvent event) {
-//                        updateTableFooterPrepaid();
-                    }
-                });
-                return nfd;
-            }
-        });
-        tblCreditCard.addGeneratedColumn("colLote", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("presentacion");  //Atributo del bean
+//    public void buildTableCreditCard() {
+//
+//        tblCreditCard = utils.buildTable("Detalle tarjetas de crédito:", 100f, 100f, bcrCreditC,
+//                new String[]{"nombre"},
+//                new String[]{"Nombre"}
+//        );
+//        tblCreditCard.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
+//        tblCreditCard.addStyleName(ValoTheme.TABLE_COMPACT);
+//        tblCreditCard.addStyleName(ValoTheme.TABLE_SMALL);
+//        tblCreditCard.setImmediate(true);
+//        tblCreditCard.addGeneratedColumn("colCliente", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
+//                ComboBox cbxCliente = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, contCreditC);
+//                cbxCliente.setPropertyDataSource(pro);
+//                cbxCliente.setFilteringMode(FilteringMode.CONTAINS);
+//                return cbxCliente;
+//            }
+//        });
+//        tblCreditCard.addGeneratedColumn("colMonto", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("valor");  //Atributo del bean
 //                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
 //                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
 //                nfd.setValue(numberFmt.format(value));
-                final TextField nfd = new TextField(pro);
-                nfd.setNullRepresentation("");
-                nfd.setWidth("100px");
-                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
-                nfd.addStyleName("align-right");
-                nfd.addValueChangeListener(new Property.ValueChangeListener() {
-                    @Override
-                    public void valueChange(Property.ValueChangeEvent event) {
+//                nfd.setWidth("100px");
+//                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+//                nfd.addStyleName("align-right");
+//                nfd.addValueChangeListener(new Property.ValueChangeListener() {
+//                    @Override
+//                    public void valueChange(Property.ValueChangeEvent event) {
+////                        updateTableFooterPrepaid();
+//                    }
+//                });
+//                return nfd;
+//            }
+//        });
+//        tblCreditCard.addGeneratedColumn("colLote", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("presentacion");  //Atributo del bean
+////                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
+////                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
+////                nfd.setValue(numberFmt.format(value));
+//                final TextField nfd = new TextField(pro);
+//                nfd.setNullRepresentation("");
+//                nfd.setWidth("100px");
+//                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+//                nfd.addStyleName("align-right");
+//                nfd.addValueChangeListener(new Property.ValueChangeListener() {
+//                    @Override
+//                    public void valueChange(Property.ValueChangeEvent event) {
+////                        updateTableFooterPrepaid();
+//                    }
+//                });
+//                return nfd;
+//            }
+//        });
+//        tblCreditCard.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Button btnDelete = new Button(FontAwesome.TRASH);
+//                btnDelete.addStyleName(ValoTheme.BUTTON_DANGER);
+//                btnDelete.addStyleName(ValoTheme.BUTTON_SMALL);
+//                btnDelete.addClickListener(new Button.ClickListener() {
+//                    @Override
+//                    public void buttonClick(Button.ClickEvent event) {
+//                        bcrCreditC.removeItem(itemId);
+//                        List<DtoProducto> tempList = new ArrayList();
+//                        for (DtoProducto deo : listPrepaid) {
+//                            if (deo.getProductoId() != itemId) {
+//                                tempList.add(deo);
+//                            }
+//                        }
+//                        listPrepaid = tempList;
 //                        updateTableFooterPrepaid();
-                    }
-                });
-                return nfd;
-            }
-        });
-        tblCreditCard.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Button btnDelete = new Button(FontAwesome.TRASH);
-                btnDelete.addStyleName(ValoTheme.BUTTON_DANGER);
-                btnDelete.addStyleName(ValoTheme.BUTTON_SMALL);
-                btnDelete.addClickListener(new Button.ClickListener() {
-                    @Override
-                    public void buttonClick(Button.ClickEvent event) {
-                        bcrCreditC.removeItem(itemId);
-                        List<DtoProducto> tempList = new ArrayList();
-                        for (DtoProducto deo : listPrepaid) {
-                            if (deo.getProductoId() != itemId) {
-                                tempList.add(deo);
-                            }
-                        }
-                        listPrepaid = tempList;
-                        updateTableFooterPrepaid();
-                    }
-                });
-                return btnDelete;
-            }
-        });
-        tblCreditCard.setVisibleColumns(new Object[]{"colCliente", "colLote", "colMonto", "colDelete"});
-        tblCreditCard.setColumnHeaders(new String[]{"Tarjeta", "Lote", "Monto", "Borrar"});
-        tblCreditCard.setColumnAlignments(Align.LEFT, Align.RIGHT, Align.RIGHT, Align.CENTER);
-        tblCreditCard.setSizeUndefined();
-        tblCreditCard.setHeight(200f, Unit.PIXELS);
-
-        btnAddCreditC = new Button("Agregar", FontAwesome.PLUS);
-        btnAddCreditC.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        btnAddCreditC.addStyleName(ValoTheme.BUTTON_SMALL);
-        btnAddCreditC.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-//                bcrCreditC.removeAllItems();
-                DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
-                dtoprod.setValor(0D);
-                bcrCreditC.addBean(dtoprod);
-                tblCreditCard.refreshRowCache();
-//                listPrepaid.add(dtoprod);
-//                bcrCreditC.addAll(listPrepaid);
-            }
-        });
-    }
-
+//                    }
+//                });
+//                return btnDelete;
+//            }
+//        });
+//        tblCreditCard.setVisibleColumns(new Object[]{"colCliente", "colLote", "colMonto", "colDelete"});
+//        tblCreditCard.setColumnHeaders(new String[]{"Tarjeta", "Lote", "Monto", "Borrar"});
+//        tblCreditCard.setColumnAlignments(Align.LEFT, Align.RIGHT, Align.RIGHT, Align.CENTER);
+//        tblCreditCard.setSizeUndefined();
+//        tblCreditCard.setHeight(200f, Unit.PIXELS);
+//
+//        btnAddCreditC = new Button("Agregar", FontAwesome.PLUS);
+//        btnAddCreditC.addStyleName(ValoTheme.BUTTON_PRIMARY);
+//        btnAddCreditC.addStyleName(ValoTheme.BUTTON_SMALL);
+//        btnAddCreditC.addClickListener(new Button.ClickListener() {
+//            @Override
+//            public void buttonClick(Button.ClickEvent event) {
+////                bcrCreditC.removeAllItems();
+//                DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
+//                dtoprod.setValor(0D);
+//                bcrCreditC.addBean(dtoprod);
+//                tblCreditCard.refreshRowCache();
+////                listPrepaid.add(dtoprod);
+////                bcrCreditC.addAll(listPrepaid);
+//            }
+//        });
+//    }
     public void updateTableFooterCxC() {
         tmpDouble = 0;
         for (Integer itemId : bcrClientes.getItemIds()) {

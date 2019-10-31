@@ -65,11 +65,11 @@ public class FormClientesCredito extends Window {
     Integer idestacion;
     Integer idpais;
 
-    public FormClientesCredito(Integer idestacion, String currencySymbol, Integer idpais, BeanContainer<Integer, DtoProducto> bcrPrepaid) {
+    public FormClientesCredito(Integer idestacion, String currencySymbol, Integer idpais, BeanContainer<Integer, DtoProducto> bcrClientes) {
         this.idestacion = idestacion;
         this.currencySymbol = currencySymbol;
         this.idpais = idpais;
-        this.bcrClientes = bcrPrepaid;
+        this.bcrClientes = bcrClientes;
         addStyleName(Constant.stylePopUps);
         Responsive.makeResponsive(this);
         setModal(true);
