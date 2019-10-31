@@ -148,7 +148,6 @@ public final class DashboardMenu extends CustomComponent {
 //        menuItemsLayout.addComponent(new ValoMenuItemButton(DashboardViewType.HOME));
         Usuario user = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
         Dao servicio = new Dao();
-        System.out.println("crea mis accesos ");
         List<Acceso> misAccessos = servicio.getAccesosByUsuarioid(user.getUsuarioId(), user.isSysadmin());
         servicio.closeConnections();
         
