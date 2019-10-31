@@ -490,39 +490,39 @@ calculosInventario();
     }
 
     private void determinarPermisos() {
-        Calendar udMenosUno = null;
-        if (ultimoDia.getFecha()!=null) {
-            udMenosUno = Calendar.getInstance();
-            udMenosUno.setTime(ultimoDia.getFecha());
-            udMenosUno.add(Calendar.DATE, -1);
-        }
-       
-        boolean explorar = false, editar = false, cerrarDia = false;
-        if (dia.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
-                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
-            explorar = true;
-        } else if (dia.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
-                && dia.getFecha().before(ultimoDia.getFecha())) {
-            explorar = true;
-        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
-                && dia.getEstadoId()!=null && dia.getEstadoId()== 2) {
-            explorar = true;
-        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
-                && dia.getEstadoId()!=null && dia.getEstadoId()== 1) {    //dia abierto
-            editar = cerrarDia = true;
-explorar = true;
-        } else if ( (user.isAdministrativo() || user.isGerente()) 
-                && dia.getFecha()!=null && ultimoDia.getFecha()!=null && udMenosUno!=null && ultimoDia.getEstadoId()==1 && udMenosUno.getTime().equals(dia.getFecha()) ) {
-            explorar = cerrarDia = true;
-        } else if ( (user.isAdministrativo() || user.isGerente()) 
-                && dia.getFecha()!=null && ultimoDia.getFecha()!=null && ultimoDia.getEstadoId()==2 && ultimoDia.getFecha().equals(dia.getFecha()) ) {
-            explorar = cerrarDia = true;
-        } else if (user.isAdministrativo() || user.isGerente()) {
-            explorar = true;
-        }
-
-        dfdFecha.setEnabled(explorar);   //habilitado
-        btnGuardar.setEnabled(cerrarDia);    //habilitado (cerrado)
+//        Calendar udMenosUno = null;
+//        if (ultimoDia.getFecha()!=null) {
+//            udMenosUno = Calendar.getInstance();
+//            udMenosUno.setTime(ultimoDia.getFecha());
+//            udMenosUno.add(Calendar.DATE, -1);
+//        }
+//       
+//        boolean explorar = false, editar = false, cerrarDia = false;
+//        if (dia.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
+//            explorar = true;
+//        } else if (dia.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                && dia.getFecha().before(ultimoDia.getFecha())) {
+//            explorar = true;
+//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
+//                && dia.getEstadoId()!=null && dia.getEstadoId()== 2) {
+//            explorar = true;
+//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
+//                && dia.getEstadoId()!=null && dia.getEstadoId()== 1) {    //dia abierto
+//            editar = cerrarDia = true;
+//explorar = true;
+//        } else if ( (user.isAdministrativo() || user.isGerente()) 
+//                && dia.getFecha()!=null && ultimoDia.getFecha()!=null && udMenosUno!=null && ultimoDia.getEstadoId()==1 && udMenosUno.getTime().equals(dia.getFecha()) ) {
+//            explorar = cerrarDia = true;
+//        } else if ( (user.isAdministrativo() || user.isGerente()) 
+//                && dia.getFecha()!=null && ultimoDia.getFecha()!=null && ultimoDia.getEstadoId()==2 && ultimoDia.getFecha().equals(dia.getFecha()) ) {
+//            explorar = cerrarDia = true;
+//        } else if (user.isAdministrativo() || user.isGerente()) {
+//            explorar = true;
+//        }
+//
+//        dfdFecha.setEnabled(explorar);   //habilitado
+//        btnGuardar.setEnabled(cerrarDia);    //habilitado (cerrado)
     }
 
     private void buildTableCuadre() {

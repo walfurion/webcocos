@@ -97,4 +97,32 @@ public class SvcClientePrepago extends Dao {
         }
         return bcrPrepaid;
     }
+    
+    public BeanContainer<Integer, DtoProducto> getDetalleCredito(Integer idarqueocaja) {
+        BeanContainer<Integer, DtoProducto> bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+        ResultSet rst = null;
+        PreparedStatement pst = null;
+        int id = 0;
+        try {
+            query = "select a.arqueocaja_id,a.monto,a.creado_por,a.creado_el, "
+                    + "b.cliente_id,b.codigo,b.nombre,b.estacion_id,b.estado,b.creado_por,b.creado_el,b.tipo,b.codigo_envoy,b.cedula_juridica "
+                    + "from arqueocaja_det_cxcprep a, "
+                    + "cliente b "
+                    + "where a.cliente_id = b.cliente_id "
+                    + "and a.arqueocaja_id = " + idarqueocaja;
+
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            while (rst.next()) {
+                id++;
+                DtoProducto dto = new DtoProducto();
+                dto.setValor(rst.getDouble(2));
+                dto.setCliente(new Cliente(rst.getInt(5),rst.getString(6),rst.getString(7),rst.getInt(8),rst.getString(9),rst.getString(10),rst.getDate(11),rst.getString(12),rst.getString(13),rst.getString(14)));
+                bcrClientes.addItem(id, dto);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return bcrClientes;
+    }
 }
