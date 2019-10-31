@@ -1697,16 +1697,16 @@ public class Dao {
         return p;
     }
     public Acceso getAccess(String screen){
+        System.out.println("screen "+screen);
         Acceso acceso = new Acceso();
          Usuario user = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
                 for (Acceso a : user.getRoles().get(0).getAccesos()) {
                     if (a.getRecursoInterno().trim().toUpperCase().equals(screen)) {
-                        System.out.println(screen + " - " + a.getTitulo() + " ACCIONES  " 
-                                + a.isVer() + " " + a.isCambiar() + " - " + a.isAgregar());
                         acceso.setVer(true);
                         acceso.setCambiar(a.isCambiar());
                         acceso.setEliminar(a.isEliminar());
                         acceso.setAgregar(a.isAgregar());
+                        System.out.println("nombre "+a.getRecursoInterno()+" cambiar "+acceso.isCambiar()+" agregar "+acceso.isAgregar());
                         return acceso;
                     }
                 }

@@ -101,9 +101,7 @@ public class DashboardNavigator extends Navigator {
 //                        }
 //                    }
 //                }
-                    System.out.println(event.getViewName() + " event.getViewName().equals(DashboardViewType.HOME.getViewName() " + DashboardViewType.HOME.getViewName());
                     if (!exists && !(event.getViewName().equals(DashboardViewType.HOME.getViewName()))) {
-                        System.out.println(event.getViewName() + " event.getViewName().equals(DashboardViewType.HOME.getViewName() " + DashboardViewType.HOME.getViewName());
                         return false;
                     }
 

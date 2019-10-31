@@ -74,6 +74,7 @@ public class MntRol extends Panel implements View {
     private Usuario user;
     CheckBox cbxVer,cbxCambiar,cbxEliminar,cbxAgregar;
     Label lb;
+    Acceso acceso = new Acceso();
     public MntRol() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
@@ -382,7 +383,11 @@ public class MntRol extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnAdd.setEnabled(acceso.isAgregar());
+        btnSave.setEnabled(acceso.isCambiar());
     }
     public void setAllCheck(String caption,boolean all){
                 for (Object itemId : tblAccess.getItemIds()) {
