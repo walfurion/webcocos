@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.fundamental.view;
 
 import com.fundamental.model.Bomba;
@@ -57,6 +52,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -94,8 +90,8 @@ public class TurnoPr extends Panel implements View {
     Estacion estacion;
     Pais pais;
     EstacionConfHead estConfHead;
-    Button btnGuardar = new Button("Guardar");
-    Button btnModificar = new Button("Modificar precio", FontAwesome.EDIT);
+    Button btnGuardar = new Button("Crear Turno");
+    Button btnModificar = new Button("Modificar Turno", FontAwesome.EDIT);
     Button btnAddEmpPump;
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
 
@@ -347,6 +343,20 @@ public class TurnoPr extends Panel implements View {
                             }
                         }
                     }
+                    Horario hhh = new Horario();
+                    hhh = (Horario) cmbHorario.getValue();
+                    if (cmbTurno.getValue() != null) {
+                        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+                        Turno tt = new Turno();
+                        tt = (Turno) cmbTurno.getValue();
+                        int val = -1;
+                        val = dao.getExistHorario(estacion.getEstacionId(), hhh.getEstacionconfheadId(), hhh.getHorarioId(), format.format(tt.getFecha()));
+                        if (val == 0) {
+                            cmbTurno.setValue(null);
+                            bcrEmpPump.removeAllItems();
+                        }
+                    }
+
                     nuevoMetodoConfhead(configs.get(0));    //solo traera 1
                     /*Agrego la tabla de precios y Empleados y sus Bombas*/
                     toolbarContainerTables.removeAllComponents();
@@ -370,7 +380,6 @@ public class TurnoPr extends Panel implements View {
                     toolbarContainerTables.removeAllComponents();
                     toolbarContainerTables.addComponent(buildTables());
                     dao.closeConnections();
-
                     Integer h = dao.getIdHorario(turno.getTurnoId());
                     int i = 0;
                     for (i = 0; i < contHorario.size(); i++) {
@@ -490,6 +499,12 @@ public class TurnoPr extends Panel implements View {
         toolbarContainerTableAsignacion.removeAllComponents();
         ConstruyeTablaAsignacion();
         toolbarContainerTableAsignacion.addComponent(tablaAsignacion);
+
+        if (bcrEmpPump.size() > 0) {
+            /*Carga Tabla Asignaciones*/
+            validaExistentes();
+        }
+
         return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tablaPrecio), utils.vlContainerTable(v)});
     }
 
@@ -682,6 +697,12 @@ public class TurnoPr extends Panel implements View {
                         public void buttonClick(Button.ClickEvent event) {
                             bcrEmpPump.removeItem(itemId);
                             tablaAsignacion.refreshRowCache();
+                            /*Recupera valores de bombas*/
+                            validaBombas("I");
+                            reactivaBombas((EmpleadoBombaTurno) itemId);
+                            toolbarContainerTableAsignacion.removeAllComponents();
+                            ConstruyeTablaAsignacion();
+                            toolbarContainerTableAsignacion.addComponent(tablaAsignacion);
                         }
                     });
                     return btnDelete;
@@ -696,12 +717,23 @@ public class TurnoPr extends Panel implements View {
             List<String> encabezados = new ArrayList<String>();
             columnas.add("colNombre");
             encabezados.add("Pistero");
-            if (maxBomba > 0) {
-                for (int i = 1; i <= maxBomba; i++) {
-                    columnas.add("colBomba" + i);
-                    encabezados.add("Bomba" + i);
+
+            if (maxBomba > varMaxBomba) {
+                if (maxBomba > 0) {
+                    for (int i = 1; i <= maxBomba; i++) {
+                        columnas.add("colBomba" + i);
+                        encabezados.add("Bomba" + i);
+                    }
+                }
+            } else {
+                if (varMaxBomba > 0) {
+                    for (int i = 1; i <= varMaxBomba; i++) {
+                        columnas.add("colBomba" + i);
+                        encabezados.add("Bomba" + i);
+                    }
                 }
             }
+
             columnas.add("colDelete");
             encabezados.add("Accion");
             Object[] colCols = columnas.toArray(new Object[0]);
@@ -930,7 +962,80 @@ public class TurnoPr extends Panel implements View {
         }
     }
 
+    private void validaExistentes() {
+//        System.out.println("TAMAÑO COLECCION " + bcrEmpPump.size());
+//        varMaxBomba = 0;
+//        Integer bombaMasAlta = 0;
+        bcrEmpPump.sort(new Object[]{"empleadoid"}, new boolean[]{true});
+
+        for (EmpleadoBombaTurno empleado : bcrEmpPump.getItemIds()) {
+            if (empleado.isBomba1()) {
+//                varMaxBomba++;
+//                bombaMasAlta = 1;
+                chkBomba1.setEnabled(false);
+            }
+            if (empleado.isBomba2()) {
+//                varMaxBomba++;
+//                bombaMasAlta = 2;
+                chkBomba2.setEnabled(false);
+            }
+            if (empleado.isBomba3()) {
+//                varMaxBomba++;
+//                bombaMasAlta = 3;
+                chkBomba3.setEnabled(false);
+            }
+            if (empleado.isBomba4()) {
+//                varMaxBomba++;
+//                bombaMasAlta = 4;
+                chkBomba4.setEnabled(false);
+            }
+            if (empleado.isBomba5()) {
+//                varMaxBomba++;
+//                bombaMasAlta = 5;
+                chkBomba5.setEnabled(false);
+            }
+            if (empleado.isBomba6()) {
+//                varMaxBomba++;
+//                bombaMasAlta = 6;
+                chkBomba6.setEnabled(false);
+            }
+            if (empleado.isBomba7()) {
+//                varMaxBomba++;
+//                bombaMasAlta = 7;
+                chkBomba7.setEnabled(false);
+            }
+            if (empleado.isBomba8()) {
+//                varMaxBomba++;
+//                bombaMasAlta = 8;
+                chkBomba8.setEnabled(false);
+            }
+            if (empleado.isBomba9()) {
+//                varMaxBomba++;
+//                bombaMasAlta = 9;
+                chkBomba9.setEnabled(false);
+            }
+            if (empleado.isBomba10()) {
+//                varMaxBomba++;
+//                bombaMasAlta = 10;
+                chkBomba10.setEnabled(false);
+            }
+
+            if (empleado.isBomba11()) {
+//                varMaxBomba++;
+//                bombaMasAlta = 11;
+                chkBomba11.setEnabled(false);
+            }
+
+            if (empleado.isBomba12()) {
+//                varMaxBomba++;
+//                bombaMasAlta = 12;
+                chkBomba12.setEnabled(false);
+            }
+        }
+    }
+
     private void validaBombas(String val) {
+        System.out.println("TAMAÑO COLECCION " + bcrEmpPump.size());
         varMaxBomba = 0;
         Integer bombaMasAlta = 0;
         bcrEmpPump.sort(new Object[]{"empleadoid"}, new boolean[]{true});
@@ -1000,6 +1105,10 @@ public class TurnoPr extends Panel implements View {
             }
         }
         System.out.println("VAL " + val);
+        System.out.println("VARMAXBOMBA " + varMaxBomba);
+        System.out.println("BOMBA MAS ALTA " + bombaMasAlta);
+        System.out.println("BOMBA MAS ALTA OLD" + bombaMasAltaOld);
+
         if (val.equals("A")) {
             if (bombaMasAlta > bombaMasAltaOld) {
                 bombaMasAltaOld = bombaMasAlta;
@@ -1008,8 +1117,6 @@ public class TurnoPr extends Panel implements View {
                 varMaxBomba = bombaMasAltaOld;
             }
         } else {
-            System.out.println("BOMBA MAS ALTA " + bombaMasAlta);
-            System.out.println("BOMBA MAS ALTA OLD" + bombaMasAltaOld);
             if (bombaMasAlta < bombaMasAltaOld) {
                 bombaMasAltaOld = bombaMasAlta;
                 varMaxBomba = bombaMasAlta;
@@ -1145,7 +1252,7 @@ public class TurnoPr extends Panel implements View {
                             }
                         }
                         if (!val) {
-                            bcrEmpPump.addItem(new EmpleadoBombaTurno(0, empleado.getEmpleadoId(), empleado.getNombre(), varMaxBomba, chkBomba1.getValue(), chkBomba2.getValue(), chkBomba3.getValue(), chkBomba4.getValue(), chkBomba5.getValue(), chkBomba6.getValue(), chkBomba7.getValue(), chkBomba8.getValue(), chkBomba9.getValue(), chkBomba10.getValue(), chkBomba11.getValue(), chkBomba12.getValue(),-1));
+                            bcrEmpPump.addItem(new EmpleadoBombaTurno(0, empleado.getEmpleadoId(), empleado.getNombre(), varMaxBomba, chkBomba1.getValue(), chkBomba2.getValue(), chkBomba3.getValue(), chkBomba4.getValue(), chkBomba5.getValue(), chkBomba6.getValue(), chkBomba7.getValue(), chkBomba8.getValue(), chkBomba9.getValue(), chkBomba10.getValue(), chkBomba11.getValue(), chkBomba12.getValue(), -1));
                             cmbEmpleado.setValue(null);
                             reiniciaCheckBox();
                             /*Carga Tabla Asignaciones*/
@@ -1268,7 +1375,6 @@ public class TurnoPr extends Panel implements View {
     private void nuevoMetodoConfhead(EstacionConfHead echSelected) {
         Integer[] showAutoFull = new Integer[]{0, 0};
         showAutoservicio = false;
-//        EstacionConfHead echSelected = ((EstacionConfHead) cbxConfiguracion.getValue());
         for (EstacionConf ecf : echSelected.getEstacionConf()) {
             if (ecf.getTipodespachoId() == 1 && showAutoFull[0] == 0) { //Auto
                 showAutoFull[0] = 1;
@@ -1292,13 +1398,6 @@ public class TurnoPr extends Panel implements View {
         }
         tablaPrecio.setVisibleColumns(visCols);
         tablaPrecio.setColumnHeaders(colHeads);
-//        lblHoraConf.setValue("Horario: " + echSelected.getHoraInicio() + " - " + echSelected.getHoraFin());
-//        if (turno.getTurnoId() == null || ultimoTurno.getTurnoId() == null) {
-//            SvcTurno service = new SvcTurno();
-//            listPump = service.getBombasByEstacionConfheadId(echSelected.getEstacionconfheadId(), 0);
-//            bcrEmpPump.removeAllItems();
-//            service.closeConnections();
-//        }
     }
 
     private Component buildButtons() {
@@ -1323,14 +1422,21 @@ public class TurnoPr extends Panel implements View {
                     Notification.show("ERROR:", "Debe asociar almenos un empleado con una bomba.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
-//                EmpleadoBombaTurno teb;
-//                for (EmpleadoBombaTurno itemId : bcrEmpPump.getItemIds()) {
-//                    teb = bcrEmpPump.getItem(itemId).getBean();
-//                    if (teb.getEmpleadoid() == null || teb.getPump() == null) {
-//                        Notification.show("ERROR:", "Las asociaciones de bomba/empleado debe ser válidas.", Notification.Type.ERROR_MESSAGE);
-//                        return;
-//                    }
-//                }
+
+                /*Valida Horario en el que se intenta crear el turno*/
+                Horario hhh = new Horario();
+                hhh = (Horario) cmbHorario.getValue();
+                if (cmbTurno.getValue() != null) {
+                    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+                    Turno tt = new Turno();
+                    tt = (Turno) cmbTurno.getValue();
+                    int val = -1;
+                    val = dao.getExistHorario(estacion.getEstacionId(), hhh.getEstacionconfheadId(), hhh.getHorarioId(), format.format(tt.getFecha()));
+                    if (val > 0) {
+                        Notification.show("ERROR:", "El horario para el que intenta crear el turno ya fue asignado..", Notification.Type.ERROR_MESSAGE);
+                        return;
+                    }
+                }
 
                 boolean crearDia = false;
                 Turno turno = new Turno(null, usuario.getEstacionid(), usuario.getUsuarioId(), 1, usuario.getUsername(), cmbFecha.getValue(), usuario.getUsername());
@@ -1351,22 +1457,16 @@ public class TurnoPr extends Panel implements View {
                     prod = (Producto) ((BeanItem) tablaPrecio.getItem(pi)).getBean();
                     if (showAutoservicio) {
                         precio = new Precio(turno.getTurnoId(), pi, 1, prod.getPriceAS(), usuario.getUsername(), usuario.getUsername());  //AutoServicio
-//                        precio = dao.doActionPrecio(Dao.ACTION_ADD, precio);
                         listPrecio.add(precio);
                         conExito = (precio != null) ? conExito + 1 : conExito;
                     }
                     precio = new Precio(turno.getTurnoId(), pi, 2, prod.getPriceSC(), usuario.getUsername(), usuario.getUsername());  //Servicio completo
-//                    precio = dao.doActionPrecio(Dao.ACTION_ADD, precio);
                     listPrecio.add(precio);
                     conExito = (precio.getTurnoId() != null) ? conExito + 1 : conExito;
                 }
-//                List<EmpleadoBombaTurno> listTurnoEmpPump = new ArrayList();
-//                for (Integer itemId : bcrEmpPump.getItemIds()) {
-//                    listTurnoEmpPump.add(bcrEmpPump.getItem(itemId).getBean());
-//                }
                 turno.setHorarioId(((Horario) cmbHorario.getValue()).getHorarioId());
 
-                boolean everythingOk = dao.doCreateTurn2(crearDia, dia, turno, listPrecio, bcrEmpPump,usuario.getUsername());  //Descomentar
+                boolean everythingOk = dao.doCreateTurn2(crearDia, dia, turno, listPrecio, bcrEmpPump, usuario.getUsername());  //Descomentar
                 dao.closeConnections();
 
                 /*TODO EL IF DESCOMENTAR*/
@@ -1408,28 +1508,22 @@ public class TurnoPr extends Panel implements View {
                 }
                 service.closeConnections();
 
+                try {
+                    /*Actualiza Empleado Bomba Turno*/
+                    dao.modificarTurno(turno.getTurnoId(), bcrEmpPump, usuario.getUsername());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
                 if (bcrPrecios.getItemIds().size() == counter) {
-                    Notification notif = new Notification("ÉXITO:", "El registro de precio se ha actualizado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
+                    Notification notif = new Notification("ÉXITO:", "El registro se ha actualizado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);
                     notif.setPosition(Position.MIDDLE_CENTER);
                     notif.show(Page.getCurrent());
                     UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_TURN.getViewName());
                 } else {
-                    Notification.show("ERROR:", "Ocurrió un error al actualizar el precio.\n", Notification.Type.ERROR_MESSAGE);
+                    Notification.show("ERROR:", "Ocurrió un error al actualizar el registro.\n", Notification.Type.ERROR_MESSAGE);
                     return;
-                }
-            }
-        });
-
-        btnAddEmpPump = utils.buildButton("Agregar", FontAwesome.PLUS, ValoTheme.BUTTON_PRIMARY);
-        btnAddEmpPump.addStyleName(ValoTheme.BUTTON_SMALL);
-        btnAddEmpPump.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                if (turno != null) {
-                    int turnoId = (turno.getTurnoId() != null) ? turno.getTurnoId() : 0;
-//                    bcrEmpPump.addBean(new TurnoEmpleadoBomba(utils.getRandomNumberInRange(1, 1000), turnoId, 0, 0, user.getNombreLogin()));
-//                    tableEmployeePump.refreshRowCache();
                 }
             }
         });

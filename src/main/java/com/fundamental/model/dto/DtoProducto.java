@@ -22,6 +22,7 @@ public class DtoProducto {
     private Cliente cliente;
     private Producto producto;
     private int cantidad;
+    private int idmarca;
 
     public DtoProducto(Integer productoId, String nombre, String codigo) {
         this.productoId = productoId;
@@ -167,6 +168,14 @@ public class DtoProducto {
 
     public void setProducto(Producto producto) {
         this.producto = producto;
+    }
+
+    public int getIdmarca() {
+        return idmarca;
+    }
+
+    public void setIdmarca(int idmarca) {
+        this.idmarca = idmarca;
     }
 
 }

@@ -28,6 +28,7 @@ import com.fundamental.services.SvcArqueo;
 import com.fundamental.services.SvcClientePrepago;
 import com.fundamental.services.SvcCuadre;
 import com.fundamental.services.SvcTarjetaCredito;
+import com.fundamental.services.SvcDetalleLubricantes;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
@@ -35,12 +36,12 @@ import com.fundamental.utils.CreateComponents;
 import com.fundamental.utils.Mail;
 import com.fundamental.utils.Util;
 import com.sisintegrados.generic.bean.GenericTarjeta;
-import com.sisintegrados.generic.bean.Tarjeta;
+import com.sisintegrados.view.form.FormClientesCredito;
+import com.sisintegrados.view.form.FormTarjetasCredito;
 import com.sisintegrados.view.form.FormDetalleVenta;
 import com.sisintegrados.view.form.FormDetalleVenta2;
 import com.sisintegrados.view.form.FormClientePrepago;
-import com.sisintegrados.view.form.FormClientesCredito;
-import com.sisintegrados.view.form.FormTarjetasCredito;
+import com.sisintegrados.view.form.FormDetalleLubricantes;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -93,8 +94,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.vaadin.maddon.ListContainer;
 import org.vaadin.ui.NumberField;
 
@@ -188,6 +187,7 @@ public class PrCuadre extends Panel implements View {
     String currencySymbol, volumenSymbol, tmpString;
     File tempFile;
     double tmpDouble;
+    double tmpDoublePr;
     int tmpInt;
     List<Pais> allCountries;
     String[] uniqueStation;
@@ -198,7 +198,7 @@ public class PrCuadre extends Panel implements View {
     FormClientePrepago formClientePrepago;
     BeanContainer<Integer, DtoProducto> bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
     SvcClientePrepago dao = new SvcClientePrepago();
-    
+
     /*Detalle Clientes Prepago*/
 
  /*Detalle Clientes Credito*/
@@ -211,7 +211,14 @@ public class PrCuadre extends Panel implements View {
     BeanContainer<Integer, GenericTarjeta> bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
     SvcTarjetaCredito daoTrC = new SvcTarjetaCredito();
 
-    /*Detalle Tarjeta Credito*/
+    /*Detalle Lubricantes*/
+    FormDetalleLubricantes formProductos;
+    BeanContainer<Integer, DtoProducto> bcrProduct = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+    //SvcProducto daoProd = new SvcProducto();
+    double tmpDoubleProdUno;
+    double tmpDoubleProdNoUno;
+    SvcDetalleLubricantes daoLubs = new SvcDetalleLubricantes();
+
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
@@ -579,6 +586,7 @@ public class PrCuadre extends Panel implements View {
                 contLubs = new ListContainer<>(Producto.class, service.getLubricantsByCountryStation(true, estacion.getPaisId(), estacion.getEstacionId()));
                 bcrClientes.removeAllItems();
                 bcrPrepaid.removeAllItems();
+                bcrLubs.removeAllItems();
 
                 service.closeConnections();
 //                determinarPermisos();
@@ -718,6 +726,11 @@ public class PrCuadre extends Panel implements View {
                     bcrCreditC = daoTrC.getDetalleTarjetaCredito(arqueocaja.getArqueocajaId());
                     //Fin
                 }
+
+                /*Recupera Detalle Lubricantes*/ //JLopez
+                bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                bcrLubs = daoLubs.getDetalleProducto(arqueocaja.getArqueocajaId());
+
             }
         });
 
@@ -881,7 +894,7 @@ public class PrCuadre extends Panel implements View {
         btnLubricante = new Button("Lubricantes", FontAwesome.PLUS);
         btnLubricante.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnLubricante.addStyleName(ValoTheme.BUTTON_SMALL);
-//        btnLubricante.addClickListener(clickEvent -> metodo1());
+        btnLubricante.addClickListener(clickEvent -> formDetalleProd(estacion.getEstacionId(), currencySymbol, pais.getPaisId()));
 
         btnClienteCredito = new Button("Clientes Credito", FontAwesome.PLUS);
         btnClienteCredito.addStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -1079,6 +1092,14 @@ public class PrCuadre extends Panel implements View {
                                     }
                                     /*fin registro detalle*/
 
+                                    //*Registro detalle de lubricantes*// JLopez
+                                    try {
+                                        daoLubs.CreaProductoDetalle(arqueo.getArqueocajaId(), bcrLubs, user.getUsername());
+                                    } catch (SQLException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                    /*fin registro detalle*/
+
                                     myAction = (myAction.equals(Dao.ACTION_ADD)) ? "cuadrado" : "actualizado";
                                     Notification notif = new Notification("ÉXITO:", "Se ha " + myAction + " las bombas con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                                     notif.setDelayMsec(3000);
@@ -1130,6 +1151,7 @@ public class PrCuadre extends Panel implements View {
                 for (Integer itemId : bcrMediopago.getItemIds()) {
                     if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_VENTA_PREPAGO) {
                         bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDouble);
+//                        bcrMediopago.getItem(itemId).getItemProperty("value").setReadOnly(true);
                         break;
                     }
                 }
@@ -1171,12 +1193,47 @@ public class PrCuadre extends Panel implements View {
                 for (Integer itemId : bcrMediopago.getItemIds()) {
                     if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_TARJETAS) {
                         bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDouble);
+                    }
+                }
+            });
+        }
+        getUI().addWindow(formTarjetasCredito);
+        formTarjetasCredito.focus();
+    }
+
+    /*Metodo Llama Forma Detalle Productos (Lubricantes) *///JJ
+    private void formDetalleProd(Integer idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxEmpleado.getValue() != null) {
+            formProductos = new FormDetalleLubricantes(idestacion, simboloMoneda, idpais, bcrLubs);
+            formProductos.addCloseListener((e) -> {
+                bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                bcrLubs = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detalleProducto");
+                tmpDoubleProdUno = (Double) VaadinSession.getCurrent().getAttribute("totalProductoUno");
+                tmpDoubleProdNoUno = (Double) VaadinSession.getCurrent().getAttribute("totalProducto");
+                tmpDoublePr = (Double) VaadinSession.getCurrent().getAttribute("totalProd");
+                System.out.println("tmpDoubleProdUno --------" + tmpDoubleProdUno);
+                System.out.println("tmpDoubleProdNoUno --------" + tmpDoubleProdNoUno);
+
+                for (Integer itemId : bcrProducto.getItemIds()) {
+                    System.out.println("bcrProducto.getItem(itemId).getBean().getProductoId()" + bcrProducto.getItem(itemId).getBean().getProductoId());
+                }
+
+                for (Integer itemId : bcrProducto.getItemIds()) {
+                    if (bcrProducto.getItem(itemId).getBean().getProductoId() == Constant.MP_CRI_VENTA_LUBS_UNO) {
+                        bcrProducto.getItem(itemId).getItemProperty("value").setValue(tmpDoubleProdUno);
+                        break;
+                    }
+                }
+
+                for (Integer itemId : bcrProducto.getItemIds()) {
+                    if (bcrProducto.getItem(itemId).getBean().getProductoId() == Constant.MP_CRI_VENTA_LUBS) {
+                        bcrProducto.getItem(itemId).getItemProperty("value").setValue(tmpDoubleProdNoUno);
                         break;
                     }
                 }
             });
-            getUI().addWindow(formTarjetasCredito);
-            formTarjetasCredito.focus();
+            getUI().addWindow(formProductos);
+            formProductos.focus();
         }
     }
 
@@ -1261,11 +1318,16 @@ public class PrCuadre extends Panel implements View {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("value");  //Atributo del bean
+                Property proid = source.getItem(itemId).getItemProperty("productoId");  //Atributo del bean
+                Property pronombre = source.getItem(itemId).getItemProperty("nombre");  //Atributo del bean
                 final TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
                 tfdValue.setValue("0.00");
                 tfdValue.setWidth("100px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
+                if ((Integer) proid.getValue() == 9 || (Integer) proid.getValue() == 10) {
+                    tfdValue.setReadOnly(true);
+                }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
@@ -1337,11 +1399,15 @@ public class PrCuadre extends Panel implements View {
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 System.out.println("tblMediospago.colMonto::: " + source.getId());
                 Property pro = source.getItem(itemId).getItemProperty("value");  //Atributo del bean
+                Property desc = source.getItem(itemId).getItemProperty("mediopagoId");
                 final TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
                 tfdValue.setValue("0.00");
                 tfdValue.setWidth("125px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
+                if ((Integer) desc.getValue() == 6 || (Integer) desc.getValue() == 5) {
+                    tfdValue.setReadOnly(true);
+                }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {

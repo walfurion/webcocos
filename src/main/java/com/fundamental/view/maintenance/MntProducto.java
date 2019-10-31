@@ -1,5 +1,6 @@
 package com.fundamental.view.maintenance;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Marca;
 import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Producto;
@@ -91,7 +92,7 @@ public class MntProducto extends Panel implements View {
     List<Marca> listBrands = new ArrayList();
     List<Tipoproducto> listTipoproducto = new ArrayList();
     String action;
-            
+    Acceso acceso = new Acceso();     
 //template
     private VerticalLayout vlRoot;
     private Utils utils = new Utils();
@@ -359,7 +360,11 @@ public class MntProducto extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnAdd.setEnabled(acceso.isAgregar());
+        btnSave.setEnabled(acceso.isCambiar());
     }
 
 }
