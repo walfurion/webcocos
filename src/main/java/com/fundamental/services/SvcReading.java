@@ -105,7 +105,7 @@ public class SvcReading extends Dao {
     public List<DtoLectura> getLecturasByTurnoid(Integer turnoId, String tipo) {
         List<DtoLectura> result = new ArrayList();
         try {
-            query = "SELECT ld.bomba_id, ld.producto_id, ld.tipo, ld.lectura_inicial, ld.lectura_final, ld.total, ld.tipodespacho_id, l.creado_persona, ld.calibracion, ld.lectura_id, l.nombre_pistero, l.nombre_jefe "
+            query = "SELECT ld.bomba_id, ld.producto_id, ld.tipo, ld.lectura_inicial, ld.lectura_final, ld.total, ld.tipodespacho_id, l.creado_persona, ld.calibracion, ld.lectura_id, l.nombre_pistero, l.nombre_jefe, l.NUMEROCASO "
                     + "FROM turno t, lectura l, lectura_detalle ld "
                     + "WHERE l.lectura_id = ld.lectura_id AND l.turno_id = t.turno_id AND t.estacion_id = l.estacion_id AND t.turno_id = ? AND ld.tipo = ?";
             pst = getConnection().prepareStatement(query);
@@ -125,6 +125,7 @@ public class SvcReading extends Dao {
                 dla.setLecturaId(rst.getInt(10));
                 dla.setNombrePistero(rst.getString(11));
                 dla.setNombreJefe(rst.getString(12));
+                dla.setNumeroCaso(rst.getString(13));
                 result.add(dla);
             }
         } catch (Exception exc) {
