@@ -820,11 +820,6 @@ public class Dao {
                     + "     FROM arqueocaja a, arqueocaja_producto ap  "
                     + "     WHERE a.arqueocaja_id = ap.arqueocaja_id AND a.turno_id = " + turnoId
                     + "     GROUP BY a.arqueocaja_id "
-                    + "UNION "
-                    + "     select a.ARQUEOCAJA_ID, SUM(tc.MONTO) monto  "
-                    + "     from ARQUEOCAJA a, ARQUEOCAJA_TC tc  "
-                    + "     where a.ARQUEOCAJA_ID = tc.ARQUEOCAJA_ID and a.TURNO_ID= " + turnoId
-                    + "     group by a.ARQUEOCAJA_ID "
                     + ") tabl "
                     + "GROUP BY tabl.arqueocaja_id "
                     + "ORDER BY tabl.arqueocaja_id";
@@ -1697,16 +1692,16 @@ public class Dao {
         return p;
     }
     public Acceso getAccess(String screen){
+        System.out.println("screen "+screen);
         Acceso acceso = new Acceso();
          Usuario user = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
                 for (Acceso a : user.getRoles().get(0).getAccesos()) {
                     if (a.getRecursoInterno().trim().toUpperCase().equals(screen)) {
-                        System.out.println(screen + " - " + a.getTitulo() + " ACCIONES  " 
-                                + a.isVer() + " " + a.isCambiar() + " - " + a.isAgregar());
                         acceso.setVer(true);
                         acceso.setCambiar(a.isCambiar());
                         acceso.setEliminar(a.isEliminar());
                         acceso.setAgregar(a.isAgregar());
+                        System.out.println("nombre "+a.getRecursoInterno()+" cambiar "+acceso.isCambiar()+" agregar "+acceso.isAgregar());
                         return acceso;
                     }
                 }

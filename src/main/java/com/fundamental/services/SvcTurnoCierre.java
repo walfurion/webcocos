@@ -130,16 +130,18 @@ public class SvcTurnoCierre extends Dao {
     public List<ArqueoTC> getArqueoTC(String arqueocajaId) {
         List<ArqueoTC> result = new ArrayList();
         try {
-            query = "select ARQ.ARQUEOCAJA_ID, ARQ.LOTE, SUM(ARQ.MONTO), TAR.NOMBRE, TAR.TARJETA_ID "
+            query = "select ARQ.LOTE, SUM(ARQ.MONTO), TAR.NOMBRE, TAR.TARJETA_ID "
                     + "from ARQUEOCAJA_TC ARQ, TARJETA TAR "
                     + "where ARQ.TARJETA_ID=TAR.TARJETA_ID and ARQUEOCAJA_ID IN (" + arqueocajaId + ") "
-                    + "group by ARQ.ARQUEOCAJA_ID, ARQ.LOTE, TAR.NOMBRE, TAR.TARJETA_ID order by TAR.NOMBRE, ARQ.LOTE ";
+                    + "group by ARQ.LOTE, TAR.NOMBRE, TAR.TARJETA_ID order by TAR.NOMBRE, ARQ.LOTE ";
             pst = getConnection().prepareStatement(query);
             System.out.println("entra a la tarjeta "+query);
             ResultSet rst = pst.executeQuery();
             ArqueoTC atc;
+            int count =0;
             while (rst.next()) {
-                atc = new ArqueoTC(rst.getInt(1), rst.getString(2), rst.getDouble(3), rst.getString(4), rst.getInt(5));
+                atc = new ArqueoTC(rst.getString(1), rst.getDouble(2), rst.getString(3), rst.getInt(4));
+                atc.setId(count++);
                 result.add(atc);
             }
         } catch (Exception exc) {

@@ -277,7 +277,7 @@ public class PrTurnoCierre extends Panel implements View {
         bcrProducto.setBeanIdProperty("productoId");
         bcrMediospago.setBeanIdProperty("mediopagoId");
         bcrEfectivo.setBeanIdProperty("efectivoId");
-        bcrTarjeta.setBeanIdProperty("tarjetaId");
+        bcrTarjeta.setBeanIdProperty("id");
 
         SvcTurnoCierre service = new SvcTurnoCierre();
 
@@ -754,7 +754,7 @@ actionComboboxTurno();
         tableTarjeta.setVisibleColumns(new Object[]{"nombre", "lote", "value"});
         tableTarjeta.setColumnHeaders(new String[]{"Nombre", "Lote", "Monto"});
         tableTarjeta.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT);
-        tableTarjeta.setHeight(200f, Unit.PIXELS);
+        tableTarjeta.setHeight(300f, Unit.PIXELS);
         tableTarjeta.addStyleName(ValoTheme.TABLE_SMALL);
     }
 
