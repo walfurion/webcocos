@@ -627,7 +627,7 @@ public class PrReading extends VerticalLayout implements View {
 //                    Notification.show("ADVERTENCIA:", "Tiene por lo menos un dato de calibración, debe adjuntar un documento", Notification.Type.WARNING_MESSAGE);
 //                    return;
 //                }
-                if (existCalibration && txtNumeroCaso.getValue() == "") {
+                if (existCalibration && txtNumeroCaso.getValue().equals("")) {
                     Notification.show("ADVERTENCIA:", "Tiene por lo menos un dato de calibración, debe ingresar un numero de caso", Notification.Type.WARNING_MESSAGE);
                     return;
                 }
@@ -635,21 +635,20 @@ public class PrReading extends VerticalLayout implements View {
                 if (turno.getTurnoId() != null) {
                     Integer turnoId = turno.getTurnoId();
                     Lectura lectura = new Lectura();
-                    if (txtNumeroCaso.getValue() != "") {
-                        lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), txtNumeroCaso.getValue()/**
-                         * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
-                         */
-                        );
-
-                    } else {
+//                    if (!txtNumeroCaso.getValue().equals("")) {
+//                        lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), txtNumeroCaso.getValue()/**
+//                         * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
+//                         */
+//                        );
+//
+//                    } else {
                         lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), null/**
                          * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
                          */
                         );
-                    }
+//                    }
 
                     lectura.setEmpleadoId(((Empleado) cbxEmpleado.getValue()).getEmpleadoId());
-
                     LecturaDetalle ldetalle;
                     boolean crearNuevaLectura = false;
 //                    if (pais.getPaisId() == Constant.CAT_PAIS_GUATEMALA) {
@@ -657,7 +656,7 @@ public class PrReading extends VerticalLayout implements View {
                         dlectura = (DtoLectura) ((BeanItem) tableElectronicas.getItem(id)).getBean();
                         ldetalle = new LecturaDetalle(lectura.getLecturaId(), estacion.getEstacionId(), dlectura.getBombaId(), dlectura.getProductoId(), dlectura.getTipodespachoId(),
                                 //                                "E", dlectura.geteInicial(), dlectura.geteFinal(), dlectura.geteVolumen(), null);
-//                                "E", dlectura.geteInicial(), dlectura.geteFinal(), dlectura.geteVolumen(), dlectura.geteCalibracion());
+                                //                                "E", dlectura.geteInicial(), dlectura.geteFinal(), dlectura.geteVolumen(), dlectura.geteCalibracion());
                                 "E", dlectura.geteInicial(), dlectura.geteFinal(), dlectura.geteVolumen(), dlectura.getmCalibracion());
                         if ((!crearNuevaLectura && dlectura.getEsNueva())) {
                             crearNuevaLectura = true;
@@ -731,8 +730,13 @@ public class PrReading extends VerticalLayout implements View {
 //                    }
                     int contador = 0;
                     if (crearNuevaLectura) {
+                        lectura.setNumeroCaso(txtNumeroCaso.getValue());
                         lectura = svcLectura.doActionLectura(Dao.ACTION_ADD, lectura);
                     } else {
+                        //ASG
+                        lectura.setLecturaId(svcLectura.getLecturaID(lectura.getEmpleadoId(), turnoId));
+                        lectura.setNumeroCaso(txtNumeroCaso.getValue());
+                        //FIN ASG
                         lectura = svcLectura.doActionLectura(Dao.ACTION_UPDATE, lectura);
                     }
                     for (LecturaDetalle lde : lectura.getLecturaDetalle()) {
@@ -1583,7 +1587,7 @@ public class PrReading extends VerticalLayout implements View {
                 }
                 if (lecturaFinalTurnoActual) {    //cerrado
                     //ASG
-                    String hdcase = "";
+                    String numeroCaso="";
                     for (DtoLectura dlec : lecturasTurnoActivoElectronicas) {
                         if (dlec.getBombaId().equals(itemId) && dlec.getProductoId().equals(p.getProductoId()) && dlec.getTipodespachoId().equals(bomba.getTipoDespachoId())) {
                             //tfdNameSeller.setValue(dlec.getNombrePistero());
@@ -1592,7 +1596,7 @@ public class PrReading extends VerticalLayout implements View {
                             dla.seteFinal(dlec.getmFinal());
                             dla.setmCalibracion(dlec.getmCalibracion());  ///ASG
                             if (dlec.getNumeroCaso() != null) {
-                                hdcase = dlec.getNumeroCaso();
+                                numeroCaso = dlec.getNumeroCaso();
                             }
                             dla.setEsNueva(Boolean.FALSE);
                             dla.setLecturaId(dlec.getLecturaId());
@@ -1603,10 +1607,10 @@ public class PrReading extends VerticalLayout implements View {
                             break;
                         }
                     }
-                    //ASG
-                    if (!hdcase.equals("")) {
+                    // ASG
+                    if (!numeroCaso.equals("")) {
                         txtNumeroCaso.setVisible(true);
-                        txtNumeroCaso.setValue(hdcase);
+                        txtNumeroCaso.setValue(numeroCaso);
                     } else {
                         txtNumeroCaso.setVisible(false);
                         txtNumeroCaso.setValue("");
