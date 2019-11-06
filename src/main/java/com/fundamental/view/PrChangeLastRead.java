@@ -1,5 +1,6 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Bomba;
 import com.fundamental.services.Dao;
 import com.sisintegrados.generic.bean.Estacion;
@@ -54,6 +55,7 @@ public class PrChangeLastRead extends Panel implements View {
     Table tableBombas, tableLecturas;
     TextArea txtaComentario;
     Button btnSave;
+    Acceso acceso = new Acceso();
 
     BeanContainer<Integer, Bomba> bcBombas;
     BeanContainer<Integer, LecturaDetalle> bcLecturas;
@@ -423,7 +425,9 @@ public class PrChangeLastRead extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnSave.setEnabled(acceso.isAgregar());
     }
-
 }

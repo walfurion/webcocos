@@ -1,5 +1,6 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Bomba;
 import com.fundamental.model.Dia;
 import com.sisintegrados.generic.bean.Empleado;
@@ -93,6 +94,7 @@ public class TurnoPr extends Panel implements View {
     Button btnGuardar = new Button("Crear Turno");
     Button btnModificar = new Button("Modificar Turno", FontAwesome.EDIT);
     Button btnAddEmpPump;
+    Acceso acceso = new Acceso();
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
 
     /*Para Asignar Bombas Pistero*/
@@ -1551,7 +1553,10 @@ public class TurnoPr extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnGuardar.setEnabled(acceso.isAgregar());
+        btnModificar.setEnabled(acceso.isCambiar());
     }
-
 }

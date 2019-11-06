@@ -1,5 +1,6 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.services.Dao;
 import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Pais;
@@ -58,6 +59,7 @@ public class MntMediosPago extends Panel implements View {
     private Button btnAdd,
             btnSave,
             btnFilterClear;
+    Acceso acceso = new Acceso();
     private Table tblData;
     private TextField tfdFilter;
     @PropertyId("nombre")
@@ -224,7 +226,7 @@ public class MntMediosPago extends Panel implements View {
         tfdPartidacontPorc = utils.buildTextField("Porcentaje en Part cont:", "0", false, 6, false, ValoTheme.TEXTFIELD_SMALL);
         tfdPartidacontPorc.addStyleName("align-right");
         tfdPartidacontPorc.setVisible(false);
-        
+
         chxPartidacont.setVisible(false);
         chxTCredito.setVisible(false);
 
@@ -292,10 +294,10 @@ public class MntMediosPago extends Panel implements View {
                 SvcMntMedioPago service = new SvcMntMedioPago();
                 mediopago = service.doAction(action, mediopago);
                 Mediopago item;
-                for(Integer id : bcrMediopago.getItemIds()) {
+                for (Integer id : bcrMediopago.getItemIds()) {
                     item = bcrMediopago.getItem(id).getBean();
-                    item.setPartidacont(mediopago.getPartidacontPor()!=null);
-                    service.doAction(Dao.ACTION_UPDATE,item);
+                    item.setPartidacont(mediopago.getPartidacontPor() != null);
+                    service.doAction(Dao.ACTION_UPDATE, item);
                 }
                 service.closeConnections();
                 if (mediopago.getMediopagoId() != null) {
@@ -350,7 +352,7 @@ public class MntMediosPago extends Panel implements View {
         tblData.addGeneratedColumn("colPorcentaje", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
-                TextField result  = utils.buildTextField("", "0", false, 6, false, ValoTheme.TEXTFIELD_SMALL);
+                TextField result = utils.buildTextField("", "0", false, 6, false, ValoTheme.TEXTFIELD_SMALL);
                 Property prop = source.getItem(itemId).getItemProperty("partidacontPor");  //Atributo del bean
                 result.setPropertyDataSource(prop);
                 result.setWidth("75px");
@@ -361,9 +363,9 @@ public class MntMediosPago extends Panel implements View {
         tblData.addGeneratedColumn("colEstado", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Label result  = new Label();
+                Label result = new Label();
                 String estado = bcrMediopago.getItem(itemId).getBean().getEstado();
-                result.setValue(estado.equals("A")?"Activo":"Inactivo");
+                result.setValue(estado.equals("A") ? "Activo" : "Inactivo");
                 result.setWidth("75px");
                 return result;
             }
@@ -380,10 +382,10 @@ public class MntMediosPago extends Panel implements View {
         });
 //        tblData.setHeight("400px");
 //        tblData.setWidth("350px");
-        tblData.setVisibleColumns(new Object[]{"nombrePais", "orden", "nombre","colPorcentaje","colTarjeta","colEstado"});
-        tblData.setColumnHeaders(new String[]{"Pais", "Orden", "Medio pago","Porcentaje en Part cont","¿Es tarjeta de crédito?","Estado"});
+        tblData.setVisibleColumns(new Object[]{"nombrePais", "orden", "nombre", "colPorcentaje", "colTarjeta", "colEstado"});
+        tblData.setColumnHeaders(new String[]{"Pais", "Orden", "Medio pago", "Porcentaje en Part cont", "¿Es tarjeta de crédito?", "Estado"});
         tblData.setColumnAlignments(new Table.Align[]{
-            Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.CENTER, Table.Align.CENTER,Table.Align.LEFT});
+            Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.CENTER, Table.Align.CENTER, Table.Align.LEFT});
     }
 
     private void buildTablePaises() {
@@ -436,7 +438,10 @@ public class MntMediosPago extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnAdd.setEnabled(acceso.isAgregar());
+        btnSave.setEnabled(acceso.isCambiar());
     }
-
 }
