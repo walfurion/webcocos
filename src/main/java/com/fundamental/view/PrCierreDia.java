@@ -1167,7 +1167,7 @@ public class PrCierreDia extends Panel implements View {
         Dao dao = new Dao();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
-        btnGuardar.setEnabled(acceso.isAgregar());
-       // btnSave.setEnabled(acceso.isCambiar());
+        //btnGuardar.setEnabled(acceso.isAgregar());
+        btnGuardar.setEnabled(acceso.isCambiar());
     }
 }

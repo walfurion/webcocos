@@ -67,7 +67,7 @@ public final class MntEstacion extends Panel implements View {
             btnAdd = new Button("Agregar", FontAwesome.PLUS),
             btnSave = new Button("Guardar", FontAwesome.SAVE),
             btnLubsAll, btnLubsNone;
-    Acceso acceso = new Acceso();
+    
     private CssLayout filtering;
     private Table tblStations, tblBombas, tblCombustibles, tblMiscelaneos;
     private CheckBox chkMuestraPOS = new CheckBox("¿Mostrar facturación POS?:", false);
@@ -111,6 +111,7 @@ public final class MntEstacion extends Panel implements View {
     private final VerticalLayout vlRoot;
     private Utils utils = new Utils();
     private Usuario user;
+    Acceso acceso = new Acceso();
 
     public MntEstacion() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
