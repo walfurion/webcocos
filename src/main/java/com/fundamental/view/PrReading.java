@@ -642,10 +642,10 @@ public class PrReading extends VerticalLayout implements View {
 //                        );
 //
 //                    } else {
-                        lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), null/**
-                         * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
-                         */
-                        );
+                    lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), null/**
+                     * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
+                     */
+                    );
 //                    }
 
                     lectura.setEmpleadoId(((Empleado) cbxEmpleado.getValue()).getEmpleadoId());
@@ -1587,7 +1587,7 @@ public class PrReading extends VerticalLayout implements View {
                 }
                 if (lecturaFinalTurnoActual) {    //cerrado
                     //ASG
-                    String numeroCaso="";
+                    String numeroCaso = "";
                     for (DtoLectura dlec : lecturasTurnoActivoElectronicas) {
                         if (dlec.getBombaId().equals(itemId) && dlec.getProductoId().equals(p.getProductoId()) && dlec.getTipodespachoId().equals(bomba.getTipoDespachoId())) {
                             //tfdNameSeller.setValue(dlec.getNombrePistero());
@@ -1608,6 +1608,8 @@ public class PrReading extends VerticalLayout implements View {
                         }
                     }
                     // ASG
+
+                    System.out.println("NUMERO CASOOO " + numeroCaso);
                     if (!numeroCaso.equals("")) {
                         txtNumeroCaso.setVisible(true);
                         txtNumeroCaso.setValue(numeroCaso);
@@ -1626,6 +1628,8 @@ public class PrReading extends VerticalLayout implements View {
                         }
 //                                        tfdNameSeller.setValue(dlec.getNombrePistero());
 //                                        tfdNameChief.setValue(dlec.getNombreJefe());
+                        txtNumeroCaso.setVisible(false);
+                        txtNumeroCaso.setValue("");
                     }
                 }
 

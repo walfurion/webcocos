@@ -725,6 +725,14 @@ public class PrCuadre extends Panel implements View {
                     bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
                     bcrCreditC = daoTrC.getDetalleTarjetaCredito(arqueocaja.getArqueocajaId());
 
+                } else {
+                    /*ASG*/
+                    //no existen arqueos se limpian las colecciones.
+                    bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+                    listaEfectivo.removeAll(listaEfectivo); //ASG
                 }
 
             }
@@ -1690,7 +1698,6 @@ public class PrCuadre extends Panel implements View {
                 bcEfectivo.removeAllItems();
                 listaEfectivo.add(new DtoEfectivo(itemId, null, 0D));
                 bcEfectivo.addAll(listaEfectivo);
-
             }
         });
 
