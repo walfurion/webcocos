@@ -80,6 +80,7 @@ public class FormDetalleLubricantes extends Window {
     int tmpIntNoUno;
     // Container contLubs = new ListContainer<>(Producto.class, new ArrayList());
     Container contLubs = new ListContainer<>(GenericProduct.class, new ArrayList());
+    SvcCuadre service = new SvcCuadre();
 
     public FormDetalleLubricantes(Integer idestacion, String currencySymbol, Integer idpais, BeanContainer<Integer, DtoProducto> bcrLubs) {
         this.idestacion = idestacion;
@@ -106,7 +107,6 @@ public class FormDetalleLubricantes extends Window {
         detailsWrapper.addStyleName(ValoTheme.TABSHEET_CENTERED_TABS);
         content.addComponent(detailsWrapper);
         content.setExpandRatio(detailsWrapper, 1f);
-        SvcCuadre service = new SvcCuadre();
         if (idestacion != null) {
             //    contCustomerPrepaid = new ListContainer<Producto>(Producto.class, dao.getLubricantsByCountryStation(true, idestacion, idpais));
             contLubs = new ListContainer<Producto>(Producto.class, service.getLubricantsGenericsCountryStation(idpais, idestacion));
@@ -183,6 +183,9 @@ public class FormDetalleLubricantes extends Window {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("producto");  //Atributo del bean
+                if (idestacion != null) {
+                    contLubs = new ListContainer<Producto>(Producto.class, service.getLubricantsGenericsCountryStation(idpais, idestacion));
+                }
                 final ComboBox cbxProducto = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, contLubs);
                 cbxProducto.setPropertyDataSource(pro);
                 cbxProducto.setFilteringMode(FilteringMode.CONTAINS);
@@ -290,8 +293,8 @@ public class FormDetalleLubricantes extends Window {
         tmpIntUno = 0;
         tmpIntNoUno = 0;
         for (Integer itemId : bcrLubs.getItemIds()) {
-           tmpDouble += bcrLubs.getItem(itemId).getBean().getValor();
-           tmpInt += bcrLubs.getItem(itemId).getBean().getCantidad();
+            tmpDouble += bcrLubs.getItem(itemId).getBean().getValor();
+            tmpInt += bcrLubs.getItem(itemId).getBean().getCantidad();
         }
 
         for (Integer itemId : bcrLubs.getItemIds()) {
@@ -307,8 +310,7 @@ public class FormDetalleLubricantes extends Window {
         tblLubricantes.setFooterVisible(true);
         tblLubricantes.setColumnFooter("colProducto", "Total:");
         tblLubricantes.setColumnFooter("colCantidad", Integer.toString(tmpInt));
-        tblLubricantes.setColumnFooter("total", currencySymbol + numberFmt.format((tmpLubsUno*tmpIntUno)+(tmpIntNoUno*tmpLubsOtros)).trim());
-
+        tblLubricantes.setColumnFooter("total", currencySymbol + numberFmt.format((tmpLubsUno * tmpIntUno) + (tmpIntNoUno * tmpLubsOtros)).trim());
 
         VaadinSession.getCurrent().setAttribute("detalleProducto", bcrLubs);
         VaadinSession.getCurrent().setAttribute("totalProd", tmpDouble);

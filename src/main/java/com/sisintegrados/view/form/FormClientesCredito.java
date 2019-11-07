@@ -44,7 +44,7 @@ import org.vaadin.maddon.ListContainer;
  */
 public class FormClientesCredito extends Window {
 
-     static final DecimalFormat numberFmt = new DecimalFormat("### ###,##0.00;-#");
+    static final DecimalFormat numberFmt = new DecimalFormat("### ###,##0.00;-#");
     static final DecimalFormat numberFmt3D = new DecimalFormat("### ###,##0.000;-#");
     static final String HEIGHT_TABLE = "300px";
     CreateComponents components = new CreateComponents();
@@ -161,6 +161,9 @@ public class FormClientesCredito extends Window {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
+                if (idestacion != null) {
+                    contCustomerCredit = new ListContainer<Cliente>(Cliente.class, dao.getCustomersByStationidType(idestacion, "C"));
+                }
                 ComboBox cbxCliente = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, contCustomerCredit);
                 cbxCliente.setPropertyDataSource(pro);
                 cbxCliente.setFilteringMode(FilteringMode.CONTAINS);
