@@ -21,6 +21,7 @@ import com.vaadin.server.Responsive;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.combobox.FilteringMode;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
@@ -82,8 +83,8 @@ public class FormTarjetasCredito extends Window {
         detailsWrapper.addStyleName(ValoTheme.TABSHEET_CENTERED_TABS);
         content.addComponent(detailsWrapper);
         content.setExpandRatio(detailsWrapper, 1f);
-        ContCreditC = new BeanItemContainer<Tarjeta>(Tarjeta.class);
-        ContCreditC.addAll(dao.getTarjetas());
+//        ContCreditC = new BeanItemContainer<Tarjeta>(Tarjeta.class);
+//        ContCreditC.addAll(dao.getTarjetas());
         detailsWrapper.addComponent(buildFields());
         content.addComponent(buildButtons());
     }
@@ -148,7 +149,15 @@ public class FormTarjetasCredito extends Window {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("tarjeta");  //Atributo del bean
-                ComboBox cmbTarjeta = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, ContCreditC);
+                ContCreditC = new BeanItemContainer<Tarjeta>(Tarjeta.class);
+                ContCreditC.addAll(dao.getTarjetas());
+//                ComboBox cmbTarjeta = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, ContCreditC);
+                ComboBox cmbTarjeta = new ComboBox(null, ContCreditC);
+                cmbTarjeta.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbTarjeta.setItemCaptionPropertyId("nombre");
+                cmbTarjeta.setNullSelectionAllowed(false);
+                cmbTarjeta.addStyleName(ValoTheme.COMBOBOX_SMALL);
+                
                 cmbTarjeta.setPropertyDataSource(pro);
                 cmbTarjeta.setFilteringMode(FilteringMode.CONTAINS);
                 cmbTarjeta.setWidth("250px");

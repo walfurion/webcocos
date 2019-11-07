@@ -1,5 +1,6 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Arqueocaja;
 import com.fundamental.model.ArqueocajaBomba;
 import com.fundamental.model.ArqueocajaDetalle;
@@ -222,6 +223,10 @@ public class PrCuadre extends Panel implements View {
     BeanContainer<Integer, GenericTarjeta> bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
     SvcTarjetaCredito daoTrC = new SvcTarjetaCredito();
     double tmpDoubleTarjetaCredito;
+
+    Acceso acceso = new Acceso();
+    boolean modificar = false;
+    boolean crear = false;
 
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -801,44 +806,44 @@ public class PrCuadre extends Panel implements View {
     }
 
     private void determinarPermisos() {
-        boolean explorar = false, editar = false, crearCuadre = false;
-        try {
-            if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
-                    && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
-                explorar = crearCuadre = true;
-            } else if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
-                    && dia.getFecha().before(ultimoDia.getFecha())) {
-                explorar = true;
-            } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO)
-                    || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
-                    && dia.getEstadoId() != null && dia.getEstadoId() == 2
-                    && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
-                explorar = true;
-            } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) && dia.getEstadoId() == 1 && turno.getEstadoId() == 2) {
-                explorar = true;
-            } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR)
-                    && dia.getEstadoId() != null && dia.getEstadoId() == 1
-                    && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
-                explorar = crearCuadre = true;
-            } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
-                    && dia.getEstadoId() != null && dia.getEstadoId() == 1
-                    && turno.getEstadoId() != null && turno.getEstadoId() == 1) {
-//            explorar = false;
-                explorar = true;
-                editar = crearCuadre = true;
-            } else if (user.isAdministrativo()) {
-                explorar = true;
-                crearCuadre = true;
-            } else if (user.isGerente()) {
-                explorar = crearCuadre = true;
-            }
-        } catch (Exception ignore) {
-            ignore.printStackTrace();
-        }
-        dfdFecha.setEnabled(explorar);   //habilitado
-        cbxTurno.setEnabled(explorar);    //habilitado
-//        crearCuadre = (editar && crearCuadre)
-        btnSave.setEnabled(crearCuadre);    //habilitado (cerrado)
+//        boolean explorar = false, editar = false, crearCuadre = false;
+//        try {
+//            if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                    && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
+//                explorar = crearCuadre = true;
+//            } else if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                    && dia.getFecha().before(ultimoDia.getFecha())) {
+//                explorar = true;
+//            } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO)
+//                    || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
+//                    && dia.getEstadoId() != null && dia.getEstadoId() == 2
+//                    && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
+//                explorar = true;
+//            } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) && dia.getEstadoId() == 1 && turno.getEstadoId() == 2) {
+//                explorar = true;
+//            } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR)
+//                    && dia.getEstadoId() != null && dia.getEstadoId() == 1
+//                    && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
+//                explorar = crearCuadre = true;
+//            } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
+//                    && dia.getEstadoId() != null && dia.getEstadoId() == 1
+//                    && turno.getEstadoId() != null && turno.getEstadoId() == 1) {
+////            explorar = false;
+//                explorar = true;
+//                editar = crearCuadre = true;
+//            } else if (user.isAdministrativo()) {
+//                explorar = true;
+//                crearCuadre = true;
+//            } else if (user.isGerente()) {
+//                explorar = crearCuadre = true;
+//            }
+//        } catch (Exception ignore) {
+//            ignore.printStackTrace();
+//        }
+//        dfdFecha.setEnabled(explorar);   //habilitado
+//        cbxTurno.setEnabled(explorar);    //habilitado
+////        crearCuadre = (editar && crearCuadre)
+//        btnSave.setEnabled(crearCuadre);    //habilitado (cerrado)
     }
 
     private void recalcularFooter() {
@@ -2532,6 +2537,19 @@ public class PrCuadre extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        modificar = acceso.isCambiar();
+        crear = acceso.isAgregar();
+        if (acceso.isCambiar() || acceso.isAgregar()) {
+            modificar = true;
+            crear = true;
+            btnSave.setEnabled(true);
+        } else {
+            modificar = false;
+            crear = false;
+            btnSave.setEnabled(false);
+        }
     }
 }

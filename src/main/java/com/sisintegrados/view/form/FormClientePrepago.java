@@ -93,7 +93,7 @@ public class FormClientePrepago extends Window {
         content.addComponent(detailsWrapper);
         content.setExpandRatio(detailsWrapper, 1f);
         if (idestacion != null) {
-            contCustomerPrepaid = new ListContainer<Cliente>(Cliente.class, dao.getCustomersByStationidType(idestacion, "P"));
+//            contCustomerPrepaid = new ListContainer<Cliente>(Cliente.class, dao.getCustomersByStationidType(idestacion, "P"));
             bcrMediopago.setBeanIdProperty("mediopagoId");
             bcrMediopago.addAll(dao.getMediospagoByPaisidTipoid(idpais, 1));   //genericos
         }
@@ -163,6 +163,9 @@ public class FormClientePrepago extends Window {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
+                if (idestacion != null) {
+                    contCustomerPrepaid = new ListContainer<Cliente>(Cliente.class, dao.getCustomersByStationidType(idestacion, "P"));
+                }
                 ComboBox cbxCliente = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, contCustomerPrepaid);
                 cbxCliente.setPropertyDataSource(pro);
                 cbxCliente.setFilteringMode(FilteringMode.CONTAINS);
