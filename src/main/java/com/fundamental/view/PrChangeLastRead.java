@@ -55,7 +55,7 @@ public class PrChangeLastRead extends Panel implements View {
     Table tableBombas, tableLecturas;
     TextArea txtaComentario;
     Button btnSave;
-    Acceso acceso = new Acceso();
+    
 
     BeanContainer<Integer, Bomba> bcBombas;
     BeanContainer<Integer, LecturaDetalle> bcLecturas;
@@ -68,6 +68,7 @@ public class PrChangeLastRead extends Panel implements View {
     private CssLayout content = new CssLayout();
     Utils utils = new Utils();
     Usuario user;
+    Acceso acceso = new Acceso();
 
     public PrChangeLastRead() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);

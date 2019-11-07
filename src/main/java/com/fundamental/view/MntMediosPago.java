@@ -59,7 +59,7 @@ public class MntMediosPago extends Panel implements View {
     private Button btnAdd,
             btnSave,
             btnFilterClear;
-    Acceso acceso = new Acceso();
+    
     private Table tblData;
     private TextField tfdFilter;
     @PropertyId("nombre")
@@ -97,6 +97,7 @@ public class MntMediosPago extends Panel implements View {
     private Usuario user;
     String action;
     private List<DtoGenericBean> listStatus;
+    Acceso acceso = new Acceso();
 
     public MntMediosPago() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
