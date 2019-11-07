@@ -481,7 +481,7 @@ public class PrReading extends VerticalLayout implements View {
 //        determinarPermisos();
     }
 
-    boolean editar = false;
+//    boolean editar = false;
 
     private void determinarPermisos() {
 //        boolean explorar = false, crearLectura = false;
@@ -1178,7 +1178,7 @@ public class PrReading extends VerticalLayout implements View {
                 nfd.setWidth(100f, Unit.PIXELS);
                 nfd.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 nfd.addStyleName("align-right");
-                nfd.setEnabled(editar);
+//                nfd.setEnabled(editar); //ASG 
                 nfd.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
@@ -1351,7 +1351,7 @@ public class PrReading extends VerticalLayout implements View {
                 nfd.setWidth(100f, Unit.PIXELS);
                 nfd.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 nfd.addStyleName("align-right");
-                nfd.setEnabled(editar);
+//                nfd.setEnabled(editar); //ASG 
 //                nfd.setEnabled(
 //                        dia.getFecha() != null && ultimoDia.getFecha() != null && turno.getEstadoId() != null
 //                        && dia.getFecha().equals(ultimoDia.getFecha())

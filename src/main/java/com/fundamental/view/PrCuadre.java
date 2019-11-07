@@ -1076,22 +1076,24 @@ public class PrCuadre extends Panel implements View {
                                 }
 
                                 tmpString = (user.getPaisLogin() != null) ? user.getPaisLogin().getNombre() : ((Pais) cbxPais.getValue()).getNombre();
-                                Parametro parametro = svcTurno.getParameterByName("CORREO_CALIBRACIONES_" + tmpString.toUpperCase().replaceAll(" ", ""));
+//                                Parametro parametro = svcTurno.getParameterByName("CORREO_CALIBRACIONES_" + tmpString.toUpperCase().replaceAll(" ", "")); //COMENTADO CORREO NO SE USA  ASG
 
                                 svcTurno.closeConnections();
 
                                 if (arqueo.getArqueocajaId() != null) {
 
-                                    if (diferencia < 0 && myAction.equals(Dao.ACTION_ADD)) {
-                                        tmpString = (user.getEstacionLogin() != null) ? user.getEstacionLogin().getNombre() : ((Estacion) cbxEstacion.getValue()).getNombre();
-                                        System.out.println("PrCuadre.doSave::: " + tmpString + "; " + turno.getTurnoId());
-                                        Mail mail = new Mail(parametro.getValor(), "Web COCOs - Diferencia " + tmpString,
-                                                String.format("Se ha encontrado una diferencia en el cuadre de caja de la estación %s del turno: %s", tmpString, turno.getTurnoId()),
-                                                new ArrayList(Arrays.asList(tempFile.getAbsolutePath())));
-                                        mail.run();
-                                    }
-
-                                    //*Registro detalle de clientes*// ASG
+                                    //COMENTADO YA NO EXISTE CORREOS ASG
+//                                    if (diferencia < 0 && myAction.equals(Dao.ACTION_ADD)) {
+//                                        tmpString = (user.getEstacionLogin() != null) ? user.getEstacionLogin().getNombre() : ((Estacion) cbxEstacion.getValue()).getNombre();
+//                                        System.out.println("PrCuadre.doSave::: " + tmpString + "; " + turno.getTurnoId());
+//                                        Mail mail = new Mail(parametro.getValor(), "Web COCOs - Diferencia " + tmpString,
+//                                                String.format("Se ha encontrado una diferencia en el cuadre de caja de la estación %s del turno: %s", tmpString, turno.getTurnoId()),
+//                                                new ArrayList(Arrays.asList(tempFile.getAbsolutePath())));
+//                                        mail.run();
+//                                    }
+                                    //FIN ASG
+                                    
+                                      //*Registro detalle de clientes*// ASG
                                     try {
                                         dao.CreaClienteDetalle(arqueo.getArqueocajaId(), bcrPrepaid, user.getUsername());
                                         dao.CreaClienteDetalleCredito(arqueo.getArqueocajaId(), bcrClientes, user.getUsername());//Clientes Credito
@@ -1330,7 +1332,7 @@ public class PrCuadre extends Panel implements View {
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
                 if ((Integer) proid.getValue() == 9 || (Integer) proid.getValue() == 10) {
-                    tfdValue.setReadOnly(true);
+//                    tfdValue.setReadOnly(true); // ASG DESCOMENTAR CUANDO CORRIGAN LA DATA DE LUBRICANTES
                 }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
