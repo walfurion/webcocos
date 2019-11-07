@@ -1,7 +1,7 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Bomba;
-import com.fundamental.model.BombaEmpleadoEstacion;
 import com.fundamental.model.Dia;
 import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Estacion;
@@ -21,7 +21,6 @@ import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcReading;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.utils.Constant;
-import com.fundamental.utils.Mail;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -62,11 +61,9 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import static org.eclipse.persistence.jpa.rs.util.JPARSLogger.exception;
 import org.vaadin.maddon.ListContainer;
 import org.vaadin.ui.NumberField;
 
@@ -127,6 +124,9 @@ public class PrReading extends VerticalLayout implements View {
     String[] uniqueStation;
     public TextField txtNumeroCaso;
     Double cantCalibrar;
+    Acceso acceso = new Acceso();
+    boolean modificar = false;
+    boolean crear = false;
 
     public PrReading() {
         setSizeFull();
@@ -484,34 +484,34 @@ public class PrReading extends VerticalLayout implements View {
     boolean editar = false;
 
     private void determinarPermisos() {
-        boolean explorar = false, crearLectura = false;
-        editar = false;
-        if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha() == null && ultimoDia.getFecha() == null) {
-            explorar = true;
-        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null && ultimoDia.getFecha() == null) {
-            explorar = true;
-        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
-                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
-            explorar = crearLectura = true;
-        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
-                && dia.getFecha().before(ultimoDia.getFecha())) {
-            explorar = true;
-        } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
-                && dia.getEstadoId() == 2 && turno.getEstadoId() == 2) {
-            explorar = true;
-        } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
-                && dia.getEstadoId() == 1 //                && turno.getEstadoId() == 2
-                ) {
-            explorar = editar = crearLectura = true;
-        } else if (user.isAdministrativo() || user.isGerente()) {
-            explorar = editar = crearLectura = true;
-        }
-//        else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
-//                && dia.getEstadoId() == 1 && turno.getEstadoId() == 1) { editar = crearLectura = true; } 
-
-        dfdFecha.setEnabled(explorar);   //habilitado
-        cbxTurno.setEnabled(explorar);    //habilitado
-        btnSave.setEnabled(crearLectura);    //habilitado (cerrado)
+//        boolean explorar = false, crearLectura = false;
+//        editar = false;
+//        if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha() == null && ultimoDia.getFecha() == null) {
+//            explorar = true;
+//        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null && ultimoDia.getFecha() == null) {
+//            explorar = true;
+//        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
+//            explorar = crearLectura = true;
+//        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                && dia.getFecha().before(ultimoDia.getFecha())) {
+//            explorar = true;
+//        } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
+//                && dia.getEstadoId() == 2 && turno.getEstadoId() == 2) {
+//            explorar = true;
+//        } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
+//                && dia.getEstadoId() == 1 //                && turno.getEstadoId() == 2
+//                ) {
+//            explorar = editar = crearLectura = true;
+//        } else if (user.isAdministrativo() || user.isGerente()) {
+//            explorar = editar = crearLectura = true;
+//        }
+////        else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
+////                && dia.getEstadoId() == 1 && turno.getEstadoId() == 1) { editar = crearLectura = true; } 
+//
+//        dfdFecha.setEnabled(explorar);   //habilitado
+//        cbxTurno.setEnabled(explorar);    //habilitado
+//        btnSave.setEnabled(crearLectura);    //habilitado (cerrado)
     }
 
     private void actionComboboxTurno() {
@@ -731,28 +731,36 @@ public class PrReading extends VerticalLayout implements View {
                     int contador = 0;
                     if (crearNuevaLectura) {
                         lectura.setNumeroCaso(txtNumeroCaso.getValue());
-                        lectura = svcLectura.doActionLectura(Dao.ACTION_ADD, lectura);
+                        if (crear) { //ASG Matriz seguridad
+                            lectura = svcLectura.doActionLectura(Dao.ACTION_ADD, lectura);
+                        }
                     } else {
                         //ASG
                         lectura.setLecturaId(svcLectura.getLecturaID(lectura.getEmpleadoId(), turnoId));
                         lectura.setNumeroCaso(txtNumeroCaso.getValue());
                         //FIN ASG
-                        lectura = svcLectura.doActionLectura(Dao.ACTION_UPDATE, lectura);
+                        if (modificar) {//ASG Matriz seguridad
+                            lectura = svcLectura.doActionLectura(Dao.ACTION_UPDATE, lectura);
+                        }
                     }
                     for (LecturaDetalle lde : lectura.getLecturaDetalle()) {
                         if (lde.getEsNueva()) {
                             lde.setLecturaId(lectura.getLecturaId());
-                            svcLectura.doActionLecturaDetalle(Dao.ACTION_ADD, lde);
+                            if (crear) { //ASG Matriz seguridad
+                                svcLectura.doActionLecturaDetalle(Dao.ACTION_ADD, lde);
+                            }
                         } else {
-                            svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, lde);
-                            //Si existe una lectura siguiente, se actualiza la lectura inicial de esa siguiente.
-                            LecturaDetalle ldeNext = svcLectura.getLecturaDetalleSiguiente(lde.getEstacionId(), lde.getLecturaId(), lde.getBombaId(), lde.getProductoId());
-                            if (ldeNext.getLecturaId() != null) {
-                                ldeNext.setLecturaInicial(lde.getLecturaFinal());
-                                svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, ldeNext);
-                            } else {
-                                Lecturafinal lfinal = new Lecturafinal(lde.getEstacionId(), lde.getBombaId(), lde.getProductoId(), lde.getTipo(), lde.getLecturaInicial(), lde.getLecturaFinal(), user.getUsername(), user.getNombreLogin());
-                                svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfinal);
+                            if (modificar) {  //ASG Matriz seguridad
+                                svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, lde);
+                                //Si existe una lectura siguiente, se actualiza la lectura inicial de esa siguiente.
+                                LecturaDetalle ldeNext = svcLectura.getLecturaDetalleSiguiente(lde.getEstacionId(), lde.getLecturaId(), lde.getBombaId(), lde.getProductoId());
+                                if (ldeNext.getLecturaId() != null) {
+                                    ldeNext.setLecturaInicial(lde.getLecturaFinal());
+                                    svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, ldeNext);
+                                } else {
+                                    Lecturafinal lfinal = new Lecturafinal(lde.getEstacionId(), lde.getBombaId(), lde.getProductoId(), lde.getTipo(), lde.getLecturaInicial(), lde.getLecturaFinal(), user.getUsername(), user.getNombreLogin());
+                                    svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfinal);
+                                }
                             }
                         }
                         contador++;
@@ -769,9 +777,13 @@ public class PrReading extends VerticalLayout implements View {
                             }
                         }
                         if (existeMecanica) {
-                            svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+                            if (modificar) {//ASG Matriz seguridad
+                                svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+                            }
                         } else {
-                            svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+                            if (crear) { //ASG Matriz seguridad
+                                svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+                            }
                         }
                     }
 
@@ -786,9 +798,13 @@ public class PrReading extends VerticalLayout implements View {
                             }
                         }
                         if (existeElectronica) {
-                            svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+                            if (modificar) {//ASG Matriz seguridad
+                                svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+                            }
                         } else {
-                            svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+                            if (crear) { //ASG Matriz seguridad
+                                svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+                            }
                         }
                     }
 
@@ -805,13 +821,17 @@ public class PrReading extends VerticalLayout implements View {
 
 //                    if (lectura.getLecturaId() != null) {
 //                        Notification.show("La lectura se ha creado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
-                        Notification notif = new Notification("ÉXITO:", "Operación realizada con éxito.", Notification.Type.HUMANIZED_MESSAGE);
-                        notif.setDelayMsec(3000);
-                        notif.setPosition(Position.MIDDLE_CENTER);
-                        //notif.setStyleName("mystyle");
-                        //notif.setIcon(new ThemeResource("img/reindeer.png"));
-                        notif.show(Page.getCurrent());
-                        UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_READING.getViewName());
+                        if (crear || modificar) {
+                            Notification notif = new Notification("ÉXITO:", "Operación realizada con éxito.", Notification.Type.HUMANIZED_MESSAGE);
+                            notif.setDelayMsec(3000);
+                            notif.setPosition(Position.MIDDLE_CENTER);
+                            //notif.setStyleName("mystyle");
+                            //notif.setIcon(new ThemeResource("img/reindeer.png"));
+                            notif.show(Page.getCurrent());
+                            UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_READING.getViewName());
+                        } else {
+                            UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_READING.getViewName()); //ASG
+                        }
                     } else {
                         Notification.show("ERROR:", "Ocurrió un error al guardar la lectura.\n" + lectura.getDescError(), Notification.Type.ERROR_MESSAGE);
                         return;
@@ -1493,11 +1513,6 @@ public class PrReading extends VerticalLayout implements View {
         tableManuales.setColumnFooter("colTotal", numberFmt.format(totalVenta));
     }
 
-    @Override
-    public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     private void buildLabelInfo() {
         SimpleDateFormat sdf_ddmmyyyy = new SimpleDateFormat("dd/MM/yyyy");
         String fechaString = (ultimoDia.getFecha() != null) ? sdf_ddmmyyyy.format(ultimoDia.getFecha()) : "INEXISTENTE";
@@ -1723,4 +1738,18 @@ public class PrReading extends VerticalLayout implements View {
         }
     }
 
+    @Override
+    public void enter(ViewChangeListener.ViewChangeEvent event) {
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        modificar = acceso.isCambiar();
+        crear = acceso.isAgregar();
+//        System.out.println(" ACCESO "+acceso.isCambiar()+" agregar  "+acceso.isAgregar());
+        if (acceso.isCambiar() || acceso.isAgregar()) {
+            btnSave.setEnabled(true);
+        } else {
+            btnSave.setEnabled(false);
+        }
+    }
 }
