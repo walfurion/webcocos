@@ -125,8 +125,6 @@ public class PrReading extends VerticalLayout implements View {
     public TextField txtNumeroCaso;
     Double cantCalibrar;
     Acceso acceso = new Acceso();
-    boolean modificar = false;
-    boolean crear = false;
 
     public PrReading() {
         setSizeFull();
@@ -731,26 +729,26 @@ public class PrReading extends VerticalLayout implements View {
                     int contador = 0;
                     if (crearNuevaLectura) {
                         lectura.setNumeroCaso(txtNumeroCaso.getValue());
-                        if (crear) { //ASG Matriz seguridad
+//                        if (crear) { //ASG Matriz seguridad
                             lectura = svcLectura.doActionLectura(Dao.ACTION_ADD, lectura);
-                        }
+//                        }
                     } else {
                         //ASG
                         lectura.setLecturaId(svcLectura.getLecturaID(lectura.getEmpleadoId(), turnoId));
                         lectura.setNumeroCaso(txtNumeroCaso.getValue());
                         //FIN ASG
-                        if (modificar) {//ASG Matriz seguridad
+//                        if (modificar) {//ASG Matriz seguridad
                             lectura = svcLectura.doActionLectura(Dao.ACTION_UPDATE, lectura);
-                        }
+//                        }
                     }
                     for (LecturaDetalle lde : lectura.getLecturaDetalle()) {
                         if (lde.getEsNueva()) {
                             lde.setLecturaId(lectura.getLecturaId());
-                            if (crear) { //ASG Matriz seguridad
+//                            if (crear) { //ASG Matriz seguridad
                                 svcLectura.doActionLecturaDetalle(Dao.ACTION_ADD, lde);
-                            }
+//                            }
                         } else {
-                            if (modificar) {  //ASG Matriz seguridad
+//                            if (modificar) {  //ASG Matriz seguridad
                                 svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, lde);
                                 //Si existe una lectura siguiente, se actualiza la lectura inicial de esa siguiente.
                                 LecturaDetalle ldeNext = svcLectura.getLecturaDetalleSiguiente(lde.getEstacionId(), lde.getLecturaId(), lde.getBombaId(), lde.getProductoId());
@@ -761,7 +759,7 @@ public class PrReading extends VerticalLayout implements View {
                                     Lecturafinal lfinal = new Lecturafinal(lde.getEstacionId(), lde.getBombaId(), lde.getProductoId(), lde.getTipo(), lde.getLecturaInicial(), lde.getLecturaFinal(), user.getUsername(), user.getNombreLogin());
                                     svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfinal);
                                 }
-                            }
+//                            }
                         }
                         contador++;
                     }
@@ -777,13 +775,13 @@ public class PrReading extends VerticalLayout implements View {
                             }
                         }
                         if (existeMecanica) {
-                            if (modificar) {//ASG Matriz seguridad
+//                            if (modificar) {//ASG Matriz seguridad
                                 svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
-                            }
+//                            }
                         } else {
-                            if (crear) { //ASG Matriz seguridad
+//                            if (crear) { //ASG Matriz seguridad
                                 svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
-                            }
+//                            }
                         }
                     }
 
@@ -798,13 +796,13 @@ public class PrReading extends VerticalLayout implements View {
                             }
                         }
                         if (existeElectronica) {
-                            if (modificar) {//ASG Matriz seguridad
+//                            if (modificar) {//ASG Matriz seguridad
                                 svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
-                            }
+//                            }
                         } else {
-                            if (crear) { //ASG Matriz seguridad
+//                            if (crear) { //ASG Matriz seguridad
                                 svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
-                            }
+//                            }
                         }
                     }
 
@@ -821,17 +819,11 @@ public class PrReading extends VerticalLayout implements View {
 
 //                    if (lectura.getLecturaId() != null) {
 //                        Notification.show("La lectura se ha creado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
-                        if (crear || modificar) {
                             Notification notif = new Notification("ÉXITO:", "Operación realizada con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                             notif.setDelayMsec(3000);
                             notif.setPosition(Position.MIDDLE_CENTER);
-                            //notif.setStyleName("mystyle");
-                            //notif.setIcon(new ThemeResource("img/reindeer.png"));
                             notif.show(Page.getCurrent());
                             UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_READING.getViewName());
-                        } else {
-                            UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_READING.getViewName()); //ASG
-                        }
                     } else {
                         Notification.show("ERROR:", "Ocurrió un error al guardar la lectura.\n" + lectura.getDescError(), Notification.Type.ERROR_MESSAGE);
                         return;
@@ -1743,9 +1735,6 @@ public class PrReading extends VerticalLayout implements View {
         Dao dao = new Dao();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
-        modificar = acceso.isCambiar();
-        crear = acceso.isAgregar();
-//        System.out.println(" ACCESO "+acceso.isCambiar()+" agregar  "+acceso.isAgregar());
         if (acceso.isCambiar() || acceso.isAgregar()) {
             btnSave.setEnabled(true);
         } else {
