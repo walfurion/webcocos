@@ -5,8 +5,8 @@ import com.fundamental.model.Arqueocaja;
 import com.fundamental.model.Bomba;
 import com.fundamental.model.BombaEstacion;
 import com.fundamental.model.Dia;
-import com.fundamental.model.Empleado;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Empleado;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.EstacionConf;
 import com.fundamental.model.EstacionConfHead;
 import com.fundamental.model.Horario;
@@ -22,6 +22,8 @@ import com.fundamental.model.Turno;
 import com.fundamental.model.dto.DtoArqueo;
 import com.fundamental.model.dto.DtoGenericBean;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.generic.bean.Usuario;
+import com.vaadin.data.util.ListSet;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.CheckBox;
 import java.sql.Connection;
@@ -33,12 +35,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 /**
- * @author Henry Barrientos
+ * @author Henry Barrientos..
  */
 public class Dao {
 
@@ -121,14 +122,23 @@ public class Dao {
     protected List<Rol> getRolesByUserid(Integer userId) {
         List<Rol> result = new ArrayList();
         ResultSet rst = null;
+        SvcMaintenance maintenace = new SvcMaintenance();
         try {
             miQuery = "SELECT r.rol_id, r.nombre, r.descripcion, r.rolpadre_id, r.estado "
                     + "FROM rol r, rol_usuario ru "
                     + "WHERE r.rol_id = ru.rol_id AND ru.usuario_id = " + userId;
             pst = getConnection().prepareStatement(miQuery);
+//            System.out.println("getRoles "+miQuery);
             rst = pst.executeQuery();
             while (rst.next()) {
-                result.add(new Rol(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5)));
+                Rol rl = new Rol(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5));
+                try{
+                List<Acceso> accesos = maintenace.getAccessByRolid(rst.getInt(1));
+                rl.setAccesos(accesos);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+                result.add(rl);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -314,7 +324,7 @@ public class Dao {
         try {
             rst = getConnection().prepareStatement(miQuery).executeQuery();
             while (rst.next()) {
-                result.add(new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5),false));
+                result.add(new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5), null));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -414,6 +424,39 @@ public class Dao {
                     + ", h.horario_id, h.nombre, h.hora_inicio, h.hora_fin, h.estado, h.descripcion "
                     + "FROM turno t, horario h "
                     + "WHERE t.horario_id = h.horario_id AND t.estacion_id = ? "
+                    + " ORDER BY t.turno_id DESC";
+            pst = getConnection().prepareStatement(miQuery);
+            pst.setObject(1, estacionId);
+            rst = pst.executeQuery();
+            if (rst.next()) {
+                result = new Turno(rst.getInt(1), rst.getInt(2), rst.getInt(3), rst.getInt(4), rst.getDate(5), null, rst.getString(6));
+                result.setEstacionconfheadId(rst.getInt(7));
+                Horario h = new Horario(rst.getInt(8), rst.getString(9), rst.getString(10), rst.getString(11), rst.getString(12), rst.getString(13));
+                h.setNombreHoras(rst.getString(10) + " - " + rst.getString(11));
+                result.setHorario(h);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+    public Turno getUltimoTurnoByEstacionid2(Integer estacionId,Date Fecha) {
+        Turno result = new Turno();
+        ResultSet rst = null;
+        String dateString = Constant.SDF_ddMMyyyy.format(Fecha);
+        try {
+            miQuery = "SELECT t.turno_id, t.estacion_id, t.usuario_id, t.estado_id, t.fecha, t.creado_persona, t.estacionconfhead_id "
+                    + ", h.horario_id, h.nombre, h.hora_inicio, h.hora_fin, h.estado, h.descripcion "
+                    + "FROM turno t, horario h "
+                    + "WHERE t.horario_id = h.horario_id AND t.estacion_id = ? "
+                    + "AND fecha = to_date('"+dateString+"','dd/mm/yyyy')"
                     + " ORDER BY t.turno_id DESC";
             pst = getConnection().prepareStatement(miQuery);
             pst.setObject(1, estacionId);
@@ -779,6 +822,7 @@ public class Dao {
                     + ") tabl "
                     + "GROUP BY tabl.arqueocaja_id "
                     + "ORDER BY tabl.arqueocaja_id";
+            System.out.println("mi query "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             while (rst.next()) {
@@ -1071,22 +1115,53 @@ public class Dao {
         List<Acceso> tempList = new ArrayList();
         ResultSet rst = null;
         try {
+            isSysadmin = false;
             //Si el usuario es SYSADMIN, trae todos los accesos.
+            /*modificado por cambios de seguridad anterior
             String isNotSysadmin = (isSysadmin) ? " WHERE a.estado = 'A' " : ", acceso_rol ar, rol_usuario ru, usuario u WHERE a.estado = 'A' AND a.acceso_id = ar.acceso_id AND ar.rol_id = ru.rol_id AND ru.usuario_id = u.usuario_id AND u.usuario_id = " + usuarioId;
-            miQuery = "SELECT DISTINCT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, a.estado "
+            
+             miQuery = "SELECT DISTINCT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, a.estado "
+                    + " ,ar.ver,ar.cambiar,ar.agregar,ar.eliminar "
                     + "FROM acceso a " + isNotSysadmin
                     + " CONNECT BY PRIOR a.acceso_id = a.padre "
-                    + "START WITH a.padre IS NULL "
-                    + "ORDER BY NVL(a.padre, 0), a.orden";
+                    + " START WITH a.padre IS NULL "
+                    + " ORDER BY NVL(a.padre, 0), a.orden";
+            System.out.println("valida user = "+miQuery);
+            */
+            String isNotSysadmin = (isSysadmin) ? " WHERE a.estado = 'A' " : ", acceso_rol ar, rol_usuario ru, usuario u WHERE a.estado = 'A' AND a.acceso_id = ar.acceso_id AND ar.rol_id = ru.rol_id AND ru.usuario_id = u.usuario_id AND u.usuario_id = " + usuarioId;
+            miQuery = "SELECT DISTINCT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, a.estado "
+//                    + " ,ar.ver,ar.cambiar,ar.agregar,ar.eliminar "
+                    + "FROM acceso a " + isNotSysadmin
+                    + " CONNECT BY PRIOR a.acceso_id = a.padre "
+                    + " ORDER BY NVL(a.padre, 0), a.orden";
+            System.out.println("valida user = "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
+            Acceso access;
             while (rst.next()) {
+                access = new Acceso();
+                access.setAccesoId(rst.getInt(1));
+                access.setTitulo(rst.getString(2));
+                access.setPadre(rst.getInt(3));
+                access.setOrden(rst.getInt(4));
+                access.setRecursoInterno(rst.getString(5));
+                access.setDescripcion(rst.getString(6));
+                access.setEstado(rst.getString(7));
+                access.setAccesos(new ArrayList<Acceso>());
+//                access.setVer(rst.getInt(8)==1?true:false);
+//                access.setCambiar(rst.getInt(9)==1?true:false);
+//                access.setAgregar(rst.getInt(10)==1?true:false);
+//                access.setEliminar(rst.getInt(11)==1?true:false);
+                
                 if (rst.getString(3) == null || rst.getInt(3) == 0) { //padres
-                    result.add(new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7)));
+                    result.add(access);
+////                    result.add(new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7)));
                 } else { //hijos
-                    tempList.add(new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7)));
+//                    tempList.add(new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7)));
+                    tempList.add(access);
                 }
             }
+            result = getParents();
             for (Acceso a : result) {
                 for (Acceso acc : tempList) {
                     if (a.getAccesoId().equals(acc.getPadre())) {
@@ -1127,7 +1202,7 @@ public class Dao {
             while (rst.next()) {
                 estacion = new Estacion(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5), rst.getString(7));
                 estacion.setPaisNombre(rst.getString(6));
-                estacion.setPais(new Pais(rst.getInt(4), rst.getString(6), rst.getString(8), "", "", "",false));
+                estacion.setPais(new Pais(rst.getInt(4), rst.getString(6), rst.getString(8), "", "", "", null));
                 estacion.setBombas(new ArrayList());
                 estacion.setProductos(new ArrayList());
                 estacion.getBombas().addAll(getBombasByEstacionid(rst.getInt(1)));
@@ -1279,6 +1354,7 @@ public class Dao {
         miQuery = "SELECT parametro_id, nombre, valor, descripcion, estado, creado_por, creado_el "
                 + "FROM parametro "
                 + "WHERE nombre = ?";
+        System.out.println("parametro "+miQuery);
         try {
             pst = getConnection().prepareStatement(miQuery);
             pst.setString(1, name);
@@ -1307,6 +1383,45 @@ public class Dao {
                 emp = new Empleado(rst.getInt(1), rst.getString(2));
                 if (rst.getString(4) != null) {
                     emp.setArqueo(new Arqueocaja(rst.getInt(4), rst.getInt(5), rst.getInt(6), rst.getDate(7), rst.getInt(8), null, null, null, rst.getString(9), rst.getString(10)));
+                }
+                result.add(emp);
+            }
+            closePst();
+            for (Empleado item : result) {
+                item.setBombas(new ArrayList());
+                miQuery = "SELECT b.bomba_id, b.nombre, b.estado, b.creado_por, b.creado_el, b.isla "
+                        + "FROM turno_empleado_bomba bee, empleado e, bomba b "
+                        + "WHERE bee.bomba_id = b.bomba_id AND bee.empleado_id = e.empleado_id AND bee.turno_id = " + turnoId + " AND bee.empleado_id = " + item.getEmpleadoId();
+                pst = getConnection().prepareStatement(miQuery);
+                rst = pst.executeQuery();
+                while (rst.next()) {
+                    item.getBombas().add(new Bomba(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), new java.util.Date(rst.getDate(5).getTime()), null));
+                }
+                closePst();
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
+
+    public List<Empleado> getEmpleadosByTurnoid2(int turnoId) {
+        List<Empleado> result = new ArrayList();
+        try {
+            miQuery = "SELECT DISTINCT e.empleado_id, e.nombre, e.estado, a.arqueocaja_id, a.estacion_id, a.turno_id, a.fecha, a.estado_id "
+                    + "FROM empleado e, turno_empleado_bomba teb "
+                    + "LEFT JOIN arqueocaja a ON teb.empleado_id = a.empleado_id AND teb.turno_id = a.turno_id "
+                    + "WHERE teb.empleado_id = e.empleado_id AND teb.turno_id = " + turnoId
+                    + " ORDER BY e.nombre";
+            pst = getConnection().prepareStatement(miQuery);
+            ResultSet rst = pst.executeQuery();
+            Empleado emp;
+            while (rst.next()) {
+                emp = new Empleado(rst.getInt(1), rst.getString(2));
+                if (rst.getString(4) != null) {
+                    emp.setArqueo(new Arqueocaja(rst.getInt(4), rst.getInt(5), rst.getInt(6), rst.getDate(7), rst.getInt(8), null, null, null));
                 }
                 result.add(emp);
             }
@@ -1418,21 +1533,55 @@ public class Dao {
         return result;
     }
 
-    public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int type, Integer brandId, boolean includeInactive) {
+//    public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int type, Integer brandId, boolean includeInactive) {
+//        List<Producto> result = new ArrayList();
+//        ResultSet rst = null;
+//        try {
+//            tmpString = (brandId == null) ? "" : " AND p.id_marca = " + brandId;
+//            miQuery = (includeInactive) ? "" : " AND p.estado = 'A' ";
+//            miQuery = "SELECT p.producto_id, p.nombre, p.codigo, p.estado, p.creado_por, p.orden_pos, NVL(m.id_marca, 0), NVL(m.nombre, '') "
+//                    + "FROM producto p "
+//                    + "LEFT JOIN estacion_producto ep ON ep.producto_id = p.producto_id "
+//                    + "LEFT JOIN marca m ON p.id_marca = m.id_marca "
+//                    + "LEFT JOIN estacion e ON e.estacion_id = ep.estacion_id AND e.pais_id = " + countryId
+//                    + " WHERE p.tipo_id = " + type
+//                    + miQuery
+//                    + tmpString
+//                    + " ORDER BY m.nombre, p.nombre";
+//            System.out.println("getAllProductosByCountryTypeBrand "+miQuery);
+//            pst = getConnection().prepareStatement(miQuery);
+//            rst = pst.executeQuery();
+//            Producto producto;
+//            while (rst.next()) {
+//                producto = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getInt(6));
+//                producto.setMarca(new Marca(rst.getInt(7), rst.getString(8), null));
+//                result.add(producto);
+//            }
+//        } catch (Exception exc) {
+//            exc.printStackTrace();
+//        } finally {
+//            closePst();
+//        }
+//        return result;
+//    }
+public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int type, Integer brandId, boolean includeInactive) {
         List<Producto> result = new ArrayList();
         ResultSet rst = null;
         try {
             tmpString = (brandId == null) ? "" : " AND p.id_marca = " + brandId;
             miQuery = (includeInactive) ? "" : " AND p.estado = 'A' ";
-            miQuery = "SELECT p.producto_id, p.nombre, p.codigo, p.estado, p.creado_por, p.orden_pos, NVL(m.id_marca, 0), NVL(m.nombre, '') "
-                    + "FROM producto p "
-                    + "LEFT JOIN estacion_producto ep ON ep.producto_id = p.producto_id "
-                    + "LEFT JOIN marca m ON p.id_marca = m.id_marca "
-                    + "LEFT JOIN estacion e ON e.estacion_id = ep.estacion_id AND e.pais_id = " + countryId
+            miQuery = " SELECT p.producto_id, p.nombre, p.codigo, p.estado, p.creado_por, p.orden_pos, NVL(m.id_marca, 0), NVL(m.nombre, '') "
+                    + " FROM producto p "
+                    + " LEFT JOIN estacion_producto ep ON ep.producto_id = p.producto_id "
+                    + " LEFT JOIN marca m ON p.id_marca = m.id_marca "
+                    + " LEFT JOIN estacion e ON e.estacion_id = ep.estacion_id AND e.pais_id = " + countryId
+                    + " LEFT JOIN LUBRICANTEPRECIO LP ON LP.PAIS_ID="+countryId+" AND LP.PRODUCTO_ID=p.PRODUCTO_ID "
                     + " WHERE p.tipo_id = " + type
                     + miQuery
                     + tmpString
+                    + " and lp.PRODUCTO_ID is null "
                     + " ORDER BY m.nombre, p.nombre";
+            System.out.println("getAllProductosByCountryTypeBrand "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             Producto producto;
@@ -1481,6 +1630,14 @@ public class Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
+            try {
+                if (rst != null) {
+                    rst.close();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
             closePst();
         }
         return result;
@@ -1536,5 +1693,51 @@ public class Dao {
         return result;
     }
     
-    
+     public List<Acceso> getParents() {
+        List<Acceso> p = new ArrayList();
+        ResultSet rst = null;
+        try {
+            String query =  " select ACCESO_ID,TITULO,PADRE,ORDEN,DESCRIPCION " +
+                            " from acceso where PADRE is null and upper(estado)='A' order by orden";
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+             Acceso access;
+            while (rst.next()) {
+                access = new Acceso();
+                access.setAccesoId(rst.getInt(1));
+                access.setTitulo(rst.getString(2));
+                access.setPadre(rst.getInt(3));
+                access.setOrden(rst.getInt(4));
+                access.setDescripcion(rst.getString(5));
+                access.setAccesos(new ArrayList<Acceso>());
+                p.add(access);
+                
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return p;
+    }
+    public Acceso getAccess(String screen){
+//        System.out.println("screen "+screen);
+        Acceso acceso = new Acceso();
+         Usuario user = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
+                for (Acceso a : user.getRoles().get(0).getAccesos()) {
+                    if (a.getRecursoInterno().trim().toUpperCase().equals(screen)) {
+                        acceso.setVer(true);
+                        acceso.setCambiar(a.isCambiar());
+                        acceso.setEliminar(a.isEliminar());
+                        acceso.setAgregar(a.isAgregar());
+//                        System.out.println("nombre "+a.getRecursoInterno()+" cambiar "+acceso.isCambiar()+" agregar "+acceso.isAgregar());
+                        return acceso;
+                    }
+                }
+                return acceso;
+    }    
 }

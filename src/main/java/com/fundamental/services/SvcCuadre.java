@@ -2,10 +2,11 @@ package com.fundamental.services;
 
 import com.fundamental.model.Bomba;
 import com.fundamental.model.Cliente;
-import com.fundamental.model.Empleado;
+import com.sisintegrados.generic.bean.Empleado;
 import com.fundamental.model.Producto;
 import com.fundamental.model.TasaCambio;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.generic.bean.GenericProduct;
 import com.vaadin.ui.CheckBox;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -139,15 +140,16 @@ public class SvcCuadre extends Dao {
         try {
             query = Constant.SDF_ddMMyyyy.format(new java.util.Date());
             query = (onlyActive) ? " AND TO_DATE('" + query + "', 'dd/mm/yyyy') BETWEEN TRUNC(fecha_inicio) AND TRUNC(fecha_fin) " : "";
-            query = "SELECT p.producto_id, p.nombre, p.codigo, p.tipo_id, p.orden_pos, p.estado, p.creado_por, p.creado_el, p.codigo_num, p.presentacion, p.codigo_barras, NVL(lub.precio, 0) "
+            query = "SELECT p.producto_id, p.nombre, p.codigo, p.tipo_id, p.orden_pos, p.estado, p.creado_por, p.creado_el, p.codigo_num, p.presentacion, p.codigo_barras, NVL(lub.precio, 0), p.ID_MARCA "
                     + "FROM producto p, estacion_producto pe, lubricanteprecio lub "
                     + "WHERE p.producto_id = pe.producto_id "//+ " AND pe.estacion_id = lub.estacion_id "
                     + "AND pe.producto_id = lub.producto_id "
-                    + "AND p.tipo_id = 2 AND lub.pais_id = " + countryId 
+                    + "AND p.tipo_id = 2 AND lub.pais_id = " + countryId
                     //+ " AND lub.estacion_id = " + stationId 
-                    + " AND pe.estacion_id = " + stationId 
+                    + " AND pe.estacion_id = " + stationId
                     + query
                     + " ORDER BY p.orden_pos";
+            System.out.println("query ----  " + query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Producto producto;
@@ -183,9 +185,9 @@ public class SvcCuadre extends Dao {
         }
         return result;
     }
-    
+
     public String[] getEmpleadoByEstacionTurnoEmpleado(int estacionId, int turnoId, int empleadoId) {
-        String[] result = new String[]{"",""};
+        String[] result = new String[]{"", ""};
         try {
             query = "SELECT l.nombre_pistero, l.nombre_jefe FROM lectura l WHERE l.estacion_id = ? AND l.turno_id = ? AND l.empleado_id = ?";
             pst = getConnection().prepareStatement(query);
@@ -200,6 +202,55 @@ public class SvcCuadre extends Dao {
             exc.printStackTrace();
         } finally {
             closePst();
+        }
+        return result;
+    }
+
+    public List<Producto> getLubricantsGenericsCountryStation(Integer countryId, Integer stationId) {
+        List<Producto> result = new ArrayList();
+        try {
+            query = Constant.SDF_ddMMyyyy.format(new java.util.Date());
+            //query = (onlyActive) ? " AND TO_DATE('" + query + "', 'dd/mm/yyyy') BETWEEN TRUNC(fecha_inicio) AND TRUNC(fecha_fin) " : "";
+            query = "SELECT p.producto_id,\n"
+                    + "         p.nombre,\n"
+                    + "         p.codigo,\n"
+                    + "         p.id_marca,\n"
+                    + "         p.estado,\n"
+                    + "         NVL (pr.precio, 0) precio\n"
+                    + "    FROM producto         p,\n"
+                    + "         lubricanteprecio pr,\n"
+                    + "         estacion_producto ep,\n"
+                    + "         estacion         e\n"
+                    + "   WHERE     p.producto_id = pr.producto_id\n"
+                    + "         AND e.pais_id = pr.pais_id\n"
+                    + "         AND ep.estacion_id = e.estacion_id\n"
+                    + "         AND ep.producto_id IN (9, 10)\n"
+                    + "         AND TRUNC (SYSDATE) <= TRUNC (pr.fecha_fin)\n"
+                    + "         AND e.estacion_id = " + stationId  +" \n"
+                    + "         AND p.ESTADO = 'A'\n"
+                    + "         AND p.TIPO_ID = 2\n"
+                    + "         AND e.pais_id = " + countryId +" \n"
+                    + "GROUP BY p.producto_id,\n"
+                    + "         p.nombre,\n"
+                    + "         p.codigo,\n"
+                    + "         p.estado,\n"
+                    + "         NVL (pr.precio, 0),\n"
+                    + "         p.id_marca ";
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            Producto prod;
+            while (rst.next()) {
+                prod = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5), rst.getDouble(6), null);
+                prod.setPrecio(rst.getDouble(6));
+                result.add(prod);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }

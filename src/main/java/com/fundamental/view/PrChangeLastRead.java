@@ -1,9 +1,10 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Bomba;
 import com.fundamental.services.Dao;
-import com.fundamental.model.Estacion;
-import com.fundamental.model.Lectura;
+import com.sisintegrados.generic.bean.Estacion;
+import com.sisintegrados.generic.bean.Lectura;
 import com.fundamental.model.LecturaDetalle;
 import com.fundamental.model.Lecturafinal;
 import com.sisintegrados.generic.bean.Pais;
@@ -54,6 +55,7 @@ public class PrChangeLastRead extends Panel implements View {
     Table tableBombas, tableLecturas;
     TextArea txtaComentario;
     Button btnSave;
+    
 
     BeanContainer<Integer, Bomba> bcBombas;
     BeanContainer<Integer, LecturaDetalle> bcLecturas;
@@ -66,6 +68,7 @@ public class PrChangeLastRead extends Panel implements View {
     private CssLayout content = new CssLayout();
     Utils utils = new Utils();
     Usuario user;
+    Acceso acceso = new Acceso();
 
     public PrChangeLastRead() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -352,7 +355,7 @@ public class PrChangeLastRead extends Panel implements View {
                 }
                 SvcReading svcLectura = new SvcReading();
                 Turno turno = svcLectura.getTurnoActivoByEstacionid(estacion.getEstacionId());
-                Lectura lectura = new Lectura(null, estacion.getEstacionId(), turno.getTurnoId(), null, null, null, null);
+                Lectura lectura = new Lectura(null, estacion.getEstacionId(), turno.getTurnoId(), null, null, null/*,null, null*/);
                 lectura.setLecturaDetalle(new ArrayList<LecturaDetalle>());
                 LecturaDetalle ldetail;
                 boolean existe = false;
@@ -423,7 +426,9 @@ public class PrChangeLastRead extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnSave.setEnabled(acceso.isAgregar());
     }
-
 }

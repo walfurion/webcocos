@@ -1,6 +1,7 @@
 package com.fundamental.view;
 
-import com.fundamental.model.Estacion;
+import com.fundamental.model.Acceso;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.EstacionConfHead;
 import com.fundamental.model.Horario;
 import com.sisintegrados.generic.bean.Pais;
@@ -89,6 +90,7 @@ public class MntHorario extends Panel implements View {
     private VerticalLayout vlRoot;
     private Utils utils = new Utils();
     private Usuario user;
+    Acceso acceso = new Acceso();
 
     public MntHorario() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -366,6 +368,11 @@ public class MntHorario extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnAdd.setEnabled(acceso.isAgregar());
+        btnSave.setEnabled(acceso.isCambiar());
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

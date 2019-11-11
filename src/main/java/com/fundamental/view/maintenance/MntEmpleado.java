@@ -5,7 +5,7 @@
  */
 package com.fundamental.view.maintenance;
 
-import com.fundamental.model.Empleado;
+import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoBean;

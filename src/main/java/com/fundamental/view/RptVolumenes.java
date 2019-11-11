@@ -1,8 +1,10 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
+import com.fundamental.services.Dao;
 import com.fundamental.services.SvcMedioPago;
 import com.fundamental.services.SvcReporte;
 import com.fundamental.utils.XlsxReportGenerator;
@@ -56,6 +58,7 @@ public class RptVolumenes extends Panel implements View {
     VerticalLayout vlRoot;
     Utils utils = new Utils();
     Usuario user;
+    Acceso acceso = new Acceso();
 
     public RptVolumenes() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -304,7 +307,10 @@ public class RptVolumenes extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnGenerar.setEnabled(acceso.isAgregar());    
+        btnGenerarMov.setEnabled(acceso.isAgregar());
     }
-
 }

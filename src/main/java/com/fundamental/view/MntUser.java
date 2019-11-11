@@ -1,15 +1,17 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Rol;
 import com.sisintegrados.generic.bean.Usuario;
 import com.sisintegrados.generic.bean.Pais;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoGenericBean;
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcMaintenance;
 import com.fundamental.services.SvcMntUser;
 import com.fundamental.utils.Constant;
+import com.google.gwt.user.client.ui.ListBox;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Item;
@@ -39,8 +41,10 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -50,6 +54,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.Entity;
 import org.vaadin.maddon.ListContainer;
 
 /**
@@ -65,7 +70,7 @@ public class MntUser extends Panel implements View {
     Table tblStations;
     BeanContainer<Integer, Estacion> bcrStations = new BeanContainer<>(Estacion.class);
     List<Estacion> allStations = new ArrayList();
-    
+
     Button btnAdd, btnSave, btnFilterClear;
     TextField tfdFilter;
     private CssLayout filtering;
@@ -73,7 +78,7 @@ public class MntUser extends Panel implements View {
     @PropertyId("correo")
     TextField tfdEmail;
     PasswordField clave;
-    
+
     //Para el mantenimiento la estacion viene en el objeto Usuario.estacionLogin
 //    @PropertyId("estacionLogin")
 //    ComboBox estacion = new ComboBox("Estación:");
@@ -83,7 +88,6 @@ public class MntUser extends Panel implements View {
     ComboBox cbxStatus;
     private List<DtoGenericBean> listStatus;
 //    ComboBox cbPaisUsuario = new ComboBox("País(usuario):");
-
 
     FormLayout form;
     BeanFieldGroup<Usuario> binder = new BeanFieldGroup<Usuario>(Usuario.class);
@@ -97,6 +101,8 @@ public class MntUser extends Panel implements View {
     private CssLayout content = new CssLayout();
     Utils utils = new Utils();
     Usuario user;
+    private OptionGroup optGroup;
+    Acceso acceso = new Acceso();
 
     public MntUser() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -117,7 +123,7 @@ public class MntUser extends Panel implements View {
 
         initControls();
         buildButtons();
-        buildTableRoles();
+//        buildTableRoles();
         buildTableStations();
 
         filtering = new CssLayout();
@@ -134,14 +140,15 @@ public class MntUser extends Panel implements View {
         vlLeft.setComponentAlignment(btnAdd, Alignment.TOP_CENTER);
         Responsive.makeResponsive(vlLeft);
 
-        CssLayout cltButtons = new CssLayout(utils.vlContainer(tblRol), utils.vlContainer(tblStations));
+//        CssLayout cltButtons = new CssLayout(utils.vlContainer(tblRol), utils.vlContainer(tblStations));
+        CssLayout cltButtons = new CssLayout(utils.vlContainer(optGroup), utils.vlContainer(tblStations));
         cltButtons.setSizeUndefined();
         Responsive.makeResponsive(cltButtons);
 
         VerticalLayout vlRight = new VerticalLayout(form, cltButtons, btnSave);
         vlRight.setSizeUndefined();
         vlRight.setId("vlRight");
-        vlRight.setComponentAlignment( vlRight.getComponent(1) , Alignment.MIDDLE_CENTER);
+        vlRight.setComponentAlignment(vlRight.getComponent(1), Alignment.MIDDLE_CENTER);
         vlRight.setComponentAlignment(btnSave, Alignment.MIDDLE_CENTER);
         Responsive.makeResponsive(vlRight);
 
@@ -155,7 +162,7 @@ public class MntUser extends Panel implements View {
         bcrStations.setBeanIdProperty("estacionId");
 
         SvcMntUser service = new SvcMntUser();
-        bcrUsuarios.addAll(service.getAllUsuarios(true));
+        bcrUsuarios.addAll(service.getAllUsuarios(false));
         allRoles = service.getAllRoles(true);
         paises = service.getAllPaises();
         allStations = service.getAllEstaciones(false);
@@ -166,9 +173,13 @@ public class MntUser extends Panel implements View {
 //        if (usuario.getEstacionLogin() != null) {
 //            cbPais.setValue(usuario.getEstacionLogin().getPais());
 //        }
-        defineSelectedRoles();
         bcrRoles.addAll(allRoles);
         listStatus = Arrays.asList(new DtoGenericBean("I", "Inactivo"), new DtoGenericBean("A", "Activo"));
+        optGroup = new OptionGroup("Perfiles", bcrRoles);
+        for (Rol r : allRoles) {
+            optGroup.setItemCaption(r.getRolId(), r.getNombre());
+        }
+        defineSelectedRoles();
     }
 
     private void initControls() {
@@ -235,15 +246,15 @@ public class MntUser extends Panel implements View {
         tblUser.addGeneratedColumn("colEstado", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Label result  = new Label();
+                Label result = new Label();
                 String estado = bcrUsuarios.getItem(itemId).getBean().getEstado();
-                result.setValue(estado.equals("A")?"Activo":"Inactivo");
+                result.setValue(estado.equals("A") ? "Activo" : "Inactivo");
                 result.setWidth("75px");
                 return result;
             }
         });
-        tblUser.setVisibleColumns(new Object[]{"username", "nombre", "apellido","colEstado"});
-        tblUser.setColumnHeaders(new String[]{"Usuario", "Nombre", "Apellido","Estado"});
+        tblUser.setVisibleColumns(new Object[]{"username", "nombre", "apellido", "colEstado"});
+        tblUser.setColumnHeaders(new String[]{"Usuario", "Nombre", "Apellido", "Estado"});
         tblUser.addValueChangeListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
@@ -278,14 +289,14 @@ public class MntUser extends Panel implements View {
         nombre = utils.buildTextField("Nombre:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
 
         apellido = utils.buildTextField("Apellido:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
-        
+
         tfdEmail = utils.buildTextField("Correo:", "", false, 100, true, ValoTheme.TEXTFIELD_SMALL);
         tfdEmail.setWidth("350px");
         tfdEmail.addValueChangeListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
-                if (tfdEmail.getValue()!=null) {
-                    if (!tfdEmail.getValue().matches(Constant.REGEX_EMAIL)){
+                if (tfdEmail.getValue() != null) {
+                    if (!tfdEmail.getValue().matches(Constant.REGEX_EMAIL)) {
                         tfdEmail.setValue(null);
                         Notification.show("El correo no cumple con un formato válido.", Notification.Type.WARNING_MESSAGE);
                         return;
@@ -297,7 +308,6 @@ public class MntUser extends Panel implements View {
 //        estacion.setItemCaptionPropertyId("nombre");
 //        estacion.setNullSelectionAllowed(false);
 //        estacion.addStyleName(ValoTheme.COMBOBOX_SMALL);
-
 //        cbPais.setContainerDataSource(new ListContainer<Pais>(Pais.class, paises));
 //        cbPais.setItemCaptionPropertyId("nombre");
 //        cbPais.setItemIconPropertyId("flag");
@@ -319,7 +329,6 @@ public class MntUser extends Panel implements View {
 //                }
 //            }
 //        });
-
         //Pais al que estara asociado el usuario
 //        cbPaisUsuario.setContainerDataSource(new ListContainer<Pais>(Pais.class, paises));
 //        cbPaisUsuario.setItemCaptionPropertyId("nombre");
@@ -354,6 +363,8 @@ public class MntUser extends Panel implements View {
                     bcrStations.getItem(itemId).getItemProperty("selected").setValue(false);
                 }
                 tblUser.setValue(null);
+                optGroup.setValue(null);
+                cbxStatus.setValue(null);
             }
         });
 
@@ -369,12 +380,19 @@ public class MntUser extends Panel implements View {
                 //Validacion y/o asignacion de roles
                 usuario.setRoles(new ArrayList());
                 boolean exists = false;
-                for (Integer rid : bcrRoles.getItemIds()) {
-                    if (bcrRoles.getItem(rid).getBean().getSelected()) {
-                        usuario.getRoles().add(bcrRoles.getItem(rid).getBean());
-                        exists = true;
-                    }
+                if (optGroup.getValue() != null) {
+                    List<Rol> roles = new ArrayList<Rol>();
+                    roles.add(bcrRoles.getItem(optGroup.getValue()).getBean());
+                    usuario.setRoles(roles);
+                    exists = true;
                 }
+//                for (Integer rid : bcrRoles.getItemIds()) {
+//                    if (bcrRoles.getItem(rid).getBean().getSelected()) {
+//                        System.out.println("bcrRoles.getItem(rid) "+bcrRoles.getItem(rid));
+//                        
+//                        exists = true;
+//                    }
+//                }
                 if (!exists) {
                     Notification.show("Es obligatorio seleccionar al menos un rol.", Notification.Type.ERROR_MESSAGE);
                     return;
@@ -392,7 +410,6 @@ public class MntUser extends Panel implements View {
 //                if (!codeStation.isEmpty() && !username.getValue().contains(codeStation)) {
 //                    newUsername = username.getValue().concat(codeStation);
 //                }
-
                 if (action.equals(Dao.ACTION_ADD)) {
                     for (Integer uid : bcrUsuarios.getItemIds()) {
                         if (newUsername.equals(bcrUsuarios.getItem(uid).getItemProperty("username").getValue())) {
@@ -415,7 +432,6 @@ public class MntUser extends Panel implements View {
 //                        }
 //                    }
 //                }
-
 //                if (estacion.getValue() == null) {
 //                    usuario.setEstacionLogin(new Estacion());
 //                    usuario.getEstacionLogin().setPais(new Pais());
@@ -458,6 +474,7 @@ public class MntUser extends Panel implements View {
             r.setSelected(false);
             for (Rol rl : usuario.getRoles()) {
                 if (r.getRolId().equals(rl.getRolId())) {
+                    optGroup.select(r.getRolId());
                     r.setSelected(true);
                     break;
                 }
@@ -483,28 +500,47 @@ public class MntUser extends Panel implements View {
         bcrStations.addAll(allStations);
     }
 
-    private void buildTableRoles() {
-        tblRol = utils.buildTable("Roles:", 100f, 100f, bcrRoles,
-                new String[]{"nombre"},
-                new String[]{"Nombre"});
-        tblRol.setSizeUndefined();
-        tblRol.setStyleName(ValoTheme.TABLE_COMPACT);
-        tblRol.setStyleName(ValoTheme.TABLE_SMALL);
-        tblRol.setHeight("200px");
-        tblRol.setWidth("250px");
-        tblRol.addGeneratedColumn("colSelected", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("selected");  //Atributo del bean
-                CheckBox cbxSelect = new CheckBox("", pro);
-                cbxSelect.addStyleName(ValoTheme.CHECKBOX_SMALL);
-                return cbxSelect;
-            }
-        });
-        tblRol.setVisibleColumns(new Object[]{"colSelected", "nombre"});
-        tblRol.setColumnHeaders(new String[]{"", "Nombre"});
-    }
-
+//    private void buildTableRoles() {
+//        tblRol = utils.buildTable("Roles:", 100f, 100f, bcrRoles,
+//                new String[]{"nombre"},
+//                new String[]{"Nombre"});
+//        tblRol.setSizeUndefined();
+//        tblRol.setStyleName(ValoTheme.TABLE_COMPACT);
+//        tblRol.setStyleName(ValoTheme.TABLE_SMALL);
+//        tblRol.setHeight("200px");
+//        tblRol.setWidth("250px");
+//        tblRol.addGeneratedColumn("colSelected", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("selected");  //Atributo del bean
+//                
+//                CheckBox cbxSelect = new CheckBox("", pro);
+//                cbxSelect.addStyleName(ValoTheme.CHECKBOX_SMALL);
+//                return cbxSelect;
+//            }
+//        });
+//        tblRol.setVisibleColumns(new Object[]{"colSelected", "nombre"});
+//        tblRol.setColumnHeaders(new String[]{"", "Nombre"});
+//    }
+//                cbxSelect.addListener(new Button.ClickListener() {
+//                    public void buttonClick(ClickEvent event) {
+//                        entity.setBooleanProperty(event.getButton().booleanValue());
+//                        BeanItemContainer<Entity> container = (BeanItemContainer<Entity>) getContainerDataSource();
+//                        for (Iterator iterator = getItemIds().iterator(); iterator.hasNext();) {
+//                            
+//                            Entity bean = (Entity) iterator.next();
+//                            container.removeItem(bean);
+//                            if (!entity.equals(bean)) {
+//                                entity.setBooleanProperty(false);
+//                            }
+//                            container.addBean(bean);
+//                        }
+//                    }
+//                });
+//                return cb;
+//            }
+//        });
+//    }
     private void buildTableStations() {
         tblStations = utils.buildTable("Estaciones:", 100f, 100f, bcrStations,
                 new String[]{"nombre"},
@@ -529,6 +565,11 @@ public class MntUser extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnAdd.setEnabled(acceso.isAgregar());
+        btnSave.setEnabled(acceso.isCambiar());
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

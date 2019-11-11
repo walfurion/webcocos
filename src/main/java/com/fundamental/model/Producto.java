@@ -26,6 +26,7 @@ public class Producto {
     private Marca marca;
     private Tipoproducto typeProd;
     private DtoGenericBean status;
+    private String countrys;
 
     public Producto(Integer productoId, String nombre, String codigo, String estado, String creadoPor, Integer ordenPos) {
         this.productoId = productoId;
@@ -35,6 +36,18 @@ public class Producto {
         this.creadoPor = creadoPor;
         this.ordenPos = ordenPos;
     }
+
+    public Producto(Integer productoId, String nombre, String codigo, Integer idMarca, String estado, Double precio, String presentacion ) {
+        this.productoId = productoId;
+        this.nombre = nombre;
+        this.codigo = codigo;
+        this.idMarca = idMarca;
+        this.estado = estado;
+        this.precio = precio;
+        this.presentacion = presentacion;
+    }
+
+    
 
     public Producto(Integer productoId, String nombre, String codigo, Integer tipoId, Integer ordenPos, String estado, Integer codigoNumerico, String presentacion, String codigoBarras, Integer idMarca, String codigoEnvoy, String sku) {
         this.productoId = productoId;
@@ -268,6 +281,14 @@ public class Producto {
 
     public void setSku(String sku) {
         this.sku = sku;
+    }
+
+    public String getCountrys() {
+        return countrys;
+    }
+
+    public void setCountrys(String countrys) {
+        this.countrys = countrys;
     }
     
 }

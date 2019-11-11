@@ -1,25 +1,20 @@
 package com.vaadin.demo.dashboard.view;
 
-import com.fundamental.model.Estacion;
+import com.fundamental.model.Acceso;
+import com.fundamental.services.Dao;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
-import com.fundamental.services.SvcEstacion;
-import com.fundamental.services.SvcPais;
 import com.fundamental.services.SvcUsuario;
 import com.fundamental.utils.Constant;
-import com.vaadin.data.Container;
-import com.vaadin.data.Property;
 import com.vaadin.demo.dashboard.event.DashboardEvent.UserLoginRequestedEvent;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Responsive;
-import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Label;
@@ -28,11 +23,7 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import org.vaadin.maddon.ListContainer;
 
 @SuppressWarnings("serial")
 public class LoginView extends VerticalLayout {
@@ -229,8 +220,17 @@ public class LoginView extends VerticalLayout {
                 if (validData) {
                     SvcUsuario svcUsuario = new SvcUsuario();
 //                    Integer estacionId = (cbEstacion.getValue() != null) ? ((Estacion) cbEstacion.getValue()).getEstacionId() : 0;
+                    System.out.println("valida data");
                     Usuario user = svcUsuario.getUserByUserPass(usuario, password.getValue());
-                    svcUsuario.closeConnections();
+                    Dao servicio = new Dao();
+                    List<Acceso> misAccessos = servicio.getAccesosByUsuarioid(user.getUsuarioId(), user.isSysadmin());
+                     svcUsuario.closeConnections();
+                     System.out.println("misAccessos ");
+//                    user.getRoles().get(0).setAccesos(misAccessos);
+                    for(Acceso a:misAccessos){
+                        System.out.println("LoginView "+a.getTitulo()+" "+a.isVer()+" "+a.isAgregar()+" "+a.isCambiar()+" "+a.isEliminar());
+                    }
+                   
                     if (user.getUsuarioId() != null && user.getUsuarioId() > 0) {
                         String myNombreLogin = user.getNombre().concat(" ").concat(user.getApellido());
                         user.setNombreLogin(myNombreLogin);
@@ -250,7 +250,7 @@ public class LoginView extends VerticalLayout {
 //                            + "FROM usuario u, rol_usuario ru, rol r "
 //                            + "WHERE r.rol_id = ru.rol_id AND u.usuario_id = ru.usuario_id AND username = '" + username.getValue() + "' AND clave = '" + password.getValue() + "'");
 //                    ResultSet rst = pst.executeQuery();
-//                    if (rst.next()) {
+//                    if (rst.next-()) {
 //                        user.setFirstName(rst.getString(4));
 //                        user.setLastName(rst.getString(5));
 //                        user.setId(rst.getInt(1));

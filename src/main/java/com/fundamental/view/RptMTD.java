@@ -1,11 +1,13 @@
 package com.fundamental.view;
 
-import com.fundamental.model.Estacion;
+import com.fundamental.model.Acceso;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Producto;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
+import com.fundamental.services.Dao;
 import com.fundamental.services.SvcChangeLastRead;
 import com.fundamental.services.SvcMedioPago;
 import com.fundamental.services.SvcReporte;
@@ -72,6 +74,7 @@ public class RptMTD extends Panel implements View {
     VerticalLayout vlRoot;
     Utils utils = new Utils();
     Usuario user;
+    Acceso acceso = new Acceso();
 
     public RptMTD() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -117,25 +120,26 @@ public class RptMTD extends Panel implements View {
     Pais pais;
 
     private void getAllData() {
-        
+
         SvcMedioPago svcMP = new SvcMedioPago();
 //        pais = (Pais) ((cbxPais != null && cbxPais.getValue() != null)
 //                ? cbxPais.getValue() 
 //                : ((user.getPaisLogin() != null) ? user.getPaisLogin() : new Pais()));
-        
+
         pais = new Pais();
         if ((cbxPais != null && cbxPais.getValue() != null)) {
             pais = (Pais) cbxPais.getValue();
         } else if (user.getPaisLogin() != null) {   //elegido en login
             pais = user.getPaisLogin();
-        } else if (user.getPaisId()!=null && user.getPaisId()>0) { //en mantenimiento
+        } else if (user.getPaisId() != null && user.getPaisId() > 0) { //en mantenimiento
             for (Pais p : svcMP.getAllPaises()) {
                 if (p.getPaisId().equals(user.getPaisId())) {
-                    pais = p; break;
+                    pais = p;
+                    break;
                 }
             }
         }
-        
+
         if (pais.getPaisId() != null && pais.getPaisId() > 0) {
             paises.add(pais);
         } else {
@@ -189,7 +193,7 @@ public class RptMTD extends Panel implements View {
         btnGenerar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-System.out.println("*** buttonClick");
+                System.out.println("*** buttonClick");
 //DashboardEventBus.post(new DashboardEvent.CloseOpenWindowsEvent());
 //Window w = new LoadingWindow(); //user, preferencesTabActive);
 //UI.getCurrent().addWindow(w);
@@ -197,14 +201,12 @@ System.out.println("*** buttonClick");
 //try { Thread.sleep(3000); } catch (Exception exc) {}
 //UI.getCurrent().removeWindow(w);
 
-                    Usuario loggedUser = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
-                    if ((cbxPais == null || cbxPais.getValue() == null)
-                        || (!loggedUser.isJefePais() && (cbxEstacion == null || cbxEstacion.getValue() == null))
-                    ) {
-                        Notification.show("ERROR:", "Todos los campos son requeridos.", Notification.Type.ERROR_MESSAGE);
-                        return;
-                    }
-
+                Usuario loggedUser = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
+                if ((cbxPais == null || cbxPais.getValue() == null)
+                        || (!loggedUser.isJefePais() && (cbxEstacion == null || cbxEstacion.getValue() == null))) {
+                    Notification.show("ERROR:", "Todos los campos son requeridos.", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
 
             }
         });
@@ -219,7 +221,7 @@ System.out.println("*** buttonClick");
                 ByteArrayOutputStream stream;
                 InputStream input = null;
                 try {
-System.out.println("*** getExcelStreamResource 1 - "+ new Date());
+                    System.out.println("*** getExcelStreamResource 1 - " + new Date());
                     List<CellRangeAddress> regions = new ArrayList();   //Agrupar titulos
                     List<String> regionsTitle = new ArrayList();   //titulos
                     int colRegion = 2;
@@ -238,18 +240,18 @@ System.out.println("*** getExcelStreamResource 1 - "+ new Date());
 
                     Integer estacionId = (cbxEstacion != null && cbxEstacion.getValue() != null)
                             ? ((Estacion) cbxEstacion.getValue()).getEstacionId() : null;
-                    
+
                     String estacionesIds = "";
-                    if (estacionId==null && loggedUser.isJefePais()) {
+                    if (estacionId == null && loggedUser.isJefePais()) {
                         for (Object est : cbxEstacion.getContainerDataSource().getItemIds()) {
                             estacionesIds += (estacionesIds.isEmpty()) ? ((Estacion) est).getEstacionId() : ",".concat(((Estacion) est).getEstacionId().toString());
                         }
                     } else {
                         estacionesIds = estacionId.toString();
                     }
-                    
+
                     System.out.println("coco's Obtener datos MTD START: " + new Date());
-                    
+
                     SvcReporte service = new SvcReporte();
                     allCombustibles = service.getMTDProductos(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionesIds);
                     String productosIds = "";
@@ -277,18 +279,17 @@ System.out.println("*** getExcelStreamResource 1 - "+ new Date());
                     totalOtrosProductos = service.getMTDVentaOtrosProductos(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionesIds, true);
                     detalleOtrosProductos = service.getMTDVentaOtrosProductos(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionesIds, false);
 
-                    
                     midataTurno = service.getMTDVentaTurnoByFechaEstacion(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionesIds);
                     midataIsla = service.getMTDVentaIslaByFechaEstacion(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionesIds);
                     midataMP = service.getMTDMediospagoByFechaEstacion(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionesIds);
                     midataMPefe = service.getMTDEfectivoByFechaEstacion(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionesIds);
-                    
+
                     midataInvFin = service.getMTDInventarioByFechaEstacion(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionesIds, "FINAL");
                     midataInvComp = service.getMTDInventarioByFechaEstacion(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionesIds, "COMPRAS");
                     midataCalib = service.getMTDCalibraciones(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionesIds, productosIds);
                     midataFaltSob = service.getMTDFaltanteSobrante(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionesIds, productosIds);
                     midataFaltSobVol = service.getMTDFaltanteSobranteVol(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionesIds, productosIds);
-                                     
+
                     System.out.println("coco's Obtener datos MTD END: " + new Date());
                     service.closeConnections();
 
@@ -488,7 +489,7 @@ System.out.println("*** getExcelStreamResource 1 - "+ new Date());
                         lTypes.add(CELL_TYPE_NUMERIC);
                         colFormula.add("OK");
                     }
-if (cantTurnos>1) {
+                    if (cantTurnos > 1) {
                         regions.add(new CellRangeAddress(0, 0, colRegion, (colRegion + cantTurnos - 1)));
                     }
                     colRegion += cantTurnos;
@@ -632,14 +633,13 @@ if (cantTurnos>1) {
                         mymap.get(content[0]).addAll(datamap.subList(1, datamap.size()));
                     }
 
-
 //conversion
                     List<String[]> data = new ArrayList();
                     for (Entry<String, List<String>> item : mymap.entrySet()) {
                         data.add(Arrays.copyOf(item.getValue().toArray(), item.getValue().toArray().length, String[].class));
                     }
 
-System.out.println("*** getExcelStreamResource 2 - "+ new Date());
+                    System.out.println("*** getExcelStreamResource 2 - " + new Date());
                     XlsxReportGenerator xrg = new XlsxReportGenerator();
                     xrg.setListRegions(regions);
                     xrg.setListTitleRegions(regionsTitle);
@@ -659,7 +659,7 @@ System.out.println("*** getExcelStreamResource 2 - "+ new Date());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-System.out.println("*** getExcelStreamResource 3 - "+ new Date());
+                System.out.println("*** getExcelStreamResource 3 - " + new Date());
 //loadingw.close();
                 return input;
             }
@@ -671,7 +671,9 @@ System.out.println("*** getExcelStreamResource 3 - "+ new Date());
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnGenerar.setEnabled(acceso.isAgregar());
     }
-
 }

@@ -1,11 +1,11 @@
 package com.fundamental.services;
 
 import com.fundamental.model.Bomba;
-import com.fundamental.model.Empleado;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Empleado;
+import com.sisintegrados.generic.bean.Estacion;
 import static com.fundamental.services.Dao.ACTION_ADD;
 import static com.fundamental.services.Dao.ACTION_UPDATE;
-import com.fundamental.model.Lectura;
+import com.sisintegrados.generic.bean.Lectura;
 import com.fundamental.model.LecturaDetalle;
 import com.fundamental.model.Lecturafinal;
 import com.fundamental.model.dto.DtoLectura;
@@ -105,7 +105,7 @@ public class SvcReading extends Dao {
     public List<DtoLectura> getLecturasByTurnoid(Integer turnoId, String tipo) {
         List<DtoLectura> result = new ArrayList();
         try {
-            query = "SELECT ld.bomba_id, ld.producto_id, ld.tipo, ld.lectura_inicial, ld.lectura_final, ld.total, ld.tipodespacho_id, l.creado_persona, ld.calibracion, ld.lectura_id, l.nombre_pistero, l.nombre_jefe "
+            query = "SELECT ld.bomba_id, ld.producto_id, ld.tipo, ld.lectura_inicial, ld.lectura_final, ld.total, ld.tipodespacho_id, l.creado_persona, ld.calibracion, ld.lectura_id, l.nombre_pistero, l.nombre_jefe, l.NUMEROCASO "
                     + "FROM turno t, lectura l, lectura_detalle ld "
                     + "WHERE l.lectura_id = ld.lectura_id AND l.turno_id = t.turno_id AND t.estacion_id = l.estacion_id AND t.turno_id = ? AND ld.tipo = ?";
             pst = getConnection().prepareStatement(query);
@@ -125,6 +125,7 @@ public class SvcReading extends Dao {
                 dla.setLecturaId(rst.getInt(10));
                 dla.setNombrePistero(rst.getString(11));
                 dla.setNombreJefe(rst.getString(12));
+                dla.setNumeroCaso(rst.getString(13));
                 result.add(dla);
             }
         } catch (Exception exc) {
@@ -145,8 +146,8 @@ public class SvcReading extends Dao {
                 Integer lecturaId = (rst.next()) ? rst.getInt(1) : 0;
                 lectura.setLecturaId(lecturaId);
                 closePst();
-                query = "INSERT INTO lectura (lectura_id, estacion_id, turno_id, creado_por, creado_persona, nombre_pistero, nombre_jefe, empleado_id) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                query = "INSERT INTO lectura (lectura_id, estacion_id, turno_id, creado_por, creado_persona, nombre_pistero, nombre_jefe, empleado_id, numerocaso) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 pst = getConnection().prepareStatement(query);
                 pst.setInt(1, lectura.getLecturaId());
                 pst.setInt(2, lectura.getEstacionId());
@@ -156,21 +157,27 @@ public class SvcReading extends Dao {
                 pst.setString(6, lectura.getNombrePistero());
                 pst.setString(7, lectura.getNombreJefe());
                 pst.setInt(8, lectura.getEmpleadoId());
+                pst.setString(9, lectura.getNumeroCaso()); //JJ --> Se agrega numero de caso 
                 pst.executeUpdate();
                 closePst();
                 result = lectura;
             } else if (action.equals(ACTION_UPDATE)) {
-//TODO: se debiese actualizar los nombres de pistero y jefe.
-                query = "UPDATE lectura SET nombre_pistero = ?, nombre_jefe = ?, empleado_id = ? WHERE estacion_id = ? AND turno_id = ?";
-                pst = getConnection().prepareStatement(query);
-                pst.setString(1, lectura.getNombrePistero());
-                pst.setString(2, lectura.getNombreJefe());
-                pst.setInt(3, lectura.getEmpleadoId());
-                pst.setInt(4, lectura.getEstacionId());
-                pst.setInt(5, lectura.getTurnoId());
-                pst.executeUpdate();
-                closePst();
-
+//TODO: se debiese actualizar los nombres de pistero y jefe.  //ASG 
+                System.out.println("LECTURA ID ACTUALIZAR " + lectura.getLecturaId());
+                if (lectura.getLecturaId() != -1) {
+//                    query = "UPDATE lectura SET nombre_pistero = ?, nombre_jefe = ?, empleado_id = ?, numerocaso = ? WHERE estacion_id = ? AND turno_id = ? AND lectura_id = ?";
+                    query = "UPDATE lectura SET numerocaso = ? WHERE estacion_id = ? AND turno_id = ? AND lectura_id = ?"; //ASG
+                    pst = getConnection().prepareStatement(query);
+//                    pst.setString(1, lectura.getNombrePistero());
+//                    pst.setString(2, lectura.getNombreJefe());
+//                    pst.setInt(3, lectura.getEmpleadoId());
+                    pst.setString(1, lectura.getNumeroCaso());  //ASG
+                    pst.setInt(2, lectura.getEstacionId());
+                    pst.setInt(3, lectura.getTurnoId());
+                    pst.setInt(4, lectura.getLecturaId());
+                    pst.executeUpdate();
+                    closePst();
+                }
 //                query = "SELECT lectura_id FROM lectura WHERE estacion_id = ? AND turno_id = ?";
 //                pst = getConnection().prepareStatement(query);
 //                pst.setInt(1, lectura.getEstacionId());
@@ -382,4 +389,20 @@ public class SvcReading extends Dao {
         return result;
     }
 
+    public Integer getLecturaID(Integer idempleado, Integer turnoid) {
+        Integer result = -1;
+        try {
+            query = "select lectura_id from lectura where turno_id = " + turnoid + " and empleado_id = " + idempleado;
+            System.out.println("QUERY "+query);
+            ResultSet rst = getConnection().prepareStatement(query).executeQuery();
+            if (rst.next()) {
+                result = rst.getInt(1);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
 }

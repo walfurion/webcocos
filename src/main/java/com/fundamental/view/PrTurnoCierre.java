@@ -1,9 +1,10 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Arqueocaja;
 import com.fundamental.model.Bomba;
 import com.fundamental.model.Dia;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Precio;
@@ -17,6 +18,7 @@ import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.generic.bean.ArqueoTC;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -58,7 +60,7 @@ import java.util.Locale;
 import org.vaadin.maddon.ListContainer;
 
 /**
- * @author Henry Barrientos
+ * @author Mery Gil
  */
 public class PrTurnoCierre extends Panel implements View {
 
@@ -72,10 +74,10 @@ public class PrTurnoCierre extends Panel implements View {
     Button btnGuardar = new Button("Cerrar turno"),
             btnAll = new Button("Todas"),
             btnNone = new Button("Ninguna");
-    
+
     Label lblUltimoDía = new Label("Último día:"),
             lblUltimoTurno = new Label("Último turno:");
-    
+
     ComboBox cbxPais = new ComboBox("Pais:"),
             cbxEstacion = new ComboBox("Estación:"),
             cbxTurno = new ComboBox("Turnos:");
@@ -91,7 +93,7 @@ public class PrTurnoCierre extends Panel implements View {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
             if (colId.equals("diferencia")) {
-                return numberFmt.format((property.getValue()==null) ? 0D : property.getValue());
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
             }
             return super.formatPropertyValue(rowId, colId, property);
         }
@@ -101,7 +103,7 @@ public class PrTurnoCierre extends Panel implements View {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
             if (colId.equals("volumen") || colId.equals("venta")) {
-                return numberFmt.format((property.getValue()==null) ? 0D : property.getValue());
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
             }
             return super.formatPropertyValue(rowId, colId, property);
         }
@@ -111,7 +113,7 @@ public class PrTurnoCierre extends Panel implements View {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
             if (colId.equals("value")) {
-                return numberFmt.format((property.getValue()==null) ? 0D : property.getValue());
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
             }
             return super.formatPropertyValue(rowId, colId, property);
         }
@@ -121,7 +123,7 @@ public class PrTurnoCierre extends Panel implements View {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
             if (colId.equals("value")) {
-                return numberFmt.format((property.getValue()==null) ? 0D : property.getValue());
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
             }
             return super.formatPropertyValue(rowId, colId, property);
         }
@@ -131,7 +133,17 @@ public class PrTurnoCierre extends Panel implements View {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
             if (colId.equals("value")) {
-                return numberFmt.format((property.getValue()==null) ? 0D : property.getValue());
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
+            }
+            return super.formatPropertyValue(rowId, colId, property);
+        }
+    };
+
+    Table tableTarjeta = new Table() {
+        @Override
+        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
+            if (colId.equals("value")) {
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
             }
             return super.formatPropertyValue(rowId, colId, property);
         }
@@ -144,6 +156,7 @@ public class PrTurnoCierre extends Panel implements View {
     BeanContainer<Integer, Producto> bcrProducto = new BeanContainer<Integer, Producto>(Producto.class);
     BeanContainer<Integer, Mediopago> bcrMediospago = new BeanContainer<Integer, Mediopago>(Mediopago.class);
     BeanContainer<Integer, Mediopago> bcrEfectivo = new BeanContainer<Integer, Mediopago>(Mediopago.class);
+    BeanContainer<Integer, ArqueoTC> bcrTarjeta = new BeanContainer<Integer, ArqueoTC>(ArqueoTC.class);
 
     Double totalVentas = 0D, totalDinero = 0D;
     String symCurrency, symVolumen;
@@ -153,7 +166,7 @@ public class PrTurnoCierre extends Panel implements View {
     List<Precio> precios;
     List<Producto> productos;
     List<Bomba> allBombas;
-
+    Acceso acceso = new Acceso();
     public PrTurnoCierre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
@@ -179,6 +192,7 @@ public class PrTurnoCierre extends Panel implements View {
         buildTableProductos();
         buildTableMediosPago();
         buildTableEfectivo();
+        buildTableTarjeta();
         buildFilters();
         buildButtons();
 
@@ -214,7 +228,7 @@ public class PrTurnoCierre extends Panel implements View {
         cltInfo.setWidth(100f, Unit.PERCENTAGE);
         Responsive.makeResponsive(cltInfo);
         cltInfo.addComponents(lblUltimoDía, lblUltimoTurno);
-        
+
         HorizontalLayout hlCombos = utils.buildHorizontal("hlCombos", false, false, true, false);
         hlCombos.setSizeUndefined();
         CssLayout cltCombo = new CssLayout(utils.vlContainer(cbxPais), utils.vlContainer(cbxEstacion), utils.vlContainer(dfdFecha), utils.vlContainer(cbxTurno));
@@ -236,9 +250,10 @@ public class PrTurnoCierre extends Panel implements View {
         Responsive.makeResponsive(content);
         content.addComponents(
                 utils.vlContainer(vlTableButtons), utils.vlContainer(tableBombas), utils.vlContainer(tableVentas), utils.vlContainer(tableProductos),
-                utils.vlContainer(tableMediosPago), utils.vlContainer(tableEfectivo) //                hlContent, hlContent2, //hlContent5, 
+                utils.vlContainer(tableMediosPago), utils.vlContainer(tableEfectivo), utils.vlContainer(tableTarjeta) //                hlContent, hlContent2, //hlContent5, 
                 //                hlContent3, 
-                , utils.vlContainer(hlContent4)
+                ,
+                 utils.vlContainer(hlContent4)
         );
 
         root.addComponents(cltInfo, hlCombos, content);
@@ -264,13 +279,14 @@ public class PrTurnoCierre extends Panel implements View {
         bcrProducto.setBeanIdProperty("productoId");
         bcrMediospago.setBeanIdProperty("mediopagoId");
         bcrEfectivo.setBeanIdProperty("efectivoId");
+        bcrTarjeta.setBeanIdProperty("id");
 
         SvcTurnoCierre service = new SvcTurnoCierre();
 
         pais = (user.getPaisLogin() != null)
                 ? user.getPaisLogin() : ((pais != null) ? pais : new Pais());
 //        if (user.getPaisLogin() == null && contPais.getItemIds().isEmpty()) {
-            contPais = new ListContainer<>(Pais.class, service.getAllPaises());
+        contPais = new ListContainer<>(Pais.class, service.getAllPaises());
 //        }
 
         estacion = (Estacion) ((user.getEstacionLogin() != null)
@@ -328,7 +344,7 @@ public class PrTurnoCierre extends Panel implements View {
             public void valueChange(final Property.ValueChangeEvent event) {
                 pais = (Pais) cbxPais.getValue();
                 SvcEstacion svcEstacion = new SvcEstacion();
-                Container estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()) );
+                Container estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));
                 svcEstacion.closeConnections();
                 cbxEstacion.setContainerDataSource(estacionContainer);
                 //limpiar
@@ -354,15 +370,15 @@ public class PrTurnoCierre extends Panel implements View {
                 cbxTurno.setContainerDataSource(contTurnos);
                 cbxTurno.setValue(null);
                 bcrArqueocaja.removeAllItems();
-                
-SvcTurnoCierre service = new SvcTurnoCierre();
-        ultimoDia = (ultimoDia.getFecha() == null) ? service.getUltimoDiaByEstacionid(estacion.getEstacionId()) : ultimoDia;
-            dia = service.getDiaActivoByEstacionid(estacion.getEstacionId());
+
+                SvcTurnoCierre service = new SvcTurnoCierre();
+                ultimoDia = (ultimoDia.getFecha() == null) ? service.getUltimoDiaByEstacionid(estacion.getEstacionId()) : ultimoDia;
+                dia = service.getDiaActivoByEstacionid(estacion.getEstacionId());
 //            dia = (dia.getEstadoId() == null) ? ultimoDia : dia;
-        ultimoTurno = (ultimoTurno.getTurnoId() == null) ? service.getUltimoTurnoByEstacionid(estacion.getEstacionId()) : ultimoTurno;
-            turno = service.getTurnoActivoByEstacionid(estacion.getEstacionId());
+                ultimoTurno = (ultimoTurno.getTurnoId() == null) ? service.getUltimoTurnoByEstacionid(estacion.getEstacionId()) : ultimoTurno;
+                turno = service.getTurnoActivoByEstacionid(estacion.getEstacionId());
 //            turno = (turno.getEstadoId() == null) ? ultimoTurno : turno;
-service.closeConnections();
+                service.closeConnections();
 //determinarPermisos();
             }
         });
@@ -390,8 +406,9 @@ service.closeConnections();
                     bcrProducto.removeAllItems();
                     bcrMediospago.removeAllItems();
                     bcrEfectivo.removeAllItems();
-calcularSumas();
-        
+                    bcrTarjeta.removeAllItems();
+                    calcularSumas();
+
                     turno = new Turno();
                     if (!contTurnos.getItemIds().isEmpty()) {
                         int lastIndex = listTurno.size() - 1;
@@ -403,7 +420,7 @@ calcularSumas();
 //                                cbxArqueos.setValue(ac);
 //                            }
 //                        }
-actionComboboxTurno();
+                        actionComboboxTurno();
                     }
                     determinarPermisos();
                     buildLabelInfo();
@@ -440,33 +457,33 @@ actionComboboxTurno();
     }
 
     private void determinarPermisos() {
-        boolean explorar = false, editar = false, cerrarTurno = false;
-        if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
-                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
-            explorar = true;
-        } else if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
-                && dia.getFecha().before(ultimoDia.getFecha())) {
-            explorar = true;
-        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
-                && dia.getEstadoId()!=null && dia.getEstadoId()== 2 
-                && turno.getEstadoId()!=null && turno.getEstadoId()== 2) {
-            explorar = true;
-        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
-                && dia.getEstadoId()!=null && dia.getEstadoId()== 1 
-                && turno.getEstadoId()!=null && turno.getEstadoId() == 2) {
-            explorar = true;
-        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
-                && dia.getEstadoId()!=null && dia.getEstadoId() == 1 
-                && turno.getEstadoId()!=null && turno.getEstadoId()== 1) {
-            explorar = false;
-            editar = cerrarTurno = true;
-        } else if (user.isAdministrativo() || user.isGerente()) {
-            explorar = true;
-        }
-
-        dfdFecha.setEnabled(explorar);   //habilitado
-        cbxTurno.setEnabled(explorar);    //habilitado
-        btnGuardar.setEnabled(cerrarTurno);    //habilitado (cerrado)
+//        boolean explorar = false, editar = false, cerrarTurno = false;
+//        if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
+//            explorar = true;
+//        } else if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                && dia.getFecha().before(ultimoDia.getFecha())) {
+//            explorar = true;
+//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR)
+//                && dia.getEstadoId() != null && dia.getEstadoId() == 2
+//                && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
+//            explorar = true;
+//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR)
+//                && dia.getEstadoId() != null && dia.getEstadoId() == 1
+//                && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
+//            explorar = true;
+//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR)
+//                && dia.getEstadoId() != null && dia.getEstadoId() == 1
+//                && turno.getEstadoId() != null && turno.getEstadoId() == 1) {
+//            explorar = false;
+//            editar = cerrarTurno = true;
+//        } else if (user.isAdministrativo() || user.isGerente()) {
+//            explorar = true;
+//        }
+//
+//        dfdFecha.setEnabled(explorar);   //habilitado
+//        cbxTurno.setEnabled(explorar);    //habilitado
+//        btnGuardar.setEnabled(cerrarTurno);    //habilitado (cerrado)
     }
 
     private void buildButtons() {
@@ -608,10 +625,12 @@ actionComboboxTurno();
                         bcrMediospago.removeAllItems();
                         //Determinar medios de pago (efectivo)
                         bcrEfectivo.removeAllItems();
+                        bcrTarjeta.removeAllItems();
                         if (!arqueosIds.isEmpty()) {
                             bcrProducto.addAll(svcTC.getProductoByArqueoid(arqueosIds));
                             bcrMediospago.addAll(svcTC.getMediopagoByArqueoid(arqueosIds));
                             bcrEfectivo.addAll(svcTC.getEfectivoByArqueoid(arqueosIds));
+                            bcrTarjeta.addAll(svcTC.getArqueoTC(arqueosIds));
                         }
                         svcTC.closeConnections();
                         calcularSumas();
@@ -635,7 +654,7 @@ actionComboboxTurno();
 
     private void calcularSumas() {
         totalVentas = totalDinero = 0D;
-        Double tpVolumen = 0D, tpVentas = 0D, tpProducto = 0D, tpMediospago = 0D, tpEfectivo = 0D;
+        Double tpVolumen = 0D, tpVentas = 0D, tpProducto = 0D, tpMediospago = 0D, tpEfectivo = 0D, tpTarjeta = 0D;
         for (Integer id : bcrVentas.getItemIds()) {
             totalVentas += bcrVentas.getItem(id).getBean().getVenta();
             tpVentas += bcrVentas.getItem(id).getBean().getVenta();
@@ -653,6 +672,10 @@ actionComboboxTurno();
             totalDinero += bcrEfectivo.getItem(id).getBean().getValue();
             tpEfectivo += bcrEfectivo.getItem(id).getBean().getValue();
         }
+        for (Integer id : bcrTarjeta.getItemIds()) {
+//            totalDinero += bcrTarjeta.getItem(id).getBean().getValue();
+            tpTarjeta += bcrTarjeta.getItem(id).getBean().getValue();
+        }
 
         tableVentas.setFooterVisible(true);
         tableVentas.setColumnFooter("nombreDespacho", "Total:");
@@ -668,7 +691,11 @@ actionComboboxTurno();
         tableEfectivo.setFooterVisible(true);
         tableEfectivo.setColumnFooter("nombre", "Total:");
         tableEfectivo.setColumnFooter("value", symCurrency + numberFmt.format(tpEfectivo));
-        
+
+        tableTarjeta.setFooterVisible(true);
+        tableTarjeta.setColumnFooter("nombre", "Total:");
+        tableTarjeta.setColumnFooter("value", symCurrency + numberFmt.format(tpTarjeta));
+
     }
 
     private void buildTableBombas() {
@@ -723,6 +750,16 @@ actionComboboxTurno();
         tableEfectivo.addStyleName(ValoTheme.TABLE_SMALL);
     }
 
+    private void buildTableTarjeta() {
+        tableTarjeta.setCaption("Tarjeta:");
+        tableTarjeta.setContainerDataSource(bcrTarjeta);
+        tableTarjeta.setVisibleColumns(new Object[]{"nombre", "lote", "value"});
+        tableTarjeta.setColumnHeaders(new String[]{"Nombre", "Lote", "Monto"});
+        tableTarjeta.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT);
+        tableTarjeta.setHeight(300f, Unit.PIXELS);
+        tableTarjeta.addStyleName(ValoTheme.TABLE_SMALL);
+    }
+
     private HorizontalLayout buildDetalleMontos() {
         Label label3 = new Label("Diferencia: ");
         label3.addStyleName(ValoTheme.LABEL_BOLD);
@@ -760,7 +797,7 @@ actionComboboxTurno();
         lblUltimoDía.addStyleName(ValoTheme.LABEL_COLORED);
         lblUltimoDía.setSizeUndefined();
         lblUltimoDía.setWidth("30%");
-        
+
         fechaString = (ultimoTurno.getTurnoId() != null) ? "Turno ".concat(ultimoTurno.getTurnoId().toString()) : "INEXISTENTE";
         estadoName = (ultimoTurno.getEstadoId() != null && ultimoTurno.getEstadoId() == 1)
                 ? "ABIERTO" : ((ultimoTurno.getEstadoId() != null && ultimoTurno.getEstadoId() == 2) ? "CERRADO" : "SIN ESTADO");
@@ -771,11 +808,17 @@ actionComboboxTurno();
         lblUltimoTurno.setSizeUndefined();
         lblUltimoTurno.setWidth("40%");
 //        lblUltimoTurno.setWidth("350px");
-}
+    }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        if (acceso.isCambiar() || acceso.isAgregar()) {
+            btnGuardar.setEnabled(true);
+        } else {
+            btnGuardar.setEnabled(false);
+        }
     }
-
 }

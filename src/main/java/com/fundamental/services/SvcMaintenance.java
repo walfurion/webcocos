@@ -1,7 +1,7 @@
 package com.fundamental.services;
 
 import com.fundamental.model.Acceso;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Marca;
 import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Pais;
@@ -192,14 +192,30 @@ public class SvcMaintenance extends Dao {
     public List<Acceso> getAccessByRolid(int rolId) {
         List<Acceso> result = new ArrayList();
         try {
-            query = "SELECT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, a.estado "
-                    + "FROM acceso a, acceso_rol ar "
-                    + "WHERE ar.acceso_id = a.acceso_id AND ar.rol_id = " + rolId
-                    + " ORDER BY a.padre, a.orden DESC";
+            query = " SELECT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, a.estado,ar.ver,ar.cambiar,ar.agregar,ar.eliminar"
+                   +" FROM acceso a, acceso_rol ar "
+                   +" WHERE ar.acceso_id = a.acceso_id AND ar.rol_id = " + rolId
+                   +" ORDER BY a.padre, a.orden DESC";
+//            System.out.println("getAccesByRolinid "+query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
+            Acceso access;
             while (rst.next()) {
-                result.add(new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7)));
+//                result.add(new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7)));
+                access = new Acceso();
+                access.setAccesoId(rst.getInt(1));
+                access.setTitulo(rst.getString(2));
+                access.setPadre(rst.getInt(3));
+                access.setOrden(rst.getInt(4));
+                access.setRecursoInterno(rst.getString(5));
+                access.setDescripcion(rst.getString(6));
+                access.setEstado(rst.getString(7));
+                access.setVer(rst.getInt(8)==1?true:false);
+                access.setCambiar(rst.getInt(9)==1?true:false);
+                access.setAgregar(rst.getInt(10)==1?true:false);
+                access.setEliminar(rst.getInt(11)==1?true:false);
+                result.add(access);
+                
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -210,15 +226,29 @@ public class SvcMaintenance extends Dao {
     public List<Acceso> getAllAccess(boolean includeInactive) {
         List<Acceso> result = new ArrayList();
         try {
-            query = "SELECT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, a.estado, ap.titulo "
+            query = " SELECT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, "
+                    + "a.estado, ap.titulo,0 as \"ver\" ,0 as \"cambiar\",0 as \"agregar\" ,0 as \"eliminar\" "
                     + "FROM acceso a, acceso ap "
-                    + "WHERE a.padre = ap.acceso_id ORDER BY a.padre, a.orden DESC";
+                    + "WHERE a.padre = ap.acceso_id ORDER BY a.padre, a.orden DESC ";
+//            System.out.println("query = "+query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Acceso access;
             while (rst.next()) {
-                access = new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7));
+//                access = new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7));
+                access = new Acceso();
+                access.setAccesoId(rst.getInt(1));
+                access.setTitulo(rst.getString(2));
+                access.setPadre(rst.getInt(3));
+                access.setOrden(rst.getInt(4));
+                access.setRecursoInterno(rst.getString(5));
+                access.setDescripcion(rst.getString(6));
+                access.setEstado(rst.getString(7));
                 access.setNombrePadre(rst.getString(8));
+                access.setVer(rst.getInt(9)==1?true:false);
+                access.setCambiar(rst.getInt(10)==1?true:false);
+                access.setAgregar(rst.getInt(11)==1?true:false);
+                access.setEliminar(rst.getInt(12)==1?true:false);
                 result.add(access);
             }
         } catch (Exception exc) {
@@ -247,13 +277,18 @@ public class SvcMaintenance extends Dao {
                 pst.setObject(5, rol.getRolId());
                 pst.executeUpdate();
                 closePst();
-                query = "INSERT INTO acceso_rol (acceso_id, rol_id, creado_por) "
-                        + "VALUES (?, ?, ?)";
+                query = "INSERT INTO acceso_rol (acceso_id, rol_id, creado_por,ver,cambiar,agregar,eliminar) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?)";
                 for (Acceso item : rol.getAccesos()) {
+//                    System.out.println("add = "+item.isVer()+" "+item.isCambiar()+" "+item.isAgregar());
                     pst = getConnection().prepareStatement(query);
                     pst.setObject(1, item.getAccesoId());
                     pst.setObject(2, rol.getRolId());
                     pst.setObject(3, rol.getCreadoPor());
+                    pst.setObject(4, item.isVer()==true?1:0);
+                    pst.setObject(5, item.isCambiar()==true?1:0);
+                    pst.setObject(6, item.isAgregar()==true?1:0);
+                    pst.setObject(7, item.isEliminar()==true?1:0);
                     pst.executeUpdate();
                     closePst();
                 }
@@ -274,23 +309,35 @@ public class SvcMaintenance extends Dao {
                 for (Acceso item : rol.getAccesos()) {
                     tmpString += (tmpString.isEmpty()) ? item.getAccesoId() : "," + item.getAccesoId();
                 }
+//                System.out.println(rol.getRolId()+"tmpString "+tmpString);
                 if (!tmpString.isEmpty()) {
-                    query = "DELETE FROM acceso_rol WHERE rol_id = ? AND acceso_id NOT IN (" + tmpString + ")";
+//                    query = "DELETE FROM acceso_rol WHERE rol_id = ? AND acceso_id NOT IN (" + tmpString + ")";
+                    query = "DELETE FROM acceso_rol WHERE rol_id = ? ";
                     pst = getConnection().prepareStatement(query);
                     pst.setObject(1, rol.getRolId());
-                    pst.executeUpdate();
+                    try {
+                        pst.executeUpdate();
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
                     closePst();
                 }
-                query = "INSERT INTO acceso_rol (acceso_id, rol_id, creado_por) "
-                        + "VALUES (?, ?, ?)";
+                query = "INSERT INTO acceso_rol (acceso_id, rol_id, creado_por,ver,cambiar,agregar,eliminar) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?)";
                 for (Acceso item : rol.getAccesos()) {
+//                     System.out.println("ed = "+item.isVer()+" "+item.isCambiar()+" "+item.isAgregar());
                     pst = getConnection().prepareStatement(query);
                     pst.setObject(1, item.getAccesoId());
                     pst.setObject(2, rol.getRolId());
                     pst.setObject(3, rol.getCreadoPor());
+                    pst.setObject(4, item.isVer()?1:0);
+                    pst.setObject(5, item.isCambiar()?1:0);
+                    pst.setObject(6, item.isAgregar()?1:0);
+                    pst.setObject(7, item.isEliminar()?1:0);
                     try {
                         pst.executeUpdate();
                     } catch (Exception ignore) {
+                        ignore.printStackTrace();
                     }
                     closePst();
                 }
@@ -329,7 +376,33 @@ public class SvcMaintenance extends Dao {
         return result;
     }
 
-    public List<Producto> getAllProducts(boolean includeInactive) {
+//    public List<Producto> getAllProducts(boolean includeInactive) {
+//        List<Producto> result = new ArrayList();
+//        try {
+//            query = (includeInactive) ? "" : " AND p.estado = 'A' ";
+//            query = "SELECT p.producto_id, p.nombre, p.codigo, p.tipo_id, p.orden_pos, p.estado, p.codigo_num, p.presentacion, p.codigo_barras, p.id_marca, p.codigo_envoy "
+//                    + ", t.tipo_id, t.nombre, m.id_marca, m.nombre, p.sku " //12,...
+//                    + "FROM tipoproducto t, producto p "
+//                    + "LEFT JOIN marca m ON p.id_marca = m.id_marca "
+//                    + "WHERE p.tipo_id = t.tipo_id "
+//                    + query;
+//            pst = getConnection().prepareStatement(query);
+//            ResultSet rst = pst.executeQuery();
+//            Producto producto;
+//            while (rst.next()) {
+//                producto = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getInt(5), rst.getString(6), rst.getInt(7), rst.getString(8), rst.getString(9), rst.getInt(10), rst.getString(11), rst.getString(16));
+//                producto.setTypeProd(new Tipoproducto(rst.getInt(12), rst.getString(13), "A"));
+//                producto.setMarca(new Marca(rst.getInt(14), rst.getString(15), "A"));
+//                producto.setStatus(new DtoGenericBean(rst.getString(6), (rst.getString(6).equals("A") ? "Activo" : "Inactivo")));
+//                result.add(producto);
+//            }
+//        } catch (Exception exc) {
+//            exc.printStackTrace();
+//        }
+//        return result;
+//    }
+        public List<Producto> getAllProducts(boolean includeInactive) {
+//            System.out.println("getAllProducts() ");
         List<Producto> result = new ArrayList();
         try {
             query = (includeInactive) ? "" : " AND p.estado = 'A' ";
@@ -342,12 +415,56 @@ public class SvcMaintenance extends Dao {
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Producto producto;
+            List<Producto> lstProd = getAllProductsWhitCountry();
             while (rst.next()) {
                 producto = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getInt(5), rst.getString(6), rst.getInt(7), rst.getString(8), rst.getString(9), rst.getInt(10), rst.getString(11), rst.getString(16));
                 producto.setTypeProd(new Tipoproducto(rst.getInt(12), rst.getString(13), "A"));
                 producto.setMarca(new Marca(rst.getInt(14), rst.getString(15), "A"));
                 producto.setStatus(new DtoGenericBean(rst.getString(6), (rst.getString(6).equals("A") ? "Activo" : "Inactivo")));
                 result.add(producto);
+            }
+            for(Producto p : result){
+                for(Producto p2:lstProd){
+                    if(p.getProductoId()==p2.getProductoId()){
+                        p.setCountrys("[ "+p2.getCountrys().trim()+" ]");
+                        break;
+//                        System.out.println("p "+p.getCountrys());
+                    }
+                }
+//                System.out.println("p "+p.getProductoId()+" - "+p.getCountrys());
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        }
+        return result;
+    }
+    public List<Producto> getAllProductsWhitCountry() {
+        List<Producto> result = new ArrayList();
+        try {
+            query = "select p2.PRODUCTO_ID,p.PAIS_ID,p.NOMBRE from pais p join pais_producto p2 \n"
+                    + " on\n"
+                    + " p.pais_id=p2.PAIS_ID order by P2.PRODUCTO_ID";
+//            System.out.println("paises "+query);
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            Producto p_ant = new Producto();
+            Producto p;
+            p_ant.setProductoId(-99);
+            while (rst.next()) {
+                p = new Producto();
+                p.setProductoId(rst.getInt(1));
+                p.setCountrys(rst.getString(3));
+                if(p.getProductoId()==p_ant.getProductoId()){
+                    p_ant.setCountrys(p_ant.getCountrys()+", "+p.getCountrys());
+                }else {
+                    if(p_ant.getProductoId()>0){
+                        result.add(p_ant);
+                    }
+                    p_ant = p;
+                }
+            }
+            if(p_ant.getProductoId()>0){
+                result.add(p_ant);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -391,7 +508,7 @@ public class SvcMaintenance extends Dao {
                 mediopago = new Mediopago(rst.getInt(1), rst.getString(2), rst.getInt(3), null, rst.getInt(5), rst.getString(8), rst.getBoolean(11), rst.getString(4));
                 mediopago.setPaisId(rst.getInt(6));
                 mediopago.setTipoprodId(rst.getInt(7));
-                mediopago.setCountry(new Pais(rst.getInt(6), rst.getString(8), rst.getString(12), null, null, null,false));
+                mediopago.setCountry(new Pais(rst.getInt(6), rst.getString(8), rst.getString(12), null, null, null,null));
                 query = (rst.getString(4).equals("A")) ? "Activo" : "Inactivo";
                 mediopago.setStatus(new DtoGenericBean(rst.getString(4), query));
                 mediopago.setPartidacontPor(rst.getDouble(9));
@@ -476,7 +593,7 @@ public class SvcMaintenance extends Dao {
         ResultSet rst = null; try {
             rst = getConnection().prepareStatement(miQuery).executeQuery();
             while (rst.next()) {
-                result.add(new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5), rst.getInt(7)>0));
+                result.add(new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5),null, rst.getInt(7)>0));
             }
         } catch (Exception exc) {
             exc.printStackTrace();

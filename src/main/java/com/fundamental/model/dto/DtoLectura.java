@@ -18,8 +18,8 @@ public class DtoLectura {
     private Double mInicial, mFinal, mTotal, mDiferencia, mCalibracion;
     private Boolean esNueva;
     private Integer lecturaId;
-    
-    
+    private String numeroCaso;
+
     public static final String[] columnsTable = new String[]{"bomba", "producto", "lecIni", "lecFin", "lecTotal", "diferencia"};
     public static final String[] columnsTableElec = new String[]{"bomba", "producto", "lecVolIni", "lecFin", "lecVolTotal"};
 
@@ -197,6 +197,14 @@ public class DtoLectura {
 
     public void seteCalibracion(Double eCalibracion) {
         this.eCalibracion = eCalibracion;
+    }
+
+    public String getNumeroCaso() {
+        return numeroCaso;
+    }
+
+    public void setNumeroCaso(String numeroCaso) {
+        this.numeroCaso = numeroCaso;
     }
 
 }

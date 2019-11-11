@@ -1,5 +1,6 @@
 package com.fundamental.view.maintenance;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Marca;
 import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Producto;
@@ -91,7 +92,7 @@ public class MntProducto extends Panel implements View {
     List<Marca> listBrands = new ArrayList();
     List<Tipoproducto> listTipoproducto = new ArrayList();
     String action;
-            
+    Acceso acceso = new Acceso();     
 //template
     private VerticalLayout vlRoot;
     private Utils utils = new Utils();
@@ -232,12 +233,13 @@ public class MntProducto extends Panel implements View {
                             return true;
                         }
                         return utils.filterByProperty("nombre", item, event.getText())
-                                || utils.filterByProperty("codigo", item, event.getText());
+                                || utils.filterByProperty("codigo", item, event.getText())
+                                || utils.filterByProperty("countrys", item, event.getText());
                     }
                     @Override
                     public boolean appliesToProperty(final Object propertyId) {
                         return propertyId.equals("nombre") 
-                                || propertyId.equals("codigo");
+                                || propertyId.equals("codigo") || propertyId.equals("countrys");
                     }
                 });
             }
@@ -246,7 +248,7 @@ public class MntProducto extends Panel implements View {
     }
 
     private void buildTable() {
-        tblProduct = utils.buildTable("Productos:", 100f, 250f, bcrProduct, new Object[]{"nombre", "codigo", "codigoEnvoy", "estado"}, new String[]{"Nombre", "Código E1", "Código envoy", "Estado"});
+        tblProduct = utils.buildTable("Productos:", 100f, 250f, bcrProduct, new Object[]{"nombre", "codigo", "codigoEnvoy", "estado","countrys"}, new String[]{"Nombre", "Código E1", "Código envoy", "Estado","País"});
         tblProduct.setSizeUndefined();
         tblProduct.addStyleName(ValoTheme.TABLE_COMPACT);
         tblProduct.addStyleName(ValoTheme.TABLE_SMALL);
@@ -264,6 +266,7 @@ public class MntProducto extends Panel implements View {
                 service.closeConnections();
             }
         });
+        
     }
     
     private void buildTablePaises() {
@@ -359,7 +362,11 @@ public class MntProducto extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnAdd.setEnabled(acceso.isAgregar());
+        btnSave.setEnabled(acceso.isCambiar());
     }
 
 }

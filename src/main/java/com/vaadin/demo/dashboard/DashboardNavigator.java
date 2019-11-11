@@ -54,47 +54,81 @@ public class DashboardNavigator extends Navigator {
 
     private void initViewChangeListener() {
         addViewChangeListener(new ViewChangeListener() {
-
             @Override
             public boolean beforeViewChange(final ViewChangeEvent event) {
+//                System.out.println("beforeViewChange ");
                 //TODO: Aplicar segurida aca para accesos NO autorizados.
                 //Para evitar accesos NO autorizados via URL.
-                Usuario user = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
-                Dao servicio = new Dao();
-                List<Acceso> misAccessos = servicio.getAccesosByUsuarioid(user.getUsuarioId(), user.isSysadmin());
-                servicio.closeConnections();
                 boolean exists = false;
-                for (Acceso accPadre : misAccessos) {    //estos son padres
-                    for (Acceso acc : accPadre.getAccesos()) {
-                        if (acc.getRecursoInterno().trim().toUpperCase().equals(event.getViewName())) {
-                            exists = true;
-                            break;
-                        }
+                 Dao servicio = new Dao();
+                if(servicio.getAccess(event.getViewName()).isVer()){
+                    exists = true;
+                }
+                servicio.closeConnections();
+//                Usuario user = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
+//                for (Acceso a : user.getRoles().get(0).getAccesos()) {
+//                    if (a.getRecursoInterno().trim().toUpperCase().equals(event.getViewName())) {
+//                        System.out.println(event.getViewName() + " - " + a.getTitulo() + " ACCIONES  " + a.isVer() + " " + a.isCambiar() + " - " + a.isAgregar());
+//                        exists = true;
+//                        break;
+//                    }
+//                }
+                
+//                Dao servicio = new Dao();
+//                List<Acceso> misAccessos = servicio.getAccesosByUsuarioid(user.getUsuarioId(), user.isSysadmin());
+//                servicio.closeConnections();
+//                List<Acceso> misAccessos2 = user.getRoles().get(0).getAccesos();
+//                boolean exists = false;
+//                 for (Acceso accPadre : misAccessos2) {    //estos son padres
+//                     System.out.println("accPadre "+accPadre.getNombrePadre()+" - "+accPadre.getDescripcion());
+//                    for (Acceso acc : accPadre.getAccesos()) {
+//                        System.out.println("2 "+acc.getRecursoInterno()+" - "+event.getViewName());
+//                        if (acc.getRecursoInterno().trim().toUpperCase().equals(event.getViewName())) {
+//                            System.out.println(event.getViewName()+" -  "+acc.isVer()+" "+acc.isCambiar()+" - "+acc.isAgregar());
+//                            exists = true;
+//                            break;
+//                        }
+//                    }
+//                }
+////                List<Acceso> misAccessos = user.getRoles().get(0).getAccesos();
+//                for (Acceso accPadre : misAccessos) {    //estos son padres
+//                    for (Acceso acc : accPadre.getAccesos()) {
+//                        System.out.println("acc.getRecursoInterno() "+acc.getRecursoInterno());
+//                        if (acc.getRecursoInterno().trim().toUpperCase().equals(event.getViewName())) {
+//                            System.out.println(event.getViewName()+" - "+acc.getTitulo()+" ACCIONES  "+acc.isVer()+" "+acc.isCambiar()+" - "+acc.isAgregar());
+//                            exists = true;
+//                            break;
+//                        }
+//                    }
+//                }
+                    if (!exists && !(event.getViewName().equals(DashboardViewType.HOME.getViewName()))) {
+                        return false;
+                    }
+
+                    // Since there's no conditions in switching between the views
+                    // we can always return true.
+                    return true;
+                }
+
+                @Override
+                public void afterViewChange
+                (final ViewChangeEvent event
+                
+                    ) {
+//                System.out.println("afterViewChange");
+                    DashboardViewType view = DashboardViewType.getByViewName(event.getViewName());
+                    // Appropriate events get fired after the view is changed.
+                    DashboardEventBus.post(new PostViewChangeEvent(view));
+                    DashboardEventBus.post(new BrowserResizeEvent());
+                    DashboardEventBus.post(new CloseOpenWindowsEvent());
+
+                    if (tracker != null) {
+                        // The view change is submitted as a pageview for GA tracker
+                        tracker.trackPageview("/dashboard/" + event.getViewName());
                     }
                 }
-                if (!exists && !(event.getViewName().equals(DashboardViewType.HOME.getViewName()))) {
-                    return false;
-                }
-
-                // Since there's no conditions in switching between the views
-                // we can always return true.
-                return true;
             }
-
-            @Override
-            public void afterViewChange(final ViewChangeEvent event) {
-                DashboardViewType view = DashboardViewType.getByViewName(event.getViewName());
-                // Appropriate events get fired after the view is changed.
-                DashboardEventBus.post(new PostViewChangeEvent(view));
-                DashboardEventBus.post(new BrowserResizeEvent());
-                DashboardEventBus.post(new CloseOpenWindowsEvent());
-
-                if (tracker != null) {
-                    // The view change is submitted as a pageview for GA tracker
-                    tracker.trackPageview("/dashboard/" + event.getViewName());
-                }
-            }
-        });
+        );
     }
 
     private void initViewProviders() {
@@ -109,6 +143,7 @@ public class DashboardNavigator extends Navigator {
 
                 @Override
                 public View getView(final String viewName) {
+//                    System.out.println("getView");
                     View result = null;
                     if (viewType.getViewName().equals(viewName)) {
                         if (viewType.isStateful()) {

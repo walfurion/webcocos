@@ -19,6 +19,7 @@ import com.fundamental.view.MntServiceMode;
 import com.fundamental.view.RptMTD;
 import com.fundamental.view.RptVolumenes;
 import com.fundamental.view.RptWSM;
+import com.fundamental.view.TurnoPr;
 import com.fundamental.view.maintenance.MntEmpleado;
 import com.fundamental.view.maintenance.MntLubricantPrice;
 import com.fundamental.view.maintenance.MntProducto;
@@ -34,8 +35,8 @@ public enum DashboardViewType {
     //    TRANSACTIONS("transactions", TransactionsView.class, FontAwesome.TABLE, false), 
     //    REPORTS("reports", ReportsView.class, FontAwesome.FILE_TEXT_O, true), 
     //    SCHEDULE("schedule", ScheduleView.class, FontAwesome.CALENDAR_O, false)
-
-    PR_TURN("PR_TURN", PrTurn.class, FontAwesome.TABLE, false),
+//    PR_TURN("PR_TURN", PrTurn.class, FontAwesome.TABLE, false),
+    PR_TURN("PR_TURN", TurnoPr.class, FontAwesome.TABLE, false),
     PR_READING("PR_READING", PrReading.class, FontAwesome.TABLE, false), 
     PR_SQUAREUP("PR_SQUAREUP", PrCuadre.class, FontAwesome.MONEY, false), 
     PR_TURN_CLOSE("PR_TURN_CLOSE", PrTurnoCierre.class, FontAwesome.CLOSE, false), 

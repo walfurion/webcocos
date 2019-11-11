@@ -29,9 +29,12 @@ public class Constant {
     public static final int MP_CRI_VENTA_PREPAGO = 6;
     public static final int MP_CRI_EMPLEADO_CXC = 7;
     public static final int MP_CRI_EFECTIVO_DOLARES = 8;
+    public static final int MP_CRI_TARJETAS = 108;
+    
 
     //... el resto de paises ...
     public static final int MP_CRI_VENTA_LUBS_UNO = 10;
+    public static final int MP_CRI_VENTA_LUBS = 9;
 
     public static final int AUTOSERVICIO = 1;
     public static final int SERVICIO_COMPLETO = 2;
@@ -55,6 +58,11 @@ public class Constant {
 
     public static final short CAT_PAIS_GUATEMALA = 320;
     public static Map<String, String> MAP_MIMETYPES_EXT;
+    public static String FORMATONUMERO = "########0.00";
+    public static DecimalFormat numberFact = new DecimalFormat(FORMATONUMERO);
+    public static String FORMATONUMERO4DECIMALES = "########0.0000";
+    public static DecimalFormat NUMBER4DECIMAL = new DecimalFormat(FORMATONUMERO4DECIMALES);
+    
 
     public Constant() {
         MAP_MIMETYPES_EXT = new HashMap();

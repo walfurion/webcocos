@@ -1,7 +1,7 @@
 package com.fundamental.services;
 
 import com.fundamental.model.Cliente;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.EstacionConfHead;
 import com.fundamental.model.Horario;
 import com.fundamental.model.Lubricanteprecio;
@@ -11,6 +11,7 @@ import com.fundamental.model.Producto;
 import com.fundamental.model.dto.DtoGenericBean;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,7 +115,7 @@ public class SvcGeneral extends Dao {
                 lpo.setProductoNombre(rst.getString(11));
                 lpo.setMarca(new Marca(rst.getInt(12), rst.getString(13), rst.getString(14)));
                 lpo.setMarcaNombre(rst.getString(13));
-                lpo.setPais(new Pais(rst.getInt(2), rst.getString(9), rst.getString(15), null, null, null,false));
+                lpo.setPais(new Pais(rst.getInt(2), rst.getString(9), rst.getString(15), null, null, null,null));
                 lpo.setProducto(new Producto(rst.getInt(4), rst.getString(11), rst.getString(16), null, null, null));
                 result.add(lpo);
             }
@@ -271,7 +272,54 @@ public class SvcGeneral extends Dao {
         return result;
     }
 
-    public Lubricanteprecio doActionLubprecio(String action, Lubricanteprecio lub) {
+//    public Lubricanteprecio doActionLubprecio(String action, Lubricanteprecio lub) {
+//        Lubricanteprecio result = new Lubricanteprecio();
+//        try {
+//            getConnection().setAutoCommit(false);
+//            if (action.equals(Dao.ACTION_ADD)) {
+//                query = "SELECT lubricanteprecio_seq.NEXTVAL FROM DUAL";
+//                pst = getConnection().prepareStatement(query);
+//                ResultSet rst = pst.executeQuery();
+//                int lubprecioId = (rst.next()) ? rst.getInt(1) : 0;
+//                lub.setLubricanteprecio(lubprecioId);
+//                closePst();
+//                System.out.println("lub.getFechaInicio().getTime() "+lub.getFechaInicio().getTime());
+//                query = "INSERT INTO lubricanteprecio (pais_id, producto_id, fecha_inicio, fecha_fin, precio, creado_por, lubricanteprecio) "
+//                        + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+//                System.out.println("doActionLubprecio "+query);
+//                pst = getConnection().prepareStatement(query);
+//                pst.setObject(1, lub.getPaisId());
+//                pst.setObject(2, lub.getProductoId());
+//                pst.setObject(3, new java.sql.Date(lub.getFechaInicio().getTime()));
+//                pst.setObject(4, new java.sql.Date(lub.getFechaFin().getTime()));
+//                pst.setObject(5, lub.getPrecio());
+//                pst.setObject(6, lub.getCreadoPor());
+//                pst.setObject(7, lub.getLubricanteprecio());
+//                pst.executeUpdate();
+//            } else if (action.equals(Dao.ACTION_UPDATE)) {
+//                query = "UPDATE lubricanteprecio "
+//                        + "SET pais_id = ?, producto_id = ?, fecha_inicio = ?, fecha_fin = ?, precio = ?, modificado_por = ?, modificado_el = SYSDATE "
+//                        + "WHERE lubricanteprecio = ?";
+//                pst = getConnection().prepareStatement(query);
+//                pst.setObject(1, lub.getPaisId());
+//                pst.setObject(2, lub.getProductoId());
+//                pst.setObject(3, new java.sql.Date(lub.getFechaInicio().getTime()));
+//                pst.setObject(4, new java.sql.Date(lub.getFechaFin().getTime()));
+//                pst.setObject(5, lub.getPrecio());
+//                pst.setObject(6, lub.getModificadoPor());
+//                pst.setObject(7, lub.getLubricanteprecio());
+//                pst.executeUpdate();
+//            }
+//            result = lub;
+//            getConnection().commit();
+//        } catch (Exception exc) {
+//            try { getConnection().rollback(); } catch(Exception ignore) {}
+//            result.setDescError(exc.getMessage());
+//            exc.printStackTrace();
+//        }
+//        return result;
+//    }
+    public Lubricanteprecio doActionLubprecio(String action, Lubricanteprecio lub, Lubricanteprecio lubricante_log) {
         Lubricanteprecio result = new Lubricanteprecio();
         try {
             getConnection().setAutoCommit(false);
@@ -280,11 +328,12 @@ public class SvcGeneral extends Dao {
                 pst = getConnection().prepareStatement(query);
                 ResultSet rst = pst.executeQuery();
                 int lubprecioId = (rst.next()) ? rst.getInt(1) : 0;
+                System.out.println("lub precio "+lubprecioId);
                 lub.setLubricanteprecio(lubprecioId);
                 closePst();
-
                 query = "INSERT INTO lubricanteprecio (pais_id, producto_id, fecha_inicio, fecha_fin, precio, creado_por, lubricanteprecio) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                System.out.println("doActionLubprecio "+query+" "+lub.toString());
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, lub.getPaisId());
                 pst.setObject(2, lub.getProductoId());
@@ -307,6 +356,7 @@ public class SvcGeneral extends Dao {
                 pst.setObject(6, lub.getModificadoPor());
                 pst.setObject(7, lub.getLubricanteprecio());
                 pst.executeUpdate();
+                doActionLubprecioLog(lubricante_log);
             }
             result = lub;
             getConnection().commit();
@@ -317,7 +367,6 @@ public class SvcGeneral extends Dao {
         }
         return result;
     }
-    
     public String doBulkInsert(List<String> listInsert) {
         String result = null, currentInsert = "";
         int count = 0;
@@ -375,5 +424,52 @@ public class SvcGeneral extends Dao {
         }
         return result;
     }
-
+    public void doActionLubprecioLog(Lubricanteprecio lub) {
+        try {
+                getConnection().setAutoCommit(false);
+                query = "INSERT INTO LUBRICANTEPRECIOLOG (lubricanteprecio, fecha_inicio, fecha_fin, precio, modificado_por,modificado_el) "
+                        + "VALUES (?, ?, ?, ?, ?, ?)";
+                System.out.println("doActionLubprecio "+query+" "+lub.toString());
+                pst = getConnection().prepareStatement(query);
+                pst.setObject(1, lub.getLubricanteprecio());
+                pst.setObject(2, new java.sql.Date(lub.getFechaInicio().getTime()));
+                pst.setObject(3, new java.sql.Date(lub.getFechaFin().getTime()));
+                pst.setObject(4, lub.getPrecio());
+                pst.setObject(5, lub.getModificadoPor());
+                pst.setObject(6, new java.sql.Date(lub.getModificadoEl().getTime()));
+                pst.executeUpdate();
+                getConnection().commit();
+        } catch (Exception exc) {
+            try { getConnection().rollback(); } catch(Exception ignore) {}
+            exc.printStackTrace();
+        }
+    }
+    public List<Lubricanteprecio> getLubpriceHistory(int id) {
+        List<Lubricanteprecio> result = new ArrayList();
+        try {
+            query =   " SELECT rownum,FECHA_INICIO,FECHA_FIN,PRECIO,MODIFICADO_POR,MODIFICADO_EL "
+                    + " FROM LUBRICANTEPRECIOLOG "
+                    + " WHERE LUBRICANTEPRECIO = ? ";
+            System.out.println("getLub "+query);
+            pst = getConnection().prepareStatement(query);
+            pst.setInt(1, id);
+            ResultSet rst = pst.executeQuery();
+            Lubricanteprecio lpo;
+            while (rst.next()) {
+                lpo = new Lubricanteprecio();
+                lpo.setLubricanteprecio(rst.getInt(1));
+                lpo.setFechaInicio(new java.util.Date(rst.getDate(2).getTime()));
+                lpo.setFechaFin(new java.util.Date(rst.getDate(3).getTime()));
+                lpo.setPrecio(rst.getDouble(4));
+                lpo.setModificadoPor(rst.getString(5));
+                lpo.setModificadoEl(new java.util.Date(rst.getDate(6).getTime()));
+                result.add(lpo);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
 }

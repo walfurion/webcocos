@@ -1,6 +1,7 @@
 package com.fundamental.view.maintenance;
 
-import com.fundamental.model.Estacion;
+import com.fundamental.model.Acceso;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Lubricanteprecio;
 import com.fundamental.model.Marca;
 import com.sisintegrados.generic.bean.Pais;
@@ -35,6 +36,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DateField;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
@@ -42,7 +44,9 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.v7.ui.themes.BaseTheme;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -65,7 +69,7 @@ import java.io.IOException;
  * @author Henry Barrientos
  */
 public class MntLubricantPrice extends Panel implements View {
-
+    Acceso acceso = new Acceso();
     Button btnSave, btnAdd, btnFilterClear;
     TextField tfdFilter;
     BeanContainer<Integer, Lubricanteprecio> bcrProduct = new BeanContainer<Integer, Lubricanteprecio>(Lubricanteprecio.class);
@@ -80,11 +84,11 @@ public class MntLubricantPrice extends Panel implements View {
             return super.formatPropertyValue(rowId, colId, property);
         }
     };
-    
+
     private BeanFieldGroup<Lubricanteprecio> binder = new BeanFieldGroup<Lubricanteprecio>(Lubricanteprecio.class);
 //    @PropertyId("pais")
     ComboBox cbxCountry; //cbxStation, 
-    @PropertyId("producto")
+//    @PropertyId("producto")
     ComboBox cbxProduct;
 //    @PropertyId("marca")
     ComboBox cbxBrand;
@@ -95,11 +99,12 @@ public class MntLubricantPrice extends Panel implements View {
     @PropertyId("fechaFin")
     DateField dfdEnd;
     Lubricanteprecio lubricante;
+    Lubricanteprecio lubricante_log;
 
     Upload upload;
     File tempFile;
     int line;
-    
+
     List<Pais> listCountries;
     List<Estacion> listStations = new ArrayList();
     List<Lubricanteprecio> listProducts = new ArrayList();
@@ -111,6 +116,8 @@ public class MntLubricantPrice extends Panel implements View {
     private final VerticalLayout vlRoot;
     private Utils utils = new Utils();
     private Usuario user;
+    
+            
 
     public MntLubricantPrice() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -135,6 +142,7 @@ public class MntLubricantPrice extends Panel implements View {
         buildControls();
         buildTableContent();
         buildButtons();
+        
 
         CssLayout filtering = new CssLayout();
         filtering.addComponents(tfdFilter, btnFilterClear);
@@ -145,7 +153,6 @@ public class MntLubricantPrice extends Panel implements View {
 //        hltFilters.setSizeFull();
 //        hltFilters.addComponents(cbxCountry//, cbxStation
 //        );
-
         VerticalLayout vlLeft = new VerticalLayout(//hltFilters, 
                 filtering, tblProduct, btnAdd);
         vlLeft.setSpacing(true);
@@ -161,7 +168,7 @@ public class MntLubricantPrice extends Panel implements View {
         vlRight.setId("vlRight");
         vlRight.setComponentAlignment(btnSave, Alignment.MIDDLE_CENTER);
         Responsive.makeResponsive(vlRight);
-        
+
         VerticalLayout vlUpload = new VerticalLayout(upload);
         vlUpload.setSpacing(true);
         vlUpload.setSizeUndefined();
@@ -249,14 +256,14 @@ public class MntLubricantPrice extends Panel implements View {
                             return true;
                         }
                         return filterByProperty("paisNombre", item, event.getText())
-//                                || filterByProperty("estacionNombre", item, event.getText())
+                                //                                || filterByProperty("estacionNombre", item, event.getText())
                                 || filterByProperty("productoNombre", item, event.getText());
                     }
 
                     @Override
                     public boolean appliesToProperty(final Object propertyId) {
                         return propertyId.equals("paisNombre")
-//                                || propertyId.equals("estacionNombre")
+                                //                                || propertyId.equals("estacionNombre")
                                 || propertyId.equals("productoNombre");
                     }
                 });
@@ -269,7 +276,8 @@ public class MntLubricantPrice extends Panel implements View {
 
         tfdPrice = utils.buildTextField("Precio:", "0", false, 10, true, ValoTheme.TEXTFIELD_SMALL);
         tfdPrice.addStyleName("align-right");
-
+        binder.bindMemberFields(this);
+        binder.setItemDataSource(lubricante);
         cbxBrand = utils.buildCombobox("Marca:", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, new ListContainer<>(Marca.class, listBrands));
         cbxBrand.addValueChangeListener(new Property.ValueChangeListener() {
             @Override
@@ -288,7 +296,7 @@ public class MntLubricantPrice extends Panel implements View {
                 }
             }
         });
-        
+
         upload = new Upload("Selección de archivo:", new Upload.Receiver() {
             @Override
             public OutputStream receiveUpload(String filename, String mimeType) {
@@ -319,10 +327,9 @@ public class MntLubricantPrice extends Panel implements View {
         });
         upload.setButtonCaption("Cargar");
         
-
         //Importante
-        binder.bindMemberFields(this);
-        binder.setItemDataSource(lubricante);
+//        binder.bindMemberFields(this);
+//        binder.setItemDataSource(lubricante);
     }
 
     private void buildTableContent() {
@@ -339,15 +346,47 @@ public class MntLubricantPrice extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (tblProduct.getValue() != null) {
+                    btnSave.setEnabled(true);
                     action = Dao.ACTION_UPDATE;
                     lubricante = bcrProduct.getItem(tblProduct.getValue()).getBean();
+                    lubricante_log = (Lubricanteprecio)lubricante.clone();
+                    if(lubricante_log.getModificadoEl()==null){
+                        lubricante_log.setModificadoEl(lubricante.getCreadoEl());
+                    }
+                    if(lubricante_log.getModificadoPor()==null || !lubricante_log.getModificadoPor().trim().equals("")){
+                        lubricante_log.setModificadoPor(lubricante.getCreadoPor());
+                    }
+                    allLubricants.add(lubricante.getProducto());
+//                    cbxProduct.setContainerDataSource(new ListContainer<Producto>(Producto.class, allLubricants));
+                    cbxProduct.removeAllItems();
+                    cbxProduct.addItem(lubricante.getProducto());
+                    cbxProduct.select(lubricante.getProducto());
+                    
+                    System.out.println("lubricante_log "+lubricante_log.toString());
                     binder.setItemDataSource(bcrProduct.getItem(tblProduct.getValue()));
                 }
             }
         });
-        tblProduct.setVisibleColumns(new Object[]{"paisNombre", "marcaNombre", "productoNombre", "fechaInicio", "fechaFin", "precio"});
-        tblProduct.setColumnHeaders(new String[]{"Pais", "Marca", "Producto", "Inicio", "Fin", "Precio"});
-        tblProduct.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT);
+        tblProduct.addGeneratedColumn("history", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("lubricanteprecio");  //Atributo del bean
+                Property pnom = source.getItem(itemId).getItemProperty("productoNombre");  //Atributo del bean
+                int id = (int) pro.getValue();
+                  Button btnHist = new Button("Historial");
+                  btnHist.setStyleName(BaseTheme.BUTTON_LINK);
+                  btnHist.addClickListener(new Button.ClickListener() {
+                    @Override
+                    public void buttonClick(Button.ClickEvent event) {
+                        getHistory(id,pnom.getValue().toString());
+                    }
+                });
+                  return btnHist;
+            }
+        });
+        tblProduct.setVisibleColumns(new Object[]{"paisNombre", "marcaNombre", "productoNombre", "fechaInicio", "fechaFin", "precio","history"});
+        tblProduct.setColumnHeaders(new String[]{"Pais", "Marca", "Producto", "Inicio", "Fin", "Precio","Historial"});
+        tblProduct.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT,Table.Align.CENTER);
     }
 
     private void buildButtons() {
@@ -361,17 +400,21 @@ public class MntLubricantPrice extends Panel implements View {
                 action = Dao.ACTION_ADD;
                 tblProduct.setValue(null);
                 lubricante = new Lubricanteprecio();
+                btnSave.setEnabled(true);
                 binder.setItemDataSource(lubricante);
             }
         });
 
         btnSave = utils.buildButton("Guardar", FontAwesome.SAVE, ValoTheme.BUTTON_FRIENDLY);
+        btnSave.setEnabled(false);
         btnSave.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                if (!cbxCountry.isValid() || !cbxBrand.isValid() || !cbxProduct.isValid() 
-                        || !dfdStart.isValid() || !dfdEnd.isValid() 
-                        || tfdPrice.getValue()==null || !tfdPrice.isValid()) {
+                if (!cbxCountry.isValid() || !cbxBrand.isValid() || !cbxProduct.isValid()
+                        || !dfdStart.isValid() 
+                        || !dfdEnd.isValid()
+                        || tfdPrice.getValue() == null 
+                        || !tfdPrice.isValid()) {
                     Notification.show("Los campos marcados son requeridos.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
@@ -380,12 +423,17 @@ public class MntLubricantPrice extends Panel implements View {
                 } catch (Exception ex) {
                     Logger.getLogger(MntLubricantPrice.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                lubricante.setPaisId(((Pais)cbxCountry.getValue()).getPaisId());
+                lubricante.setProductoId(((Producto)cbxProduct.getValue()).getProductoId());
                 lubricante.setCreadoPor(user.getUsername());
                 lubricante.setModificadoPor(user.getUsername());
+//                lubricante_log.setModificadoPor(user.getUsername());
                 SvcGeneral service = new SvcGeneral();
-                lubricante = service.doActionLubprecio(action, lubricante);
+//                lubricante = service.doActionLubprecio(action, lubricante);
+                
+                lubricante = service.doActionLubprecio(action, lubricante,lubricante_log);
                 service.closeConnections();
-                if (lubricante.getLubricanteprecio()>0) {
+                if (lubricante.getLubricanteprecio() > 0) {
                     Notification notif = new Notification("¡Exito!", "La acción se ha ejecutado correctamente.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);
                     notif.setPosition(Position.MIDDLE_CENTER);
@@ -394,11 +442,7 @@ public class MntLubricantPrice extends Panel implements View {
                 } else {
                     Notification.show("Ocurrió un error al ejecutar la acción. \n" + lubricante.getDescError(), Notification.Type.ERROR_MESSAGE);
                 }
-                
-                
-                
-                
-                
+
 //                Cliente cliente;
 //                for (Integer itemId : bcrCustomer.getItemIds()) {
 //                    cliente = bcrCustomer.getItem(itemId).getBean();
@@ -422,6 +466,7 @@ public class MntLubricantPrice extends Panel implements View {
 //                }
             }
         });
+        
     }
 
     private boolean filterByProperty(final String prop, final Item item, final String text) {
@@ -434,7 +479,7 @@ public class MntLubricantPrice extends Panel implements View {
         }
         return false;
     }
-    
+
     private void XlsxReader(File tempFile, boolean firstRowContainsHeaders) throws IOException {
         FileInputStream excelFile = new FileInputStream(tempFile);
         Workbook workbook = new XSSFWorkbook(excelFile);
@@ -452,9 +497,9 @@ public class MntLubricantPrice extends Panel implements View {
             currentRow = rowIterator.next();
             if (currentRow.getCell(0) != null && !currentRow.getCell(0).toString().trim().isEmpty()) {
                 insertList.add("INSERT INTO lubricanteprecio (lubricanteprecio, pais_id, producto_id, fecha_inicio, fecha_fin, precio, creado_por) "
-                        + "VALUES (lubricanteprecio_seq.NEXTVAL, "+currentRow.getCell(1).toString()+", "+currentRow.getCell(5).toString()+", "
-                                + "TO_DATE('"+currentRow.getCell(7).toString()+"', 'dd/mm/yyyy'), TO_DATE('"+currentRow.getCell(8).toString()+"', 'dd/mm/yyyy'), "
-                                        + ""+currentRow.getCell(9).toString()+", '"+user.getUsername()+"')");  
+                        + "VALUES (lubricanteprecio_seq.NEXTVAL, " + currentRow.getCell(1).toString() + ", " + currentRow.getCell(5).toString() + ", "
+                        + "TO_DATE('" + currentRow.getCell(7).toString() + "', 'dd/mm/yyyy'), TO_DATE('" + currentRow.getCell(8).toString() + "', 'dd/mm/yyyy'), "
+                        + "" + currentRow.getCell(9).toString() + ", '" + user.getUsername() + "')");
             }
         }
         workbook.close();
@@ -484,7 +529,63 @@ public class MntLubricantPrice extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnAdd.setEnabled(acceso.isAgregar());
+        btnSave.setEnabled(acceso.isCambiar());
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
+    public void getHistory(int id,String descproduct){
+        System.out.println("getHItory");
+        VerticalLayout v = new VerticalLayout();
+        v.setSizeFull();
+        v.setSizeUndefined();
+        v.setMargin(true);
+        v.addStyleName("dashboard-view");
+        v.addComponent(utils.buildHeader(descproduct, false, true));
+        v.addComponent(utils.buildSeparator());
+        BeanContainer<Integer, Lubricanteprecio> bcrProductH = new BeanContainer<Integer, Lubricanteprecio>(Lubricanteprecio.class);
+        SvcGeneral service = new SvcGeneral();
+        List<Lubricanteprecio> listProductsH = service.getLubpriceHistory(id);
+        service.closeConnections();
+        bcrProductH.setBeanIdProperty("lubricanteprecio");
+        bcrProductH.removeAllItems();
+        bcrProductH.addAll(new ArrayList());
+        bcrProductH.addAll(listProductsH);
+        
+        Table tblProductH = new Table() {
+            @Override
+            protected String formatPropertyValue(Object rowId, Object colId, Property property) {
+                if (colId.equals("precio")) {
+                    return Constant.decimal2D.format(property.getValue()).trim();
+                } else if (colId.equals("fechaInicio") || colId.equals("fechaFin") || colId.equals("modificadoEl")) {
+                    return Constant.SDF_yyyyMMdd.format(property.getValue()).trim();
+                }
+                return super.formatPropertyValue(rowId, colId, property);
+            }
+        };
+        tblProductH.setHeight(400, Unit.PERCENTAGE);
+        tblProductH.setWidth(500, Unit.PERCENTAGE);
+        tblProductH.setContainerDataSource(bcrProductH);
+        tblProductH.addStyleName(ValoTheme.TABLE_COMPACT);
+        tblProductH.addStyleName(ValoTheme.TABLE_SMALL);
+        tblProductH.setSizeUndefined();
+        tblProductH.setVisibleColumns(new Object[]{"fechaInicio", "fechaFin", "precio","modificadoPor","modificadoEl"});
+        tblProductH.setColumnHeaders(new String[]{"Inicio", "Fin", "Precio","Modificado por","Modificado el"});
+        tblProductH.setColumnAlignments(Table.Align.CENTER, Table.Align.CENTER, Table.Align.LEFT, Table.Align.CENTER, Table.Align.CENTER);
+        v.addComponent(tblProductH);
+        Window window = new Window("Historico");
+        window.setWidth(500, Unit.PIXELS);
+        window.setHeight(500,Unit.PIXELS);
+        window.center();
+        window.setContent(v);
+        this.getUI().getUI().addWindow(window);
+    }
+    public void enabledField(boolean enabled){
+        cbxCountry.setEnabled(enabled);
+        cbxProduct.setEnabled(enabled);
+        cbxBrand.setEnabled(enabled);
+    }
 }

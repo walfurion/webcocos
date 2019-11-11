@@ -1,6 +1,5 @@
 package com.sisintegrados.generic.bean;
 
-import com.fundamental.model.Estacion;
 import com.fundamental.model.Rol;
 import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.dto.DtoGenericBean;
@@ -44,6 +43,9 @@ public class Usuario {
     private String descError;
     private DtoGenericBean status;
     private List<Estacion> stations;
+    private Integer estacionid;
+    private GenericDia dia;
+    private GenericTurno turno;
 
     public Usuario(Integer usuarioId, String username, String clave, String nombre, String apellido, String estado, String creadoPor) {
         this.usuarioId = usuarioId;

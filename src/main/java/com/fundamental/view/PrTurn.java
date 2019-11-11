@@ -1,23 +1,24 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Bomba;
 import com.fundamental.model.Dia;
-import com.fundamental.model.Empleado;
-import com.fundamental.model.Estacion;
+import com.sisintegrados.generic.bean.Empleado;
+import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.services.Dao;
 import com.fundamental.model.EstacionConf;
 import com.fundamental.model.EstacionConfHead;
 import com.fundamental.model.Horario;
-import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Precio;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Turno;
-import com.fundamental.model.TurnoEmpleadoBomba;
-import com.sisintegrados.generic.bean.Usuario;
+import com.sisintegrados.generic.bean.TurnoEmpleadoBomba;
 import com.fundamental.model.Utils;
 import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.generic.bean.Pais;
+import com.sisintegrados.generic.bean.Usuario;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -63,6 +64,7 @@ public class PrTurn extends Panel implements View {
     Button btnGuardar = new Button("Crear Turno"),
             btnModificar = new Button("Modificar precio", FontAwesome.EDIT),
             btnAddEmpPump;
+    Acceso acceso = new Acceso();
     Table tablePrecio = new Table("Precios:"), tblEmployeePump;
     Label labelStation, labelTurno;
     TextField tfTurnoRef = new TextField("Turno referencia");
@@ -292,7 +294,7 @@ public class PrTurn extends Panel implements View {
                 result.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
-                        
+
                     }
                 });
                 return result;
@@ -536,7 +538,7 @@ public class PrTurn extends Panel implements View {
                 ctrTurnos = new ListContainer<>(Turno.class, new ArrayList());
                 cbxTurno.setContainerDataSource(ctrTurnos);
                 bcrPrecios.removeAllItems();
-                if (listStations.size()==1) {
+                if (listStations.size() == 1) {
                     cbxEstacion.setValue(listStations.get(0));
                 }
             }
@@ -713,54 +715,54 @@ public class PrTurn extends Panel implements View {
     }
 
     private void determinarPermisos() {
-        boolean explorar = false, editar = false, crearTurno = false;
-
-//        if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha()!=null && ultimoDia.getFecha()!=null
-//                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))
-//                ) {
-//            explorar = true;
-//        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null  && dia.getFecha()!=null && ultimoDia.getFecha()!=null
-//                && dia.getFecha().before(ultimoDia.getFecha())) {
-//            explorar = true;
-//        } else {
-        if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
-                && dia.getEstadoId() == null && turno.getEstadoId() == null) {
-            //El dia elegido No existe aun en base de datos
-            if (dia.getFecha() != null && ultimoDia.getFecha() != null && (dia.getFecha().after(ultimoDia.getFecha()) || dia.getFecha().equals(ultimoDia.getFecha()))) {
-                explorar = crearTurno = true;
-            } else if (ultimoDia.getFecha() == null) {
-                //La primericima vez que se crea un turno y precio tendra que pasar por esta validacion que aplica solo para el cajero y supervisor, permite habilitar el boton  para Guardar
-                explorar = crearTurno = true;
-            } else {
-                explorar = true;
-            }
-        } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) && dia.getEstadoId() == 2 && turno.getEstadoId() == 2)) {
-            explorar = crearTurno = true;
-        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) && dia.getEstadoId() == 1 && turno.getEstadoId() == 2) {
-            explorar = crearTurno = true;
-        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) && dia.getEstadoId() == 1 && turno.getEstadoId() == 1) {
-            editar = true;
-        } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) && dia.getEstadoId() == 2 && turno.getEstadoId() == 2)) {
-            explorar = crearTurno = true;
-        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) && dia.getEstadoId() == 1
-                && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
-            explorar = editar = crearTurno = true;
-        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) && dia.getEstadoId() == 1
-                && turno.getEstadoId() != null && turno.getEstadoId() == 1) {
-            editar = true;
-        } else if (user.isAdministrativo()) {
-            explorar = editar = true;
-        } else if (user.isGerente()) {
-            explorar = editar = true;
-        }
-
-        dfdFecha.setEnabled(explorar);   //habilitado
-        cbxTurno.setEnabled(explorar);    //habilitado
-        crearTurno = (crearTurno && dia.getFecha() != null) // && dia.getFecha().equals(ultimoDia.getFecha()))
-                ? true : crearTurno;
-        btnGuardar.setEnabled(crearTurno);    //habilitado (cerrado)
-        editar = (editar && crearTurno) ? false : editar;
-        btnModificar.setEnabled(editar);    //habilitado
+//        boolean explorar = false, editar = false, crearTurno = false;
+//
+////        if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha()!=null && ultimoDia.getFecha()!=null
+////                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))
+////                ) {
+////            explorar = true;
+////        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null  && dia.getFecha()!=null && ultimoDia.getFecha()!=null
+////                && dia.getFecha().before(ultimoDia.getFecha())) {
+////            explorar = true;
+////        } else {
+//        if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
+//                && dia.getEstadoId() == null && turno.getEstadoId() == null) {
+//            //El dia elegido No existe aun en base de datos
+//            if (dia.getFecha() != null && ultimoDia.getFecha() != null && (dia.getFecha().after(ultimoDia.getFecha()) || dia.getFecha().equals(ultimoDia.getFecha()))) {
+//                explorar = crearTurno = true;
+//            } else if (ultimoDia.getFecha() == null) {
+//                //La primericima vez que se crea un turno y precio tendra que pasar por esta validacion que aplica solo para el cajero y supervisor, permite habilitar el boton  para Guardar
+//                explorar = crearTurno = true;
+//            } else {
+//                explorar = true;
+//            }
+//        } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) && dia.getEstadoId() == 2 && turno.getEstadoId() == 2)) {
+//            explorar = crearTurno = true;
+//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) && dia.getEstadoId() == 1 && turno.getEstadoId() == 2) {
+//            explorar = crearTurno = true;
+//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) && dia.getEstadoId() == 1 && turno.getEstadoId() == 1) {
+//            editar = true;
+//        } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) && dia.getEstadoId() == 2 && turno.getEstadoId() == 2)) {
+//            explorar = crearTurno = true;
+//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) && dia.getEstadoId() == 1
+//                && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
+//            explorar = editar = crearTurno = true;
+//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) && dia.getEstadoId() == 1
+//                && turno.getEstadoId() != null && turno.getEstadoId() == 1) {
+//            editar = true;
+//        } else if (user.isAdministrativo()) {
+//            explorar = editar = true;
+//        } else if (user.isGerente()) {
+//            explorar = editar = true;
+//        }
+//
+//        dfdFecha.setEnabled(explorar);   //habilitado
+//        cbxTurno.setEnabled(explorar);    //habilitado
+//        crearTurno = (crearTurno && dia.getFecha() != null) // && dia.getFecha().equals(ultimoDia.getFecha()))
+//                ? true : crearTurno;
+//        btnGuardar.setEnabled(crearTurno);    //habilitado (cerrado)
+//        editar = (editar && crearTurno) ? false : editar;
+//        btnModificar.setEnabled(editar);    //habilitado
     }
 
     private void getDataPrecios() {
@@ -868,7 +870,15 @@ public class PrTurn extends Panel implements View {
         lblHoraConf.setValue("Horario: " + echSelected.getHoraInicio() + " - " + echSelected.getHoraFin());
         if (turno.getTurnoId() == null || ultimoTurno.getTurnoId() == null) {
             SvcTurno service = new SvcTurno();
-            listPump = service.getBombasByEstacionConfheadId(echSelected.getEstacionconfheadId());
+            // ASG INICIA
+            Estacion est = new Estacion();
+            if (cbxEstacion != null) {
+                est = (Estacion) cbxEstacion.getValue();
+            } else {
+                est.setEstacionId(0);
+            }
+            //ASG FINALIZA
+            listPump = service.getBombasByEstacionConfheadId(echSelected.getEstacionconfheadId(), est.getEstacionId()); //ASG
             bcrEmpPump.removeAllItems();
             service.closeConnections();
         }
@@ -911,7 +921,11 @@ public class PrTurn extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnGuardar.setEnabled(acceso.isAgregar());
+        btnModificar.setEnabled(acceso.isCambiar());
     }
 
 }
