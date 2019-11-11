@@ -150,7 +150,6 @@ public class PrCuadre extends Panel implements View {
 
     TextField tfdNameSeller, tfdNameChief;
     DateField dfdFecha = new DateField("Fecha:");
-    Upload upload;
 
     Pais pais;
     Estacion estacion;
@@ -299,11 +298,10 @@ public class PrCuadre extends Panel implements View {
         cltMedios.setSizeFull();
         Responsive.makeResponsive(cltMedios);
 
-        CssLayout cltUpload = new CssLayout(utils.vlContainer(upload));
-        cltUpload.setSizeFull();
-        cltUpload.setVisible(false);
-        Responsive.makeResponsive(cltUpload);
-
+//        CssLayout cltUpload = new CssLayout(utils.vlContainer(upload));
+//        cltUpload.setSizeFull();
+//        cltUpload.setVisible(false);
+//        Responsive.makeResponsive(cltUpload);
         CssLayout cltTaDiff = buildDetalleMontos();
         cltTaDiff.setSizeFull();
         cltTaDiff.addComponent(btnSave);
@@ -374,7 +372,8 @@ public class PrCuadre extends Panel implements View {
 ////           }
 ////       });
         CssLayout cltMain = new CssLayout(hlLabels, hlCombo, cltEmpleado, cltVentas, cltMedios, //utils.vlContainer(tblPartida), 
-                cltUpload, cltTaDiff);
+                //cltUpload,
+                cltTaDiff);
         Responsive.makeResponsive(cltMain);
         tabsheet.addTab(cltMain, "Principal", FontAwesome.LIST);
 
@@ -690,118 +689,118 @@ public class PrCuadre extends Panel implements View {
         cbxEmpleado.addValueChangeListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
-                tfdNameSeller.setValue(null);
-                tfdNameChief.setValue(null);
+//                tfdNameSeller.setValue(null);
+//                tfdNameChief.setValue(null);
                 for (Integer itemId : bcrBombas.getItemIds()) {
                     bcrBombas.getItem(itemId).getItemProperty("selected").setValue(false);
                     onChangeCheckboxBomba(itemId, false);
                 }
-                for (Bomba bomba : ((Empleado) cbxEmpleado.getValue()).getBombas()) {
-                    for (Integer itemId : bcrBombas.getItemIds()) {
-                        if (bomba.getId().equals(itemId)) {
-                            bcrBombas.getItem(itemId).getItemProperty("selected").setValue(true);
-                            onChangeCheckboxBomba(itemId, true);
-                            break;
+                if (cbxEmpleado.getValue() != null) {  //ASG
+                    for (Bomba bomba : ((Empleado) cbxEmpleado.getValue()).getBombas()) {
+                        for (Integer itemId : bcrBombas.getItemIds()) {
+                            if (bomba.getId().equals(itemId)) {
+                                bcrBombas.getItem(itemId).getItemProperty("selected").setValue(true);
+                                onChangeCheckboxBomba(itemId, true);
+                                break;
+                            }
                         }
                     }
-                }
 
 //                SvcCuadre service = new SvcCuadre();
 //                String[] nombres = service.getEmpleadoByEstacionTurnoEmpleado(estacion.getEstacionId(), turno.getTurnoId(), ((Empleado) cbxEmpleado.getValue()).getEmpleadoId());
-                Arqueocaja arqueocaja = ((Empleado) cbxEmpleado.getValue()).getArqueo();
-                if (arqueocaja != null) {
-                    tfdNameSeller.setValue(arqueocaja.getNombrePistero());
-                    tfdNameChief.setValue(arqueocaja.getNombreJefe());
-                    onchangeCbxArqueo(arqueocaja.getArqueocajaId().toString());
+                    Arqueocaja arqueocaja = ((Empleado) cbxEmpleado.getValue()).getArqueo();
+                    if (arqueocaja != null) {
+//                        tfdNameSeller.setValue(arqueocaja.getNombrePistero());
+//                        tfdNameChief.setValue(arqueocaja.getNombreJefe());
+                        onchangeCbxArqueo(arqueocaja.getArqueocajaId().toString());
 
-                    /*Recupera Detalle Cliente Prepago*/ //ASG
-                    bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
-                    bcrPrepaid = dao.getDetallePrepago(arqueocaja.getArqueocajaId());
+                        /*Recupera Detalle Cliente Prepago*/ //ASG
+                        bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                        bcrPrepaid = dao.getDetallePrepago(arqueocaja.getArqueocajaId());
 
-                    /*Recupera Detalle Lubricantes*/ //JLopez
-                    bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
-                    bcrLubs = daoLubs.getDetalleProducto(arqueocaja.getArqueocajaId());
+                        /*Recupera Detalle Lubricantes*/ //JLopez
+                        bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                        bcrLubs = daoLubs.getDetalleProducto(arqueocaja.getArqueocajaId());
 
-                    /*Recupera Detalle Cliente Credito*/ //MAG
-                    bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
-                    bcrClientes = dao.getDetalleCredito(arqueocaja.getArqueocajaId());
+                        /*Recupera Detalle Cliente Credito*/ //MAG
+                        bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                        bcrClientes = dao.getDetalleCredito(arqueocaja.getArqueocajaId());
 
-                    /*Recupera Detalle tarjeta de credito*/ //MAG
-                    bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
-                    bcrCreditC = daoTrC.getDetalleTarjetaCredito(arqueocaja.getArqueocajaId());
+                        /*Recupera Detalle tarjeta de credito*/ //MAG
+                        bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+                        bcrCreditC = daoTrC.getDetalleTarjetaCredito(arqueocaja.getArqueocajaId());
 
-                } else {
-                    /*ASG*/
-                    //no existen arqueos se limpian las colecciones.
-                    bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
-                    bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
-                    bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
-                    bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
-                    listaEfectivo.removeAll(listaEfectivo); //ASG
-                }
-
-            }
-        });
-
-        tfdNameSeller = utils.buildTextField("Pistero:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
-
-        tfdNameChief = utils.buildTextField("Jefe de pista:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
-
-        upload = new Upload("Selección:", new Upload.Receiver() {
-            @Override
-            public OutputStream receiveUpload(String filename, String mimeType) {
-                //Validaciones
-                try {
-                    Constant constant = new Constant();
-                    if (constant.MAP_MIMETYPES_EXT.containsKey(mimeType)) {
-                        System.out.println("receiveUpload::: " + filename + "; " + mimeType);
-                        tmpString = "Faltante" + user.getEstacionLogin().getNombre().replaceAll(" ", "-").concat(Constant.SDF_yyyyMMddHHmmss.format(new Date()));
-                        tempFile = File.createTempFile(tmpString, constant.MAP_MIMETYPES_EXT.get(mimeType));
-                        return new FileOutputStream(tempFile);
                     } else {
-                        Notification.show("ERROR", "Tipo de documento NO reconocido", Notification.Type.ERROR_MESSAGE);
-                        return null;
+                        /*ASG*/
+                        //no existen arqueos se limpian las colecciones.
+                        bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                        bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                        bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                        bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+                        listaEfectivo.removeAll(listaEfectivo); //ASG
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        });
-        upload.addFinishedListener(new Upload.FinishedListener() {
-            @Override
-            public void uploadFinished(Upload.FinishedEvent finishedEvent) {
-                try {
-                    System.out.println("uploadFinished::: " + finishedEvent.getFilename() + "; " + finishedEvent.getMIMEType() + "; " + finishedEvent.getLength() + "; " + finishedEvent.toString());
-                    if (tempFile != null && tempFile.exists()) {
-//                        XlsxReader(tempFile, true);
-                    }
-                } catch (Exception ex) {
-//                    Notification.show("Fila: " + line + "; " + ex.getMessage(), Notification.Type.ERROR_MESSAGE);
-                }
-            }
-        });
-        upload.addSucceededListener(new Upload.SucceededListener() {
-            @Override
-            public void uploadSucceeded(Upload.SucceededEvent event) {
-                System.out.println("uploadSucceeded::: ");
-            }
-        });
-        upload.addProgressListener(new Upload.ProgressListener() {
-            @Override
-            public void updateProgress(long readBytes, long contentLength) {
-                System.out.println("updateProgress::: " + new Date());
-            }
-        });
-        upload.addFailedListener(new Upload.FailedListener() {
-            @Override
-            public void uploadFailed(Upload.FailedEvent event) {
-                System.out.println("uploadFailed::: ");
-            }
-        });
-        upload.setButtonCaption("Cargar comprobante");
-        upload.addStyleName(ValoTheme.BUTTON_SMALL);
 
+                }
+            } //ASG
+        });
+
+//        tfdNameSeller = utils.buildTextField("Pistero:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
+//
+//        tfdNameChief = utils.buildTextField("Jefe de pista:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
+//        upload = new Upload("Selección:", new Upload.Receiver() {
+//            @Override
+//            public OutputStream receiveUpload(String filename, String mimeType) {
+//                //Validaciones
+//                try {
+//                    Constant constant = new Constant();
+//                    if (constant.MAP_MIMETYPES_EXT.containsKey(mimeType)) {
+//                        System.out.println("receiveUpload::: " + filename + "; " + mimeType);
+//                        tmpString = "Faltante" + user.getEstacionLogin().getNombre().replaceAll(" ", "-").concat(Constant.SDF_yyyyMMddHHmmss.format(new Date()));
+//                        tempFile = File.createTempFile(tmpString, constant.MAP_MIMETYPES_EXT.get(mimeType));
+//                        return new FileOutputStream(tempFile);
+//                    } else {
+//                        Notification.show("ERROR", "Tipo de documento NO reconocido", Notification.Type.ERROR_MESSAGE);
+//                        return null;
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    return null;
+//                }
+//            }
+//        });
+//        upload.addFinishedListener(new Upload.FinishedListener() {
+//            @Override
+//            public void uploadFinished(Upload.FinishedEvent finishedEvent) {
+//                try {
+//                    System.out.println("uploadFinished::: " + finishedEvent.getFilename() + "; " + finishedEvent.getMIMEType() + "; " + finishedEvent.getLength() + "; " + finishedEvent.toString());
+//                    if (tempFile != null && tempFile.exists()) {
+////                        XlsxReader(tempFile, true);
+//                    }
+//                } catch (Exception ex) {
+////                    Notification.show("Fila: " + line + "; " + ex.getMessage(), Notification.Type.ERROR_MESSAGE);
+//                }
+//            }
+//        });
+//        upload.addSucceededListener(new Upload.SucceededListener() {
+//            @Override
+//            public void uploadSucceeded(Upload.SucceededEvent event) {
+//                System.out.println("uploadSucceeded::: ");
+//            }
+//        });
+//        upload.addProgressListener(new Upload.ProgressListener() {
+//            @Override
+//            public void updateProgress(long readBytes, long contentLength) {
+//                System.out.println("updateProgress::: " + new Date());
+//            }
+//        });
+//        upload.addFailedListener(new Upload.FailedListener() {
+//            @Override
+//            public void uploadFailed(Upload.FailedEvent event) {
+//                System.out.println("uploadFailed::: ");
+//            }
+//        });
+//        upload.setButtonCaption("Cargar comprobante");
+//        upload.addStyleName(ValoTheme.BUTTON_SMALL);
 //        determinarPermisos();
     }
 
@@ -1092,8 +1091,7 @@ public class PrCuadre extends Panel implements View {
 //                                        mail.run();
 //                                    }
                                     //FIN ASG
-                                    
-                                      //*Registro detalle de clientes*// ASG
+                                    //*Registro detalle de clientes*// ASG
                                     try {
                                         dao.CreaClienteDetalle(arqueo.getArqueocajaId(), bcrPrepaid, user.getUsername());
                                         dao.CreaClienteDetalleCredito(arqueo.getArqueocajaId(), bcrClientes, user.getUsername());//Clientes Credito
