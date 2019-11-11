@@ -1,5 +1,6 @@
 package com.fundamental.view.maintenance;
 
+import com.fundamental.model.Acceso;
 import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Lubricanteprecio;
 import com.fundamental.model.Marca;
@@ -68,7 +69,7 @@ import java.io.IOException;
  * @author Henry Barrientos
  */
 public class MntLubricantPrice extends Panel implements View {
-
+    Acceso acceso = new Acceso();
     Button btnSave, btnAdd, btnFilterClear;
     TextField tfdFilter;
     BeanContainer<Integer, Lubricanteprecio> bcrProduct = new BeanContainer<Integer, Lubricanteprecio>(Lubricanteprecio.class);
@@ -528,6 +529,11 @@ public class MntLubricantPrice extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnAdd.setEnabled(acceso.isAgregar());
+        btnSave.setEnabled(acceso.isCambiar());
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

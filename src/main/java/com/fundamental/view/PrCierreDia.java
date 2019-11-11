@@ -1,5 +1,6 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Dia;
 import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Mediopago;
@@ -134,7 +135,7 @@ public class PrCierreDia extends Panel implements View {
     };
 
     Table tblInventory = new Table("Inventario:");
-    
+
     TextField tfdDriver = new TextField("Piloto:"), tfdUnit = new TextField("Unidad:"), tfdBill = new TextField("Factura:");
     Label lblTittle = new Label("Recepción producto:");
 
@@ -156,6 +157,7 @@ public class PrCierreDia extends Panel implements View {
     Dia dia, ultimoDia;
     List<Precio> precios;
     List<Producto> productos;
+    Acceso acceso = new Acceso();
 
     public PrCierreDia() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -236,15 +238,18 @@ public class PrCierreDia extends Panel implements View {
         vlTableButtons.setSizeUndefined();
         vlTableButtons.setHeight("90%");
 
-tfdDriver.addStyleName(ValoTheme.TEXTFIELD_SMALL); tfdUnit.addStyleName(ValoTheme.TEXTFIELD_SMALL); tfdBill.addStyleName(ValoTheme.TEXTFIELD_SMALL); 
-lblTittle.addStyleName(ValoTheme.LABEL_BOLD); lblTittle.addStyleName(ValoTheme.LABEL_SMALL);
+        tfdDriver.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+        tfdUnit.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+        tfdBill.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+        lblTittle.addStyleName(ValoTheme.LABEL_BOLD);
+        lblTittle.addStyleName(ValoTheme.LABEL_SMALL);
         HorizontalLayout hltInventory = new HorizontalLayout(lblTittle, tfdDriver, tfdUnit, tfdBill);
         hltInventory.setSizeUndefined();
         hltInventory.setSpacing(true);
         VerticalLayout vltInventory = new VerticalLayout(hltInventory, utils.vlContainer(tblInventory));
         vltInventory.setSizeUndefined();
         vltInventory.setMargin(new MarginInfo(false, true, true, false));
-        
+
         CssLayout content = new CssLayout();
         content.addStyleName("dashboard-panels");
         Responsive.makeResponsive(content);
@@ -252,7 +257,7 @@ lblTittle.addStyleName(ValoTheme.LABEL_BOLD); lblTittle.addStyleName(ValoTheme.L
                 utils.vlContainer(vlTableButtons),
                 utils.vlContainer(tableVentas), utils.vlContainer(tableProductos),
                 utils.vlContainer(tableMediosPago), utils.vlContainer(tableEfectivo),
-//                utils.vlContainer(tblInventory),
+                //                utils.vlContainer(tblInventory),
                 vltInventory,
                 utils.vlContainer(hlContent4)
         );
@@ -278,7 +283,7 @@ lblTittle.addStyleName(ValoTheme.LABEL_BOLD); lblTittle.addStyleName(ValoTheme.L
         estacion = (Estacion) ((cbxEstacion != null && cbxEstacion.getValue() != null)
                 ? cbxEstacion.getValue() : ((user.getEstacionLogin() != null) ? user.getEstacionLogin() : new Estacion()));
 
-        ultimoDia = (ultimoDia == null || ultimoDia.getFecha()==null) ? service.getUltimoDiaByEstacionid(estacion.getEstacionId()) : ultimoDia;
+        ultimoDia = (ultimoDia == null || ultimoDia.getFecha() == null) ? service.getUltimoDiaByEstacionid(estacion.getEstacionId()) : ultimoDia;
         if (dia == null || dia.getFecha() == null) {    //La primera vez
             dia = service.getDiaActivoByEstacionid(estacion.getEstacionId());
             dia = (dia.getEstadoId() == null) ? ultimoDia : dia;
@@ -294,42 +299,38 @@ lblTittle.addStyleName(ValoTheme.LABEL_BOLD); lblTittle.addStyleName(ValoTheme.L
         if (dia != null && dia.getEstadoId() != null) {
 
             List<String[]> calibraciones = service.getCalibracionByFechaEstacion(dia.getFecha(), estacion.getEstacionId()); //de hoy
-            
-            
 
-                Calendar ayer = Calendar.getInstance();
-                ayer.setTime(dia.getFecha());
-                ayer.add(Calendar.DATE, -1);
-                inventarioAyer = service.getInventarioByFechaEstacion(ayer.getTime(), estacion.getEstacionId());
-                List<Producto> myprods = service.getCombustiblesByEstacionid(estacion.getEstacionId());
-                int index = 1;
-                InventarioDto invdto;
-                for (Producto p : myprods) {
-                    invdto = new InventarioDto(index++, p.getNombre(), 0D, dia.getFecha(), estacion.getEstacionId(), p.getProductoId(), 0D, 0D, 0D, null, null);
-                    invdto.setVentas(0D);
-                    invdto.setVentasCons(0D);
-                    invdto.setComprasDto(0D);
-                    invdto.setFinallDto(0D);
-                    for (String[] cal : calibraciones) {
-                        if (p.getProductoId() == Integer.parseInt(cal[0])) {
-                            invdto.setCalibracion(Double.parseDouble(cal[1]));
-                            invdto.setVentasCons(Double.parseDouble(cal[2]));
-                            break;
-                        }
+            Calendar ayer = Calendar.getInstance();
+            ayer.setTime(dia.getFecha());
+            ayer.add(Calendar.DATE, -1);
+            inventarioAyer = service.getInventarioByFechaEstacion(ayer.getTime(), estacion.getEstacionId());
+            List<Producto> myprods = service.getCombustiblesByEstacionid(estacion.getEstacionId());
+            int index = 1;
+            InventarioDto invdto;
+            for (Producto p : myprods) {
+                invdto = new InventarioDto(index++, p.getNombre(), 0D, dia.getFecha(), estacion.getEstacionId(), p.getProductoId(), 0D, 0D, 0D, null, null);
+                invdto.setVentas(0D);
+                invdto.setVentasCons(0D);
+                invdto.setComprasDto(0D);
+                invdto.setFinallDto(0D);
+                for (String[] cal : calibraciones) {
+                    if (p.getProductoId() == Integer.parseInt(cal[0])) {
+                        invdto.setCalibracion(Double.parseDouble(cal[1]));
+                        invdto.setVentasCons(Double.parseDouble(cal[2]));
+                        break;
                     }
-                    for (InventarioDto idto : inventarioAyer) {
-                        if (p.getProductoId().equals(idto.getProductoId())) {
-//                        invdto.setInicial(idto.getFinall());
-                            invdto.setInicialDto(idto.getFinall());
-                            break;
-                        }
-                    }
-                    invdto.setEsNuevo(Boolean.TRUE);
-                    inventarioHoy.add(invdto);
                 }
+                for (InventarioDto idto : inventarioAyer) {
+                    if (p.getProductoId().equals(idto.getProductoId())) {
+//                        invdto.setInicial(idto.getFinall());
+                        invdto.setInicialDto(idto.getFinall());
+                        break;
+                    }
+                }
+                invdto.setEsNuevo(Boolean.TRUE);
+                inventarioHoy.add(invdto);
+            }
 
-                
-            
             if (dia != null && dia.getEstadoId() != null && dia.getEstadoId() == 2) { //cerrado
                 List<InventarioDto> listTmpInv = service.getInventarioByFechaEstacion(dia.getFecha(), estacion.getEstacionId());
                 if (!listTmpInv.isEmpty()) {    //cubre el caso cuando se olvido ingresar inventario dia anterior.
@@ -345,10 +346,10 @@ lblTittle.addStyleName(ValoTheme.LABEL_BOLD); lblTittle.addStyleName(ValoTheme.L
                         item.setVentas((item.getInicialDto() + item.getComprasDto()) - (item.getFinallDto() + item.getCalibracion()));
                         item.setDiferencia(item.getVentasCons() - item.getVentas());
                         item.setEstado((item.getDiferencia() > 0) ? "SOBRANTE" : ((item.getDiferencia() == 0) ? "OK" : "FALTANTE"));
-item.setEsNuevo(Boolean.FALSE);
+                        item.setEsNuevo(Boolean.FALSE);
                     }
                 }
-            } 
+            }
 //            else {
 //                Calendar ayer = Calendar.getInstance();
 //                ayer.setTime(dia.getFecha());
@@ -416,7 +417,7 @@ item.setEsNuevo(Boolean.FALSE);
                 Pais pais = (Pais) cbxPais.getValue();
                 SvcEstacion svcEstacion = new SvcEstacion();
 //                List<Estacion> estaciones = svcEstacion.getStationsByCountry(pais.getPaisId());
-                Container estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()) );
+                Container estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));
                 svcEstacion.closeConnections();
                 cbxEstacion.setContainerDataSource(estacionContainer);
             }
@@ -442,13 +443,13 @@ item.setEsNuevo(Boolean.FALSE);
                 calcularSumas();
                 printDataLabel();
 
-SvcTurnoCierre service = new SvcTurnoCierre();
-ultimoDia = (ultimoDia.getFecha() == null) ? service.getUltimoDiaByEstacionid(estacion.getEstacionId()) : ultimoDia;
-dia = service.getDiaActivoByEstacionid(estacion.getEstacionId());
+                SvcTurnoCierre service = new SvcTurnoCierre();
+                ultimoDia = (ultimoDia.getFecha() == null) ? service.getUltimoDiaByEstacionid(estacion.getEstacionId()) : ultimoDia;
+                dia = service.getDiaActivoByEstacionid(estacion.getEstacionId());
 //            dia = (dia.getEstadoId() == null) ? ultimoDia : dia;
-service.closeConnections();
-determinarPermisos();
-calculosInventario();
+                service.closeConnections();
+                determinarPermisos();
+                calculosInventario();
             }
         });
 
@@ -479,7 +480,7 @@ calculosInventario();
                     determinarPermisos();
                     calcularSumas();
                     printDataLabel();
-                    
+
                 }
 //determinarPermisos();
             }
@@ -490,39 +491,39 @@ calculosInventario();
     }
 
     private void determinarPermisos() {
-        Calendar udMenosUno = null;
-        if (ultimoDia.getFecha()!=null) {
-            udMenosUno = Calendar.getInstance();
-            udMenosUno.setTime(ultimoDia.getFecha());
-            udMenosUno.add(Calendar.DATE, -1);
-        }
-       
-        boolean explorar = false, editar = false, cerrarDia = false;
-        if (dia.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
-                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
-            explorar = true;
-        } else if (dia.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
-                && dia.getFecha().before(ultimoDia.getFecha())) {
-            explorar = true;
-        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
-                && dia.getEstadoId()!=null && dia.getEstadoId()== 2) {
-            explorar = true;
-        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
-                && dia.getEstadoId()!=null && dia.getEstadoId()== 1) {    //dia abierto
-            editar = cerrarDia = true;
-explorar = true;
-        } else if ( (user.isAdministrativo() || user.isGerente()) 
-                && dia.getFecha()!=null && ultimoDia.getFecha()!=null && udMenosUno!=null && ultimoDia.getEstadoId()==1 && udMenosUno.getTime().equals(dia.getFecha()) ) {
-            explorar = cerrarDia = true;
-        } else if ( (user.isAdministrativo() || user.isGerente()) 
-                && dia.getFecha()!=null && ultimoDia.getFecha()!=null && ultimoDia.getEstadoId()==2 && ultimoDia.getFecha().equals(dia.getFecha()) ) {
-            explorar = cerrarDia = true;
-        } else if (user.isAdministrativo() || user.isGerente()) {
-            explorar = true;
-        }
-
-        dfdFecha.setEnabled(explorar);   //habilitado
-        btnGuardar.setEnabled(cerrarDia);    //habilitado (cerrado)
+//        Calendar udMenosUno = null;
+//        if (ultimoDia.getFecha()!=null) {
+//            udMenosUno = Calendar.getInstance();
+//            udMenosUno.setTime(ultimoDia.getFecha());
+//            udMenosUno.add(Calendar.DATE, -1);
+//        }
+//       
+//        boolean explorar = false, editar = false, cerrarDia = false;
+//        if (dia.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
+//            explorar = true;
+//        } else if (dia.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                && dia.getFecha().before(ultimoDia.getFecha())) {
+//            explorar = true;
+//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
+//                && dia.getEstadoId()!=null && dia.getEstadoId()== 2) {
+//            explorar = true;
+//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
+//                && dia.getEstadoId()!=null && dia.getEstadoId()== 1) {    //dia abierto
+//            editar = cerrarDia = true;
+//explorar = true;
+//        } else if ( (user.isAdministrativo() || user.isGerente()) 
+//                && dia.getFecha()!=null && ultimoDia.getFecha()!=null && udMenosUno!=null && ultimoDia.getEstadoId()==1 && udMenosUno.getTime().equals(dia.getFecha()) ) {
+//            explorar = cerrarDia = true;
+//        } else if ( (user.isAdministrativo() || user.isGerente()) 
+//                && dia.getFecha()!=null && ultimoDia.getFecha()!=null && ultimoDia.getEstadoId()==2 && ultimoDia.getFecha().equals(dia.getFecha()) ) {
+//            explorar = cerrarDia = true;
+//        } else if (user.isAdministrativo() || user.isGerente()) {
+//            explorar = true;
+//        }
+//
+//        dfdFecha.setEnabled(explorar);   //habilitado
+//        btnGuardar.setEnabled(cerrarDia);    //habilitado (cerrado)
     }
 
     private void buildTableCuadre() {
@@ -714,8 +715,10 @@ explorar = true;
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("inventarioFisico");  //Atributo del bean
                 TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
-                tfdValue.setWidth("85px"); tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
-                tfdValue.setNullRepresentation("0.00"); tfdValue.addStyleName("align-right");
+                tfdValue.setWidth("85px");
+                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+                tfdValue.setNullRepresentation("0.00");
+                tfdValue.addStyleName("align-right");
                 return tfdValue;
             }
         });
@@ -724,8 +727,10 @@ explorar = true;
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("lecturaVeederRoot");  //Atributo del bean
                 TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
-                tfdValue.setWidth("85px"); tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
-                tfdValue.setNullRepresentation("0.00"); tfdValue.addStyleName("align-right");
+                tfdValue.setWidth("85px");
+                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+                tfdValue.setNullRepresentation("0.00");
+                tfdValue.addStyleName("align-right");
                 return tfdValue;
             }
         });
@@ -735,7 +740,8 @@ explorar = true;
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("compartimiento");  //Atributo del bean
                 TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
-                tfdValue.setWidth("85px"); tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+                tfdValue.setWidth("85px");
+                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.setNullRepresentation(""); //tfdValue.addStyleName("align-right");
                 return tfdValue;
             }
@@ -755,7 +761,8 @@ explorar = true;
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("pulgadas");  //Atributo del bean
                 TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
-                tfdValue.setWidth("85px"); tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+                tfdValue.setWidth("85px");
+                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.setNullRepresentation(""); //tfdValue.addStyleName("align-right");
                 return tfdValue;
             }
@@ -765,17 +772,17 @@ explorar = true;
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("galonesCisterna");  //Atributo del bean
                 TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
-                tfdValue.setWidth("85px"); tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
-                tfdValue.setNullRepresentation("0.00"); tfdValue.addStyleName("align-right");
+                tfdValue.setWidth("85px");
+                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+                tfdValue.setNullRepresentation("0.00");
+                tfdValue.addStyleName("align-right");
                 return tfdValue;
             }
         });
         tblInventory.setVisibleColumns(new Object[]{"productoNombre", "colInicial", "colCompras", "ventasCons", "colInvFisico", "colVeederroot", "colCompartimiento", "colPulgadas", "colGalones"});
         tblInventory.setColumnHeaders(new String[]{"Producto", "Iniicial", "Compras", "Ventas", "Inv físico", "Veeder root", "Compartimiento", "Pulgadas", "Galones"});
-        
 
-        
-/*        tblInventory.addGeneratedColumn("colFinal", new Table.ColumnGenerator() {
+        /*        tblInventory.addGeneratedColumn("colFinal", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("finallDto");  //Atributo del bean
@@ -826,7 +833,7 @@ explorar = true;
         tblInventory.setColumnHeaders(new String[]{"Producto", "Inicial", "Final", "Compras",
             "Calibración", "Ventas", "VentasCons", "Diferencia", "Estado"});
         tblInventory.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.LEFT);
-*/
+         */
     }
 
     private void buildButtons() {
@@ -861,15 +868,15 @@ explorar = true;
         btnGuardar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(final Button.ClickEvent event) {
-                
+
                 for (Integer itemId : bcrInventario.getItemIds()) {
-                    if (bcrInventario.getItem(itemId).getBean().getComprasDto()>0 
-                            && (tfdDriver.getValue().trim().isEmpty() || tfdUnit.getValue().trim().isEmpty() || tfdBill.getValue().trim().isEmpty()) ) {
+                    if (bcrInventario.getItem(itemId).getBean().getComprasDto() > 0
+                            && (tfdDriver.getValue().trim().isEmpty() || tfdUnit.getValue().trim().isEmpty() || tfdBill.getValue().trim().isEmpty())) {
                         Notification.show("ERROR:", "Dado que hay compras, la información de recepción es obligatoria.", Notification.Type.ERROR_MESSAGE);
                         return;
                     }
                 }
-                
+
                 if (bcrTurnos.getItemIds().isEmpty()) {
                     Notification.show("AVISO:", "No existen turnos para cerrar el día.", Notification.Type.WARNING_MESSAGE);
                     return;
@@ -893,7 +900,7 @@ explorar = true;
                         .withOkButton(new Runnable() {
                             public void run() {
 
-                                SvcTurnoCierre svcTC = new SvcTurnoCierre();                                
+                                SvcTurnoCierre svcTC = new SvcTurnoCierre();
                                 boolean invNuevo = (dia.getEstadoId() == 1);
                                 dia.setModificadoPersona(user.getNombreLogin());
                                 dia.setModificadoPor(user.getUsername());
@@ -905,22 +912,22 @@ explorar = true;
                                     inventario = bcrInventario.getItem(id).getBean();
                                     inventario.setInicial(inventario.getInicialDto());
                                     inventario.setFinall(inventario.getFinallDto());
-                                    inventario.setCompras((inventario.getComprasDto()==null) ? 0D : inventario.getComprasDto());
+                                    inventario.setCompras((inventario.getComprasDto() == null) ? 0D : inventario.getComprasDto());
                                     inventario.setCreadoPor(user.getUsername());
                                     inventario.setCreadoPersona(user.getNombreLogin());
                                     inventario.setModificadoPor(user.getUsername());
                                     inventario.setModificadoPersona(user.getNombreLogin());
 //                                    svcTC.doActionInventario( (invNuevo ? Dao.ACTION_ADD : Dao.ACTION_UPDATE), 
-inventario.setVolFacturado(id);
-                                    svcTC.doActionInventario( (inventario.getEsNuevo() ? Dao.ACTION_ADD : Dao.ACTION_UPDATE), 
+                                    inventario.setVolFacturado(id);
+                                    svcTC.doActionInventario((inventario.getEsNuevo() ? Dao.ACTION_ADD : Dao.ACTION_UPDATE),
                                             inventario);
                                 }
-                                
-                            if (tfdDriver.getValue()!=null && tfdUnit.getValue()!=null && tfdBill.getValue()!=null) {
-                                RecepcionDto recepcion = new RecepcionDto(null, dia.getFecha(), estacion.getPaisId(), estacion.getEstacionId(), tfdDriver.getValue(), tfdUnit.getValue(), tfdBill.getValue());
-                                recepcion.setCreado_por(user.getUsername());
-                                svcTC.doActionInvRecepcion(Dao.ACTION_ADD, recepcion);
-                            }
+
+                                if (tfdDriver.getValue() != null && tfdUnit.getValue() != null && tfdBill.getValue() != null) {
+                                    RecepcionDto recepcion = new RecepcionDto(null, dia.getFecha(), estacion.getPaisId(), estacion.getEstacionId(), tfdDriver.getValue(), tfdUnit.getValue(), tfdBill.getValue());
+                                    recepcion.setCreado_por(user.getUsername());
+                                    svcTC.doActionInvRecepcion(Dao.ACTION_ADD, recepcion);
+                                }
 
                                 svcTC.closeConnections();
                                 if (dia.getFecha() != null) {
@@ -1056,48 +1063,46 @@ inventario.setVolFacturado(id);
 //        lblUltimoTurno.setSizeUndefined();
 ////        lblUltimoTurno.setWidth("350px");
     }
-    
+
     public void calculosInventario() {
-        
+
         SvcTurnoCierre service = new SvcTurnoCierre();
         List<InventarioDto> inventarioHoy = new ArrayList();
         if (dia != null && dia.getEstadoId() != null) {
             List<String[]> calibraciones = service.getCalibracionByFechaEstacion(dia.getFecha(), estacion.getEstacionId()); //de hoy
-            
-                Calendar ayer = Calendar.getInstance();
-                ayer.setTime(dia.getFecha());
-                ayer.add(Calendar.DATE, -1);
-                inventarioAyer = service.getInventarioByFechaEstacion(ayer.getTime(), estacion.getEstacionId());
-                List<Producto> myprods = service.getCombustiblesByEstacionid(estacion.getEstacionId());
-                int index = 1;
-                InventarioDto invdto;
-                for (Producto p : myprods) {
-                    invdto = new InventarioDto(index++, p.getNombre(), 0D, dia.getFecha(), estacion.getEstacionId(), p.getProductoId(), 0D, 0D, 0D, null, null);
-                    invdto.setVentas(0D);
-                    invdto.setVentasCons(0D);
-                    invdto.setComprasDto(0D);
-                    invdto.setFinallDto(0D);
-                    for (String[] cal : calibraciones) {
-                        if (p.getProductoId() == Integer.parseInt(cal[0])) {
-                            invdto.setCalibracion(Double.parseDouble(cal[1]));
-//                            invdto.setVentasCons(Double.parseDouble(cal[2]));
-invdto.setVentasCons(Double.parseDouble(cal[2])/2);
-                            break;
-                        }
-                    }
-                    for (InventarioDto idto : inventarioAyer) {
-                        if (p.getProductoId().equals(idto.getProductoId())) {
-//                        invdto.setInicial(idto.getFinall());
-                            invdto.setInicialDto(idto.getFinall());
-                            break;
-                        }
-                    }
-                    invdto.setEsNuevo(Boolean.TRUE);
-                    inventarioHoy.add(invdto);
-                }
 
-                
-            
+            Calendar ayer = Calendar.getInstance();
+            ayer.setTime(dia.getFecha());
+            ayer.add(Calendar.DATE, -1);
+            inventarioAyer = service.getInventarioByFechaEstacion(ayer.getTime(), estacion.getEstacionId());
+            List<Producto> myprods = service.getCombustiblesByEstacionid(estacion.getEstacionId());
+            int index = 1;
+            InventarioDto invdto;
+            for (Producto p : myprods) {
+                invdto = new InventarioDto(index++, p.getNombre(), 0D, dia.getFecha(), estacion.getEstacionId(), p.getProductoId(), 0D, 0D, 0D, null, null);
+                invdto.setVentas(0D);
+                invdto.setVentasCons(0D);
+                invdto.setComprasDto(0D);
+                invdto.setFinallDto(0D);
+                for (String[] cal : calibraciones) {
+                    if (p.getProductoId() == Integer.parseInt(cal[0])) {
+                        invdto.setCalibracion(Double.parseDouble(cal[1]));
+//                            invdto.setVentasCons(Double.parseDouble(cal[2]));
+                        invdto.setVentasCons(Double.parseDouble(cal[2]) / 2);
+                        break;
+                    }
+                }
+                for (InventarioDto idto : inventarioAyer) {
+                    if (p.getProductoId().equals(idto.getProductoId())) {
+//                        invdto.setInicial(idto.getFinall());
+                        invdto.setInicialDto(idto.getFinall());
+                        break;
+                    }
+                }
+                invdto.setEsNuevo(Boolean.TRUE);
+                inventarioHoy.add(invdto);
+            }
+
             if (dia != null && dia.getEstadoId() != null && dia.getEstadoId() == 2) { //cerrado
                 List<InventarioDto> listTmpInv = service.getInventarioByFechaEstacion(dia.getFecha(), estacion.getEstacionId());
                 if (!listTmpInv.isEmpty()) {    //cubre el caso cuando se olvido ingresar inventario dia anterior.
@@ -1113,10 +1118,10 @@ invdto.setVentasCons(Double.parseDouble(cal[2])/2);
                         item.setVentas((item.getInicialDto() + item.getComprasDto()) - (item.getFinallDto() + item.getCalibracion()));
                         item.setDiferencia(item.getVentasCons() - item.getVentas());
                         item.setEstado((item.getDiferencia() > 0) ? "SOBRANTE" : ((item.getDiferencia() == 0) ? "OK" : "FALTANTE"));
-item.setEsNuevo(Boolean.FALSE);
+                        item.setEsNuevo(Boolean.FALSE);
                     }
                 }
-            } 
+            }
 //            else {
 //                Calendar ayer = Calendar.getInstance();
 //                ayer.setTime(dia.getFecha());
@@ -1159,7 +1164,10 @@ item.setEsNuevo(Boolean.FALSE);
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        //btnGuardar.setEnabled(acceso.isAgregar());
+        btnGuardar.setEnabled(acceso.isCambiar());
     }
-
 }

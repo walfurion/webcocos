@@ -29,6 +29,8 @@ public class Constant {
     public static final int MP_CRI_VENTA_PREPAGO = 6;
     public static final int MP_CRI_EMPLEADO_CXC = 7;
     public static final int MP_CRI_EFECTIVO_DOLARES = 8;
+    public static final int MP_CRI_TARJETAS = 108;
+    
 
     //... el resto de paises ...
     public static final int MP_CRI_VENTA_LUBS_UNO = 10;

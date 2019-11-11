@@ -15,14 +15,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class ArqueoTC {
-    private Integer arqueocajaId;
+    private Integer id;
     private String nombre;
     private String lote;
     private Double value;
     private Integer tarjetaId;
     
-    public ArqueoTC(Integer arqueocajaId, String lote, Double value, String nombre, Integer tarjetaId) {
-        this.arqueocajaId = arqueocajaId;
+    public ArqueoTC(String lote, Double value, String nombre, Integer tarjetaId) {
         this.lote = lote;
         this.value = value;
         this.nombre = nombre;

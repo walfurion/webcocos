@@ -1,9 +1,11 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
+import com.fundamental.services.Dao;
 import com.fundamental.services.SvcMedioPago;
 import com.fundamental.utils.XlsxReportGenerator;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
@@ -60,6 +62,7 @@ public class RptMediopago extends Panel implements View {
     VerticalLayout vlRoot;
     Utils utils = new Utils();
     Usuario user;
+    Acceso acceso = new Acceso();
 
     public RptMediopago() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -81,12 +84,12 @@ public class RptMediopago extends Panel implements View {
         Responsive.makeResponsive(content);
         content.addStyleName("dashboard-panels");
         content.setSizeUndefined();
-        
+
         CssLayout contentDos = new CssLayout();
         Responsive.makeResponsive(contentDos);
         contentDos.addStyleName("dashboard-panels");
         contentDos.setSizeUndefined();
-        
+
         vlRoot.addComponents(content, contentDos);
         vlRoot.setExpandRatio(content, .25f);
         vlRoot.setExpandRatio(contentDos, .25f);
@@ -98,19 +101,14 @@ public class RptMediopago extends Panel implements View {
 //        vlContMargSup.addComponent(btnGenerar);
 //        vlContMargSup.setSizeUndefined();
 //        Responsive.makeResponsive(vlContMargSup);
-
-
 //CssLayout contentUno = new CssLayout();
 //Responsive.makeResponsive(contentUno);
 //contentUno.addComponents(utils.vlContainer(dfdFechaInicial), utils.vlContainer(dfdFechaFinal), utils.vlContainer(cbxPais), btnGenerar);
-
 //Panel pnlUno = new Panel("Generar en columnas");
 //pnlUno.setWidth(100f, Unit.PERCENTAGE);
 //pnlUno.setHeightUndefined();
 //pnlUno.setContent(contentUno);
-
 //        vlRoot.addComponents();
-
         content.addComponents(utils.vlContainer(dfdFechaInicial), utils.vlContainer(dfdFechaFinal), utils.vlContainer(cbxPais));
         contentDos.addComponents(btnGenerar, btnGenerarFilas);
 
@@ -118,7 +116,7 @@ public class RptMediopago extends Panel implements View {
         StreamResource sr = getExcelStreamResource();
         FileDownloader fileDownloader = new FileDownloader(sr);
         fileDownloader.extend(btnGenerar);
-        
+
         //Para exportar
         StreamResource sre = getExcelStreamResourceFilas();
         FileDownloader fdr = new FileDownloader(sre);
@@ -134,20 +132,20 @@ public class RptMediopago extends Panel implements View {
 //        allMediospago = svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 1);
 //        allMediospago.addAll(svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2));   //Se agregan los de efectivo
 //        allMediosEfectivo = svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2);
-
         pais = new Pais();
         if ((cbxPais != null && cbxPais.getValue() != null)) {
             pais = (Pais) cbxPais.getValue();
         } else if (user.getPaisLogin() != null) {   //elegido en login
             pais = user.getPaisLogin();
-        } else if (user.getPaisId()!=null && user.getPaisId()>0) { //en mantenimiento
+        } else if (user.getPaisId() != null && user.getPaisId() > 0) { //en mantenimiento
             for (Pais p : svcMP.getAllPaises()) {
                 if (p.getPaisId().equals(user.getPaisId())) {
-                    pais = p; break;
+                    pais = p;
+                    break;
                 }
             }
         }
-        if (pais.getPaisId()!=null && pais.getPaisId() > 0 ) {
+        if (pais.getPaisId() != null && pais.getPaisId() > 0) {
             paises.add(pais);
         } else {
             paises = svcMP.getAllPaises();
@@ -179,7 +177,7 @@ public class RptMediopago extends Panel implements View {
 
         btnGenerar = new Button("Generar en columnas", FontAwesome.FILE_EXCEL_O);
         btnGenerar.addStyleName(ValoTheme.BUTTON_FRIENDLY);
-        
+
         btnGenerarFilas = new Button("Generar en filas", FontAwesome.FILE_EXCEL_O);
         btnGenerarFilas.addStyleName(ValoTheme.BUTTON_FRIENDLY);
     }
@@ -190,21 +188,21 @@ public class RptMediopago extends Panel implements View {
                 ByteArrayOutputStream stream;
                 InputStream input = null;
                 try {
-                    
-                    if (cbxPais==null || cbxPais.getValue()==null) {
+
+                    if (cbxPais == null || cbxPais.getValue() == null) {
                         Notification.show("ERROR:", "Todos los campos son requeridos.", Notification.Type.ERROR_MESSAGE);
                         return null;
                     }
-                    
-                SvcMedioPago svcMP = new SvcMedioPago();
-                pais = (Pais) cbxPais.getValue();
-                allMediospago = svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 1);
-                allMediospago.addAll(svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2));
+
+                    SvcMedioPago svcMP = new SvcMedioPago();
+                    pais = (Pais) cbxPais.getValue();
+                    allMediospago = svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 1);
+                    allMediospago.addAll(svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2));
 //                allMediosEfectivo = svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2);
                     Integer paisId = (cbxPais != null && cbxPais.getValue() != null) ? ((Pais) cbxPais.getValue()).getPaisId() : null;
                     midata = svcMP.getMediospagoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-                svcMP.closeConnections();
-                    
+                    svcMP.closeConnections();
+
                     Map<Integer, Integer> mapPosTitle = new HashMap();
                     int index, colIniciales = 5;
                     List<String> lTitles = new ArrayList();
@@ -242,7 +240,6 @@ public class RptMediopago extends Panel implements View {
 //                    midata = svcMP.getMediospagoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
 ////                    midata1 = svcMP.getEfectivoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
 //                    svcMP.closeConnections();
-
                     String fecha_a = "";
                     List<String[]> data = new ArrayList();
                     Double total = 0D;
@@ -314,7 +311,6 @@ public class RptMediopago extends Panel implements View {
 //                        info[colIniciales + allMediospago.size()] = total.toString();   //valor para ultima columna
 //                        data.add(info);
 //                    }
-                    
                     XlsxReportGenerator xrg = new XlsxReportGenerator();
                     XSSFWorkbook workbook = xrg.generate(null, "Medios de pago", new HashMap(), lTitles.toArray(new String[lTitles.size()]), data, lTypes.toArray(new Integer[lTypes.size()]));
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -337,10 +333,6 @@ public class RptMediopago extends Panel implements View {
         StreamResource resource = new StreamResource(source, fileName);
         return resource;
     }
-
-    
-    
-    
 
     private StreamResource getExcelStreamResourceFilas() {
         StreamResource.StreamSource source = new StreamResource.StreamSource() {
@@ -355,42 +347,30 @@ public class RptMediopago extends Panel implements View {
                     Integer paisId = (cbxPais != null && cbxPais.getValue() != null) ? ((Pais) cbxPais.getValue()).getPaisId() : null;
                     midata = svcMP.getMediospagoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
 //                    midata1 = svcMP.getEfectivoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-List<String[]> dataVol = svcMP.getVolumenesReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
+                    List<String[]> dataVol = svcMP.getVolumenesReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
                     svcMP.closeConnections();
 
 //Quitamos la columna mediopago_id
-List<String[]> data = new ArrayList();
-for (String[] dato : midata) {
-    data.add(new String[]{ 
-        dato[0], dato[1], dato[2], dato[3], dato[4], dato[6], dato[7]
-    });
-}
+                    List<String[]> data = new ArrayList();
+                    for (String[] dato : midata) {
+                        data.add(new String[]{
+                            dato[0], dato[1], dato[2], dato[3], dato[4], dato[6], dato[7]
+                        });
+                    }
 //for (String[] dato : midata1) {
 //    data.add(new String[]{ 
 //        dato[0], dato[1], dato[2], dato[3], dato[4], dato[6], dato[7]
 //    });
 //}
 
-
-
-
-
-
-
                     XlsxReportGenerator xrg = new XlsxReportGenerator();
                     XSSFWorkbook workbook = xrg.generate(null, "Medios de pago", new HashMap(), lTitles.toArray(new String[lTitles.size()]), data, lTypes.toArray(new Integer[lTypes.size()]));
 
-
-
 //-- Para generar dos reportes en un mismo archivo de Excel
-lTitles = new ArrayList(Arrays.asList("CÓDIGO", "BU", "DEPÓSITO", "ESTACIÓN", "DÍA", "CÓDIGO NUM", "CÓDIGO ALF", "PRODUCTO", "VOLUMEN", "MONTO"));
-lTypes = new ArrayList(Arrays.asList(4, 4, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC));
-workbook = xrg.generate(workbook, "Volúmenes", new HashMap(), lTitles.toArray(new String[lTitles.size()]), dataVol, lTypes.toArray(new Integer[lTypes.size()]));
+                    lTitles = new ArrayList(Arrays.asList("CÓDIGO", "BU", "DEPÓSITO", "ESTACIÓN", "DÍA", "CÓDIGO NUM", "CÓDIGO ALF", "PRODUCTO", "VOLUMEN", "MONTO"));
+                    lTypes = new ArrayList(Arrays.asList(4, 4, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC));
+                    workbook = xrg.generate(workbook, "Volúmenes", new HashMap(), lTitles.toArray(new String[lTitles.size()]), dataVol, lTypes.toArray(new Integer[lTypes.size()]));
 //-- Para generar dos reportes en un mismo archivo de Excel
-
-
-
-
 
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     try {
@@ -412,11 +392,13 @@ workbook = xrg.generate(workbook, "Volúmenes", new HashMap(), lTitles.toArray(n
         StreamResource resource = new StreamResource(source, fileName);
         return resource;
     }
-    
-    
+
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        btnGenerar.setEnabled(acceso.isAgregar());
+        btnGenerarFilas.setEnabled(acceso.isAgregar());
     }
-
 }
