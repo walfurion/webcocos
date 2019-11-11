@@ -2506,6 +2506,7 @@ public class PrCuadre extends Panel implements View {
             List<Mediopago> efectivos = svcTC.getEfectivoByArqueoid(arqueoCajaId);
             bcEfectivo.removeAllItems();
             listaEfectivo = new ArrayList();
+            System.out.println("onchangeCbxArqueo ");
             int itemId = 1;
             for (Mediopago mp : efectivos) {
                 for (Mediopago mpoe : mediosPagoEfectivo) {

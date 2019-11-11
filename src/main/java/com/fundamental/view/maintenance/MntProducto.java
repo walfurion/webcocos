@@ -233,12 +233,13 @@ public class MntProducto extends Panel implements View {
                             return true;
                         }
                         return utils.filterByProperty("nombre", item, event.getText())
-                                || utils.filterByProperty("codigo", item, event.getText());
+                                || utils.filterByProperty("codigo", item, event.getText())
+                                || utils.filterByProperty("countrys", item, event.getText());
                     }
                     @Override
                     public boolean appliesToProperty(final Object propertyId) {
                         return propertyId.equals("nombre") 
-                                || propertyId.equals("codigo");
+                                || propertyId.equals("codigo") || propertyId.equals("countrys");
                     }
                 });
             }
@@ -247,7 +248,7 @@ public class MntProducto extends Panel implements View {
     }
 
     private void buildTable() {
-        tblProduct = utils.buildTable("Productos:", 100f, 250f, bcrProduct, new Object[]{"nombre", "codigo", "codigoEnvoy", "estado"}, new String[]{"Nombre", "Código E1", "Código envoy", "Estado"});
+        tblProduct = utils.buildTable("Productos:", 100f, 250f, bcrProduct, new Object[]{"nombre", "codigo", "codigoEnvoy", "estado","countrys"}, new String[]{"Nombre", "Código E1", "Código envoy", "Estado","País"});
         tblProduct.setSizeUndefined();
         tblProduct.addStyleName(ValoTheme.TABLE_COMPACT);
         tblProduct.addStyleName(ValoTheme.TABLE_SMALL);
@@ -265,6 +266,7 @@ public class MntProducto extends Panel implements View {
                 service.closeConnections();
             }
         });
+        
     }
     
     private void buildTablePaises() {

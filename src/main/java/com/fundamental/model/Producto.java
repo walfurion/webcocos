@@ -26,6 +26,7 @@ public class Producto {
     private Marca marca;
     private Tipoproducto typeProd;
     private DtoGenericBean status;
+    private String countrys;
 
     public Producto(Integer productoId, String nombre, String codigo, String estado, String creadoPor, Integer ordenPos) {
         this.productoId = productoId;
@@ -280,6 +281,14 @@ public class Producto {
 
     public void setSku(String sku) {
         this.sku = sku;
+    }
+
+    public String getCountrys() {
+        return countrys;
+    }
+
+    public void setCountrys(String countrys) {
+        this.countrys = countrys;
     }
     
 }
