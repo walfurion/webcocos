@@ -236,7 +236,6 @@ public class SvcCuadre extends Dao {
                     + "         p.estado,\n"
                     + "         NVL (pr.precio, 0),\n"
                     + "         p.id_marca ";
-            System.out.println("query ----  " + query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Producto prod;
