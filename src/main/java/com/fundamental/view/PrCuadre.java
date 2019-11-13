@@ -705,43 +705,45 @@ public class PrCuadre extends Panel implements View {
                             }
                         }
                     }
-
+                } //ASG
 //                SvcCuadre service = new SvcCuadre();
 //                String[] nombres = service.getEmpleadoByEstacionTurnoEmpleado(estacion.getEstacionId(), turno.getTurnoId(), ((Empleado) cbxEmpleado.getValue()).getEmpleadoId());
-                    Arqueocaja arqueocaja = ((Empleado) cbxEmpleado.getValue()).getArqueo();
-                    if (arqueocaja != null) {
+                Arqueocaja arqueocaja = new Arqueocaja(); //ASG
+                if (cbxEmpleado.getValue() != null) {  //ASG
+                    arqueocaja = ((Empleado) cbxEmpleado.getValue()).getArqueo();
+                } //ASG 
+                if (arqueocaja != null && arqueocaja.getArqueocajaId() != null) {
 //                        tfdNameSeller.setValue(arqueocaja.getNombrePistero());
 //                        tfdNameChief.setValue(arqueocaja.getNombreJefe());
-                        onchangeCbxArqueo(arqueocaja.getArqueocajaId().toString());
+                    onchangeCbxArqueo(arqueocaja.getArqueocajaId().toString());
 
-                        /*Recupera Detalle Cliente Prepago*/ //ASG
-                        bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
-                        bcrPrepaid = dao.getDetallePrepago(arqueocaja.getArqueocajaId());
+                    /*Recupera Detalle Cliente Prepago*/ //ASG
+                    bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrPrepaid = dao.getDetallePrepago(arqueocaja.getArqueocajaId());
 
-                        /*Recupera Detalle Lubricantes*/ //JLopez
-                        bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
-                        bcrLubs = daoLubs.getDetalleProducto(arqueocaja.getArqueocajaId());
+                    /*Recupera Detalle Lubricantes*/ //JLopez
+                    bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrLubs = daoLubs.getDetalleProducto(arqueocaja.getArqueocajaId());
 
-                        /*Recupera Detalle Cliente Credito*/ //MAG
-                        bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
-                        bcrClientes = dao.getDetalleCredito(arqueocaja.getArqueocajaId());
+                    /*Recupera Detalle Cliente Credito*/ //MAG
+                    bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrClientes = dao.getDetalleCredito(arqueocaja.getArqueocajaId());
 
-                        /*Recupera Detalle tarjeta de credito*/ //MAG
-                        bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
-                        bcrCreditC = daoTrC.getDetalleTarjetaCredito(arqueocaja.getArqueocajaId());
+                    /*Recupera Detalle tarjeta de credito*/ //MAG
+                    bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+                    bcrCreditC = daoTrC.getDetalleTarjetaCredito(arqueocaja.getArqueocajaId());
 
-                    } else {
-                        /*ASG*/
-                        //no existen arqueos se limpian las colecciones.
-                        bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
-                        bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
-                        bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
-                        bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
-                        listaEfectivo.removeAll(listaEfectivo); //ASG
-                    }
-
+                } else {
+                    /*ASG*/
+                    //no existen arqueos se limpian las colecciones.
+                    bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+                    listaEfectivo.removeAll(listaEfectivo); //ASG
                 }
-            } //ASG
+
+            }
         });
 
 //        tfdNameSeller = utils.buildTextField("Pistero:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
@@ -1008,7 +1010,7 @@ public class PrCuadre extends Panel implements View {
                                 System.out.println("ADD " + Dao.ACTION_ADD);
                                 System.out.println("UPDATE " + Dao.ACTION_UPDATE);
                                 arqueo = (arqueo == null || arqueo.getArqueocajaId() == null)
-                                        ? new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), turno.getFecha(), 1, user.getUsername(), user.getNombreLogin(), ((Empleado) cbxEmpleado.getValue()).getEmpleadoId(), tfdNameChief.getValue(), tfdNameSeller.getValue())
+                                        ? new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), turno.getFecha(), 1, user.getUsername(), user.getNombreLogin(), ((Empleado) cbxEmpleado.getValue()).getEmpleadoId())/*Retire nombre jefe y pistero ASG*/
                                         : arqueo;
                                 arqueo.setCreado_por(user.getUsername());
                                 arqueo.setCreado_persona(user.getNombreLogin());
