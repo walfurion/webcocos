@@ -436,6 +436,9 @@ public class SvcGeneral extends Dao {
                 pst.setObject(3, new java.sql.Date(lub.getFechaFin().getTime()));
                 pst.setObject(4, lub.getPrecio());
                 pst.setObject(5, lub.getModificadoPor());
+                if(lub.getModificadoEl()==null){
+                    lub.setModificadoEl(new Date());
+                }
                 pst.setObject(6, new java.sql.Date(lub.getModificadoEl().getTime()));
                 pst.executeUpdate();
                 getConnection().commit();
