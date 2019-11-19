@@ -126,6 +126,42 @@ public class SvcGeneral extends Dao {
         }
         return result;
     }
+    
+    public List<Lubricanteprecio> getLubpriceByProduct(int countryId, int brandId, int productId) {
+        List<Lubricanteprecio> result = new ArrayList();
+        try {
+            query = "SELECT l.lubricanteprecio, l.pais_id, 0 eestacion_id, l.producto_id, l.fecha_inicio, "
+                    + "l.fecha_fin, l.precio, l.creado_por, c.nombre, '' enombre, "
+                    + "p.nombre, m.id_marca, m.nombre, m.estado, c.codigo, "
+                    + "p.codigo "
+                    + "FROM lubricanteprecio l, pais c, producto p, marca m "
+                    + "WHERE l.pais_id = c.pais_id AND p.id_marca = m.id_marca "
+                    + "AND l.producto_id = p.producto_id AND l.pais_id = ? "
+                    + "AND p.id_marca = ? and l.producto_id= ? ";
+            pst = getConnection().prepareStatement(query);
+            pst.setInt(1, countryId);
+            pst.setInt(2, brandId);
+            pst.setInt(3, productId);
+            ResultSet rst = pst.executeQuery();
+            Lubricanteprecio lpo;
+            while (rst.next()) {
+                lpo = new Lubricanteprecio(rst.getInt(1), rst.getInt(2), rst.getInt(4), new java.util.Date(rst.getDate(5).getTime()), new java.util.Date(rst.getDate(6).getTime()), rst.getDouble(7), rst.getString(8));
+                lpo.setPaisNombre(rst.getString(9));
+                lpo.setEstacionNombre(rst.getString(10));
+                lpo.setProductoNombre(rst.getString(11));
+                lpo.setMarca(new Marca(rst.getInt(12), rst.getString(13), rst.getString(14)));
+                lpo.setMarcaNombre(rst.getString(13));
+                lpo.setPais(new Pais(rst.getInt(2), rst.getString(9), rst.getString(15), null, null, null,null));
+                lpo.setProducto(new Producto(rst.getInt(4), rst.getString(11), rst.getString(16), null, null, null));
+                result.add(lpo);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
 
     public List<Horario> getHorarios(boolean includeInactive) {
         List<Horario> result = new ArrayList();

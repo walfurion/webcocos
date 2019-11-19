@@ -192,7 +192,7 @@ public class MntServiceMode extends Panel implements View {
 
     private void buildTableConf() {
         tblConfiguracion = utils.buildTable("Configuraciones:", 100f, 100f, bcrConfiguraciones,
-                new String[]{"nombre"},
+                new Object[]{"nombre"},
                 new String[]{"Modo servicio"});
         tblConfiguracion.setSizeUndefined();
         tblConfiguracion.setSelectable(true);

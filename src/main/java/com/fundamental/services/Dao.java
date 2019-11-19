@@ -1615,6 +1615,29 @@ public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int t
         }
         return result;
     }
+    
+    public List<Producto> getAllProducts() {
+        List<Producto> result = new ArrayList();
+        try {
+            miQuery = "select PRODUCTO_ID,NOMBRE,CODIGO from PRODUCTO where TIPO_ID=2 and ESTADO='A' AND ID_MARCA=100";
+            System.out.println("mi query "+miQuery);
+            pst = getConnection().prepareStatement(miQuery);
+            ResultSet rst = pst.executeQuery();
+            Producto pro;
+            while (rst.next()) {
+                pro = new Producto();
+                pro.setProductoId(rst.getInt(1));
+                pro.setNombre(rst.getString(2));
+                pro.setCodigo(rst.getString(3));
+                result.add(pro);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
 
     public List<Estacion> getStationsByCountryUser(Integer paisId, Integer userId) {
         List<Estacion> result = new ArrayList();
