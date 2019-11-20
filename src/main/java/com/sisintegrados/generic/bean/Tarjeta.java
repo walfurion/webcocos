@@ -17,13 +17,16 @@ import lombok.NoArgsConstructor;
                                                                                                                                        
 public class Tarjeta {
 
-    private Integer tarjeta_Id;
+    private Integer mediopago_id;
     private String nombre;
+    private Integer is_tcredito;
+    private Integer pais_id;
+    private String estado;
     private String creado_por;
     private Date creado_el;
 
-    public Tarjeta(Integer tarjeta_Id, String nombre) {
-        this.tarjeta_Id = tarjeta_Id;
+    public Tarjeta(Integer mediopago_id, String nombre) {
+        this.mediopago_id = mediopago_id;
         this.nombre = nombre;
     }
     

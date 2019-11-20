@@ -60,10 +60,12 @@ public class FormTarjetasCredito extends Window {
     double tmpDouble;
     String currencySymbol;
     List<GenericTarjeta> listTarjeta = new ArrayList();
+    Integer idpais;
 
-    public FormTarjetasCredito(String currencySymbol, BeanContainer<Integer, GenericTarjeta> bcrCreditC) {
+    public FormTarjetasCredito(String currencySymbol, BeanContainer<Integer, GenericTarjeta> bcrCreditC, Integer idpais) {
         this.bcrCreditC = bcrCreditC;
         this.currencySymbol = currencySymbol;
+        this.idpais = idpais;
         addStyleName(Constant.stylePopUps);
         Responsive.makeResponsive(this);
         setModal(true);
@@ -150,7 +152,7 @@ public class FormTarjetasCredito extends Window {
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("tarjeta");  //Atributo del bean
                 ContCreditC = new BeanItemContainer<Tarjeta>(Tarjeta.class);
-                ContCreditC.addAll(dao.getTarjetas());
+                ContCreditC.addAll(dao.getTarjetas(idpais));
 //                ComboBox cmbTarjeta = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, ContCreditC);
                 ComboBox cmbTarjeta = new ComboBox(null, ContCreditC);
                 cmbTarjeta.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
