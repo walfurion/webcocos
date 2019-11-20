@@ -15,6 +15,7 @@ import com.fundamental.view.MntConfBombaEstacion;
 import com.fundamental.view.MntCustCredito;
 import com.fundamental.view.MntCustPrepago;
 import com.fundamental.view.MntHorario;
+import com.fundamental.view.MntLubricanteCV;
 import com.fundamental.view.MntServiceMode;
 import com.fundamental.view.RptMTD;
 import com.fundamental.view.RptVolumenes;
@@ -51,6 +52,7 @@ public enum DashboardViewType {
     MNT_CUST_CREDITO("MNT_CUST_CREDITO", MntCustCredito.class, FontAwesome.USER, false),
     MNT_CUST_PREPAGO("MNT_CUST_PREPAGO", MntCustPrepago.class, FontAwesome.USER, false),
     MNT_PRICE_LUBS("MNT_PRICE_LUBS", MntLubricantPrice.class, FontAwesome.BUS, false),
+    MNT_LUBS_CV("MNT_LUBS_CV", MntLubricanteCV.class, FontAwesome.BUS, false),
     MNT_SCHEDULE("MNT_SCHEDULE", MntHorario.class, FontAwesome.CLOCK_O, false),
     MNT_MODOSERV("MNT_MODOSERV", MntServiceMode.class, FontAwesome.MODX, false),
     MNT_ROL("MNT_ROL", MntRol.class, FontAwesome.COGS, false),

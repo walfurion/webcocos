@@ -682,7 +682,7 @@ public class Dao {
             rst = pst.executeQuery();
             Mediopago mediopago;
             while (rst.next()) {
-                mediopago = new Mediopago(rst.getInt(1), rst.getString(2), rst.getInt(3), null, rst.getInt(4), rst.getString(5), rst.getBoolean(7), null);
+                mediopago = new Mediopago(rst.getInt(1), rst.getString(2), rst.getInt(3), null, rst.getInt(4), rst.getString(5), rst.getBoolean(8), null);
                 mediopago.setPartidacontPor(rst.getDouble(6));
                 mediopago.setPartidacont(rst.getBoolean(7));
                 result.add(mediopago);
@@ -1607,6 +1607,29 @@ public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int t
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Marca(rst.getInt(1), rst.getString(2), rst.getString(3)));
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
+    
+    public List<Producto> getAllProducts() {
+        List<Producto> result = new ArrayList();
+        try {
+            miQuery = "select PRODUCTO_ID,NOMBRE,CODIGO from PRODUCTO where TIPO_ID=2 and ESTADO='A' AND ID_MARCA=100";
+            System.out.println("mi query "+miQuery);
+            pst = getConnection().prepareStatement(miQuery);
+            ResultSet rst = pst.executeQuery();
+            Producto pro;
+            while (rst.next()) {
+                pro = new Producto();
+                pro.setProductoId(rst.getInt(1));
+                pro.setNombre(rst.getString(2));
+                pro.setCodigo(rst.getString(3));
+                result.add(pro);
             }
         } catch (Exception exc) {
             exc.printStackTrace();

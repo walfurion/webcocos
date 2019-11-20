@@ -33,10 +33,14 @@ public class SvcTarjetaCredito extends Dao {
     public SvcTarjetaCredito() {
     }
 
-    public List<Tarjeta> getTarjetas() {
+    public List<Tarjeta> getTarjetas(Integer idpais) {
         List<Tarjeta> result = new ArrayList();
         try {
-            miQuery = "select tarjeta_id, nombre from TARJETA";
+            miQuery = "select mediopago_id,nombre"
+                    + " from mediopago"
+                    + " where is_tcredito = 1"
+                    + " and pais_id = " + idpais 
+                    + " and estado = 'A'";
             pst = getConnection().prepareStatement(miQuery);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
@@ -73,7 +77,7 @@ public class SvcTarjetaCredito extends Dao {
             for (Integer itemId : bcrCreditC.getItemIds()) {
                 pst = getConnection().prepareStatement(query);
                 pst.setInt(1, idarqueocaja);
-                pst.setInt(2, bcrCreditC.getItem(itemId).getBean().getTarjeta().getTarjeta_Id());
+                pst.setInt(2, bcrCreditC.getItem(itemId).getBean().getTarjeta().getMediopago_id());
                 pst.setInt(3, bcrCreditC.getItem(itemId).getBean().getLote());
                 pst.setDouble(4, bcrCreditC.getItem(itemId).getBean().getMonto());
                 pst.setString(5, usuario);
@@ -97,11 +101,11 @@ public class SvcTarjetaCredito extends Dao {
         PreparedStatement pst = null;
         int id = 0;
         try {
-            query = "select a.NOMBRE,a.TARJETA_ID, "
+            query = "select a.NOMBRE,a.mediopago_id, "
                     + "b.LOTE, b.MONTO "
-                    + "from TARJETA a, "
+                    + "from mediopago a, "
                     + "arqueocaja_tc b "
-                    + "where a.TARJETA_ID = b.TARJETA_ID "
+                    + "where a.mediopago_id = b.TARJETA_ID "
                     + "and b.ARQUEOCAJA_ID = " + idarqueocaja;
 
             pst = getConnection().prepareStatement(query);
