@@ -421,7 +421,7 @@ public class RptControDeMediosDePago extends Panel implements View {
                     double porcentaje = 0.01;
                     for (Mediopago mp : allMediospago) {
                         midata = new ArrayList<String[]>();
-                        midata = svcMP.getMediospagoID(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId, mp.getMediopagoId(), porcentaje);
+//                        midata = svcMP.getMediospagoID(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId, mp.getMediopagoId(), porcentaje);
                         System.out.println("-- "+midata.isEmpty());
 //                        System.out.println("midata " + (String[]) midata.get(0));
                         if (!midata.isEmpty()) {
