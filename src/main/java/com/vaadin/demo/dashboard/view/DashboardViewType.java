@@ -18,6 +18,7 @@ import com.fundamental.view.MntHorario;
 import com.fundamental.view.MntLubricanteCV;
 import com.fundamental.view.MntServiceMode;
 import com.fundamental.view.RptMTD;
+import com.fundamental.view.RptMTD2;
 import com.fundamental.view.RptVolumenes;
 import com.fundamental.view.RptWSM;
 import com.fundamental.view.TurnoPr;
@@ -61,7 +62,8 @@ public enum DashboardViewType {
     
     RPT_MEDIOPAGO("RPT_MEDIOPAGO", RptMediopago.class, FontAwesome.FILE, false),
     RPT_VOLUMEN("RPT_VOLUMEN", RptVolumenes.class, FontAwesome.FILE, false),
-    RPT_MTD("RPT_MTD", RptMTD.class, FontAwesome.FILE, false),
+//    RPT_MTD("RPT_MTD", RptMTD.class, FontAwesome.FILE, false),
+    RPT_MTD("RPT_MTD", RptMTD2.class, FontAwesome.FILE, false),
     RPT_WSM("RPT_WSM", RptWSM.class, FontAwesome.FILE, false)
     ;
 
