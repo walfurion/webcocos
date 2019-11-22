@@ -7,7 +7,6 @@ import com.fundamental.view.PrChangeLastRead;
 import com.fundamental.view.PrCierreDia;
 import com.fundamental.view.PrCuadre;
 import com.fundamental.view.PrReading;
-import com.fundamental.view.PrTurn;
 import com.fundamental.view.PrTurnoCierre;
 import com.fundamental.view.RptMediopago;
 import com.fundamental.view.MntCambio;
@@ -17,7 +16,7 @@ import com.fundamental.view.MntCustPrepago;
 import com.fundamental.view.MntHorario;
 import com.fundamental.view.MntLubricanteCV;
 import com.fundamental.view.MntServiceMode;
-import com.fundamental.view.RptMTD;
+import com.fundamental.view.RptMTD2;
 import com.fundamental.view.RptControDeMediosDePago;
 import com.fundamental.view.RptVolumenes;
 import com.fundamental.view.RptWSM;
@@ -63,7 +62,8 @@ public enum DashboardViewType {
     RPT_MEDIOPAGO("RPT_MEDIOPAGO", RptMediopago.class, FontAwesome.FILE, false),
     RPT_CONTROLMEDIOPAGO("RPT_CONTROLMEDIOPAGO", RptControDeMediosDePago.class, FontAwesome.FILE, false),
     RPT_VOLUMEN("RPT_VOLUMEN", RptVolumenes.class, FontAwesome.FILE, false),
-    RPT_MTD("RPT_MTD", RptMTD.class, FontAwesome.FILE, false),
+//    RPT_MTD("RPT_MTD", RptMTD.class, FontAwesome.FILE, false),
+    RPT_MTD("RPT_MTD", RptMTD2.class, FontAwesome.FILE, false),
     RPT_WSM("RPT_WSM", RptWSM.class, FontAwesome.FILE, false)
     ;
 
