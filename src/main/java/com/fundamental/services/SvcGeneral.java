@@ -219,6 +219,7 @@ public class SvcGeneral extends Dao {
             getConnection().setAutoCommit(false);
             if (action.equals(Dao.ACTION_ADD)) {
                 query = "SELECT horario_seq.NEXTVAL FROM DUAL";
+                System.out.println("SELECT_HORARIO" + query); //MG
                 pst = getConnection().prepareStatement(query);
                 ResultSet rst = pst.executeQuery();
                 int horarioId = (rst.next()) ? rst.getInt(1) : 0;
@@ -227,6 +228,7 @@ public class SvcGeneral extends Dao {
 
                 query = "INSERT INTO horario (horario_id, nombre, descripcion, hora_inicio, hora_fin, creado_por) "
                         + "VALUES (" + horarioId + ", ?, ?, ?, ?, ?)";
+                System.out.println("HORARIO " + query ); //MG
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, horario.getNombre());
                 pst.setObject(2, horario.getDescripcion());
@@ -238,6 +240,7 @@ public class SvcGeneral extends Dao {
 
                 query = "INSERT INTO estacion_horario (horario_id, estacion_id, creado_por, estacionconfhead_id, paisestacion_id) "
                         + "VALUES (?, ?, ?, ?, ?)";
+                System.out.println("ESTACION_HORARIO " + query); //MG
                 for (Estacion item : horario.getListStations()) {
                     pst = getConnection().prepareStatement(query);
                     pst.setObject(1, horarioId);
@@ -254,6 +257,7 @@ public class SvcGeneral extends Dao {
                 query = "UPDATE horario "
                         + "SET nombre = ?, descripcion = ?, hora_inicio = ?, hora_fin = ?, estado = ?, modificado_por = ?, modificado_el = SYSDATE "
                         + "WHERE horario_id = ?";
+                System.out.println("UPDATE " + query); //MG
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, horario.getNombre());
                 pst.setObject(2, horario.getDescripcion());
@@ -270,26 +274,39 @@ public class SvcGeneral extends Dao {
                     tmpString += (tmpString.isEmpty()) ? item.getEstacionId() : "," + item.getEstacionId();
                 }
                 query = "DELETE FROM estacion_horario "
-                        + "WHERE horario_id = ? AND paisestacion_id = ? AND estacion_id NOT IN (" + tmpString + ")";
+                        + "WHERE horario_id = ? AND paisestacion_id = ? ";//MG
+                      //  + "AND estacion_id NOT IN (" + tmpString + ")";
+                System.out.println("DELETE "+ query); //MG
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, horario.getHorarioId());
                 pst.setObject(2, horario.getListStations().get(0).getPaisId());
+                System.out.println("HORARIO-1 " + horario.getHorarioId()  );
+                System.out.println("HORARIO-2 " + + horario.getListStations().get(0).getPaisId());
+                
                 pst.executeUpdate();
                 closePst();
                 try {
                     query = "INSERT INTO estacion_horario (horario_id, estacion_id, creado_por, estacionconfhead_id, paisestacion_id) "
                             + "VALUES (?, ?, ?, ?, ?)";
-                    for (Estacion item : horario.getListStations()) {
+                    
+                    for (Estacion item : horario.getListStations()){
+                       System.out.println("INSERT " + query + " " + item.toString()); //MG
                         pst = getConnection().prepareStatement(query);
                         pst.setObject(1, horario.getHorarioId());
+                        System.out.println("1 " + horario.getHorarioId());
                         pst.setObject(2, item.getEstacionId());
+                        System.out.println("2 " + item.getEstacionId());
                         pst.setObject(3, horario.getCreadoPor());
+                        System.out.println("3 " + horario.getCreadoPor());
                         pst.setObject(4, item.getEstacionConfHead().getEstacionconfheadId());
+                        System.out.println("4 " + item.getEstacionConfHead().getEstacionconfheadId());
                         pst.setObject(5, item.getPaisId());
+                        System.out.println("5 " + item.getPaisId());
                         pst.executeUpdate();
                         closePst();
                     }
                 } catch (Exception ignore) {
+                    ignore.printStackTrace();
                 }
                 result = horario;
                 getConnection().commit();
