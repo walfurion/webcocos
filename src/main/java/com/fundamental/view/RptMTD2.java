@@ -6,37 +6,27 @@
 package com.fundamental.view;
 
 import com.fundamental.model.Dia;
-import com.fundamental.model.EstacionConf;
-import com.fundamental.model.EstacionConfHead;
-import com.fundamental.model.Horario;
-import com.fundamental.model.Precio;
-import com.fundamental.model.Producto;
 import com.fundamental.model.Turno;
 import com.fundamental.model.Utils;
-import com.fundamental.services.Dao;
-import com.fundamental.services.SvcEstacion;
+import com.fundamental.services.SvcMtd;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcUsuario;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
-import com.sisintegrados.generic.bean.Estacion;
+import com.sisintegrados.generic.bean.GenericEstacion;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.vaadin.data.Property;
-import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
-import com.vaadin.demo.dashboard.view.DashboardViewType;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
 import com.vaadin.server.VaadinSession;
-import com.vaadin.shared.Position;
-import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
@@ -45,14 +35,11 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -72,9 +59,12 @@ public class RptMTD2 extends Panel implements View {
     Turno ultimoTurno;
     Utils utils = new Utils();
     SvcTurno dao = new SvcTurno();
+    SvcMtd svcmtd = new SvcMtd();
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
     Button btnGenerar = new Button("Generar Reporte");
     Button btnExportar = new Button("Exportar a Excel", FontAwesome.EDIT);
+    //traer estaciones con su checkbox
+    ArrayList<GenericEstacion> checkestaciones = new ArrayList<GenericEstacion>();
 
     public RptMTD2() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
@@ -87,7 +77,7 @@ public class RptMTD2 extends Panel implements View {
     }
 
     private Component buildForm() {
-        return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), buildToolbar2(), buildButtons()});
+        return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), /*buildToolbar2(),*/ buildButtons()});
     }
 
     private Component buildTitle() {
@@ -115,7 +105,23 @@ public class RptMTD2 extends Panel implements View {
         cmbPais.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
-
+                if (cmbPais.getValue() != null) {
+                    Pais pais = new Pais();
+                    pais = (Pais) cmbPais.getValue();
+                    checkestaciones = new ArrayList<GenericEstacion>();
+                    checkestaciones = svcmtd.getCheckEstaciones(pais.getPaisId());
+                    toolbarContainerTables.removeAllComponents();
+                    VerticalLayout vl = new VerticalLayout();
+                    vl.setSpacing(true);
+                    vl.setResponsive(true);
+                    Label lblestacion = new Label("Estaciones");
+                    vl.addComponent(lblestacion);
+                    lblestacion.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+                    for (GenericEstacion checkestacion : checkestaciones) {
+                        vl.addComponent(checkestacion.getCheck());
+                    }
+                    toolbarContainerTables.addComponent(vl);
+                }
             }
         });
 
@@ -142,8 +148,7 @@ public class RptMTD2 extends Panel implements View {
             public void valueChange(final Property.ValueChangeEvent event) {
             }
         });
-
-        Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(cmbPais),/* utils.vlContainer(cmbEstacion),*/ utils.vlContainer(cmbFechaInicio), utils.vlContainer(cmbFechaFin)});
+        Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(cmbPais),/* utils.vlContainer(cmbEstacion),*/ utils.vlContainer(cmbFechaInicio), utils.vlContainer(cmbFechaFin), utils.vlContainer(buildToolbar2())});
         VerticalLayout v = new VerticalLayout(toolBar);
         return components.createHorizontal(Constant.styleViewheader, Constant.sizeFull, false, false, true, new Component[]{v});
     }
@@ -151,6 +156,7 @@ public class RptMTD2 extends Panel implements View {
 
     private Component buildToolbar2() {
         toolbarContainerTables = new CssLayout();
+//        return toolbarContainerTables;
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarContainerTables)});
     }
     private CssLayout toolBar2;
@@ -186,6 +192,12 @@ public class RptMTD2 extends Panel implements View {
         btnExportar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
+                for (Component component : toolbarContainerTables) {
+                    System.out.println("Q ES CAPTION "+component.getCaption());
+                    System.out.println("Q ES DESCRIPCION "+component.getDescription());
+                    System.out.println("Q ES ID "+component.getId());
+                    
+                }
 //                if (bcrPrecios.getItemIds().size() == counter) {
 //                    Notification notif = new Notification("ÉXITO:", "El registro se ha actualizado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
 //                    notif.setDelayMsec(3000);
