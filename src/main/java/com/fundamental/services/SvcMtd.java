@@ -18,25 +18,20 @@ import java.util.List;
  * @author Allan G.
  */
 public class SvcMtd extends Dao {
-    
+
     private String query;
-    
+
     public ArrayList<GenericEstacion> getCheckEstaciones(Integer idpais) {
         ArrayList<GenericEstacion> result = new ArrayList<GenericEstacion>();
         GenericEstacion genestacion = new GenericEstacion();
-        CheckBox check = new CheckBox();
         try {
-            query = "Select estacion_id,nombre from estacion where pais_id ="+idpais;
+            query = "Select estacion_id,nombre from estacion where pais_id =" + idpais;
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
                 genestacion = new GenericEstacion();
                 genestacion.setEstacionid(rst.getInt(1));
                 genestacion.setNombre(rst.getString(2));
-                check = new CheckBox(genestacion.getNombre());
-                check.setId(genestacion.getNombre());
-                check.setStyleName(ValoTheme.CHECKBOX_SMALL);
-                genestacion.setCheck(check);
                 result.add(genestacion);
             }
         } catch (Exception exc) {
@@ -49,5 +44,5 @@ public class SvcMtd extends Dao {
         }
         return result;
     }
-    
+
 }

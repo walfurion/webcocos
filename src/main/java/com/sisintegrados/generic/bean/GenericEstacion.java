@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class GenericEstacion {
+
     private Integer estacionid;
     private String nombre;
-    private CheckBox check;
 }
