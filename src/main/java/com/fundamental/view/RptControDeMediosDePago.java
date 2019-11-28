@@ -1,34 +1,22 @@
 package com.fundamental.view;
 
 import com.fundamental.model.Dia;
-import com.fundamental.model.EstacionConf;
-import com.fundamental.model.EstacionConfHead;
-import com.fundamental.model.Horario;
-import com.fundamental.model.Precio;
-import com.fundamental.model.Producto;
 import com.fundamental.model.Turno;
 import com.fundamental.model.Utils;
-import com.fundamental.services.Dao;
-import com.fundamental.services.SvcEstacion;
+import com.fundamental.services.SvcMtd;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcUsuario;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
-import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.vaadin.data.Property;
-import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
-import com.vaadin.demo.dashboard.view.DashboardViewType;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
 import com.vaadin.server.VaadinSession;
-import com.vaadin.shared.Position;
-import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -41,14 +29,13 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import com.fundamental.services.SvcReporteControlMediosPago;
+import com.sisintegrados.generic.bean.GenericEstacion;
 import java.util.Locale;
 
 /**
@@ -68,41 +55,13 @@ CreateComponents components = new CreateComponents();
     Turno ultimoTurno;
     Utils utils = new Utils();
     SvcTurno dao = new SvcTurno();
-   // SvcReporteControlMediosPago SvcReporteControlMediosPago = SvcReporteControlMediosPago();
+    SvcReporteControlMediosPago SvcReporteControlMediosPago = new SvcReporteControlMediosPago();
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
     Button btnGenerar = new Button("Generar Reporte");
     Button btnExportar = new Button("Exportar a Excel", FontAwesome.EDIT);
+    //traer estaciones con su checkbox
+    ArrayList<GenericEstacion> checkestacionesm = new ArrayList<GenericEstacion>();
     CheckBox chkEstacion1 = new CheckBox();
-    CheckBox chkEstacion2 = new CheckBox();
-    CheckBox chkEstacion3 = new CheckBox();
-    CheckBox chkEstacion4 = new CheckBox();
-    CheckBox chkEstacion5 = new CheckBox();
-    CheckBox chkEstacion6 = new CheckBox();
-    CheckBox chkEstacion7 = new CheckBox();
-    CheckBox chkEstacion8 = new CheckBox();
-    CheckBox chkEstacion9 = new CheckBox();
-    CheckBox chkEstacion10 = new CheckBox();
-    CheckBox chkEstacion11 = new CheckBox();
-    CheckBox chkEstacion12 = new CheckBox();
-    CheckBox chkEstacion13 = new CheckBox();
-    CheckBox chkEstacion14 = new CheckBox();
-    CheckBox chkEstacion15 = new CheckBox();
-    CheckBox chkEstacion16 = new CheckBox();
-    CheckBox chkEstacion17 = new CheckBox();
-    CheckBox chkEstacion18 = new CheckBox();
-    CheckBox chkEstacion19 = new CheckBox();
-    CheckBox chkEstacion20 = new CheckBox();
-    CheckBox chkEstacion21 = new CheckBox();
-    CheckBox chkEstacion22 = new CheckBox();
-    CheckBox chkEstacion23 = new CheckBox();
-    CheckBox chkEstacion24 = new CheckBox();
-    CheckBox chkEstacion25 = new CheckBox();
-    CheckBox chkEstacion26 = new CheckBox();
-    CheckBox chkEstacion27 = new CheckBox();
-    CheckBox chkEstacion28 = new CheckBox();
-    CheckBox chkEstacion29 = new CheckBox();
-    CheckBox chkEstacion30 = new CheckBox();
-    
 
     public RptControDeMediosDePago() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
@@ -115,7 +74,7 @@ CreateComponents components = new CreateComponents();
     }
 
     private Component buildForm() {
-        return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), buildToolbar2(), buildButtons()});
+        return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), /*buildToolbar2(),*/ buildButtons()});
     }
 
     private Component buildTitle() {
@@ -130,7 +89,7 @@ CreateComponents components = new CreateComponents();
     private Component buildHeader() {
         contPais = new BeanItemContainer<Pais>(Pais.class);
         contPais.addAll(dao.getAllPaises());
-        cargaUltTurnoDia();
+        //cargaUltTurnoDia();
         cmbPais = new ComboBox("País:", contPais);
         cmbPais.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
         cmbPais.setItemCaptionPropertyId("nombre");
@@ -143,7 +102,23 @@ CreateComponents components = new CreateComponents();
         cmbPais.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
-
+                if (cmbPais.getValue() != null) {
+                    Pais pais = new Pais();
+                    pais = (Pais) cmbPais.getValue();
+                    checkestacionesm = new ArrayList<GenericEstacion>();
+                    checkestacionesm = SvcReporteControlMediosPago.getCheckEstacionesM(pais.getPaisId());
+                    toolbarContainerTables.removeAllComponents();
+                    VerticalLayout vl = new VerticalLayout();
+                    vl.setSpacing(true);
+                    vl.setResponsive(true);
+                    Label lblestacion = new Label("Estaciones");
+                    vl.addComponent(lblestacion);
+                    lblestacion.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+                    for (GenericEstacion checkestacion : checkestacionesm) {
+                        vl.addComponent(checkestacion.getCheck());
+                    }
+                    toolbarContainerTables.addComponent(vl);
+                }
             }
         });
 
@@ -170,8 +145,7 @@ CreateComponents components = new CreateComponents();
             public void valueChange(final Property.ValueChangeEvent event) {
             }
         });
-
-        Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(cmbPais),/* utils.vlContainer(cmbEstacion),*/ utils.vlContainer(cmbFechaInicio), utils.vlContainer(cmbFechaFin)});
+        Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(cmbPais),/* utils.vlContainer(cmbEstacion),*/ utils.vlContainer(cmbFechaInicio), utils.vlContainer(cmbFechaFin), utils.vlContainer(buildToolbar2())});
         VerticalLayout v = new VerticalLayout(toolBar);
         return components.createHorizontal(Constant.styleViewheader, Constant.sizeFull, false, false, true, new Component[]{v});
     }
@@ -179,6 +153,7 @@ CreateComponents components = new CreateComponents();
 
     private Component buildToolbar2() {
         toolbarContainerTables = new CssLayout();
+//        return toolbarContainerTables;
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarContainerTables)});
     }
     private CssLayout toolBar2;
@@ -214,6 +189,12 @@ CreateComponents components = new CreateComponents();
         btnExportar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
+                for (Component component : toolbarContainerTables) {
+                    System.out.println("Q ES CAPTION "+component.getCaption());
+                    System.out.println("Q ES DESCRIPCION "+component.getDescription());
+                    System.out.println("Q ES ID "+component.getId());
+                    
+                }
 //                if (bcrPrecios.getItemIds().size() == counter) {
 //                    Notification notif = new Notification("ÉXITO:", "El registro se ha actualizado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
 //                    notif.setDelayMsec(3000);
@@ -235,31 +216,31 @@ CreateComponents components = new CreateComponents();
         return footer;
     }
 
-    private void cargaUltTurnoDia() {
-        SvcUsuario svu = new SvcUsuario();
-        usuario = svu.getLastTurnLastDay(usuario);
-        if (usuario.getDia() == null) {
-            lblUltimoDia.setValue("SIN DATOS REGISTRADOS");
-            lblUltimoTurno.setValue("SIN DATOS REGISTRADOS");
-        } else {
-            lblUltimoDia.setValue("Último día: " + usuario.getDia().getDia() + " (" + usuario.getDia().getEstado() + ")");
-            lblUltimoTurno.setValue("Último turno: " + usuario.getTurno().getTurno() + " (" + usuario.getTurno().getEstado() + ")");
-        }
-
-        lblUltimoDia.addStyleName(ValoTheme.LABEL_BOLD);
-        lblUltimoDia.addStyleName(ValoTheme.LABEL_H3);
-        lblUltimoDia.addStyleName(ValoTheme.LABEL_COLORED);
-        lblUltimoDia.setWidth("35%");
-
-        lblUltimoTurno.addStyleName(ValoTheme.LABEL_BOLD);
-        lblUltimoTurno.addStyleName(ValoTheme.LABEL_H3);
-        lblUltimoTurno.addStyleName(ValoTheme.LABEL_COLORED);
-        lblUltimoTurno.setSizeUndefined();
-
-        toolBar2.removeAllComponents();
-        toolBar2.addComponent(utils.vlContainer2(lblUltimoDia));
-        toolBar2.addComponent(utils.vlContainer2(lblUltimoTurno));
-    }
+//    private void cargaUltTurnoDia() {
+//        SvcUsuario svu = new SvcUsuario();
+//        usuario = svu.getLastTurnLastDay(usuario);
+//        if (usuario.getDia() == null) {
+//            lblUltimoDia.setValue("SIN DATOS REGISTRADOS");
+//            lblUltimoTurno.setValue("SIN DATOS REGISTRADOS");
+//        } else {
+//            lblUltimoDia.setValue("Último día: " + usuario.getDia().getDia() + " (" + usuario.getDia().getEstado() + ")");
+//            lblUltimoTurno.setValue("Último turno: " + usuario.getTurno().getTurno() + " (" + usuario.getTurno().getEstado() + ")");
+//        }
+//
+//        lblUltimoDia.addStyleName(ValoTheme.LABEL_BOLD);
+//        lblUltimoDia.addStyleName(ValoTheme.LABEL_H3);
+//        lblUltimoDia.addStyleName(ValoTheme.LABEL_COLORED);
+//        lblUltimoDia.setWidth("35%");
+//
+//        lblUltimoTurno.addStyleName(ValoTheme.LABEL_BOLD);
+//        lblUltimoTurno.addStyleName(ValoTheme.LABEL_H3);
+//        lblUltimoTurno.addStyleName(ValoTheme.LABEL_COLORED);
+//        lblUltimoTurno.setSizeUndefined();
+//
+//        toolBar2.removeAllComponents();
+//        toolBar2.addComponent(utils.vlContainer2(lblUltimoDia));
+//        toolBar2.addComponent(utils.vlContainer2(lblUltimoTurno));
+//    }
 
     private void cargaInfoSesion() {
         if (usuario.getPaisId() != null) {
