@@ -6,6 +6,7 @@
 package com.fundamental.view;
 
 import com.fundamental.model.Dia;
+import com.fundamental.model.Rol;
 import com.fundamental.model.Turno;
 import com.fundamental.model.Utils;
 import com.fundamental.services.SvcMtd;
@@ -17,6 +18,7 @@ import com.sisintegrados.generic.bean.GenericEstacion;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.vaadin.data.Property;
+import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import com.vaadin.navigator.View;
@@ -26,7 +28,6 @@ import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
@@ -34,6 +35,7 @@ import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -41,6 +43,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  *
@@ -63,8 +66,12 @@ public class RptMTD2 extends Panel implements View {
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
     Button btnGenerar = new Button("Generar Reporte");
     Button btnExportar = new Button("Exportar a Excel", FontAwesome.EDIT);
+    Button btnSelectAll;
+    Button btnUnselectAll;
     //traer estaciones con su checkbox
-    ArrayList<GenericEstacion> checkestaciones = new ArrayList<GenericEstacion>();
+    BeanContainer<Integer, GenericEstacion> checkestaciones = new BeanContainer<>(GenericEstacion.class);
+//    BeanItemContainer<GenericEstacion> checkestaciones = new BeanItemContainer<GenericEstacion>(GenericEstacion.class);
+    OptionGroup optStation = new OptionGroup();
 
     public RptMTD2() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
@@ -73,6 +80,7 @@ public class RptMTD2 extends Panel implements View {
         DashboardEventBus.register(this);
         usuario = VaadinSession.getCurrent().getAttribute(Usuario.class);
         super.setContent(components.createVertical(Constant.styleTransactions, "100%", false, true, true, new Component[]{buildForm()}));
+        checkestaciones.setBeanIdProperty("estacionid");
         cargaInfoSesion();
     }
 
@@ -108,19 +116,55 @@ public class RptMTD2 extends Panel implements View {
                 if (cmbPais.getValue() != null) {
                     Pais pais = new Pais();
                     pais = (Pais) cmbPais.getValue();
-                    checkestaciones = new ArrayList<GenericEstacion>();
-                    checkestaciones = svcmtd.getCheckEstaciones(pais.getPaisId());
+                    checkestaciones.addAll(svcmtd.getCheckEstaciones(pais.getPaisId()));
                     toolbarContainerTables.removeAllComponents();
                     VerticalLayout vl = new VerticalLayout();
-                    vl.setSpacing(true);
+                    HorizontalLayout hl = new HorizontalLayout();
+                    HorizontalLayout hlroot = new HorizontalLayout();
+//                    hlroot.setSpacing(true);
+                    hlroot.setResponsive(true);
+                    btnSelectAll = new Button("Todas");
+                    btnSelectAll.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+                    btnSelectAll.setStyleName(ValoTheme.BUTTON_LINK);
+                    btnSelectAll.addClickListener(new Button.ClickListener() {
+                        @Override
+                        public void buttonClick(Button.ClickEvent event) {
+                            optStation.select(361);
+                            optStation.select(checkestaciones.getIdByIndex(2));
+                            for (int i = 0; i < optStation.size(); i++) {
+                                optStation.select(checkestaciones.getIdByIndex(i));
+                            }
+                        }
+                    });
+                    btnUnselectAll = new Button("Ninguna");
+                    btnUnselectAll.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+                    btnUnselectAll.setStyleName(ValoTheme.BUTTON_LINK);
+                    btnUnselectAll.addClickListener(new Button.ClickListener() {
+                        @Override
+                        public void buttonClick(Button.ClickEvent event) {
+                            optStation.select(361);
+                            optStation.select(checkestaciones.getIdByIndex(2));
+                            for (int i = 0; i < optStation.size(); i++) {
+                                optStation.unselect(checkestaciones.getIdByIndex(i));
+                            }
+                        }
+                    });
+                    hl.addComponent(btnSelectAll);
+                    hl.addComponent(btnUnselectAll);
+//                    vl.setSpacing(true);
                     vl.setResponsive(true);
                     Label lblestacion = new Label("Estaciones");
-                    vl.addComponent(lblestacion);
                     lblestacion.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
-                    for (GenericEstacion checkestacion : checkestaciones) {
-                        vl.addComponent(checkestacion.getCheck());
+                    vl.addComponent(lblestacion);
+                    optStation = new OptionGroup(null, checkestaciones);
+                    optStation.setMultiSelect(true);
+                    vl.addComponent(optStation);
+                    for (Integer noid : checkestaciones.getItemIds()) {
+                        optStation.setItemCaption(checkestaciones.getItem(noid).getBean().getEstacionid(), checkestaciones.getItem(noid).getBean().getNombre());
                     }
-                    toolbarContainerTables.addComponent(vl);
+                    hlroot.addComponent(vl);
+                    hlroot.addComponent(hl);
+                    toolbarContainerTables.addComponent(hlroot);
                 }
             }
         });
@@ -192,12 +236,30 @@ public class RptMTD2 extends Panel implements View {
         btnExportar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                for (Component component : toolbarContainerTables) {
-                    System.out.println("Q ES CAPTION "+component.getCaption());
-                    System.out.println("Q ES DESCRIPCION "+component.getDescription());
-                    System.out.println("Q ES ID "+component.getId());
-                    
+                /*Devulevo una lista de string seleccionados*/
+                String[] Seleccion;
+                Seleccion = getSeleccion();
+                /*Recorro la seleccion de estaciones para enviarlas al query*/
+                for (String string : Seleccion) {
+//                    System.out.println(" Tamaño " + string.length());
+//*Ejemplo de query */
+                    System.out.println("Select * from estacion where estacion_id = " + string.trim());
                 }
+//                Integer algo;
+//                algo = (Integer) checkestaciones.getIdByIndex(2);
+//
+//                System.out.println("objetos " + optStation.getValue());
+////                System.out.println("objetos " + rayos);
+//                System.out.println("algo " + algo);
+//                System.out.println("Valor " + valor);
+
+//                listaestaciones.add(checkestaciones.getItem(optStation.getValue()).getBean());
+//                System.out.println(" ALGO "+algo.length);
+//                String algo = optStation.getValue();
+//                for (String string : algo) {
+//                    System.out.println("TVALOR GRUPO "+string);
+//                }
+//                System.out.println("TVALOR GRUPO "+optStation.getValue());
 //                if (bcrPrecios.getItemIds().size() == counter) {
 //                    Notification notif = new Notification("ÉXITO:", "El registro se ha actualizado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
 //                    notif.setDelayMsec(3000);
@@ -217,6 +279,16 @@ public class RptMTD2 extends Panel implements View {
         footer.setWidth(
                 100.0f, Unit.PERCENTAGE);
         return footer;
+    }
+
+    private String[] getSeleccion() {
+        String[] result;
+        String valor = String.valueOf(optStation.getValue());
+        valor = valor.replaceAll("\\[", "");
+        valor = valor.replaceAll("\\]", "");
+        valor = valor.trim();
+        result = valor.split(",");
+        return result;
     }
 
     private void cargaUltTurnoDia() {
