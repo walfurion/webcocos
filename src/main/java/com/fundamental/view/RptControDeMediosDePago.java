@@ -115,7 +115,7 @@ CreateComponents components = new CreateComponents();
                     vl.addComponent(lblestacion);
                     lblestacion.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
                     for (GenericEstacion checkestacion : checkestacionesm) {
-                        vl.addComponent(checkestacion.getCheck());
+//                        vl.addComponent(checkestacion.getCheck());
                     }
                     toolbarContainerTables.addComponent(vl);
                 }
