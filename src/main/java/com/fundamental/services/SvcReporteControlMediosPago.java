@@ -34,7 +34,7 @@ public class SvcReporteControlMediosPago extends Dao {
                 check = new CheckBox(gnestacion.getNombre());
                 check.setId(gnestacion.getNombre());
                 check.setStyleName(ValoTheme.CHECKBOX_SMALL);
-                gnestacion.setCheck(check);
+//                gnestacion.setCheck(check);
                 result.add(gnestacion);
             }
         } catch (Exception exc) {
