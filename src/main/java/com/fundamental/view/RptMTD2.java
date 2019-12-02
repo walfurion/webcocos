@@ -109,7 +109,7 @@ public class RptMTD2 extends Panel implements View {
         cmbPais.setRequired(true);
         cmbPais.setNullSelectionAllowed(false);
         cmbPais.setRequiredError("Debe seleccionar un país");
-        cmbPais.addStyleName(ValoTheme.COMBOBOX_SMALL);
+        cmbPais.addStyleName(ValoTheme.COMBOBOX_TINY);
         cmbPais.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
@@ -124,6 +124,7 @@ public class RptMTD2 extends Panel implements View {
 //                    hlroot.setSpacing(true);
                     hlroot.setResponsive(true);
                     btnSelectAll = new Button("Todas");
+                    btnSelectAll.setStyleName(ValoTheme.BUTTON_TINY);
                     btnSelectAll.setStyleName(ValoTheme.BUTTON_FRIENDLY);
                     btnSelectAll.setStyleName(ValoTheme.BUTTON_LINK);
                     btnSelectAll.addClickListener(new Button.ClickListener() {
@@ -137,6 +138,7 @@ public class RptMTD2 extends Panel implements View {
                         }
                     });
                     btnUnselectAll = new Button("Ninguna");
+                    btnUnselectAll.setStyleName(ValoTheme.BUTTON_TINY);
                     btnUnselectAll.setStyleName(ValoTheme.BUTTON_FRIENDLY);
                     btnUnselectAll.setStyleName(ValoTheme.BUTTON_LINK);
                     btnUnselectAll.addClickListener(new Button.ClickListener() {
@@ -158,6 +160,7 @@ public class RptMTD2 extends Panel implements View {
                     vl.addComponent(lblestacion);
                     optStation = new OptionGroup(null, checkestaciones);
                     optStation.setMultiSelect(true);
+                    optStation.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
                     vl.addComponent(optStation);
                     for (Integer noid : checkestaciones.getItemIds()) {
                         optStation.setItemCaption(checkestaciones.getItem(noid).getBean().getEstacionid(), checkestaciones.getItem(noid).getBean().getNombre());
@@ -174,7 +177,7 @@ public class RptMTD2 extends Panel implements View {
         cmbFechaInicio.setRangeEnd(Date.from(Instant.now()));
         cmbFechaInicio.setLocale(new Locale("es", "ES"));
         cmbFechaInicio.setLenient(true);
-        cmbFechaInicio.addStyleName(ValoTheme.DATEFIELD_SMALL);
+        cmbFechaInicio.addStyleName(ValoTheme.DATEFIELD_TINY);
         cmbFechaInicio.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
@@ -186,7 +189,7 @@ public class RptMTD2 extends Panel implements View {
         cmbFechaFin.setRangeEnd(Date.from(Instant.now()));
         cmbFechaFin.setLocale(new Locale("es", "ES"));
         cmbFechaFin.setLenient(true);
-        cmbFechaFin.addStyleName(ValoTheme.DATEFIELD_SMALL);
+        cmbFechaFin.addStyleName(ValoTheme.DATEFIELD_TINY);
         cmbFechaFin.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
