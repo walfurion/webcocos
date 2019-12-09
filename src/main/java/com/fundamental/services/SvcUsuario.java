@@ -152,9 +152,7 @@ public class SvcUsuario extends Dao {
             try {
                 rst.close();
                 pst.close();
-            } catch (Exception ignore) {
-            }
+            } catch (Exception ignore) {}
         }
-        return user;
-    }
+        return user; }
 }

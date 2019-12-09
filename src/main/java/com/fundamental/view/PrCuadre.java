@@ -39,6 +39,7 @@ import com.fundamental.utils.Mail;
 import com.fundamental.utils.Util;
 import com.sisintegrados.generic.bean.GenericProduct;
 import com.sisintegrados.generic.bean.GenericTarjeta;
+import com.sisintegrados.generic.bean.genericMedioTarjeta;
 import com.sisintegrados.view.form.FormDetalleVenta;
 import com.sisintegrados.view.form.FormDetalleVenta2;
 import com.sisintegrados.view.form.FormClientePrepago;
@@ -95,6 +96,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -226,6 +228,8 @@ public class PrCuadre extends Panel implements View {
     Acceso acceso = new Acceso();
     boolean modificar = false;
     boolean crear = false;
+
+    double tmpTotal = 0.00;
 
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -1227,16 +1231,63 @@ public class PrCuadre extends Panel implements View {
     /*Metodo Llama Forma tarjeta credito*///MAG
     private void formTarjetaCredito(String simboloMoneda) {
         if (cbxEmpleado.getValue() != null) {
-            formTarjetasCredito = new FormTarjetasCredito(simboloMoneda, bcrCreditC);
+            tmpTotal = 0.00;
+            HashMap<Integer, genericMedioTarjeta> listaIDSEncontrados = new HashMap<Integer, genericMedioTarjeta>();
+            HashMap<Integer, genericMedioTarjeta> listaIDSDepurados = new HashMap<Integer, genericMedioTarjeta>();
+
+            formTarjetasCredito = new FormTarjetasCredito(simboloMoneda, bcrCreditC, pais.getPaisId());
             formTarjetasCredito.addCloseListener((e) -> {
                 bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
                 bcrCreditC = (BeanContainer<Integer, GenericTarjeta>) VaadinSession.getCurrent().getAttribute("detalleTarjetaCredito");
                 tmpDoubleTarjetaCredito = (Double) VaadinSession.getCurrent().getAttribute("totalTarjetaCredito");
+                tmpTotal = 0.00;
                 for (Integer itemId : bcrMediopago.getItemIds()) {
-                    if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_TARJETAS) {
-                        bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDoubleTarjetaCredito);
+                    if (bcrMediopago.getItem(itemId).getBean().isIsTCredito()) {
+                        genericMedioTarjeta genDep = new genericMedioTarjeta();
+                        genDep.setIdmedio(bcrMediopago.getItem(itemId).getBean().getMediopagoId());
+                        genDep.setMonto(0.00);
+                        listaIDSDepurados.put(bcrMediopago.getItem(itemId).getBean().getMediopagoId(), genDep);
+//                        System.out.println("###PADRE### " + bcrMediopago.getItem(itemId).getBean().getMediopagoId() + " " + bcrMediopago.getItem(itemId).getBean().getNombre());
+                        for (Integer idmedio : bcrCreditC.getItemIds()) {
+//                            System.out.println("HIJO " + bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id() + " " + bcrCreditC.getItem(idmedio).getBean().getTarjeta().getNombre());
+                            if (bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id() == bcrMediopago.getItem(itemId).getBean().getMediopagoId()) {
+//                                System.out.println("VALOR DEL HIJO ENCONTRADO " + bcrCreditC.getItem(idmedio).getBean().getMonto());
+                                genericMedioTarjeta genEnc = new genericMedioTarjeta();
+                                genEnc.setIdmedio(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id());
+                                genEnc.setMonto(bcrCreditC.getItem(idmedio).getBean().getMonto());
+                                if (listaIDSEncontrados.containsKey(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id())) {
+                                    genericMedioTarjeta genEncc = new genericMedioTarjeta();
+                                    genEncc = listaIDSEncontrados.get(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id());
+                                    genEncc.setMonto(genEncc.getMonto() + genEnc.getMonto());
+                                    listaIDSEncontrados.remove(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id());
+                                    listaIDSEncontrados.put(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id(), genEncc);
+                                } else {
+                                    listaIDSEncontrados.put(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id(), genEnc);
+                                }
+                            }
+                        }
                     }
                 }
+                /*Recorro para limpiar valores no asignados en tarjetas*/
+                for (genericMedioTarjeta integer : listaIDSEncontrados.values()) {
+//                    System.out.println("IDS ENCONTRADOS " + integer.getIdmedio() + "  " + integer.getMonto());
+                    listaIDSDepurados.remove(integer.getIdmedio());
+                    for (Integer itemId : bcrMediopago.getItemIds()) {
+                        if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == integer.getIdmedio()) {
+                            bcrMediopago.getItem(itemId).getItemProperty("value").setValue(integer.getMonto());
+                        }
+                    }
+                }
+
+                for (genericMedioTarjeta listaidsdepurado : listaIDSDepurados.values()) {
+//                    System.out.println("IDS DEPURADOS " + listaidsdepurado.getIdmedio());
+                    for (Integer itemId : bcrMediopago.getItemIds()) {
+                        if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == listaidsdepurado.getIdmedio()) {
+                            bcrMediopago.getItem(itemId).getItemProperty("value").setValue(0.00);
+                        }
+                    }
+                }
+
             });
             getUI().addWindow(formTarjetasCredito);
             formTarjetasCredito.focus();
@@ -1520,7 +1571,8 @@ public class PrCuadre extends Panel implements View {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("medioPago");  //Atributo del bean DtoEfectivo
-                Container contMediosPago = new ListContainer<Mediopago>(Mediopago.class, mediosPagoEfectivo);
+                Container contMediosPago = new ListContainer<Mediopago>(Mediopago.class,
+                        mediosPagoEfectivo);
                 final ComboBox combo = new ComboBox("", contMediosPago);
                 combo.setItemCaptionPropertyId("nombre");   //atributo de medio de pago
                 combo.setPropertyDataSource(pro);

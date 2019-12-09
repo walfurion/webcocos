@@ -684,7 +684,7 @@ public class Dao {
             rst = pst.executeQuery();
             Mediopago mediopago;
             while (rst.next()) {
-                mediopago = new Mediopago(rst.getInt(1), rst.getString(2), rst.getInt(3), null, rst.getInt(4), rst.getString(5), rst.getBoolean(7), null);
+                mediopago = new Mediopago(rst.getInt(1), rst.getString(2), rst.getInt(3), null, rst.getInt(4), rst.getString(5), rst.getBoolean(8), null);
                 mediopago.setPartidacontPor(rst.getDouble(6));
                 mediopago.setPartidacont(rst.getBoolean(7));
                 result.add(mediopago);
