@@ -15,6 +15,7 @@ import com.fundamental.services.SvcUsuario;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
 import com.sisintegrados.generic.bean.GenericEstacion;
+import com.sisintegrados.generic.bean.GenericMTD;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.vaadin.data.Property;
@@ -39,11 +40,14 @@ import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -220,14 +224,17 @@ public class RptMTD2 extends Panel implements View {
         btnGenerar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(final Button.ClickEvent event) {
-                if (ultimoDia.getFecha() != null && ultimoDia.getEstadoId() == 2 && ultimoDia.getFecha().equals(cmbFechaInicio.getValue())) {
-                    Notification.show("ERROR:", "Para la fecha elegida, existe un día cerrado.", Notification.Type.ERROR_MESSAGE);
-                    return;
-                }
-
-                boolean everythingOk = false;  //SOLO EJEMPLO 
-                if (everythingOk) {
-
+                if (cmbPais.getValue() != null && cmbFechaInicio.getValue() != null && cmbFechaFin.getValue() != null && optStation.size() > 0) {
+                    try {
+                        svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), "361");
+                        ArrayList<GenericMTD> listadb = new ArrayList<GenericMTD>();
+                        listadb = svcmtd.getMTD();
+                        for (GenericMTD genericMTD : listadb) {
+                            System.out.println(" RECUPERE "+genericMTD.getL_total());
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } else {
                     Notification.show("ERROR:", "Ocurrió un error al guardar el precio.\n", Notification.Type.ERROR_MESSAGE);
                     return;
