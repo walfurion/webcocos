@@ -5,13 +5,13 @@ import com.fundamental.model.ArqueocajaDetalle;
 import com.fundamental.model.ArqueocajaProducto;
 import com.fundamental.model.Bomba;
 import com.fundamental.model.Efectivo;
-import com.fundamental.model.Inventario;
 import com.fundamental.model.Mediopago;
 import com.fundamental.model.Producto;
-import com.fundamental.model.dto.InventarioDto;
-import com.fundamental.model.dto.RecepcionDto;
 import com.fundamental.utils.Constant;
 import com.sisintegrados.generic.bean.ArqueoTC;
+import com.sisintegrados.generic.bean.InventarioRec;
+import com.sisintegrados.generic.bean.InventarioRecepcion;
+import com.sisintegrados.generic.bean.RecepcionInventario;
 import com.vaadin.ui.CheckBox;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -324,7 +324,7 @@ public class SvcTurnoCierre extends Dao {
         List<String[]> result = new ArrayList();
         try {
             //calibraciones por dia
-            query = "SELECT p.producto_id, SUM(ld.calibracion), SUM(ld.lectura_final - ld.lectura_inicial) "
+            query = "SELECT p.producto_id, SUM(ld.calibracion), SUM(ld.lectura_final - ld.lectura_inicial - ld.calibracion) "
                     + "FROM dia d, turno t, lectura l, lectura_detalle ld, producto p "
                     + "WHERE d.fecha = t.fecha AND d.estacion_id = t.estacion_id AND t.estacion_id = l.estacion_id AND t.turno_id = l.turno_id AND l.lectura_id = ld.lectura_id AND ld.producto_id = p.producto_id "
                     + "AND d.fecha = TO_DATE(?, 'dd/mm/yyyy') AND d.estacion_id = ? "
@@ -344,27 +344,33 @@ public class SvcTurnoCierre extends Dao {
         return result;
     }
 
-    public List<InventarioDto> getInventarioByFechaEstacion(Date fecha, Integer estacionId) {
-        List<InventarioDto> result = new ArrayList();
+    public List<InventarioRecepcion> getInventarioByFechaEstacion(Date fecha, Integer estacionId) {
+        List<InventarioRecepcion> result = new ArrayList();
         try {
             //calibraciones por dia
             List<String[]> calibraciones = getCalibracionByFechaEstacion(fecha, estacionId);
 
-            query = "SELECT 'rownum', p.nombre, i.fecha, i.estacion_id, i.producto_id, i.inicial, i.final, i.compras "
-                    + "FROM inventario_coco i, producto p "
-                    + "WHERE i.producto_id = p.producto_id AND i.fecha = TO_DATE(?, 'dd/mm/yyyy') AND i.estacion_id = ? "
+            query = "SELECT 'rownum', p.nombre, i.fecha, i.estacion_id, i.producto_id, i.inicial, i.final, i.compras, "
+                    + "i.INV_FISICO, i.COMPARTIMIENTO, i.GALONES, t.DESCRIPCION "
+                    + "FROM RECEPCION_INVENTARIO_DETALLE i, producto p,  TANQUE t "
+                    + "WHERE i.producto_id = p.producto_id and t.PRODUCTO_ID=p.PRODUCTO_ID and i.ESTACION_ID=t.ESTACION_ID "
+                    + "AND i.fecha = TO_DATE(?, 'dd/mm/yyyy') AND i.estacion_id = ? "
                     + "ORDER BY p.producto_id";
             pst = getConnection().prepareStatement(query);
             pst.setString(1, Constant.SDF_ddMMyyyy.format(fecha));
             pst.setInt(2, estacionId);
             ResultSet rst = pst.executeQuery();
-            InventarioDto invdto;
+            InventarioRecepcion invdto;
             int rownum = 0;
             while (rst.next()) {
-                invdto = new InventarioDto(rownum++, rst.getString(2), 0D, rst.getDate(3), rst.getInt(4), rst.getInt(5), rst.getDouble(6), rst.getDouble(7), rst.getDouble(8), null, null);
+                invdto = new InventarioRecepcion(rownum++, rst.getString(2), 0D, rst.getDate(3), rst.getInt(4), rst.getInt(5), rst.getDouble(6), rst.getDouble(7), rst.getDouble(8), null, null);
                 invdto.setInicialDto(invdto.getInicial());
                 invdto.setFinallDto(invdto.getFinall());
                 invdto.setComprasDto(invdto.getCompras());
+                invdto.setInventarioFisico(rst.getDouble(9));
+                invdto.setCompartimiento(rst.getString(10));
+                invdto.setGalonesCisterna(rst.getInt(11));
+                invdto.setTanque(rst.getString(12));
                 for (String[] item : calibraciones) {
                     if (item[0].equals(rst.getString(5))) {
                         invdto.setCalibracion(Double.parseDouble(item[1]));
@@ -382,14 +388,27 @@ public class SvcTurnoCierre extends Dao {
         return result;
     }
 
-    public Inventario doActionInventario(String action, Inventario inventario) {
-        Inventario result = new Inventario();
+    public InventarioRec doActionInventario(String action, InventarioRec inventario) {
+        InventarioRec result = new InventarioRec();
+        int idInv =0;
+        try {
+            query = "select * from (select INVRECEPCION_ID from RECEPCION_INVENTARIO order by INVRECEPCION_ID desc) where rownum=1";
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();            
+            while(rst.next()){
+                idInv = rst.getInt(1);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
         try {
             if (action.equals(Dao.ACTION_ADD)) {
-                query = "INSERT INTO inventario_coco (inicial, final, compras, creado_por, creado_persona, creado_el, fecha, estacion_id, producto_id"
-                        + ", inv_fisico, lectura_veeder, compartimiento, vol_facturado, pulgadas, galones_cisterna) "
-                        + "VALUES (?, ?, ?, ?, ?, SYSDATE, ?, ?, ?"
-                        + ", ?, ?, ?, ?, ?, ?)";
+                query = "INSERT INTO RECEPCION_INVENTARIO_DETALLE (INVRECEPCION_DET_ID,INVRECEPCION_ID, inicial, "
+                        + "final, compras, creado_por, creado_persona, creado_el, fecha, estacion_id, producto_id "
+                        + ", inv_fisico, lectura_veeder, diferencia, varianza, compartimiento, vol_facturado, galones) "
+                        + "VALUES (INVENTARIO_DETALLE_SEQ.NEXTVAL,"+idInv+",?, ?, ?, ?, ?, SYSDATE, ?, ?, ? "
+                        + ", ?, ?, ?, ?, ?, ?, ?)";
                 pst = getConnection().prepareStatement(query);
                 pst.setDouble(1, inventario.getInicial());
                 pst.setDouble(2, inventario.getFinall());
@@ -399,17 +418,18 @@ public class SvcTurnoCierre extends Dao {
                 pst.setDate(6, (java.sql.Date) inventario.getFecha());
                 pst.setInt(7, inventario.getEstacionId());
                 pst.setInt(8, inventario.getProductoId());
-pst.setObject(9, inventario.getInventarioFisico());
-pst.setObject(10, inventario.getLecturaVeederRoot());
-pst.setObject(11, inventario.getCompartimiento());
-pst.setObject(12, inventario.getVolFacturado());
-pst.setObject(13, inventario.getPulgadas());
-pst.setObject(14, inventario.getGalonesCisterna());
+                pst.setObject(9, inventario.getInventarioFisico());
+                pst.setObject(10, inventario.getLecturaVeederRoot());
+                pst.setObject(11, inventario.getDiferencia());
+                pst.setObject(12, inventario.getVarianza());
+                pst.setObject(13, inventario.getCompartimiento());
+                pst.setObject(14, inventario.getVolFacturado());
+                pst.setObject(15, inventario.getGalonesCisterna());
                 pst.executeUpdate();
             } else if (action.equals(Dao.ACTION_UPDATE)) {
-                query = "UPDATE inventario_coco "
+                query = "UPDATE RECEPCION_INVENTARIO_DETALLE "
                         + "SET final = ?, compras = ?, modificado_por = ?, modificado_persona = ?, modificado_el = SYSDATE "
-                        + " , inv_fisico = ?, lectura_veeder = ?, compartimiento = ?, vol_facturado = ?, pulgadas = ?, galones_cisterna = ? "
+                        + " , inv_fisico = ?, lectura_veeder = ?, diferencia = ?, varianza = ?, compartimiento = ?, vol_facturado = ?, galones = ? "
                         + "WHERE fecha = ? AND estacion_id = ? AND producto_id = ?";
                 pst = getConnection().prepareStatement(query);
 //                pst.setDouble(1, inventario.getInicial());
@@ -417,16 +437,17 @@ pst.setObject(14, inventario.getGalonesCisterna());
                 pst.setObject(2, inventario.getCompras());
                 pst.setString(3, inventario.getModificadoPor());
                 pst.setString(4, inventario.getModificadoPersona());
-pst.setObject(5, inventario.getInventarioFisico());
-pst.setObject(6, inventario.getLecturaVeederRoot());
-pst.setObject(7, inventario.getCompartimiento());
-pst.setObject(8, inventario.getVolFacturado());
-pst.setObject(9, inventario.getPulgadas());
-pst.setObject(10, inventario.getGalonesCisterna());
+                pst.setObject(5, inventario.getInventarioFisico());
+                pst.setObject(6, inventario.getLecturaVeederRoot());
+                pst.setObject(7, inventario.getDiferencia());
+                pst.setObject(8, inventario.getVarianza());
+                pst.setObject(9, inventario.getCompartimiento());
+                pst.setObject(10, inventario.getVolFacturado());
+                pst.setObject(11, inventario.getGalonesCisterna());
                 //pk
-                pst.setDate(11, (java.sql.Date) inventario.getFecha());
-                pst.setInt(12, inventario.getEstacionId());
-                pst.setInt(13, inventario.getProductoId());
+                pst.setDate(12, (java.sql.Date) inventario.getFecha());
+                pst.setInt(13, inventario.getEstacionId());
+                pst.setInt(14, inventario.getProductoId());
                 pst.executeUpdate();
             }
         } catch (Exception exc) {
@@ -437,12 +458,12 @@ pst.setObject(10, inventario.getGalonesCisterna());
         return result;
     }
     
-    public RecepcionDto doActionInvRecepcion(String action, RecepcionDto invrecep) {
-        RecepcionDto result = new RecepcionDto();
+    public RecepcionInventario doActionInvRecepcion(String action, RecepcionInventario invrecep) {
+        RecepcionInventario result = new RecepcionInventario();
         try {
             if (action.equals(Dao.ACTION_ADD)) {
-                query = "INSERT INTO inv_recepcion (invrecepcion_id, fecha, pais_id, estacion_id, piloto, unidad, factura, creado_por) "
-                        + "VALUES (inv_recepcion_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
+                query = "INSERT INTO RECEPCION_INVENTARIO (INVRECEPCION_ID, FECHA, PAIS_ID, ESTACION_ID, PILOTO, UNIDAD, FACTURA, CREADO_POR) "
+                        + "VALUES (RECEPCION_INVENTARIO_SEQ.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, new java.sql.Date(invrecep.getFecha().getTime()));
                 pst.setObject(2, invrecep.getPais_id());
@@ -460,6 +481,35 @@ pst.setObject(10, inventario.getGalonesCisterna());
         }
         return result;
     }
-    
-    
+    public List<RecepcionInventario> getRecepcion(Integer pais, Integer estacion, Date fecha) {
+        List<RecepcionInventario> result = new ArrayList();
+        ResultSet rst = null;
+        String dateString = Constant.SDF_ddMMyyyy.format(fecha);
+        try {
+            miQuery = "select INVRECEPCION_ID,PILOTO,UNIDAD,FACTURA "
+                    + "from RECEPCION_INVENTARIO "
+                    + "where PAIS_ID="+pais+" and ESTACION_ID="+estacion+" and FECHA = to_date('"+dateString+"','dd/mm/yyyy')";
+            System.out.println("quer... "+miQuery);
+            pst = getConnection().prepareStatement(miQuery);
+            rst = pst.executeQuery();
+            while (rst.next()) {
+                RecepcionInventario rec = new RecepcionInventario();
+                rec.setInvrecepcion_id(rst.getInt(1));
+                rec.setPiloto(rst.getString(2));
+                rec.setUnidad(rst.getString(3));
+                rec.setFactura(rst.getString(4));
+                result.add(rec);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
 }
