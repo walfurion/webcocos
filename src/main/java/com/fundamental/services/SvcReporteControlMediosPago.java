@@ -22,7 +22,6 @@ public class SvcReporteControlMediosPago extends Dao {
     public ArrayList<GenericEstacion> getCheckEstacionesM(Integer idpais) {
         ArrayList<GenericEstacion> result = new ArrayList<GenericEstacion>();
         GenericEstacion gnestacion = new GenericEstacion();
-        CheckBox check = new CheckBox();
         try {
             query = "Select estacion_id,nombre from estacion where pais_id ="+idpais;
             pst = getConnection().prepareStatement(query);
@@ -31,10 +30,6 @@ public class SvcReporteControlMediosPago extends Dao {
                 gnestacion = new GenericEstacion();
                 gnestacion.setEstacionid(rst.getInt(1));
                 gnestacion.setNombre(rst.getString(2));
-                check = new CheckBox(gnestacion.getNombre());
-                check.setId(gnestacion.getNombre());
-                check.setStyleName(ValoTheme.CHECKBOX_SMALL);
-//                gnestacion.setCheck(check);
                 result.add(gnestacion);
             }
         } catch (Exception exc) {
