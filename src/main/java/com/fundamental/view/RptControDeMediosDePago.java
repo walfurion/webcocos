@@ -3,6 +3,7 @@ package com.fundamental.view;
 import com.fundamental.model.Dia;
 import com.fundamental.model.Turno;
 import com.fundamental.model.Utils;
+import com.fundamental.services.SvcMedioPago;
 import com.fundamental.services.SvcMtd;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcUsuario;
@@ -35,10 +36,27 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import com.fundamental.services.SvcReporteControlMediosPago;
+import com.fundamental.utils.XlsxReportGenerator;
 import com.sisintegrados.generic.bean.GenericEstacion;
 import com.vaadin.data.util.BeanContainer;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.Sizeable;
+import com.vaadin.server.StreamResource;
 import com.vaadin.ui.OptionGroup;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC;
+import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -46,7 +64,7 @@ import java.util.Locale;
  */
 public class RptControDeMediosDePago extends Panel implements View {
 
-CreateComponents components = new CreateComponents();
+    CreateComponents components = new CreateComponents();
     Label lblUltimoDia = new Label();
     Label lblUltimoTurno = new Label();
     ComboBox cmbPais = new ComboBox();
@@ -63,6 +81,7 @@ CreateComponents components = new CreateComponents();
     Button btnExportar = new Button("Exportar a Excel", FontAwesome.EDIT);
     Button btnSelectAll;
     Button btnUnselectAll;
+
     //traer estaciones con su checkbox
     BeanContainer<Integer, GenericEstacion> checkestacionesm = new BeanContainer<>(GenericEstacion.class);
     OptionGroup optStation = new OptionGroup();
@@ -75,8 +94,14 @@ CreateComponents components = new CreateComponents();
         usuario = VaadinSession.getCurrent().getAttribute(Usuario.class);
         super.setContent(components.createVertical(Constant.styleTransactions, "100%", false, true, true, new Component[]{buildForm()}));
         checkestacionesm.setBeanIdProperty("estacionid");
-        cargaInfoSesion();
+       // cargaInfoSesion();
+
+//        //Para exportar
+//        StreamResource sre = getExcelStreamResourceFilas();
+//        FileDownloader fdr = new FileDownloader(sre);
+//        fdr.extend(btnExportar);
     }
+    Pais pais;
 
     private Component buildForm() {
         return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), /*buildToolbar2(),*/ buildButtons()});
@@ -103,7 +128,7 @@ CreateComponents components = new CreateComponents();
         cmbPais.setRequired(true);
         cmbPais.setNullSelectionAllowed(false);
         cmbPais.setRequiredError("Debe seleccionar un país");
-        cmbPais.addStyleName(ValoTheme.COMBOBOX_SMALL);
+        cmbPais.addStyleName(ValoTheme.COMBOBOX_TINY);
         cmbPais.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
@@ -114,14 +139,15 @@ CreateComponents components = new CreateComponents();
                     toolbarContainerTables.removeAllComponents();
                     VerticalLayout vl = new VerticalLayout();
                     HorizontalLayout hl = new HorizontalLayout();
-                    HorizontalLayout hlroot = new HorizontalLayout(); 
-                     hlroot.setSpacing(true);
+                    HorizontalLayout hlroot = new HorizontalLayout();
+                    hlroot.setSpacing(true);
                     hlroot.setResponsive(true);
                     btnSelectAll = new Button("Todas");
+                    btnSelectAll.setStyleName(ValoTheme.BUTTON_TINY);
                     btnSelectAll.setStyleName(ValoTheme.BUTTON_FRIENDLY);
                     btnSelectAll.setStyleName(ValoTheme.BUTTON_LINK);
                     btnSelectAll.addClickListener(new Button.ClickListener() {
-                    @Override
+                        @Override
                         public void buttonClick(Button.ClickEvent event) {
                             optStation.select(361);
                             optStation.select(checkestacionesm.getIdByIndex(2));
@@ -131,6 +157,7 @@ CreateComponents components = new CreateComponents();
                         }
                     });
                     btnUnselectAll = new Button("Ninguna");
+                    btnUnselectAll.setStyleName(ValoTheme.BUTTON_TINY);
                     btnUnselectAll.setStyleName(ValoTheme.BUTTON_FRIENDLY);
                     btnUnselectAll.setStyleName(ValoTheme.BUTTON_LINK);
                     btnUnselectAll.addClickListener(new Button.ClickListener() {
@@ -168,7 +195,7 @@ CreateComponents components = new CreateComponents();
         cmbFechaInicio.setRangeEnd(Date.from(Instant.now()));
         cmbFechaInicio.setLocale(new Locale("es", "ES"));
         cmbFechaInicio.setLenient(true);
-        cmbFechaInicio.addStyleName(ValoTheme.DATEFIELD_SMALL);
+        cmbFechaInicio.addStyleName(ValoTheme.DATEFIELD_TINY);
         cmbFechaInicio.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
@@ -180,7 +207,7 @@ CreateComponents components = new CreateComponents();
         cmbFechaFin.setRangeEnd(Date.from(Instant.now()));
         cmbFechaFin.setLocale(new Locale("es", "ES"));
         cmbFechaFin.setLenient(true);
-        cmbFechaFin.addStyleName(ValoTheme.DATEFIELD_SMALL);
+        cmbFechaFin.addStyleName(ValoTheme.DATEFIELD_TINY);
         cmbFechaFin.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
@@ -211,18 +238,16 @@ CreateComponents components = new CreateComponents();
         btnGenerar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(final Button.ClickEvent event) {
-                if (ultimoDia.getFecha() != null && ultimoDia.getEstadoId() == 2 && ultimoDia.getFecha().equals(cmbFechaInicio.getValue())) {
-                    Notification.show("ERROR:", "Para la fecha elegida, existe un día cerrado.", Notification.Type.ERROR_MESSAGE);
-                    return;
-                }
+                 String fecha_ini;
+                 String fecha_fin;
+                 Integer estaciones;
+                 String paisid;
+                 Connection cn = null;
 
-                boolean everythingOk = false;  //SOLO EJEMPLO 
-                if (everythingOk) {
-
-                } else {
-                    Notification.show("ERROR:", "Ocurrió un error al guardar el precio.\n", Notification.Type.ERROR_MESSAGE);
-                    return;
-                }
+                 
+       // CallableStatement cst = cn.prepareCall("{call rep (?,?,?,?)}");
+        
+       
             }
         });
 
@@ -230,7 +255,7 @@ CreateComponents components = new CreateComponents();
         btnExportar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-               /*Devulevo una lista de string seleccionados*/
+                /*Devulevo una lista de string seleccionados*/
                 String[] Seleccion;
                 Seleccion = getSeleccion();
                 /*Recorro la seleccion de estaciones para enviarlas al query*/
@@ -267,14 +292,13 @@ CreateComponents components = new CreateComponents();
             }
         });
 
-
         HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnGenerar, btnExportar});
 
         footer.setComponentAlignment(btnGenerar, Alignment.TOP_RIGHT);
         footer.setWidth(
-                100.0f, Unit.PERCENTAGE);
+                100.0f, Sizeable.Unit.PERCENTAGE);
         return footer;
-    }            
+    }
 
     private String[] getSeleccion() {
         String[] result;
@@ -312,18 +336,81 @@ CreateComponents components = new CreateComponents();
         toolBar2.addComponent(utils.vlContainer2(lblUltimoTurno));
     }
 
-    private void cargaInfoSesion() {
-        if (usuario.getPaisId() != null) {
-            int i = 0;
-            for (i = 0; i < contPais.size(); i++) {
-                Pais hh = new Pais();
-                hh = contPais.getIdByIndex(i);
-                if (usuario.getPaisId().toString().trim().equals(hh.getPaisId().toString().trim())) {
-                    cmbPais.setValue(contPais.getIdByIndex(i));
-                }
-            }
-        }
-    }
+//    private StreamResource getExcelStreamResourceFilas() {
+//        StreamResource.StreamSource source = new StreamResource.StreamSource() {
+//            public InputStream getStream() {
+//                ByteArrayOutputStream stream;
+//                InputStream input = null;
+//              //  try {
+//                    List<String> lTitles = new ArrayList(Arrays.asList("FECHA", "LOTE", "MONTO BRUTO", "COMISION", "MONTO NETO", "COMENTARIO"));
+//                    List<Integer> lTypes = new ArrayList(Arrays.asList(CELL_TYPE_STRING, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC, CELL_TYPE_STRING));
+//
+//                    SvcMedioPago svcMP = new SvcMedioPago();
+//                    pais = (Pais) cmbPais.getValue();
+////                    checkestacionesm = svcMP.getCheckEstacionesM();
+////                    checkestacionesm.addAll(svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2));
+////                
+//                    Integer paisId = (cmbPais != null && cmbPais.getValue() != null) ? ((Pais) cmbPais.getValue()).getPaisId() : null;
+////                    midata = svcMP.getMediospagoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
+////                    midata1 = svcMP.getEfectivoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
+// //                   List<String[]> dataVol = svcMP.getVolumenesReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
+//                    svcMP.closeConnections();
+//
+////Quitamos la columna mediopago_id
+//                    List<String[]> data = new ArrayList();
+// //                   for (String[] dato : midata) {
+//                        data.add(new String[]{
+// //                           dato[0], dato[1], dato[2], dato[3], dato[4], dato[6], dato[7]
+//                        });
+//                    }
+////for (String[] dato : midata1) {
+////    data.add(new String[]{ 
+////        dato[0], dato[1], dato[2], dato[3], dato[4], dato[6], dato[7]
+////    });
+////}
+//
+//                    XlsxReportGenerator xrg = new XlsxReportGenerator();
+// //                   XSSFWorkbook workbook = xrg.generate(null, "Medios de pago", new HashMap(), lTitles.toArray(new String[lTitles.size()]), data, lTypes.toArray(new Integer[lTypes.size()]));
+//
+////-- Para generar dos reportes en un mismo archivo de Excel
+//              //      lTitles = new ArrayList(Arrays.asList("CÓDIGO", "BU", "DEPÓSITO", "ESTACIÓN", "DÍA", "CÓDIGO NUM", "CÓDIGO ALF", "PRODUCTO", "VOLUMEN", "MONTO"));
+//                //    lTypes = new ArrayList(Arrays.asList(4, 4, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC));
+//                //    workbook = xrg.generate(workbook, "Volúmenes", new HashMap(), lTitles.toArray(new String[lTitles.size()]), dataVol, lTypes.toArray(new Integer[lTypes.size()]));
+////-- Para generar dos reportes en un mismo archivo de Excel
+//
+//                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//                    try {
+//                 //       workbook.write(bos);
+//                    } catch (Exception exc) {
+//                  //      bos.close();
+//                    }
+//
+//                    stream = bos;
+//                    input = new ByteArrayInputStream(stream.toByteArray());
+//
+//              //  } catch (Exception ex) {
+//              //      ex.printStackTrace();
+//            //    }
+//        //        return input;
+//        //    }
+//     //   };
+////        String fileName = "COCOs_MediosPago_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
+////        StreamResource resource = new StreamResource(source, fileName);
+////        return resource;
+////    }
+////
+////    private void cargaInfoSesion() {
+////        if (usuario.getPaisId() != null) {
+////            int i = 0;
+////            for (i = 0; i < contPais.size(); i++) {
+////                Pais hh = new Pais();
+////                hh = contPais.getIdByIndex(i);
+////                if (usuario.getPaisId().toString().trim().equals(hh.getPaisId().toString().trim())) {
+////                    cmbPais.setValue(contPais.getIdByIndex(i));
+////                }
+////            }
+////        }
+////    }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
