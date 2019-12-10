@@ -546,9 +546,10 @@ public class Dao {
         List<Producto> result = new ArrayList();
         ResultSet rst = null;
         try {
-            miQuery = "SELECT p.producto_id, p.nombre, p.codigo, p.estado, p.orden_pos "
-                    + "FROM estacion_producto ep, producto p "
-                    + "WHERE ep.producto_id = p.producto_id AND p.tipo_id = 1 AND ep.estacion_id = " + estacionId
+            miQuery = "SELECT p.producto_id, p.nombre, p.codigo, p.estado, p.orden_pos, t.DESCRIPCION "
+                    + "FROM estacion_producto ep, producto p, TANQUE t "
+                    + "WHERE ep.producto_id = p.producto_id and t.PRODUCTO_ID=p.PRODUCTO_ID and t.ESTACION_ID=ep.ESTACION_ID "
+                    + "AND p.tipo_id = 1 AND ep.estacion_id = " + estacionId
                     + " ORDER BY p.producto_id";
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
@@ -557,6 +558,7 @@ public class Dao {
                 product = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), null, rst.getInt(5));
                 product.setPriceAS(0D);
                 product.setPriceSC(0D);
+                product.setTanque(rst.getString(6));
                 result.add(product);
             }
         } catch (Exception exc) {
@@ -1042,7 +1044,8 @@ public class Dao {
         try {
             miQuery = "SELECT estacion_id, fecha, estado_id, creado_por, creado_persona "
                     + "FROM dia "
-                    + "WHERE estado_id = 1 AND estacion_id = " + estacionId;
+                    + "WHERE estado_id = 1 AND estacion_id = " + estacionId+ " "
+                    + " ORDER BY fecha DESC ";
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             result = (rst.next()) ? new Dia(rst.getInt(1), rst.getDate(2), rst.getInt(3), rst.getString(4), rst.getString(5)) : result;
