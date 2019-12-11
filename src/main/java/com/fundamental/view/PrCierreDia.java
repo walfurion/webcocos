@@ -366,8 +366,6 @@ public class PrCierreDia extends Panel implements View {
                         item.setLecturaVeederRoot(item.getInicialDto()+item.getComprasDto()-item.getVentasCons());
                         item.setDiferencia(item.getInventarioFisico()-item.getLecturaVeederRoot());
                         item.setVarianza((item.getDiferencia()/item.getVentasCons())*100);
-                        System.out.println("inicial2222 "+item.getInicialDto());
-                        System.out.println("compras2222 "+item.getComprasDto());
                     }
                 }
             }
