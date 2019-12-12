@@ -1,585 +1,425 @@
 package com.fundamental.view;
 
-import com.fundamental.model.Acceso;
-import com.fundamental.model.Mediopago;
+import com.fundamental.model.Dia;
+import com.fundamental.model.Turno;
+import com.fundamental.model.Utils;
+import com.fundamental.services.SvcMedioPago;
+import com.fundamental.services.SvcMtd;
+import com.fundamental.services.SvcTurno;
+import com.fundamental.services.SvcUsuario;
+import com.fundamental.utils.Constant;
+import com.fundamental.utils.CreateComponents;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
-import com.fundamental.model.Utils;
-import com.fundamental.services.Dao;
-import com.fundamental.services.SvcMedioPago;
-import com.fundamental.utils.XlsxReportGenerator;
+import com.vaadin.data.Property;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Responsive;
-import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DateField;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import com.fundamental.services.SvcReporteControlMediosPago;
+import com.fundamental.utils.XlsxReportGenerator;
+import com.sisintegrados.generic.bean.GenericEstacion;
+import com.sisintegrados.generic.bean.GenericRprControlMediosPago;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.Sizeable;
+import com.vaadin.server.StreamResource;
+import com.vaadin.ui.OptionGroup;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
-import org.vaadin.maddon.ListContainer;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
- * @author Henry Barrientos
+ *
+ * @author Mery
  */
 public class RptControDeMediosDePago extends Panel implements View {
 
-//    String currency;
-    DateField dfdFechaInicial, dfdFechaFinal;
-    ComboBox cbxPais;
-    Button btnGenerar;
-    Button btnGenerarFilas;
-
-    List<Mediopago> allMediospago;
-//    List<Mediopago> allMediosEfectivo;
-    List<String[]> midata;//, midata1;
-    List<String[]> midataFilas, midata1Filas;
-    List<List<String[]>> arlmidata;//, midata1;
-    List<Pais> paises = new ArrayList();
-
-//    template
-    VerticalLayout vlRoot;
+    CreateComponents components = new CreateComponents();
+    Label lblUltimoDia = new Label();
+    Label lblUltimoTurno = new Label();
+    ComboBox cmbPais = new ComboBox();
+    DateField cmbFechaInicio = new DateField("Fecha Inicio:");
+    DateField cmbFechaFin = new DateField("Fecha Fin:");
+    Usuario usuario = new Usuario();
+    Dia ultimoDia;
+    Turno ultimoTurno;
     Utils utils = new Utils();
-    Usuario user;
-    Acceso acceso = new Acceso();
+    SvcTurno dao = new SvcTurno();
+    SvcReporteControlMediosPago SvcReporteControlMediosPago = new SvcReporteControlMediosPago();
+    BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
+    Button btnGenerar = new Button("Generar Reporte");
+    Button btnExportar = new Button("Exportar a Excel", FontAwesome.EDIT);
+    Button btnSelectAll;
+    Button btnUnselectAll;
+
+    //traer estaciones con su checkbox
+    BeanContainer<Integer, GenericEstacion> checkestacionesm = new BeanContainer<>(GenericEstacion.class);
+    OptionGroup optStation = new OptionGroup();
 
     public RptControDeMediosDePago() {
-        addStyleName(ValoTheme.PANEL_BORDERLESS);
-        setSizeFull();
+        super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
+        super.addStyleName(ValoTheme.PANEL_BORDERLESS);
+        super.setSizeFull();
         DashboardEventBus.register(this);
-        vlRoot = new VerticalLayout();
-        vlRoot.setSizeFull();
-        vlRoot.setMargin(true);
-        vlRoot.addStyleName("dashboard-view");
-        setContent(vlRoot);
-        Responsive.makeResponsive(vlRoot);
-        user = (Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName());
-//        currency = user.getPaisLogin().getMonedaSimbolo().concat(". ");
-        vlRoot.addComponent(utils.buildHeader("Reporte medios de pago", true, true));
-        vlRoot.addComponent(utils.buildSeparator());
-        getAllData();
+        usuario = VaadinSession.getCurrent().getAttribute(Usuario.class);
+        super.setContent(components.createVertical(Constant.styleTransactions, "100%", false, true, true, new Component[]{buildForm()}));
+        checkestacionesm.setBeanIdProperty("estacionid");
+       // cargaInfoSesion();
 
-        CssLayout content = new CssLayout();
-        Responsive.makeResponsive(content);
-        content.addStyleName("dashboard-panels");
-        content.setSizeUndefined();
-
-        CssLayout contentDos = new CssLayout();
-        Responsive.makeResponsive(contentDos);
-        contentDos.addStyleName("dashboard-panels");
-        contentDos.setSizeUndefined();
-
-        vlRoot.addComponents(content, contentDos);
-        vlRoot.setExpandRatio(content, .25f);
-        vlRoot.setExpandRatio(contentDos, .25f);
-//        template
-
-        buildButtons();
-
-//        VerticalLayout vlContMargSup = new VerticalLayout();
-//        vlContMargSup.addComponent(btnGenerar);
-//        vlContMargSup.setSizeUndefined();
-//        Responsive.makeResponsive(vlContMargSup);
-//CssLayout contentUno = new CssLayout();
-//Responsive.makeResponsive(contentUno);
-//contentUno.addComponents(utils.vlContainer(dfdFechaInicial), utils.vlContainer(dfdFechaFinal), utils.vlContainer(cbxPais), btnGenerar);
-//Panel pnlUno = new Panel("Generar en columnas");
-//pnlUno.setWidth(100f, Unit.PERCENTAGE);
-//pnlUno.setHeightUndefined();
-//pnlUno.setContent(contentUno);
-//        vlRoot.addComponents();
-        content.addComponents(utils.vlContainer(dfdFechaInicial), utils.vlContainer(dfdFechaFinal), utils.vlContainer(cbxPais));
-        contentDos.addComponents(btnGenerar, btnGenerarFilas);
-
-        //Para exportar
-        StreamResource sr = getExcelStreamResource();
-        FileDownloader fileDownloader = new FileDownloader(sr);
-        fileDownloader.extend(btnGenerar);
-
-        //Para exportar
-        StreamResource sre = getExcelStreamResourceFilas();
-        FileDownloader fdr = new FileDownloader(sre);
-        fdr.extend(btnGenerarFilas);
+//        //Para exportar
+//        StreamResource sre = getExcelStreamResourceFilas();
+//        FileDownloader fdr = new FileDownloader(sre);
+//        fdr.extend(btnExportar);
     }
     Pais pais;
 
-    private void getAllData() {
-        SvcMedioPago svcMP = new SvcMedioPago();
-//        pais = (Pais) ((cbxPais != null && cbxPais.getValue() != null)
-//                ? cbxPais.getValue() : ((user.getPaisLogin() != null) ? user.getPaisLogin() : new Pais()));
-
-//        allMediospago = svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 1);
-//        allMediospago.addAll(svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2));   //Se agregan los de efectivo
-//        allMediosEfectivo = svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2);
-        pais = new Pais();
-        if ((cbxPais != null && cbxPais.getValue() != null)) {
-            pais = (Pais) cbxPais.getValue();
-        } else if (user.getPaisLogin() != null) {   //elegido en login
-            pais = user.getPaisLogin();
-        } else if (user.getPaisId() != null && user.getPaisId() > 0) { //en mantenimiento
-            for (Pais p : svcMP.getAllPaises()) {
-                if (p.getPaisId().equals(user.getPaisId())) {
-                    pais = p;
-                    break;
-                }
-            }
-        }
-        if (pais.getPaisId() != null && pais.getPaisId() > 0) {
-            paises.add(pais);
-        } else {
-            paises = svcMP.getAllPaises();
-        }
-        svcMP.closeConnections();
+    private Component buildForm() {
+        return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), /*buildToolbar2(),*/ buildButtons()});
     }
 
-    private void buildButtons() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, -1);
-        dfdFechaInicial = new DateField("Fecha inicial:", cal.getTime());
-        dfdFechaInicial.setLocale(new Locale("es", "ES"));
-        dfdFechaInicial.setRequired(true);
-        System.out.println("FECHAINICIAL " + dfdFechaInicial);
+    private Component buildTitle() {
+        Label title = new Label("Control de medios de pago");
+        title.setSizeUndefined();
+        title.addStyleName(ValoTheme.LABEL_H1);
+        title.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+        Component toolBar = components.createHorizontal(Constant.styleToolbar, Constant.sizeUndefined, true, false, false, new Component[]{buildToolbar()});
+        return components.createHorizontal(Constant.styleViewheader, Constant.sizeUndefined, true, false, false, new Component[]{title, toolBar});
+    }
 
-        dfdFechaFinal = new DateField("Fecha final:", new Date());
-        dfdFechaFinal.setLocale(new Locale("es", "ES"));
-        dfdFechaFinal.setRequired(true);
-        System.out.println("FECHAFINAL " + dfdFechaFinal);
+    private Component buildHeader() {
+        contPais = new BeanItemContainer<Pais>(Pais.class);
+        contPais.addAll(dao.getAllPaises());
+        cargaUltTurnoDia();
+        cmbPais = new ComboBox("País:", contPais);
+        cmbPais.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+        cmbPais.setItemCaptionPropertyId("nombre");
+        cmbPais.setItemIconPropertyId("flag");
+        cmbPais.setWidth("165px");
+        cmbPais.setRequired(true);
+        cmbPais.setNullSelectionAllowed(false);
+        cmbPais.setRequiredError("Debe seleccionar un país");
+        cmbPais.addStyleName(ValoTheme.COMBOBOX_TINY);
+        cmbPais.addListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(final Property.ValueChangeEvent event) {
+                if (cmbPais.getValue() != null) {
+                    Pais pais = new Pais();
+                    pais = (Pais) cmbPais.getValue();
+                    checkestacionesm.addAll(SvcReporteControlMediosPago.getCheckEstacionesM(pais.getPaisId()));
+                    toolbarContainerTables.removeAllComponents();
+                    VerticalLayout vl = new VerticalLayout();
+                    HorizontalLayout hl = new HorizontalLayout();
+                    HorizontalLayout hlroot = new HorizontalLayout();
+                    hlroot.setSpacing(true);
+                    hlroot.setResponsive(true);
+                    btnSelectAll = new Button("Todas");
+                    btnSelectAll.setStyleName(ValoTheme.BUTTON_TINY);
+                    btnSelectAll.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+                    btnSelectAll.setStyleName(ValoTheme.BUTTON_LINK);
+                    btnSelectAll.addClickListener(new Button.ClickListener() {
+                        @Override
+                        public void buttonClick(Button.ClickEvent event) {
+                            optStation.select(361);
+                            optStation.select(checkestacionesm.getIdByIndex(2));
+                            for (int i = 0; i < optStation.size(); i++) {
+                                optStation.select(checkestacionesm.getIdByIndex(i));
+                            }
+                        }
+                    });
+                    btnUnselectAll = new Button("Ninguna");
+                    btnUnselectAll.setStyleName(ValoTheme.BUTTON_TINY);
+                    btnUnselectAll.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+                    btnUnselectAll.setStyleName(ValoTheme.BUTTON_LINK);
+                    btnUnselectAll.addClickListener(new Button.ClickListener() {
+                        @Override
+                        public void buttonClick(Button.ClickEvent event) {
+                            optStation.select(361);
+                            optStation.select(checkestacionesm.getIdByIndex(2));
+                            for (int i = 0; i < optStation.size(); i++) {
+                                optStation.unselect(checkestacionesm.getIdByIndex(i));
+                            }
+                        }
+                    });
+                    hl.addComponent(btnSelectAll);
+                    hl.addComponent(btnUnselectAll);
+//                    vl.setSpacing(true);
+                    vl.setResponsive(true);
+                    Label lblestacion = new Label("Estaciones");
+                    lblestacion.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+                    vl.addComponent(lblestacion);
+                    optStation = new OptionGroup(null, checkestacionesm);
+                    optStation.setMultiSelect(true);
+                    vl.addComponent(optStation);
+                    for (Integer noid : checkestacionesm.getItemIds()) {
+                        optStation.setItemCaption(checkestacionesm.getItem(noid).getBean().getEstacionid(), checkestacionesm.getItem(noid).getBean().getNombre());
+                    }
+                    hlroot.addComponent(vl);
+                    hlroot.addComponent(hl);
+                    toolbarContainerTables.addComponent(hlroot);
+                }
+            }
+        });
 
-        cbxPais = new ComboBox("País:", new ListContainer<Pais>(Pais.class, paises));
-        cbxPais.setItemCaptionPropertyId("nombre");
-        cbxPais.setSizeUndefined();
-        cbxPais.setItemIconPropertyId("flag");
-        cbxPais.setNullSelectionAllowed(false);
-//        cbxPais.addValueChangeListener(new Property.ValueChangeListener() {
-//            @Override
-//            public void valueChange(Property.ValueChangeEvent event) {
-//            }
-//        });
+        cmbFechaInicio.setWidth("135px");
+        cmbFechaInicio.setDateFormat("dd/MM/yyyy");
+        cmbFechaInicio.setRangeEnd(Date.from(Instant.now()));
+        cmbFechaInicio.setLocale(new Locale("es", "ES"));
+        cmbFechaInicio.setLenient(true);
+        cmbFechaInicio.addStyleName(ValoTheme.DATEFIELD_TINY);
+        cmbFechaInicio.addListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(final Property.ValueChangeEvent event) {
+            }
+        });
 
-        btnGenerar = new Button("Generar en columnas", FontAwesome.FILE_EXCEL_O);
+        cmbFechaFin.setWidth("135px");
+        cmbFechaFin.setDateFormat("dd/MM/yyyy");
+        cmbFechaFin.setRangeEnd(Date.from(Instant.now()));
+        cmbFechaFin.setLocale(new Locale("es", "ES"));
+        cmbFechaFin.setLenient(true);
+        cmbFechaFin.addStyleName(ValoTheme.DATEFIELD_TINY);
+        cmbFechaFin.addListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(final Property.ValueChangeEvent event) {
+            }
+        });
+        Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(cmbPais),/* utils.vlContainer(cmbEstacion),*/ utils.vlContainer(cmbFechaInicio), utils.vlContainer(cmbFechaFin), utils.vlContainer(buildToolbar2())});
+        VerticalLayout v = new VerticalLayout(toolBar);
+        return components.createHorizontal(Constant.styleViewheader, Constant.sizeFull, false, false, true, new Component[]{v});
+    }
+    private CssLayout toolbarContainerTables;
+
+    private Component buildToolbar2() {
+        toolbarContainerTables = new CssLayout();
+//        return toolbarContainerTables;
+        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarContainerTables)});
+    }
+    private CssLayout toolBar2;
+
+    private Component buildToolbar() {
+        toolBar2 = new CssLayout();
+        VerticalLayout v = new VerticalLayout(toolBar2);
+        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{v});
+    }
+
+    private Component buildButtons() {
         btnGenerar.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+        btnGenerar.setIcon(FontAwesome.SAVE);
+        btnGenerar.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(final Button.ClickEvent event) {
+                if (cmbPais.getValue() != null && cmbFechaInicio.getValue() != null && cmbFechaFin.getValue() != null && optStation.size() > 0) {
+                    try {
+                        SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), 361,"188");
+                        ArrayList<GenericRprControlMediosPago> listadb = new ArrayList<GenericRprControlMediosPago>();
+                        listadb = SvcReporteControlMediosPago.getCtlMediosPago();
+                        for (GenericRprControlMediosPago GenericRprControlMediosPago : listadb) {
+                            System.out.println(" RECUPERE "+GenericRprControlMediosPago.getMonto_neto());
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    Notification.show("ERROR:", "Ocurrió un error al guardar el precio.\n", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
+            }
+        });
 
-        btnGenerarFilas = new Button("Generar en filas", FontAwesome.FILE_EXCEL_O);
-        btnGenerarFilas.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+        btnExportar.setStyleName(ValoTheme.BUTTON_PRIMARY);
+        btnExportar.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+                /*Devulevo una lista de string seleccionados*/
+                String[] Seleccion;
+                Seleccion = getSeleccion();
+                /*Recorro la seleccion de estaciones para enviarlas al query*/
+                for (String string : Seleccion) {
+//                    System.out.println(" Tamaño " + string.length());
+//*Ejemplo de query */
+                    System.out.println("Select * from estacion where estacion_id = " + string.trim());
+                }
+//                Integer algo;
+//                algo = (Integer) checkestaciones.getIdByIndex(2);
+//
+//                System.out.println("objetos " + optStation.getValue());
+////                System.out.println("objetos " + rayos);
+//                System.out.println("algo " + algo);
+//                System.out.println("Valor " + valor);
+
+//                listaestaciones.add(checkestaciones.getItem(optStation.getValue()).getBean());
+//                System.out.println(" ALGO "+algo.length);
+//                String algo = optStation.getValue();
+//                for (String string : algo) {
+//                    System.out.println("TVALOR GRUPO "+string);
+//                }
+//                System.out.println("TVALOR GRUPO "+optStation.getValue());
+//                if (bcrPrecios.getItemIds().size() == counter) {
+//                    Notification notif = new Notification("ÉXITO:", "El registro se ha actualizado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
+//                    notif.setDelayMsec(3000);
+//                    notif.setPosition(Position.MIDDLE_CENTER);
+//                    notif.show(Page.getCurrent());
+//                    UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_TURN.getViewName());
+//                } else {
+//                    Notification.show("ERROR:", "Ocurrió un error al actualizar el registro.\n", Notification.Type.ERROR_MESSAGE);
+//                    return;
+//                }
+            }
+        });
+
+        HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnGenerar, btnExportar});
+
+        footer.setComponentAlignment(btnGenerar, Alignment.TOP_RIGHT);
+        footer.setWidth(
+                100.0f, Sizeable.Unit.PERCENTAGE);
+        return footer;
     }
 
-    private StreamResource getExcelStreamResource() {
-        StreamResource.StreamSource source = new StreamResource.StreamSource() {
-            public InputStream getStream() {
-                ByteArrayOutputStream stream;
-                InputStream input = null;
-                try {
+    private String[] getSeleccion() {
+        String[] result;
+        String valor = String.valueOf(optStation.getValue());
+        valor = valor.replaceAll("\\[", "");
+        valor = valor.replaceAll("\\]", "");
+        valor = valor.trim();
+        result = valor.split(",");
+        return result;
+    }
 
-                    if (cbxPais == null || cbxPais.getValue() == null) {
-                        Notification.show("ERROR:", "Todos los campos son requeridos.", Notification.Type.ERROR_MESSAGE);
-                        return null;
-                    }
+    private void cargaUltTurnoDia() {
+        SvcUsuario svu = new SvcUsuario();
+        usuario = svu.getLastTurnLastDay(usuario);
+        if (usuario.getDia() == null) {
+            lblUltimoDia.setValue("SIN DATOS REGISTRADOS");
+            lblUltimoTurno.setValue("SIN DATOS REGISTRADOS");
+        } else {
+            lblUltimoDia.setValue("Último día: " + usuario.getDia().getDia() + " (" + usuario.getDia().getEstado() + ")");
+            lblUltimoTurno.setValue("Último turno: " + usuario.getTurno().getTurno() + " (" + usuario.getTurno().getEstado() + ")");
+        }
 
-                    SvcMedioPago svcMP = new SvcMedioPago();
-                    pais = (Pais) cbxPais.getValue();
-                    allMediospago = svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 1);
-                    allMediospago.addAll(svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2));
-//                allMediosEfectivo = svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2);
-                    Integer paisId = (cbxPais != null && cbxPais.getValue() != null) ? ((Pais) cbxPais.getValue()).getPaisId() : null;
+        lblUltimoDia.addStyleName(ValoTheme.LABEL_BOLD);
+        lblUltimoDia.addStyleName(ValoTheme.LABEL_H3);
+        lblUltimoDia.addStyleName(ValoTheme.LABEL_COLORED);
+        lblUltimoDia.setWidth("35%");
 
-                    midata = svcMP.getMediospagoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-                    svcMP.closeConnections();
+        lblUltimoTurno.addStyleName(ValoTheme.LABEL_BOLD);
+        lblUltimoTurno.addStyleName(ValoTheme.LABEL_H3);
+        lblUltimoTurno.addStyleName(ValoTheme.LABEL_COLORED);
+        lblUltimoTurno.setSizeUndefined();
 
-                    Map<Integer, Integer> mapPosTitle = new HashMap();
-                    int index, colIniciales = 5;
-                    List<String> lTitles = new ArrayList();
-                    List<Integer> lTypes = new ArrayList();
-                    lTitles.add("FECHA");
-                    lTitles.add("CODIGO");
-                    lTitles.add("BU");
-                    lTitles.add("DEPOSITO");
-                    lTitles.add("ESTACION");
-                    lTypes.add(CELL_TYPE_STRING);
-                    lTypes.add(CELL_TYPE_STRING);
-                    lTypes.add(CELL_TYPE_STRING);
-                    lTypes.add(CELL_TYPE_STRING);
-                    lTypes.add(CELL_TYPE_STRING);
-                    index = colIniciales;
-                    for (Mediopago mp : allMediospago) {
-                        lTitles.add(mp.getNombre());
-                        lTypes.add(CELL_TYPE_NUMERIC);
-                        mapPosTitle.put(mp.getMediopagoId(), index++);
-                    }
-//                    for (Mediopago mp : allMediosEfectivo) {
-//                        lTitles.add(mp.getNombre());
-//                        lTypes.add(CELL_TYPE_NUMERIC);
-//                        mapPosTitle.put(mp.getMediopagoId(), index++);
-//                    }
-                    lTitles.add("TOTAL");
-                    lTypes.add(CELL_TYPE_NUMERIC);
+        toolBar2.removeAllComponents();
+        toolBar2.addComponent(utils.vlContainer2(lblUltimoDia));
+        toolBar2.addComponent(utils.vlContainer2(lblUltimoTurno));
+    }
 
-                    //el 3 es por FECHA, CODIGO, ESTACION; el 1 es por la columna de TOTAL
-//                    String[] info = new String[colIniciales + allMediospago.size() + allMediosEfectivo.size() + 1];
-                    String[] info = new String[colIniciales + allMediospago.size() + 1];
-
+//    private StreamResource getExcelStreamResourceFilas() {
+//        StreamResource.StreamSource source = new StreamResource.StreamSource() {
+//            public InputStream getStream() {
+//                ByteArrayOutputStream stream;
+//                InputStream input = null;
+//              //  try {
+//                    List<String> lTitles = new ArrayList(Arrays.asList("FECHA", "LOTE", "MONTO BRUTO", "COMISION", "MONTO NETO", "COMENTARIO"));
+//                    List<Integer> lTypes = new ArrayList(Arrays.asList(CELL_TYPE_STRING, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC, CELL_TYPE_STRING));
+//
 //                    SvcMedioPago svcMP = new SvcMedioPago();
-//                    Integer paisId = (cbxPais != null && cbxPais.getValue() != null) ? ((Pais) cbxPais.getValue()).getPaisId() : null;
-//                    midata = svcMP.getMediospagoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
+//                    pais = (Pais) cmbPais.getValue();
+////                    checkestacionesm = svcMP.getCheckEstacionesM();
+////                    checkestacionesm.addAll(svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2));
+////                
+//                    Integer paisId = (cmbPais != null && cmbPais.getValue() != null) ? ((Pais) cmbPais.getValue()).getPaisId() : null;
+////                    midata = svcMP.getMediospagoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
 ////                    midata1 = svcMP.getEfectivoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
+// //                   List<String[]> dataVol = svcMP.getVolumenesReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
 //                    svcMP.closeConnections();
-                    String fecha_a = "";
-                    List<String[]> data = new ArrayList();
-                    Double total = 0D;
-                    //A continuacion la conversion de filas a columnas.
-                    for (String[] content : midata) {
-                        if (!fecha_a.isEmpty() && !fecha_a.equals(content[0])) {
-                            info[0] = fecha_a;
-                            info[1] = content[1];
-                            info[2] = content[2];
-                            info[3] = content[3];
-                            info[4] = content[4];
-//                            info[colIniciales + allMediospago.size() + allMediosEfectivo.size()] = total.toString();   //valor para ultima columna
-                            info[colIniciales + allMediospago.size()] = total.toString();   //valor para ultima columna
-                            data.add(info);
-//                            info = new String[colIniciales + allMediospago.size() + allMediosEfectivo.size() + 1];
-                            info = new String[colIniciales + allMediospago.size() + 1];
-                            fecha_a = content[0];
-                            total = 0D;
-                        }
-                        if (fecha_a.isEmpty()) {
-                            fecha_a = content[0];
-                        }
-                        info[mapPosTitle.get(Integer.parseInt(content[5]))] = content[7];
-                        total += (content[7] != null && !content[7].isEmpty()) ? Double.parseDouble(content[7]) : 0D; //valor final sumatoria
-                    }
-                    //Agregar el ultimo
-                    if (midata.size() > 0) {
-                        info[0] = fecha_a;
-                        info[1] = midata.get(midata.size() - 1)[1];
-                        info[2] = midata.get(midata.size() - 1)[2];
-                        info[3] = midata.get(midata.size() - 1)[3];
-                        info[4] = midata.get(midata.size() - 1)[4];
-//                        info[colIniciales + allMediospago.size() + allMediosEfectivo.size()] = total.toString();   //valor para ultima columna
-                        info[colIniciales + allMediospago.size()] = total.toString();   //valor para ultima columna
-                        data.add(info);
-                    }
-
-//                    fecha_a = "";
-////                    info = new String[colIniciales + allMediospago.size() + allMediosEfectivo.size() + 1];
-//                    info = new String[colIniciales + allMediospago.size() + 1];
-//                    for (String[] content : midata1) {
-//                        if (!fecha_a.isEmpty() && !fecha_a.equals(content[0])) {
-//                            info[0] = fecha_a;
-//                            info[1] = content[1];
-//                            info[2] = content[2];
-//                            info[3] = content[3];
-//                            info[4] = content[4];
-////                            info[colIniciales + allMediospago.size() + allMediosEfectivo.size()] = total.toString();   //valor para ultima columna
-//                            info[colIniciales + allMediospago.size()] = total.toString();   //valor para ultima columna
-//                            data.add(info);
-////                            info = new String[colIniciales + allMediospago.size() + allMediosEfectivo.size() + 1];
-//                            info = new String[colIniciales + allMediospago.size() + 1];
-//                            fecha_a = content[0];
-//                            total = 0D;
-//                        }
-//                        if (fecha_a.isEmpty()) {
-//                            fecha_a = content[0];
-//                        }
-//                        info[mapPosTitle.get(Integer.parseInt(content[5]))] = content[7];
-//                        total += (content[7] != null && !content[7].isEmpty()) ? Double.parseDouble(content[7]) : 0D; //valor final sumatoria
+//
+////Quitamos la columna mediopago_id
+//                    List<String[]> data = new ArrayList();
+// //                   for (String[] dato : midata) {
+//                        data.add(new String[]{
+// //                           dato[0], dato[1], dato[2], dato[3], dato[4], dato[6], dato[7]
+//                        });
 //                    }
-//                    if (midata1.size() > 0) {
-//                        info[0] = fecha_a;
-//                        info[1] = midata1.get(midata1.size() - 1)[1];
-//                        info[2] = midata1.get(midata1.size() - 1)[2];
-//                        info[3] = midata1.get(midata1.size() - 1)[3];
-//                        info[4] = midata1.get(midata1.size() - 1)[4];
-////                        info[colIniciales + allMediospago.size() + allMediosEfectivo.size()] = total.toString();   //valor para ultima columna
-//                        info[colIniciales + allMediospago.size()] = total.toString();   //valor para ultima columna
-//                        data.add(info);
+////for (String[] dato : midata1) {
+////    data.add(new String[]{ 
+////        dato[0], dato[1], dato[2], dato[3], dato[4], dato[6], dato[7]
+////    });
+////}
+//
+//                    XlsxReportGenerator xrg = new XlsxReportGenerator();
+// //                   XSSFWorkbook workbook = xrg.generate(null, "Medios de pago", new HashMap(), lTitles.toArray(new String[lTitles.size()]), data, lTypes.toArray(new Integer[lTypes.size()]));
+//
+////-- Para generar dos reportes en un mismo archivo de Excel
+//              //      lTitles = new ArrayList(Arrays.asList("CÓDIGO", "BU", "DEPÓSITO", "ESTACIÓN", "DÍA", "CÓDIGO NUM", "CÓDIGO ALF", "PRODUCTO", "VOLUMEN", "MONTO"));
+//                //    lTypes = new ArrayList(Arrays.asList(4, 4, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC));
+//                //    workbook = xrg.generate(workbook, "Volúmenes", new HashMap(), lTitles.toArray(new String[lTitles.size()]), dataVol, lTypes.toArray(new Integer[lTypes.size()]));
+////-- Para generar dos reportes en un mismo archivo de Excel
+//
+//                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//                    try {
+//                 //       workbook.write(bos);
+//                    } catch (Exception exc) {
+//                  //      bos.close();
 //                    }
-                    XlsxReportGenerator xrg = new XlsxReportGenerator();
-                    XSSFWorkbook workbook = xrg.generate(null, "Medios de pago", new HashMap(), lTitles.toArray(new String[lTitles.size()]), data, lTypes.toArray(new Integer[lTypes.size()]));
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    try {
-                        workbook.write(bos);
-                    } catch (Exception exc) {
-                        bos.close();
-                    }
-
-                    stream = bos;
-                    input = new ByteArrayInputStream(stream.toByteArray());
-
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                return input;
-            }
-        };
-        String fileName = "COCOs_MediosPago_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
-        StreamResource resource = new StreamResource(source, fileName);
-        return resource;
-    }
-
-    private StreamResource getExcelStreamResourceFilas() {
-        StreamResource.StreamSource source = new StreamResource.StreamSource() {
-            public InputStream getStream() {
-                ByteArrayOutputStream stream;
-                InputStream input = null;
-                try {
-                    List<String> lTitles = new ArrayList(Arrays.asList("FECHA", "CÓDIGO", "BU", "DEPÓSITO", "ESTACIÓN", "MEDIOPAGO", "MONTO"));
-                    List<Integer> lTypes = new ArrayList(Arrays.asList(CELL_TYPE_STRING, 4, 4, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, CELL_TYPE_NUMERIC));
-
-                    SvcMedioPago svcMP = new SvcMedioPago();
-                    Integer paisId = (cbxPais != null && cbxPais.getValue() != null) ? ((Pais) cbxPais.getValue()).getPaisId() : null;
-                    midata = svcMP.getMediospagoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-//                    midata1 = svcMP.getEfectivoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-                    List<String[]> dataVol = svcMP.getVolumenesReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-                    svcMP.closeConnections();
-
-//Quitamos la columna mediopago_id
-                    List<String[]> data = new ArrayList();
-                    for (String[] dato : midata) {
-                        data.add(new String[]{
-                            dato[0], dato[1], dato[2], dato[3], dato[4], dato[6], dato[7]
-                        });
-                    }
-//for (String[] dato : midata1) {
-//    data.add(new String[]{ 
-//        dato[0], dato[1], dato[2], dato[3], dato[4], dato[6], dato[7]
-//    });
-//}
-
-                    XlsxReportGenerator xrg = new XlsxReportGenerator();
-                    XSSFWorkbook workbook = xrg.generate(null, "Medios de pago", new HashMap(), lTitles.toArray(new String[lTitles.size()]), data, lTypes.toArray(new Integer[lTypes.size()]));
-
-//-- Para generar dos reportes en un mismo archivo de Excel
-                    lTitles = new ArrayList(Arrays.asList("CÓDIGO", "BU", "DEPÓSITO", "ESTACIÓN", "DÍA", "CÓDIGO NUM", "CÓDIGO ALF", "PRODUCTO", "VOLUMEN", "MONTO"));
-                    lTypes = new ArrayList(Arrays.asList(4, 4, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC));
-                    workbook = xrg.generate(workbook, "Volúmenes", new HashMap(), lTitles.toArray(new String[lTitles.size()]), dataVol, lTypes.toArray(new Integer[lTypes.size()]));
-//-- Para generar dos reportes en un mismo archivo de Excel
-
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    try {
-                        workbook.write(bos);
-                    } catch (Exception exc) {
-                        bos.close();
-                    }
-
-                    stream = bos;
-                    input = new ByteArrayInputStream(stream.toByteArray());
-
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                return input;
-            }
-        };
-        String fileName = "COCOs_MediosPago_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
-        StreamResource resource = new StreamResource(source, fileName);
-        return resource;
-    }
-
-    //Metodo prueba Mery
-    private StreamResource getExcelStreamResourceMG() {
-        StreamResource.StreamSource source = new StreamResource.StreamSource() {
-            public InputStream getStream() {
-                ByteArrayOutputStream stream;
-                InputStream input = null;
-                try {
-
-                    if (cbxPais == null || cbxPais.getValue() == null) {
-                        Notification.show("ERROR:", "Todos los campos son requeridos.", Notification.Type.ERROR_MESSAGE);
-                        return null;
-                    }
-
-                    SvcMedioPago svcMP = new SvcMedioPago();
-                    pais = (Pais) cbxPais.getValue();
-                    allMediospago = svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 1);
-                    allMediospago.addAll(svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2));
-//                allMediosEfectivo = svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2);
-                    Integer paisId = (cbxPais != null && cbxPais.getValue() != null) ? ((Pais) cbxPais.getValue()).getPaisId() : null;
-
-                    arlmidata = new ArrayList<List<String[]>>();
-                    double porcentaje = 0.01;
-                    for (Mediopago mp : allMediospago) {
-                        midata = new ArrayList<String[]>();
-//                        midata = svcMP.getMediospagoID(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId, mp.getMediopagoId(), porcentaje);
-                        System.out.println("-- "+midata.isEmpty());
-//                        System.out.println("midata " + (String[]) midata.get(0));
-                        if (!midata.isEmpty()) {
-                            arlmidata.add(midata);
-                        }
-                    }
-
-                    svcMP.closeConnections();
-
-                    Map<Integer, Integer> mapPosTitle = new HashMap();
-                    int index, colIniciales = 5;
-                    List<String> lTitles = new ArrayList();
-                    List<Integer> lTypes = new ArrayList();
-                    lTitles.add("FECHA");
-                    lTitles.add("LOTE");
-                    lTitles.add("ESTACION");
-                    lTitles.add("MEDIOPAGOID");
-                    lTitles.add("MEDIOPAGO");
-                    lTitles.add("MONTOBRUTO");
-                    lTitles.add("COMISION");
-                    lTitles.add("MONTO");
-                    lTypes.add(CELL_TYPE_STRING);
-                    lTypes.add(CELL_TYPE_STRING);
-                    lTypes.add(CELL_TYPE_STRING);
-                    lTypes.add(CELL_TYPE_NUMERIC);
-                    lTypes.add(CELL_TYPE_STRING);
-                    lTypes.add(CELL_TYPE_NUMERIC);
-                    lTypes.add(CELL_TYPE_NUMERIC);
-                    lTypes.add(CELL_TYPE_NUMERIC);
-                    index = colIniciales;
-                    for (Mediopago mp : allMediospago) {
-                        lTitles.add(mp.getNombre());
-                        lTypes.add(CELL_TYPE_NUMERIC);
-                        mapPosTitle.put(mp.getMediopagoId(), index++);
-                    }
-//                    for (Mediopago mp : allMediosEfectivo) {
-//                        lTitles.add(mp.getNombre());
-//                        lTypes.add(CELL_TYPE_NUMERIC);
-//                        mapPosTitle.put(mp.getMediopagoId(), index++);
-//                    }
-                    lTitles.add("TOTAL");
-                    lTypes.add(CELL_TYPE_NUMERIC);
-
-                    //el 3 es por FECHA, CODIGO, ESTACION; el 1 es por la columna de TOTAL
-//                    String[] info = new String[colIniciales + allMediospago.size() + allMediosEfectivo.size() + 1];
-                    String[] info = new String[colIniciales + allMediospago.size() + 1];
-
-//                    SvcMedioPago svcMP = new SvcMedioPago();
-//                    Integer paisId = (cbxPais != null && cbxPais.getValue() != null) ? ((Pais) cbxPais.getValue()).getPaisId() : null;
-//                    midata = svcMP.getMediospagoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-////                    midata1 = svcMP.getEfectivoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-//                    svcMP.closeConnections();
-                    String fecha_a = "";
-                    List<String[]> data = new ArrayList();
-                    Double total = 0D;
-                    //A continuacion la conversion de filas a columnas.
-                    for (String[] content : midata) {
-                        if (!fecha_a.isEmpty() && !fecha_a.equals(content[0])) {
-                            info[0] = fecha_a;
-                            info[1] = content[1];
-                            info[2] = content[2];
-                            info[3] = content[3];
-                            info[4] = content[4];
-                            info[4] = content[5];
-                            info[4] = content[6];
-                            info[4] = content[7];
-//                            info[colIniciales + allMediospago.size() + allMediosEfectivo.size()] = total.toString();   //valor para ultima columna
-                            info[colIniciales + allMediospago.size()] = total.toString();   //valor para ultima columna
-                            data.add(info);
-//                            info = new String[colIniciales + allMediospago.size() + allMediosEfectivo.size() + 1];
-                            info = new String[colIniciales + allMediospago.size() + 1];
-                            fecha_a = content[0];
-                            total = 0D;
-                        }
-                        if (fecha_a.isEmpty()) {
-                            fecha_a = content[0];
-                        }
-                        info[mapPosTitle.get(Integer.parseInt(content[5]))] = content[7];
-                        total += (content[7] != null && !content[7].isEmpty()) ? Double.parseDouble(content[7]) : 0D; //valor final sumatoria
-                    }
-                    //Agregar el ultimo
-                    if (midata.size() > 0) {
-                        info[0] = fecha_a;
-                        info[1] = midata.get(midata.size() - 1)[1];
-                        info[2] = midata.get(midata.size() - 1)[2];
-                        info[3] = midata.get(midata.size() - 1)[3];
-                        info[4] = midata.get(midata.size() - 1)[4];
-                        info[4] = midata.get(midata.size() - 1)[5];
-                        info[4] = midata.get(midata.size() - 1)[6];
-                        info[4] = midata.get(midata.size() - 1)[7];
-//                        info[colIniciales + allMediospago.size() + allMediosEfectivo.size()] = total.toString();   //valor para ultima columna
-                        info[colIniciales + allMediospago.size()] = total.toString();   //valor para ultima columna
-                        data.add(info);
-                    }
-
-//                    fecha_a = "";
-////                    info = new String[colIniciales + allMediospago.size() + allMediosEfectivo.size() + 1];
-//                    info = new String[colIniciales + allMediospago.size() + 1];
-//                    for (String[] content : midata1) {
-//                        if (!fecha_a.isEmpty() && !fecha_a.equals(content[0])) {
-//                            info[0] = fecha_a;
-//                            info[1] = content[1];
-//                            info[2] = content[2];
-//                            info[3] = content[3];
-//                            info[4] = content[4];
-////                            info[colIniciales + allMediospago.size() + allMediosEfectivo.size()] = total.toString();   //valor para ultima columna
-//                            info[colIniciales + allMediospago.size()] = total.toString();   //valor para ultima columna
-//                            data.add(info);
-////                            info = new String[colIniciales + allMediospago.size() + allMediosEfectivo.size() + 1];
-//                            info = new String[colIniciales + allMediospago.size() + 1];
-//                            fecha_a = content[0];
-//                            total = 0D;
-//                        }
-//                        if (fecha_a.isEmpty()) {
-//                            fecha_a = content[0];
-//                        }
-//                        info[mapPosTitle.get(Integer.parseInt(content[5]))] = content[7];
-//                        total += (content[7] != null && !content[7].isEmpty()) ? Double.parseDouble(content[7]) : 0D; //valor final sumatoria
-//                    }
-//                    if (midata1.size() > 0) {
-//                        info[0] = fecha_a;
-//                        info[1] = midata1.get(midata1.size() - 1)[1];
-//                        info[2] = midata1.get(midata1.size() - 1)[2];
-//                        info[3] = midata1.get(midata1.size() - 1)[3];
-//                        info[4] = midata1.get(midata1.size() - 1)[4];
-////                        info[colIniciales + allMediospago.size() + allMediosEfectivo.size()] = total.toString();   //valor para ultima columna
-//                        info[colIniciales + allMediospago.size()] = total.toString();   //valor para ultima columna
-//                        data.add(info);
-//                    }
-                    XlsxReportGenerator xrg = new XlsxReportGenerator();
-                    XSSFWorkbook workbook = xrg.generate(null, "Medios de pago", new HashMap(), lTitles.toArray(new String[lTitles.size()]), data, lTypes.toArray(new Integer[lTypes.size()]));
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    try {
-                        workbook.write(bos);
-                    } catch (Exception exc) {
-                        bos.close();
-                    }
-
-                    stream = bos;
-                    input = new ByteArrayInputStream(stream.toByteArray());
-
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                return input;
-            }
-        };
-        String fileName = "COCOs_MediosPago_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
-        StreamResource resource = new StreamResource(source, fileName);
-        return resource;
-    }
+//
+//                    stream = bos;
+//                    input = new ByteArrayInputStream(stream.toByteArray());
+//
+//              //  } catch (Exception ex) {
+//              //      ex.printStackTrace();
+//            //    }
+//        //        return input;
+//        //    }
+//     //   };
+////        String fileName = "COCOs_MediosPago_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
+////        StreamResource resource = new StreamResource(source, fileName);
+////        return resource;
+////    }
+////
+////    private void cargaInfoSesion() {
+////        if (usuario.getPaisId() != null) {
+////            int i = 0;
+////            for (i = 0; i < contPais.size(); i++) {
+////                Pais hh = new Pais();
+////                hh = contPais.getIdByIndex(i);
+////                if (usuario.getPaisId().toString().trim().equals(hh.getPaisId().toString().trim())) {
+////                    cmbPais.setValue(contPais.getIdByIndex(i));
+////                }
+////            }
+////        }
+////    }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
-        acceso = dao.getAccess(event.getViewName());
-        dao.closeConnections();
-        btnGenerar.setEnabled(acceso.isAgregar());
-        btnGenerarFilas.setEnabled(acceso.isAgregar());
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

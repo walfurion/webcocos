@@ -208,6 +208,7 @@ public class Utils {
 
     DecimalFormat numberFmt = new DecimalFormat("### ###,##0.00;-#");
     DecimalFormat numberFmt3D = new DecimalFormat("### ###,##0.000;-#");
+    DecimalFormat numberFmtP = new DecimalFormat("0.00%");
 
     public PropertyFormatter getPropertyFormatterDouble(Property pro) {
         return new PropertyFormatter(pro) {
@@ -366,6 +367,7 @@ public class Utils {
         return false;
     }
     
+
     public PasswordField buildPasswordField(String caption, String nullRepresentation, boolean nullSettingAllowed, int maxLength, boolean required, String style) {
         PasswordField result = new PasswordField(caption);
         result.setNullRepresentation(nullRepresentation);
@@ -376,6 +378,23 @@ public class Utils {
             result.addStyleName(style);
         }
         return result;
+    }
+
+    public PropertyFormatter getPropertyFormatterDoubleP(Property pro) {
+        return new PropertyFormatter(pro) {
+            public String format(Object value) {
+                return numberFmtP.format(value);
+            }
+
+            public Object parse(String formattedValue) throws Exception {
+                try {
+                    return Double.parseDouble(formattedValue.replaceAll(",", "").replaceAll(" ", ""));
+                } catch (Exception exc) {
+                    return 0D;
+                }
+            }
+        };
+
     }
 
 }

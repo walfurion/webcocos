@@ -9,10 +9,10 @@ public class Inventario {
 
     private Date fecha;
     private Integer estacionId, productoId;
-    private Double inicial, finall, compras;
+    private Double inicial, finall, compras, lecturaVeederRoot, inventarioFisico, diferencia, varianza;
     private String creadoPor, creadoPersona, modificadoPor, modificadoPersona;
     //
-        private Integer inventarioFisico, lecturaVeederRoot, volFacturado, galonesCisterna;
+        private Integer volFacturado, galonesCisterna;
             private String compartimiento, pulgadas;
 
 
@@ -110,19 +110,19 @@ public class Inventario {
         this.modificadoPersona = modificadoPersona;
     }
 
-    public Integer getInventarioFisico() {
+    public Double getInventarioFisico() {
         return inventarioFisico;
     }
 
-    public void setInventarioFisico(Integer inventarioFisico) {
+    public void setInventarioFisico(Double inventarioFisico) {
         this.inventarioFisico = inventarioFisico;
     }
 
-    public Integer getLecturaVeederRoot() {
+    public Double getLecturaVeederRoot() {
         return lecturaVeederRoot;
     }
 
-    public void setLecturaVeederRoot(Integer lecturaVeederRoot) {
+    public void setLecturaVeederRoot(Double lecturaVeederRoot) {
         this.lecturaVeederRoot = lecturaVeederRoot;
     }
 
@@ -158,4 +158,20 @@ public class Inventario {
         this.pulgadas = pulgadas;
     }
 
+    public Double getDiferencia() {
+        return diferencia;
+    }
+
+    public void setDiferencia(Double diferencia) {
+        this.diferencia = diferencia;
+    }
+
+    public Double getVarianza() {
+        return varianza;
+    }
+
+    public void setVarianza(Double varianza) {
+        this.varianza = varianza;
+    }
+    
 }

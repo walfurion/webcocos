@@ -27,6 +27,7 @@ public class Producto {
     private Tipoproducto typeProd;
     private DtoGenericBean status;
     private String countrys;
+    private String tanque;
 
     public Producto(Integer productoId, String nombre, String codigo, String estado, String creadoPor, Integer ordenPos) {
         this.productoId = productoId;
@@ -292,6 +293,14 @@ public class Producto {
 
     public void setCountrys(String countrys) {
         this.countrys = countrys;
+    }
+
+    public String getTanque() {
+        return tanque;
+    }
+
+    public void setTanque(String tanque) {
+        this.tanque = tanque;
     }
     
 }

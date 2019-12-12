@@ -11,9 +11,11 @@ import com.fundamental.model.Turno;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoArqueo;
+
 import com.fundamental.model.dto.DtoProducto;
 import com.fundamental.model.dto.InventarioDto;
 import com.fundamental.model.dto.RecepcionDto;
+
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcDeposito;
 import com.fundamental.services.SvcEstacion;
@@ -21,11 +23,17 @@ import com.fundamental.services.SvcMedioPago;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
+
 import com.sisintegrados.generic.bean.GenericDepositoDet;
 import com.sisintegrados.view.form.FormClientesCredito;
 import com.sisintegrados.view.form.FormDetalleDeposito;
+
+import com.sisintegrados.generic.bean.InventarioRecepcion;
+import com.sisintegrados.generic.bean.RecepcionInventario;
+
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
@@ -76,7 +84,8 @@ import org.vaadin.maddon.ListContainer;
 public class PrCierreDia extends Panel implements View {
 
     static final DecimalFormat numberFmt = new DecimalFormat("### ###,##0.00;-#");
-
+    BeanContainer<Integer, RecepcionInventario> bcrRecepcion = new BeanContainer<>(RecepcionInventario.class);
+    private RecepcionInventario recepcion;
     VerticalLayout root;
 //    Table tableBombas;
     Label lblTotalVentas = new Label(numberFmt.format(0D)),
@@ -163,7 +172,7 @@ public class PrCierreDia extends Panel implements View {
     BeanContainer<Integer, Producto> bcrProducto = new BeanContainer<Integer, Producto>(Producto.class);
     BeanContainer<Integer, Mediopago> bcrMediospago = new BeanContainer<Integer, Mediopago>(Mediopago.class);
     BeanContainer<Integer, Mediopago> bcrEfectivo = new BeanContainer<Integer, Mediopago>(Mediopago.class);
-    BeanContainer<Integer, InventarioDto> bcrInventario = new BeanContainer<Integer, InventarioDto>(InventarioDto.class);
+    BeanContainer<Integer, InventarioRecepcion> bcrInventario = new BeanContainer<Integer, InventarioRecepcion>(InventarioRecepcion.class);
 
     BeanContainer<Integer, GenericDepositoDet> bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
     BeanItemContainer<GenericDepositoDet> ContDepositoDet = new BeanItemContainer<GenericDepositoDet>(GenericDepositoDet.class);
@@ -296,16 +305,18 @@ public class PrCierreDia extends Panel implements View {
 
     }
 
-//List<InventarioDto> inventarioHoy=new ArrayList();
-    List<InventarioDto> inventarioAyer = new ArrayList();
+//List<InventarioRecepcion> inventarioHoy=new ArrayList();
+    List<InventarioRecepcion> inventarioAyer = new ArrayList();
 
     private void getAllData() {
+        bcrRecepcion.setBeanIdProperty("invrecepcion_id");
         bcrTurnos.setBeanIdProperty("turnoId");
         bcrVentas.setBeanIdProperty("id");
         bcrProducto.setBeanIdProperty("productoId");
         bcrMediospago.setBeanIdProperty("mediopagoId");
         bcrEfectivo.setBeanIdProperty("efectivoId");
         bcrInventario.setBeanIdProperty("idDto");
+
         bcrDeposito.setBeanIdProperty("idGenerico");
 
         SvcTurnoCierre service = new SvcTurnoCierre();
@@ -324,7 +335,7 @@ public class PrCierreDia extends Panel implements View {
         bcrTurnos.removeAllItems();
         bcrTurnos.addAll(turnosTemp);
 
-        List<InventarioDto> inventarioHoy = new ArrayList();
+        List<InventarioRecepcion> inventarioHoy = new ArrayList();
 
         if (dia != null && dia.getEstadoId() != null) {
 
@@ -336,13 +347,15 @@ public class PrCierreDia extends Panel implements View {
             inventarioAyer = service.getInventarioByFechaEstacion(ayer.getTime(), estacion.getEstacionId());
             List<Producto> myprods = service.getCombustiblesByEstacionid(estacion.getEstacionId());
             int index = 1;
-            InventarioDto invdto;
+            InventarioRecepcion invdto;
             for (Producto p : myprods) {
-                invdto = new InventarioDto(index++, p.getNombre(), 0D, dia.getFecha(), estacion.getEstacionId(), p.getProductoId(), 0D, 0D, 0D, null, null);
+                invdto = new InventarioRecepcion(index++, p.getNombre(), 0D, dia.getFecha(), estacion.getEstacionId(), p.getProductoId(), 0D, 0D, 0D, null, null);
                 invdto.setVentas(0D);
                 invdto.setVentasCons(0D);
                 invdto.setComprasDto(0D);
                 invdto.setFinallDto(0D);
+                invdto.setInventarioFisico(0D);
+                invdto.setTanque(p.getTanque());
                 for (String[] cal : calibraciones) {
                     if (p.getProductoId() == Integer.parseInt(cal[0])) {
                         invdto.setCalibracion(Double.parseDouble(cal[1]));
@@ -350,22 +363,37 @@ public class PrCierreDia extends Panel implements View {
                         break;
                     }
                 }
-                for (InventarioDto idto : inventarioAyer) {
+                for (InventarioRecepcion idto : inventarioAyer) {
                     if (p.getProductoId().equals(idto.getProductoId())) {
 //                        invdto.setInicial(idto.getFinall());
-                        invdto.setInicialDto(idto.getFinall());
+                        invdto.setInicialDto(idto.getInventarioFisico());
+                        invdto.setLecturaVeederRoot(invdto.getInicialDto()+invdto.getComprasDto()-invdto.getVentasCons());
+                        invdto.setDiferencia(invdto.getInventarioFisico()-invdto.getLecturaVeederRoot());
+                        invdto.setVarianza((invdto.getDiferencia()/invdto.getVentasCons())*100);
                         break;
                     }
                 }
+//                for (Integer id : (List<Integer>) tblInventory.getItemIds()) {     
+//                    invdto.setLecturaVeederRoot(bcrInventario.getItem(id).getBean().getInicialDto()+bcrInventario.getItem(id).getBean().getComprasDto());
+//                    invdto.setCompartimiento(bcrInventario.getItem(id).getBean().getCompartimiento());
+//                    invdto.setGalonesCisterna(bcrInventario.getItem(id).getBean().getGalonesCisterna());
+//                }
                 invdto.setEsNuevo(Boolean.TRUE);
                 inventarioHoy.add(invdto);
             }
-
             if (dia != null && dia.getEstadoId() != null && dia.getEstadoId() == 2) { //cerrado
-                List<InventarioDto> listTmpInv = service.getInventarioByFechaEstacion(dia.getFecha(), estacion.getEstacionId());
+                List<RecepcionInventario> listRec = service.getRecepcion(estacion.getPaisId(), estacion.getEstacionId(), dfdFecha.getValue()); 
+                if(!listRec.isEmpty()){
+                    bcrRecepcion.addAll(listRec);
+                    recepcion = bcrRecepcion.getItem(bcrRecepcion.getItemIds().get(0)).getBean();
+                    tfdDriver.setValue(recepcion.getPiloto());
+                    tfdUnit.setValue(recepcion.getUnidad());
+                    tfdBill.setValue(recepcion.getFactura());
+                }                                                
+                List<InventarioRecepcion> listTmpInv = service.getInventarioByFechaEstacion(dia.getFecha(), estacion.getEstacionId());
                 if (!listTmpInv.isEmpty()) {    //cubre el caso cuando se olvido ingresar inventario dia anterior.
                     inventarioHoy = listTmpInv;
-                    for (InventarioDto item : inventarioHoy) {
+                    for (InventarioRecepcion item : inventarioHoy) {
                         for (String[] cal : calibraciones) {
                             if (item.getProductoId() == Integer.parseInt(cal[0])) {
                                 item.setCalibracion(Double.parseDouble(cal[1]));
@@ -377,6 +405,9 @@ public class PrCierreDia extends Panel implements View {
                         item.setDiferencia(item.getVentasCons() - item.getVentas());
                         item.setEstado((item.getDiferencia() > 0) ? "SOBRANTE" : ((item.getDiferencia() == 0) ? "OK" : "FALTANTE"));
                         item.setEsNuevo(Boolean.FALSE);
+                        item.setLecturaVeederRoot(item.getInicialDto()+item.getComprasDto()-item.getVentasCons());
+                        item.setDiferencia(item.getInventarioFisico()-item.getLecturaVeederRoot());
+                        item.setVarianza((item.getDiferencia()/item.getVentasCons())*100);
                     }
                 }
             }
@@ -387,9 +418,9 @@ public class PrCierreDia extends Panel implements View {
 //                inventarioAyer = service.getInventarioByFechaEstacion(ayer.getTime(), estacion.getEstacionId());
 //                List<Producto> myprods = service.getCombustiblesByEstacionid(estacion.getEstacionId());
 //                int index = 1;
-//                InventarioDto invdto;
+//                InventarioRecepcion invdto;
 //                for (Producto p : myprods) {
-//                    invdto = new InventarioDto(index++, p.getNombre(), 0D, dia.getFecha(), estacion.getEstacionId(), p.getProductoId(), 0D, 0D, 0D, null, null);
+//                    invdto = new InventarioRecepcion(index++, p.getNombre(), 0D, dia.getFecha(), estacion.getEstacionId(), p.getProductoId(), 0D, 0D, 0D, null, null);
 //                    invdto.setVentas(0D);
 //                    invdto.setVentasCons(0D);
 //                    invdto.setComprasDto(0D);
@@ -401,7 +432,7 @@ public class PrCierreDia extends Panel implements View {
 //                            break;
 //                        }
 //                    }
-//                    for (InventarioDto idto : inventarioAyer) {
+//                    for (InventarioRecepcion idto : inventarioAyer) {
 //                        if (p.getProductoId().equals(idto.getProductoId())) {
 ////                        invdto.setInicial(idto.getFinall());
 //                            invdto.setInicialDto(idto.getFinall());
@@ -515,6 +546,15 @@ public class PrCierreDia extends Panel implements View {
                     bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
                     //  ContDepositoDet = new BeanItemContainer<GenericDepositoDet>(GenericDepositoDet.class);
                     //  bcrDeposito.addAll(daoDeposito.getDepositoByEstacion(estacion.getEstacionId()));
+
+                  //  }                    
+                    //Importante
+//                    binder.bindMemberFields(this);
+//                    binder.setItemDataSource(recepcion);
+//                    
+//                    recepcion = bcrRecepcion.getItem(dfdFecha.getValue()).getBean();
+//                    binder.setItemDataSource(recepcion);
+
                     determinarPermisos();
                     calcularSumas();
                     printDataLabel();
@@ -716,7 +756,7 @@ public class PrCierreDia extends Panel implements View {
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
-                        InventarioDto invdto = (InventarioDto) ((BeanItem) tblInventory.getItem(itemId)).getBean();
+                        InventarioRecepcion invdto = (InventarioRecepcion) ((BeanItem) tblInventory.getItem(itemId)).getBean();
 //                        invdto.setVentas((invdto.getInicialDto() + invdto.getComprasDto()) - (invdto.getFinallDto() + invdto.getCalibracion()));
                         invdto.setVentas(invdto.getInicialDto() + invdto.getComprasDto() + invdto.getCalibracion() - invdto.getFinallDto());
                         invdto.setDiferencia(invdto.getVentasCons() - invdto.getVentas());
@@ -741,14 +781,17 @@ public class PrCierreDia extends Panel implements View {
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
-                        InventarioDto invdto = (InventarioDto) ((BeanItem) tblInventory.getItem(itemId)).getBean();
-//                        invdto.setVentas((invdto.getInicialDto() + invdto.getComprasDto()) - (invdto.getFinallDto() + invdto.getCalibracion()));
+                        InventarioRecepcion invdto = (InventarioRecepcion) ((BeanItem) tblInventory.getItem(itemId)).getBean();
+//                        invdto.setVentas((invdto.getInicialDto() + invdto.getComprasDto()) - (invdto.getFinallDto() + invdto.getCalibracion()));                        
                         invdto.setVentas(invdto.getInicialDto() + invdto.getComprasDto() + invdto.getCalibracion() - invdto.getFinallDto());
                         invdto.setDiferencia(invdto.getVentasCons() - invdto.getVentas());
                         invdto.setEstado((invdto.getDiferencia() > 0) ? "SOBRANTE" : ((invdto.getDiferencia() == 0) ? "OK" : "FALTANTE"));
-                        bcrInventario.getItem(itemId).getItemProperty("ventas").setValue(invdto.getVentas());
-                        bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invdto.getDiferencia());
+                        bcrInventario.getItem(itemId).getItemProperty("ventas").setValue(invdto.getVentas());                        
                         bcrInventario.getItem(itemId).getItemProperty("estado").setValue(invdto.getEstado());
+                        bcrInventario.getItem(itemId).getItemProperty("inicialDto").setValue(invdto.getInicialDto());
+                        bcrInventario.getItem(itemId).getItemProperty("lecturaVeederRoot").setValue(invdto.getInicialDto()+invdto.getComprasDto()-invdto.getVentasCons());
+                        bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invdto.getDiferencia());
+                        bcrInventario.getItem(itemId).getItemProperty("varianza").setValue(invdto.getDiferencia()/invdto.getVentasCons());
                     }
                 });
                 return tfdValue;
@@ -757,8 +800,41 @@ public class PrCierreDia extends Panel implements View {
         tblInventory.addGeneratedColumn("colVentas", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("ventas");  //Atributo del bean
-                Label lbl = new Label(pro);
+                Property pro = source.getItem(itemId).getItemProperty("ventasCons");  //Atributo del bean
+                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
+                lbl.setWidth("85px");
+                lbl.addStyleName(ValoTheme.LABEL_SMALL);
+                lbl.addStyleName("align-right");
+                return lbl;
+            }
+        });
+        tblInventory.addGeneratedColumn("colCalibracion", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("calibracion");  //Atributo del bean
+                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
+                lbl.setWidth("85px");
+                lbl.addStyleName(ValoTheme.LABEL_SMALL);
+                lbl.addStyleName("align-right");
+                return lbl;
+            }
+        });
+        tblInventory.addGeneratedColumn("colDiferencia", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("diferencia");  //Atributo del bean
+                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
+                lbl.setWidth("85px");
+                lbl.addStyleName(ValoTheme.LABEL_SMALL);
+                lbl.addStyleName("align-right");
+                return lbl;
+            }
+        });
+        tblInventory.addGeneratedColumn("colVarianza", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("varianza");  //Atributo del bean
+                Label lbl = new Label(utils.getPropertyFormatterDoubleP(pro));
                 lbl.setWidth("85px");
                 lbl.addStyleName(ValoTheme.LABEL_SMALL);
                 lbl.addStyleName("align-right");
@@ -774,6 +850,16 @@ public class PrCierreDia extends Panel implements View {
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.setNullRepresentation("0.00");
                 tfdValue.addStyleName("align-right");
+                tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+                        InventarioRecepcion invdto = bcrInventario.getItem(itemId).getBean();
+                        Double invFis = invdto.getInventarioFisico();
+                        bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invdto.getInventarioFisico()-invdto.getLecturaVeederRoot());
+                        bcrInventario.getItem(itemId).getItemProperty("varianza").setValue((invdto.getDiferencia()/invdto.getVentasCons())*100);
+//                        bcrInventario.getItem(itemId).getItemProperty("inventarioFisico").setValue(invFis);                        
+                    }
+                });
                 return tfdValue;
             }
         });
@@ -781,12 +867,21 @@ public class PrCierreDia extends Panel implements View {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("lecturaVeederRoot");  //Atributo del bean
-                TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
-                tfdValue.setWidth("85px");
-                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
-                tfdValue.setNullRepresentation("0.00");
-                tfdValue.addStyleName("align-right");
-                return tfdValue;
+                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
+                lbl.setWidth("85px");
+                lbl.setStyleName(ValoTheme.LABEL_SMALL);
+                lbl.addStyleName("align-right");
+                lbl.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+                        InventarioRecepcion invdto = bcrInventario.getItem(itemId).getBean();
+                        Double invFis = invdto.getInventarioFisico();
+                        bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invdto.getInventarioFisico()-invdto.getLecturaVeederRoot());
+                        bcrInventario.getItem(itemId).getItemProperty("varianza").setValue((invdto.getDiferencia()/invdto.getVentasCons())*100);
+//                        bcrInventario.getItem(itemId).getItemProperty("inventarioFisico").setValue(invFis);                        
+                    }
+                });
+                return lbl;
             }
         });
 
@@ -794,10 +889,17 @@ public class PrCierreDia extends Panel implements View {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("compartimiento");  //Atributo del bean
-                TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
+                TextField tfdValue = new TextField(pro);
                 tfdValue.setWidth("85px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.setNullRepresentation(""); //tfdValue.addStyleName("align-right");
+                tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+                        InventarioRecepcion invdto = bcrInventario.getItem(itemId).getBean();
+                        String comp = invdto.getCompartimiento();
+                    }
+                });
                 return tfdValue;
             }
         });
@@ -811,31 +913,84 @@ public class PrCierreDia extends Panel implements View {
 //                return tfdValue;
 //            }
 //        });
-        tblInventory.addGeneratedColumn("colPulgadas", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("pulgadas");  //Atributo del bean
-                TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
-                tfdValue.setWidth("85px");
-                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
-                tfdValue.setNullRepresentation(""); //tfdValue.addStyleName("align-right");
-                return tfdValue;
-            }
-        });
+//        tblInventory.addGeneratedColumn("colPulgadas", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("pulgadas");  //Atributo del bean
+//                TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
+//                tfdValue.setWidth("85px");
+//                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+//                tfdValue.setNullRepresentation(""); //tfdValue.addStyleName("align-right");
+//                return tfdValue;
+//            }
+//        });
         tblInventory.addGeneratedColumn("colGalones", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("galonesCisterna");  //Atributo del bean
-                TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
+                TextField tfdValue = new TextField(utils.getPropertyFormatterInteger(pro));
                 tfdValue.setWidth("85px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.setNullRepresentation("0.00");
                 tfdValue.addStyleName("align-right");
+                tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+                        InventarioRecepcion invdto = bcrInventario.getItem(itemId).getBean();
+                        int galones = invdto.getGalonesCisterna();
+                    }
+                });
                 return tfdValue;
             }
         });
-        tblInventory.setVisibleColumns(new Object[]{"productoNombre", "colInicial", "colCompras", "ventasCons", "colInvFisico", "colVeederroot", "colCompartimiento", "colPulgadas", "colGalones"});
-        tblInventory.setColumnHeaders(new String[]{"Producto", "Iniicial", "Compras", "Ventas", "Inv físico", "Veeder root", "Compartimiento", "Pulgadas", "Galones"});
+//        tblInventory.addGeneratedColumn("colCalibracion", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("galonesCisterna");  //Atributo del bean
+//                TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
+//                tfdValue.setWidth("85px");
+//                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+//                tfdValue.setNullRepresentation("0.00");
+//                tfdValue.addStyleName("align-right");
+//                return tfdValue;
+//            }
+//        });
+//        tblInventory.addGeneratedColumn("colDif", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("galonesCisterna");  //Atributo del bean
+//                TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
+//                tfdValue.setWidth("85px");
+//                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+//                tfdValue.setNullRepresentation("0.00");
+//                tfdValue.addStyleName("align-right");
+//                return tfdValue;
+//            }
+//        });
+//        tblInventory.addGeneratedColumn("colVarianza", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("galonesCisterna");  //Atributo del bean
+//                TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
+//                tfdValue.setWidth("85px");
+//                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+//                tfdValue.setNullRepresentation("0.00");
+//                tfdValue.addStyleName("align-right");
+//                return tfdValue;
+//            }
+//        });
+            tblInventory.addGeneratedColumn("colTanque", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("tanque");  //Atributo del bean
+                Label lbl = new Label(pro);
+                lbl.setWidth("85px");
+                lbl.addStyleName(ValoTheme.LABEL_SMALL);
+                return lbl;
+            }
+        });
+        tblInventory.setVisibleColumns(new Object[]{"tanque","productoNombre", "colInicial", "colCompras", "colVentas", "colCalibracion", "colVeederroot", "colInvFisico", "colDiferencia", "colVarianza", "colCompartimiento", "colGalones"});
+        tblInventory.setColumnHeaders(new String[]{"Nombre tanque","Producto", "Iniicial", "Compras", "Ventas", "Calibración", "Inv teórico", "Inv físico", "Diferencia", "% Varianza sobre ventas", "Compartimiento", "Galones"});
 
         /*        tblInventory.addGeneratedColumn("colFinal", new Table.ColumnGenerator() {
             @Override
@@ -849,7 +1004,7 @@ public class PrCierreDia extends Panel implements View {
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
-                        InventarioDto invdto = (InventarioDto) ((BeanItem) tblInventory.getItem(itemId)).getBean();
+                        InventarioRecepcion invdto = (InventarioRecepcion) ((BeanItem) tblInventory.getItem(itemId)).getBean();
 //                        invdto.setVentas((invdto.getInicialDto() + invdto.getComprasDto()) - (invdto.getFinallDto() + invdto.getCalibracion()));
                         invdto.setVentas(invdto.getInicialDto() + invdto.getComprasDto() + invdto.getCalibracion() - invdto.getFinallDto());
                         invdto.setDiferencia(invdto.getVentasCons() - invdto.getVentas());
@@ -964,9 +1119,15 @@ public class PrCierreDia extends Panel implements View {
                                 dia.setModificadoPersona(user.getNombreLogin());
                                 dia.setModificadoPor(user.getUsername());
                                 dia = svcTC.doActionDia(Dao.ACTION_UPDATE, dia);
-
-                                InventarioDto inventario;
-                                //InventarioDto idto;
+                                
+                                if (tfdDriver.getValue() != null && tfdUnit.getValue() != null && tfdBill.getValue() != null) {
+                                    RecepcionInventario recepcion = new RecepcionInventario(null, dia.getFecha(), estacion.getPaisId(), estacion.getEstacionId(), tfdDriver.getValue(), tfdUnit.getValue(), tfdBill.getValue());
+                                    recepcion.setCreado_por(user.getUsername());
+                                    svcTC.doActionInvRecepcion(Dao.ACTION_ADD, recepcion);
+                                }
+                                
+                                InventarioRecepcion inventario;
+                                //InventarioRecepcion idto;
                                 for (Integer id : (List<Integer>) tblInventory.getItemIds()) {
                                     inventario = bcrInventario.getItem(id).getBean();
                                     inventario.setInicial(inventario.getInicialDto());
@@ -975,18 +1136,16 @@ public class PrCierreDia extends Panel implements View {
                                     inventario.setCreadoPor(user.getUsername());
                                     inventario.setCreadoPersona(user.getNombreLogin());
                                     inventario.setModificadoPor(user.getUsername());
-                                    inventario.setModificadoPersona(user.getNombreLogin());
+                                    inventario.setModificadoPersona(user.getNombreLogin());                                    
+                                    inventario.setInventarioFisico(bcrInventario.getItem(id).getBean().getInventarioFisico());
+                                    inventario.setDiferencia(bcrInventario.getItem(id).getBean().getDiferencia());
+                                    inventario.setVarianza(bcrInventario.getItem(id).getBean().getVarianza());
+                                    inventario.setCompartimiento(bcrInventario.getItem(id).getBean().getCompartimiento());
+                                    inventario.setGalonesCisterna(bcrInventario.getItem(id).getBean().getGalonesCisterna());
 //                                    svcTC.doActionInventario( (invNuevo ? Dao.ACTION_ADD : Dao.ACTION_UPDATE), 
                                     inventario.setVolFacturado(id);
-                                    svcTC.doActionInventario((inventario.getEsNuevo() ? Dao.ACTION_ADD : Dao.ACTION_UPDATE),
-                                            inventario);
-                                }
-
-                                if (tfdDriver.getValue() != null && tfdUnit.getValue() != null && tfdBill.getValue() != null) {
-                                    RecepcionDto recepcion = new RecepcionDto(null, dia.getFecha(), estacion.getPaisId(), estacion.getEstacionId(), tfdDriver.getValue(), tfdUnit.getValue(), tfdBill.getValue());
-                                    recepcion.setCreado_por(user.getUsername());
-                                    svcTC.doActionInvRecepcion(Dao.ACTION_ADD, recepcion);
-                                }
+                                    svcTC.doActionInventario((inventario.getEsNuevo() ? Dao.ACTION_ADD : Dao.ACTION_UPDATE),inventario);
+                                }                                
 
                                 svcTC.closeConnections();
                                 if (dia.getFecha() != null) {
@@ -1130,7 +1289,7 @@ public class PrCierreDia extends Panel implements View {
     public void calculosInventario() {
 
         SvcTurnoCierre service = new SvcTurnoCierre();
-        List<InventarioDto> inventarioHoy = new ArrayList();
+        List<InventarioRecepcion> inventarioHoy = new ArrayList();
         if (dia != null && dia.getEstadoId() != null) {
             List<String[]> calibraciones = service.getCalibracionByFechaEstacion(dia.getFecha(), estacion.getEstacionId()); //de hoy
 
@@ -1140,13 +1299,14 @@ public class PrCierreDia extends Panel implements View {
             inventarioAyer = service.getInventarioByFechaEstacion(ayer.getTime(), estacion.getEstacionId());
             List<Producto> myprods = service.getCombustiblesByEstacionid(estacion.getEstacionId());
             int index = 1;
-            InventarioDto invdto;
+            InventarioRecepcion invdto;
             for (Producto p : myprods) {
-                invdto = new InventarioDto(index++, p.getNombre(), 0D, dia.getFecha(), estacion.getEstacionId(), p.getProductoId(), 0D, 0D, 0D, null, null);
+                invdto = new InventarioRecepcion(index++, p.getNombre(), 0D, dia.getFecha(), estacion.getEstacionId(), p.getProductoId(), 0D, 0D, 0D, null, null);
                 invdto.setVentas(0D);
                 invdto.setVentasCons(0D);
                 invdto.setComprasDto(0D);
                 invdto.setFinallDto(0D);
+                invdto.setTanque(p.getTanque());
                 for (String[] cal : calibraciones) {
                     if (p.getProductoId() == Integer.parseInt(cal[0])) {
                         invdto.setCalibracion(Double.parseDouble(cal[1]));
@@ -1155,7 +1315,7 @@ public class PrCierreDia extends Panel implements View {
                         break;
                     }
                 }
-                for (InventarioDto idto : inventarioAyer) {
+                for (InventarioRecepcion idto : inventarioAyer) {
                     if (p.getProductoId().equals(idto.getProductoId())) {
 //                        invdto.setInicial(idto.getFinall());
                         invdto.setInicialDto(idto.getFinall());
@@ -1167,10 +1327,10 @@ public class PrCierreDia extends Panel implements View {
             }
 
             if (dia != null && dia.getEstadoId() != null && dia.getEstadoId() == 2) { //cerrado
-                List<InventarioDto> listTmpInv = service.getInventarioByFechaEstacion(dia.getFecha(), estacion.getEstacionId());
+                List<InventarioRecepcion> listTmpInv = service.getInventarioByFechaEstacion(dia.getFecha(), estacion.getEstacionId());
                 if (!listTmpInv.isEmpty()) {    //cubre el caso cuando se olvido ingresar inventario dia anterior.
                     inventarioHoy = listTmpInv;
-                    for (InventarioDto item : inventarioHoy) {
+                    for (InventarioRecepcion item : inventarioHoy) {
                         for (String[] cal : calibraciones) {
                             if (item.getProductoId() == Integer.parseInt(cal[0])) {
                                 item.setCalibracion(Double.parseDouble(cal[1]));
@@ -1178,6 +1338,9 @@ public class PrCierreDia extends Panel implements View {
                                 break;
                             }
                         }
+                        System.out.println("entra a lectura veeder "+item.getInicialDto());
+                        System.out.println("entra a lectura veeder "+item.getComprasDto());
+                        item.setLecturaVeederRoot(item.getInicialDto()+item.getComprasDto());
                         item.setVentas((item.getInicialDto() + item.getComprasDto()) - (item.getFinallDto() + item.getCalibracion()));
                         item.setDiferencia(item.getVentasCons() - item.getVentas());
                         item.setEstado((item.getDiferencia() > 0) ? "SOBRANTE" : ((item.getDiferencia() == 0) ? "OK" : "FALTANTE"));
@@ -1192,9 +1355,9 @@ public class PrCierreDia extends Panel implements View {
 //                inventarioAyer = service.getInventarioByFechaEstacion(ayer.getTime(), estacion.getEstacionId());
 //                List<Producto> myprods = service.getCombustiblesByEstacionid(estacion.getEstacionId());
 //                int index = 1;
-//                InventarioDto invdto;
+//                InventarioRecepcion invdto;
 //                for (Producto p : myprods) {
-//                    invdto = new InventarioDto(index++, p.getNombre(), 0D, dia.getFecha(), estacion.getEstacionId(), p.getProductoId(), 0D, 0D, 0D, null, null);
+//                    invdto = new InventarioRecepcion(index++, p.getNombre(), 0D, dia.getFecha(), estacion.getEstacionId(), p.getProductoId(), 0D, 0D, 0D, null, null);
 //                    invdto.setVentas(0D);
 //                    invdto.setVentasCons(0D);
 //                    invdto.setComprasDto(0D);
@@ -1206,7 +1369,7 @@ public class PrCierreDia extends Panel implements View {
 //                            break;
 //                        }
 //                    }
-//                    for (InventarioDto idto : inventarioAyer) {
+//                    for (InventarioRecepcion idto : inventarioAyer) {
 //                        if (p.getProductoId().equals(idto.getProductoId())) {
 ////                        invdto.setInicial(idto.getFinall());
 //                            invdto.setInicialDto(idto.getFinall());
