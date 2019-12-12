@@ -11,13 +11,13 @@ import com.fundamental.model.Marca;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Utils;
 import com.fundamental.services.Dao;
-import com.fundamental.services.SvcComVenLubricantes;
+import com.fundamental.services.SvcInventarioFisico;
 import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcGeneral;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
-import com.sisintegrados.generic.bean.ComVenLubricantes;
+import com.sisintegrados.generic.bean.ComInventarioFisico;
 import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
@@ -64,13 +64,11 @@ import org.vaadin.maddon.ListContainer;
  *
  * @author m
  */
-public class MntLubricanteCV extends Panel implements View {
+public class MntInventarioFisico extends Panel implements View {
 
     CreateComponents components = new CreateComponents();
     ComboBox cmbPais = new ComboBox();
-//    ComboBox cmbEstacion = new ComboBox();
     ComboBox cmbMarca = new ComboBox();
-    ComboBox cmbProducto = new ComboBox();
     DateField cmbFecha = new DateField("Fecha:");
     Usuario usuario = new Usuario();
     Utils utils = new Utils();
@@ -79,15 +77,16 @@ public class MntLubricanteCV extends Panel implements View {
     Button btnAddEmpPump;
     Acceso acceso = new Acceso();
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
-    BeanContainer<Integer, ComVenLubricantes> contLub = new BeanContainer<Integer, ComVenLubricantes>(ComVenLubricantes.class);
+    BeanContainer<Integer, ComInventarioFisico> contLub = new BeanContainer<Integer, ComInventarioFisico>(ComInventarioFisico.class);
     SvcTurno dao = new SvcTurno();
     List<Producto> allLubricants = new ArrayList();
     List<Marca> listBrands = new ArrayList();
-    List<ComVenLubricantes> listProducts = new ArrayList();        
+    List<ComInventarioFisico> list = new ArrayList();
+    List<ComInventarioFisico> listProducts = new ArrayList();       
     Table tblProduct = new Table();
     boolean bloqueo = true;
 
-    public MntLubricanteCV() {
+    public MntInventarioFisico() {
 
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
         super.addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -118,7 +117,7 @@ public class MntLubricanteCV extends Panel implements View {
     }
 
     private Component buildTitle() {
-        Label title = new Label("Compras Ventas de Lubricantes");
+        Label title = new Label("Inventario Fisico");
         title.setSizeUndefined();
         title.addStyleName(ValoTheme.LABEL_H1);
         title.addStyleName(ValoTheme.LABEL_NO_MARGIN);
@@ -142,29 +141,18 @@ public class MntLubricanteCV extends Panel implements View {
     
     private void getAllData(){
         contLub.removeAllItems();
-        contLub.setBeanIdProperty("productoId");
+        contLub.setBeanIdProperty("inventario_id");
         toolbarContainerTables.removeAllComponents();
         toolbarContainerTables.addComponent(buildTableContent());
-        SvcComVenLubricantes service = new SvcComVenLubricantes();
+        SvcInventarioFisico service = new SvcInventarioFisico();
         int countryId = ((Pais) cmbPais.getValue()).getPaisId();
-        int brandId = ((Marca) cmbMarca.getValue()).getIdMarca();
-        int productId = ((Producto) cmbProducto.getValue()).getProductoId();
-        int count = service.countLub(productId, cmbFecha.getValue(), countryId);
-        List<ComVenLubricantes> lubAnterior = new ArrayList();
-        if(count>0){
-            listProducts = service.getComVenLubAnterior(countryId, brandId, productId, cmbFecha.getValue());
-        }else{
-            listProducts = service.getComVenLub(countryId, brandId, productId, cmbFecha.getValue());
-        }               
-        contLub.addAll(listProducts);  
-        ComVenLubricantes comVen;
-        for (Integer pi : (List<Integer>) contLub.getItemIds()) {
-            comVen = (ComVenLubricantes) ((BeanItem) contLub.getItem(pi)).getBean();
-            if(comVen.getInvInicial()!=0.0){
-                System.out.println("entra "+comVen.getInvInicial());
-                bloqueo = false;
-            }
+        int brandId = ((Marca) cmbMarca.getValue()).getIdMarca();        
+        list = service.getLubricantes(countryId, brandId, cmbFecha.getValue());  
+        ComInventarioFisico fis;
+        for(ComInventarioFisico c: list){
+//            fis.set
         }
+        contLub.addAll(listProducts);  
     }
 
     private Component buildHeader() {
@@ -194,30 +182,8 @@ public class MntLubricanteCV extends Panel implements View {
                 pais = (Pais) cmbPais.getValue();
                 contEstacion.addAll(svcEstacion.getStationsByCountryUser(pais.getPaisId(), usuario.getUsuarioId()));
                 svcEstacion.closeConnections();
-//                cmbEstacion.setContainerDataSource(contEstacion);
-//                if (contEstacion.size() == 1) {
-//                    cmbEstacion.setValue(contEstacion.getIdByIndex(0));
-//                }
             }
         });
-
-//        cmbEstacion = new ComboBox("Estación:");
-//        cmbEstacion.setItemCaptionPropertyId("nombre");
-//        cmbEstacion.setNullSelectionAllowed(false);
-//        cmbEstacion.setFilteringMode(FilteringMode.CONTAINS);
-//        cmbEstacion.setRequired(true);
-//        cmbEstacion.setRequiredError("Debe seleccionar una estacion");
-//        cmbEstacion.setWidth("230px");
-//        cmbEstacion.addStyleName(ValoTheme.COMBOBOX_SMALL);
-//        cmbEstacion.addValueChangeListener(new Property.ValueChangeListener() {
-//            @Override
-//            public void valueChange(Property.ValueChangeEvent event) {
-//                if (cmbEstacion.getValue() != null) {
-////                    cargaUltTurnoDia();
-//                }
-//
-//            }
-//        });
 
         cmbMarca = new ComboBox("Marca:");
         cmbMarca.setItemCaptionPropertyId("nombre");
@@ -231,10 +197,8 @@ public class MntLubricanteCV extends Panel implements View {
         cmbMarca.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
-                if (cmbMarca.getValue() != null) {
-                    Dao dao = new Dao();
-                    allLubricants = dao.getAllProducts();
-                    cmbProducto.setContainerDataSource(new ListContainer<Producto>(Producto.class, allLubricants));
+                if (cmbMarca.getValue() != null && cmbFecha.getValue() != null) {
+                    getAllData();
                 }
             }
         });
@@ -250,31 +214,13 @@ public class MntLubricanteCV extends Panel implements View {
         cmbFecha.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
-                if (cmbProducto.getValue() != null) {
+                if (cmbMarca.getValue() != null && cmbFecha.getValue() != null) {
                     getAllData();
                 }
             }
-        });
+        });        
 
-        cmbProducto = new ComboBox("Producto:");
-        cmbProducto.setItemCaptionPropertyId("nombre");
-        cmbProducto.setNullSelectionAllowed(false);
-        cmbProducto.setFilteringMode(FilteringMode.CONTAINS);
-        cmbProducto.setRequired(true);
-        cmbProducto.setRequiredError("Debe seleccionar un Producto");
-        cmbProducto.setWidth("230px");
-        cmbProducto.addStyleName(ValoTheme.COMBOBOX_SMALL);
-        cmbProducto.setContainerDataSource(new ListContainer<Producto>(Producto.class, allLubricants));
-        cmbProducto.addListener(new Property.ValueChangeListener() {
-            @Override
-            public void valueChange(final Property.ValueChangeEvent event) {
-                if (cmbProducto.getValue() != null) {
-                    getAllData();
-                }
-            }
-        });
-
-        Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(cmbPais), utils.vlContainer(cmbMarca), utils.vlContainer(cmbFecha), utils.vlContainer(cmbProducto)});
+        Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(cmbPais), utils.vlContainer(cmbMarca), utils.vlContainer(cmbFecha)});
         VerticalLayout v = new VerticalLayout(toolBar);
         return components.createHorizontal(Constant.styleViewheader, Constant.sizeFull, false, false, true, new Component[]{v});
     }
@@ -285,68 +231,47 @@ public class MntLubricanteCV extends Panel implements View {
         tblProduct.addStyleName(ValoTheme.TABLE_SMALL);
         tblProduct.setSizeFull();
         tblProduct.setContainerDataSource(contLub);
-        tblProduct.removeGeneratedColumn("colInvInicial");
-        tblProduct.addGeneratedColumn("colInvInicial", new Table.ColumnGenerator() {
+        tblProduct.removeGeneratedColumn("uniFisTienda");
+        tblProduct.addGeneratedColumn("uniFisTienda", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("invInicial");  //Atributo del bean
+                Property pro = source.getItem(itemId).getItemProperty("unidad_fis_tienda");  //Atributo del bean
                 TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
                 tfdValue.setWidth("85px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.setNullRepresentation("0.00");
                 tfdValue.addStyleName("align-right");
-//                tfdValue.setEnabled(bloqueo);
                 return tfdValue;
-            }
-        }); 
-        tblProduct.removeGeneratedColumn("ColCompra");
-        tblProduct.addGeneratedColumn("ColCompra", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("compra");  //Atributo del bean
-                TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
-                tfdValue.setWidth("85px");
-                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
-                tfdValue.setNullRepresentation("0.00");
-                tfdValue.addStyleName("align-right");
-                tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
-                    @Override
-                    public void valueChange(Property.ValueChangeEvent event) {
-                        ComVenLubricantes lub = contLub.getItem(itemId).getBean();
-                        System.out.println("lub.getVenta() "+lub.getVenta());
-                        Double venta = lub.getVenta()==null?0.0:lub.getVenta();
-                        contLub.getItem(itemId).getItemProperty("invfinal").setValue(lub.getInvInicial()+ lub.getCompra()-venta);
-                    }
-                });
-                return tfdValue;
-            }
-        }); 
-        tblProduct.removeGeneratedColumn("colVenta");
-        tblProduct.addGeneratedColumn("colVenta", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("venta");  //Atributo del bean
-                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
-                lbl.setWidth("85px");
-                lbl.addStyleName(ValoTheme.LABEL_SMALL);
-                lbl.addStyleName("align-right");
-                return lbl;
-            }
-        }); 
-        tblProduct.removeGeneratedColumn("colInvFinal");
-        tblProduct.addGeneratedColumn("colInvFinal", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("invfinal");  //Atributo del bean
-                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
-                lbl.setWidth("85px");
-                lbl.addStyleName(ValoTheme.LABEL_SMALL);
-                lbl.addStyleName("align-right");
-                return lbl;
             }
         });
-        tblProduct.setVisibleColumns(new Object[]{"fecha","productoNombre", "colInvInicial", "ColCompra", "colVenta", "colInvFinal"});
-        tblProduct.setColumnHeaders(new String[]{"Fecha","Nombre", "Inventario Inicial", "Compra", "Venta", "Inventario Final"});
+        tblProduct.removeGeneratedColumn("uniFisBodega");
+        tblProduct.addGeneratedColumn("uniFisBodega", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("unidad_fis_bodega");  //Atributo del bean
+                TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
+                tfdValue.setWidth("85px");
+                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+                tfdValue.setNullRepresentation("0.00");
+                tfdValue.addStyleName("align-right");
+                return tfdValue;
+            }
+        }); 
+        tblProduct.removeGeneratedColumn("uniFisPista");
+        tblProduct.addGeneratedColumn("uniFisPista", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("unidad_fis_pista");  //Atributo del bean
+                TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
+                tfdValue.setWidth("85px");
+                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+                tfdValue.setNullRepresentation("0.00");
+                tfdValue.addStyleName("align-right");
+                return tfdValue;
+            }
+        });        
+        tblProduct.setVisibleColumns(new Object[]{"numero","productoNombre", "presentacion",  "precio", "inv_final", "uniFisTienda", "uniFisBodega", "uniFisPista"});
+        tblProduct.setColumnHeaders(new String[]{"#","Descripcion", "Presentacion", "Precio de venta", "Inventario final", "Unidades fisicas en tienda", "Unidades fisicas en Bodega", "Unidades fisicas en Pista"});
 //        tblProduct.setColumnAlignments(new Table.Align[]{Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT});
         return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tblProduct)});
     }
@@ -357,30 +282,32 @@ public class MntLubricanteCV extends Panel implements View {
         btnGuardar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                if (!cmbPais.isValid() || !cmbProducto.isValid() || !cmbMarca.isValid() || !cmbFecha.isValid())  {
+                if (!cmbPais.isValid() || !cmbMarca.isValid() || !cmbFecha.isValid())  {
                     Notification.show("Los campos marcados son requeridos.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
-                ComVenLubricantes comVenLub = new ComVenLubricantes();
+                ComInventarioFisico comInv = new ComInventarioFisico();
+                ComInventarioFisico inv;
                 for (Integer i : (List<Integer>) tblProduct.getItemIds()) {
-                    ComVenLubricantes lub;
-                    lub = (ComVenLubricantes) ((BeanItem) tblProduct.getItem(i)).getBean();     
-                    comVenLub.setInvInicial(lub.getInvInicial());
-                    comVenLub.setCompra(lub.getCompra());
-                    comVenLub.setVenta(lub.getVenta());
-                    comVenLub.setInvfinal(lub.getInvfinal());
+                    ComInventarioFisico lub;
+                    lub = (ComInventarioFisico) ((BeanItem) tblProduct.getItem(i)).getBean();     
+                    comInv.setProductoNombre(lub.getProductoNombre());
+                    comInv.setPresentacion(lub.getPresentacion());
+                    comInv.setPrecio(lub.getPrecio());
+                    comInv.setInv_final(lub.getInv_final());
                 }
-                comVenLub.setFecha(cmbFecha.getValue());
-                comVenLub.setMarcaId(((Marca)cmbMarca.getValue()).getIdMarca());
-                comVenLub.setPaisId(((Pais)cmbPais.getValue()).getPaisId());
-                Integer idProducto = (((Producto)cmbProducto.getValue()).getProductoId()>0 ? ((Producto)cmbProducto.getValue()).getProductoId() : null);
-                comVenLub.setProductoId(idProducto);
-                comVenLub.setCreadopor(usuario.getUsername());
-                SvcComVenLubricantes service = new SvcComVenLubricantes();
-                service.insertCompra(comVenLub);
+                for (Integer pid : contLub.getItemIds()) {
+                    inv = contLub.getItem(pid).getBean();
+                    comInv.setProducto_id(inv.getProducto_id());
+                    
+                }
+                comInv.setFecha(cmbFecha.getValue());                
+                comInv.setCreado_por(usuario.getUsername());
+                SvcInventarioFisico service = new SvcInventarioFisico();
+//                service.insertCompra(comInv);
 //                service.insertVenta(123, 188, 150.00, cmbFecha.getValue());
                 service.closeConnections();
-                if (comVenLub.getProductoId()>0) {
+                if (comInv.getProducto_id()>0) {
                     Notification notif = new Notification("ÉXITO:", "El registro se realizó con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);
                     notif.setPosition(Position.MIDDLE_CENTER);
