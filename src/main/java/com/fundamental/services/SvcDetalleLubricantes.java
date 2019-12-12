@@ -52,7 +52,6 @@ public class SvcDetalleLubricantes extends Dao {
                 pst.setDouble(3, bcrLubs.getItem(itemId).getBean().getCantidad());
                 pst.setDouble(4, bcrLubs.getItem(itemId).getBean().getValor());
                 pst.setString(5, usuario);
-                System.out.println("query ---------------------- SvcDetalleLubricantes > " + query);
                 pst.executeUpdate();
                 closePst();
             }
@@ -85,6 +84,10 @@ public class SvcDetalleLubricantes extends Dao {
                 id++;
                 DtoProducto dto = new DtoProducto();
                 dto.setValor(rst.getDouble(2));
+                dto.setCantidad(rst.getInt(3)); //ASG CANTIDAD
+                dto.setTotal(dto.getCantidad()*dto.getValor()); //ASG TOTAL
+                dto.setIdmarca(rst.getInt(8)); //ASG
+                System.out.println("ID MARCA SVCDETALLELUBRICANTES "+rst.getInt(8));
                 dto.setProducto(new Producto(rst.getInt(6), rst.getString(7), null, rst.getInt(8), null, rst.getDouble(2), null));
                 bcrLubs.addItem(id, dto);
             }

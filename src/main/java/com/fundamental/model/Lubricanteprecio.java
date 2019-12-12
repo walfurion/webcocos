@@ -6,7 +6,7 @@ import java.util.Date;
 /**
  * @author Henry Barrientos
  */
-public class Lubricanteprecio {
+public class Lubricanteprecio implements Cloneable{
 
     private int lubricanteprecio, paisId, //estacionId, 
             productoId;
@@ -19,7 +19,15 @@ public class Lubricanteprecio {
     private Marca marca;
     private Producto producto;
     private Pais pais;
-
+    public Object clone(){
+        Lubricanteprecio obj=null;
+        try{
+            obj=(Lubricanteprecio)super.clone();
+        }catch(CloneNotSupportedException ex){
+            System.out.println(" no se puede duplicar");
+        }
+        return obj;
+    }
 //    public Lubricanteprecio(int lubricanteprecio, int paisId, int estacionId, int productoId, Date fechaInicio, Date fechaFin, double precio, String creadoPor) {
     public Lubricanteprecio(int lubricanteprecio, int paisId, int productoId, Date fechaInicio, Date fechaFin, double precio, String creadoPor) {
         this.lubricanteprecio = lubricanteprecio;
@@ -186,6 +194,11 @@ public class Lubricanteprecio {
 
     public void setDescError(String descError) {
         this.descError = descError;
+    }
+
+    @Override
+    public String toString() {
+        return "Lubricanteprecio{" + "lubricanteprecio=" + lubricanteprecio + ", paisId=" + paisId + ", productoId=" + productoId + ", fechaInicio=" + fechaInicio + ", fechaFin=" + fechaFin + ", creadoEl=" + creadoEl + ", precio=" + precio + ", creadoPor=" + creadoPor + ", modificadoEl=" + modificadoEl + ", modificadoPor=" + modificadoPor + ", paisNombre=" + paisNombre + ", estacionNombre=" + estacionNombre + ", productoNombre=" + productoNombre + ", marcaNombre=" + marcaNombre + ", descError=" + descError + ", marca=" + marca + ", producto=" + producto + ", pais=" + pais + '}';
     }
 
 }

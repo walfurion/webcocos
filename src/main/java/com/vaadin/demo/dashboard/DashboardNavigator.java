@@ -56,7 +56,7 @@ public class DashboardNavigator extends Navigator {
         addViewChangeListener(new ViewChangeListener() {
             @Override
             public boolean beforeViewChange(final ViewChangeEvent event) {
-                System.out.println("beforeViewChange ");
+//                System.out.println("beforeViewChange ");
                 //TODO: Aplicar segurida aca para accesos NO autorizados.
                 //Para evitar accesos NO autorizados via URL.
                 boolean exists = false;
@@ -101,9 +101,7 @@ public class DashboardNavigator extends Navigator {
 //                        }
 //                    }
 //                }
-                    System.out.println(event.getViewName() + " event.getViewName().equals(DashboardViewType.HOME.getViewName() " + DashboardViewType.HOME.getViewName());
                     if (!exists && !(event.getViewName().equals(DashboardViewType.HOME.getViewName()))) {
-                        System.out.println(event.getViewName() + " event.getViewName().equals(DashboardViewType.HOME.getViewName() " + DashboardViewType.HOME.getViewName());
                         return false;
                     }
 
@@ -117,7 +115,7 @@ public class DashboardNavigator extends Navigator {
                 (final ViewChangeEvent event
                 
                     ) {
-                System.out.println("afterViewChange");
+//                System.out.println("afterViewChange");
                     DashboardViewType view = DashboardViewType.getByViewName(event.getViewName());
                     // Appropriate events get fired after the view is changed.
                     DashboardEventBus.post(new PostViewChangeEvent(view));
@@ -145,7 +143,7 @@ public class DashboardNavigator extends Navigator {
 
                 @Override
                 public View getView(final String viewName) {
-                    System.out.println("getView");
+//                    System.out.println("getView");
                     View result = null;
                     if (viewType.getViewName().equals(viewName)) {
                         if (viewType.isStateful()) {

@@ -128,10 +128,9 @@ public class Dao {
                     + "FROM rol r, rol_usuario ru "
                     + "WHERE r.rol_id = ru.rol_id AND ru.usuario_id = " + userId;
             pst = getConnection().prepareStatement(miQuery);
-            System.out.println("getRoles "+miQuery);
+//            System.out.println("getRoles "+miQuery);
             rst = pst.executeQuery();
             while (rst.next()) {
-                System.out.println("next");
                 Rol rl = new Rol(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5));
                 try{
                 List<Acceso> accesos = maintenace.getAccessByRolid(rst.getInt(1));
@@ -683,7 +682,7 @@ public class Dao {
             rst = pst.executeQuery();
             Mediopago mediopago;
             while (rst.next()) {
-                mediopago = new Mediopago(rst.getInt(1), rst.getString(2), rst.getInt(3), null, rst.getInt(4), rst.getString(5), rst.getBoolean(7), null);
+                mediopago = new Mediopago(rst.getInt(1), rst.getString(2), rst.getInt(3), null, rst.getInt(4), rst.getString(5), rst.getBoolean(8), null);
                 mediopago.setPartidacontPor(rst.getDouble(6));
                 mediopago.setPartidacont(rst.getBoolean(7));
                 result.add(mediopago);
@@ -823,6 +822,7 @@ public class Dao {
                     + ") tabl "
                     + "GROUP BY tabl.arqueocaja_id "
                     + "ORDER BY tabl.arqueocaja_id";
+            System.out.println("mi query "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             while (rst.next()) {
@@ -1533,21 +1533,55 @@ public class Dao {
         return result;
     }
 
-    public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int type, Integer brandId, boolean includeInactive) {
+//    public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int type, Integer brandId, boolean includeInactive) {
+//        List<Producto> result = new ArrayList();
+//        ResultSet rst = null;
+//        try {
+//            tmpString = (brandId == null) ? "" : " AND p.id_marca = " + brandId;
+//            miQuery = (includeInactive) ? "" : " AND p.estado = 'A' ";
+//            miQuery = "SELECT p.producto_id, p.nombre, p.codigo, p.estado, p.creado_por, p.orden_pos, NVL(m.id_marca, 0), NVL(m.nombre, '') "
+//                    + "FROM producto p "
+//                    + "LEFT JOIN estacion_producto ep ON ep.producto_id = p.producto_id "
+//                    + "LEFT JOIN marca m ON p.id_marca = m.id_marca "
+//                    + "LEFT JOIN estacion e ON e.estacion_id = ep.estacion_id AND e.pais_id = " + countryId
+//                    + " WHERE p.tipo_id = " + type
+//                    + miQuery
+//                    + tmpString
+//                    + " ORDER BY m.nombre, p.nombre";
+//            System.out.println("getAllProductosByCountryTypeBrand "+miQuery);
+//            pst = getConnection().prepareStatement(miQuery);
+//            rst = pst.executeQuery();
+//            Producto producto;
+//            while (rst.next()) {
+//                producto = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getInt(6));
+//                producto.setMarca(new Marca(rst.getInt(7), rst.getString(8), null));
+//                result.add(producto);
+//            }
+//        } catch (Exception exc) {
+//            exc.printStackTrace();
+//        } finally {
+//            closePst();
+//        }
+//        return result;
+//    }
+public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int type, Integer brandId, boolean includeInactive) {
         List<Producto> result = new ArrayList();
         ResultSet rst = null;
         try {
             tmpString = (brandId == null) ? "" : " AND p.id_marca = " + brandId;
             miQuery = (includeInactive) ? "" : " AND p.estado = 'A' ";
-            miQuery = "SELECT p.producto_id, p.nombre, p.codigo, p.estado, p.creado_por, p.orden_pos, NVL(m.id_marca, 0), NVL(m.nombre, '') "
-                    + "FROM producto p "
-                    + "LEFT JOIN estacion_producto ep ON ep.producto_id = p.producto_id "
-                    + "LEFT JOIN marca m ON p.id_marca = m.id_marca "
-                    + "LEFT JOIN estacion e ON e.estacion_id = ep.estacion_id AND e.pais_id = " + countryId
+            miQuery = " SELECT p.producto_id, p.nombre, p.codigo, p.estado, p.creado_por, p.orden_pos, NVL(m.id_marca, 0), NVL(m.nombre, '') "
+                    + " FROM producto p "
+                    + " LEFT JOIN estacion_producto ep ON ep.producto_id = p.producto_id "
+                    + " LEFT JOIN marca m ON p.id_marca = m.id_marca "
+                    + " LEFT JOIN estacion e ON e.estacion_id = ep.estacion_id AND e.pais_id = " + countryId
+                    + " LEFT JOIN LUBRICANTEPRECIO LP ON LP.PAIS_ID="+countryId+" AND LP.PRODUCTO_ID=p.PRODUCTO_ID "
                     + " WHERE p.tipo_id = " + type
                     + miQuery
                     + tmpString
+                    + " and lp.PRODUCTO_ID is null "
                     + " ORDER BY m.nombre, p.nombre";
+            System.out.println("getAllProductosByCountryTypeBrand "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             Producto producto;
@@ -1691,16 +1725,16 @@ public class Dao {
         return p;
     }
     public Acceso getAccess(String screen){
+//        System.out.println("screen "+screen);
         Acceso acceso = new Acceso();
          Usuario user = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
                 for (Acceso a : user.getRoles().get(0).getAccesos()) {
                     if (a.getRecursoInterno().trim().toUpperCase().equals(screen)) {
-                        System.out.println(screen + " - " + a.getTitulo() + " ACCIONES  " 
-                                + a.isVer() + " " + a.isCambiar() + " - " + a.isAgregar());
                         acceso.setVer(true);
                         acceso.setCambiar(a.isCambiar());
                         acceso.setEliminar(a.isEliminar());
                         acceso.setAgregar(a.isAgregar());
+//                        System.out.println("nombre "+a.getRecursoInterno()+" cambiar "+acceso.isCambiar()+" agregar "+acceso.isAgregar());
                         return acceso;
                     }
                 }

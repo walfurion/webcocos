@@ -1,7 +1,7 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Bomba;
-import com.fundamental.model.BombaEmpleadoEstacion;
 import com.fundamental.model.Dia;
 import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Estacion;
@@ -21,7 +21,6 @@ import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcReading;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.utils.Constant;
-import com.fundamental.utils.Mail;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -62,11 +61,9 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import static org.eclipse.persistence.jpa.rs.util.JPARSLogger.exception;
 import org.vaadin.maddon.ListContainer;
 import org.vaadin.ui.NumberField;
 
@@ -127,6 +124,7 @@ public class PrReading extends VerticalLayout implements View {
     String[] uniqueStation;
     public TextField txtNumeroCaso;
     Double cantCalibrar;
+    Acceso acceso = new Acceso();
 
     public PrReading() {
         setSizeFull();
@@ -481,37 +479,37 @@ public class PrReading extends VerticalLayout implements View {
 //        determinarPermisos();
     }
 
-    boolean editar = false;
+//    boolean editar = false;
 
     private void determinarPermisos() {
-        boolean explorar = false, crearLectura = false;
-        editar = false;
-        if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha() == null && ultimoDia.getFecha() == null) {
-            explorar = true;
-        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null && ultimoDia.getFecha() == null) {
-            explorar = true;
-        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
-                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
-            explorar = crearLectura = true;
-        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
-                && dia.getFecha().before(ultimoDia.getFecha())) {
-            explorar = true;
-        } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
-                && dia.getEstadoId() == 2 && turno.getEstadoId() == 2) {
-            explorar = true;
-        } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
-                && dia.getEstadoId() == 1 //                && turno.getEstadoId() == 2
-                ) {
-            explorar = editar = crearLectura = true;
-        } else if (user.isAdministrativo() || user.isGerente()) {
-            explorar = editar = crearLectura = true;
-        }
-//        else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
-//                && dia.getEstadoId() == 1 && turno.getEstadoId() == 1) { editar = crearLectura = true; } 
-
-        dfdFecha.setEnabled(explorar);   //habilitado
-        cbxTurno.setEnabled(explorar);    //habilitado
-        btnSave.setEnabled(crearLectura);    //habilitado (cerrado)
+//        boolean explorar = false, crearLectura = false;
+//        editar = false;
+//        if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha() == null && ultimoDia.getFecha() == null) {
+//            explorar = true;
+//        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null && ultimoDia.getFecha() == null) {
+//            explorar = true;
+//        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
+//            explorar = crearLectura = true;
+//        } else if (dia.getEstadoId() == null && turno.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                && dia.getFecha().before(ultimoDia.getFecha())) {
+//            explorar = true;
+//        } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
+//                && dia.getEstadoId() == 2 && turno.getEstadoId() == 2) {
+//            explorar = true;
+//        } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
+//                && dia.getEstadoId() == 1 //                && turno.getEstadoId() == 2
+//                ) {
+//            explorar = editar = crearLectura = true;
+//        } else if (user.isAdministrativo() || user.isGerente()) {
+//            explorar = editar = crearLectura = true;
+//        }
+////        else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
+////                && dia.getEstadoId() == 1 && turno.getEstadoId() == 1) { editar = crearLectura = true; } 
+//
+//        dfdFecha.setEnabled(explorar);   //habilitado
+//        cbxTurno.setEnabled(explorar);    //habilitado
+//        btnSave.setEnabled(crearLectura);    //habilitado (cerrado)
     }
 
     private void actionComboboxTurno() {
@@ -587,66 +585,77 @@ public class PrReading extends VerticalLayout implements View {
                         notif.show(Page.getCurrent());
                         return;
                     }
-                    if (dlectura.getmCalibracion() > 0) {
-                        existCalibration = true;
+                    if (dlectura.getmCalibracion() != null) {
+                        if (dlectura.getmCalibracion() > 0) {
+                            existCalibration = true;
+                        }
                     }
+
                     Dao dao = new Dao();
                     Parametro parametro = dao.getParameterByName("LECTURAS_OBLIGATORIAS_ME");
-                    if ("true".equals(parametro.getValor())) {
-                        Double masmenos = dlectura2.geteFinal() - dlectura.getmFinal();
-                        if (masmenos > 5 || masmenos < -5) {
-                            Notification notif = new Notification("ADVERTENCIA:", "Valor Final no puede tener una diferencia de mayor a 5 o menor a -5 (" + dlectura.getBomba() + " -> " + dlectura.getProducto() + ").", Notification.Type.WARNING_MESSAGE);
-                            notif.setDelayMsec(4000);
-                            notif.setPosition(Position.MIDDLE_CENTER);
-                            notif.show(Page.getCurrent());
-                            return;
+                    if (parametro != null) {
+                        if ("true".equals(parametro.getValor())) {
+                            Double masmenos = dlectura2.geteFinal() - dlectura.getmFinal();
+                            if (masmenos > 5 || masmenos < -5) {
+                                Notification notif = new Notification("ADVERTENCIA:", "Valor Final no puede tener una diferencia de mayor a 5 o menor a -5 (" + dlectura.getBomba() + " -> " + dlectura.getProducto() + ").", Notification.Type.WARNING_MESSAGE);
+                                notif.setDelayMsec(4000);
+                                notif.setPosition(Position.MIDDLE_CENTER);
+                                notif.show(Page.getCurrent());
+                                return;
+                            }
                         }
+                    } else {
+                        Notification.show("ADVERTENCIA:", "No se encontro el parametro de configuracion de Lecturas...", Notification.Type.WARNING_MESSAGE);
+                        return;
                     }
                 }
-                if (existCalibration && tempFile != null) {
-                    Notification.show("ADVERTENCIA:", "Tiene por lo menos un dato de calibración, debe adjuntar un documento", Notification.Type.WARNING_MESSAGE);
+
+                /*ASG*/
+                for (Integer id : (List<Integer>) tableElectronicas.getItemIds()) {
+                    dlectura2 = (DtoLectura) ((BeanItem) tableElectronicas.getItem(id)).getBean();
+                    /*ASG*/
+                    if (dlectura2.getmCalibracion() != null) {
+                        if (dlectura2.getmCalibracion() > 0) {
+                            existCalibration = true;
+                        }
+                    }
+                    /*FIn ASG*/
+                }
+//                if (existCalibration && tempFile != null) {
+//                    Notification.show("ADVERTENCIA:", "Tiene por lo menos un dato de calibración, debe adjuntar un documento", Notification.Type.WARNING_MESSAGE);
+//                    return;
+//                }
+                if (existCalibration && txtNumeroCaso.getValue().equals("")) {
+                    Notification.show("ADVERTENCIA:", "Tiene por lo menos un dato de calibración, debe ingresar un numero de caso", Notification.Type.WARNING_MESSAGE);
                     return;
                 }
-
-                if (txtNumeroCaso.getValue() != null) {
-                    try {
-                        if (cantCalibrar > 0.00 && txtNumeroCaso.getValue().length() == 0) {
-                            Notification.show("ADVERTENCIA:", "Tiene por lo menos un dato de calibración, debe ingresar un numero de caso", Notification.Type.WARNING_MESSAGE);
-                            return;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-                
 
                 if (turno.getTurnoId() != null) {
                     Integer turnoId = turno.getTurnoId();
                     Lectura lectura = new Lectura();
-                    if (txtNumeroCaso.getValue() != null) {
-                        lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), txtNumeroCaso.getValue()/**
-                         * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
-                         */
-                        );
-
-                    } else {
-                        lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), null/**
-                         * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
-                         */
-                        );
-                    }
+//                    if (!txtNumeroCaso.getValue().equals("")) {
+//                        lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), txtNumeroCaso.getValue()/**
+//                         * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
+//                         */
+//                        );
+//
+//                    } else {
+                    lectura = new Lectura(null, estacion.getEstacionId(), turnoId, user.getUsername(), user.getNombreLogin(), null/**
+                     * , tfdNameSeller.getValue(), tfdNameChief.getValue()*
+                     */
+                    );
+//                    }
 
                     lectura.setEmpleadoId(((Empleado) cbxEmpleado.getValue()).getEmpleadoId());
-
                     LecturaDetalle ldetalle;
                     boolean crearNuevaLectura = false;
 //                    if (pais.getPaisId() == Constant.CAT_PAIS_GUATEMALA) {
                     for (Integer id : (List<Integer>) tableElectronicas.getItemIds()) {
                         dlectura = (DtoLectura) ((BeanItem) tableElectronicas.getItem(id)).getBean();
                         ldetalle = new LecturaDetalle(lectura.getLecturaId(), estacion.getEstacionId(), dlectura.getBombaId(), dlectura.getProductoId(), dlectura.getTipodespachoId(),
-                                "E", dlectura.geteInicial(), dlectura.geteFinal(), dlectura.geteVolumen(), null);
+                                //                                "E", dlectura.geteInicial(), dlectura.geteFinal(), dlectura.geteVolumen(), null);
+                                //                                "E", dlectura.geteInicial(), dlectura.geteFinal(), dlectura.geteVolumen(), dlectura.geteCalibracion());
+                                "E", dlectura.geteInicial(), dlectura.geteFinal(), dlectura.geteVolumen(), dlectura.getmCalibracion());
                         if ((!crearNuevaLectura && dlectura.getEsNueva())) {
                             crearNuevaLectura = true;
                         }
@@ -719,25 +728,38 @@ public class PrReading extends VerticalLayout implements View {
 //                    }
                     int contador = 0;
                     if (crearNuevaLectura) {
-                        lectura = svcLectura.doActionLectura(Dao.ACTION_ADD, lectura);
+                        lectura.setNumeroCaso(txtNumeroCaso.getValue());
+//                        if (crear) { //ASG Matriz seguridad
+                            lectura = svcLectura.doActionLectura(Dao.ACTION_ADD, lectura);
+//                        }
                     } else {
-                        lectura = svcLectura.doActionLectura(Dao.ACTION_UPDATE, lectura);
+                        //ASG
+                        lectura.setLecturaId(svcLectura.getLecturaID(lectura.getEmpleadoId(), turnoId));
+                        lectura.setNumeroCaso(txtNumeroCaso.getValue());
+                        //FIN ASG
+//                        if (modificar) {//ASG Matriz seguridad
+                            lectura = svcLectura.doActionLectura(Dao.ACTION_UPDATE, lectura);
+//                        }
                     }
                     for (LecturaDetalle lde : lectura.getLecturaDetalle()) {
                         if (lde.getEsNueva()) {
                             lde.setLecturaId(lectura.getLecturaId());
-                            svcLectura.doActionLecturaDetalle(Dao.ACTION_ADD, lde);
+//                            if (crear) { //ASG Matriz seguridad
+                                svcLectura.doActionLecturaDetalle(Dao.ACTION_ADD, lde);
+//                            }
                         } else {
-                            svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, lde);
-                            //Si existe una lectura siguiente, se actualiza la lectura inicial de esa siguiente.
-                            LecturaDetalle ldeNext = svcLectura.getLecturaDetalleSiguiente(lde.getEstacionId(), lde.getLecturaId(), lde.getBombaId(), lde.getProductoId());
-                            if (ldeNext.getLecturaId() != null) {
-                                ldeNext.setLecturaInicial(lde.getLecturaFinal());
-                                svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, ldeNext);
-                            } else {
-                                Lecturafinal lfinal = new Lecturafinal(lde.getEstacionId(), lde.getBombaId(), lde.getProductoId(), lde.getTipo(), lde.getLecturaInicial(), lde.getLecturaFinal(), user.getUsername(), user.getNombreLogin());
-                                svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfinal);
-                            }
+//                            if (modificar) {  //ASG Matriz seguridad
+                                svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, lde);
+                                //Si existe una lectura siguiente, se actualiza la lectura inicial de esa siguiente.
+                                LecturaDetalle ldeNext = svcLectura.getLecturaDetalleSiguiente(lde.getEstacionId(), lde.getLecturaId(), lde.getBombaId(), lde.getProductoId());
+                                if (ldeNext.getLecturaId() != null) {
+                                    ldeNext.setLecturaInicial(lde.getLecturaFinal());
+                                    svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, ldeNext);
+                                } else {
+                                    Lecturafinal lfinal = new Lecturafinal(lde.getEstacionId(), lde.getBombaId(), lde.getProductoId(), lde.getTipo(), lde.getLecturaInicial(), lde.getLecturaFinal(), user.getUsername(), user.getNombreLogin());
+                                    svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfinal);
+                                }
+//                            }
                         }
                         contador++;
                     }
@@ -753,9 +775,13 @@ public class PrReading extends VerticalLayout implements View {
                             }
                         }
                         if (existeMecanica) {
-                            svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+//                            if (modificar) {//ASG Matriz seguridad
+                                svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+//                            }
                         } else {
-                            svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+//                            if (crear) { //ASG Matriz seguridad
+                                svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+//                            }
                         }
                     }
 
@@ -770,9 +796,13 @@ public class PrReading extends VerticalLayout implements View {
                             }
                         }
                         if (existeElectronica) {
-                            svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+//                            if (modificar) {//ASG Matriz seguridad
+                                svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+//                            }
                         } else {
-                            svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+//                            if (crear) { //ASG Matriz seguridad
+                                svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+//                            }
                         }
                     }
 
@@ -789,13 +819,11 @@ public class PrReading extends VerticalLayout implements View {
 
 //                    if (lectura.getLecturaId() != null) {
 //                        Notification.show("La lectura se ha creado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
-                        Notification notif = new Notification("ÉXITO:", "Operación realizada con éxito.", Notification.Type.HUMANIZED_MESSAGE);
-                        notif.setDelayMsec(3000);
-                        notif.setPosition(Position.MIDDLE_CENTER);
-                        //notif.setStyleName("mystyle");
-                        //notif.setIcon(new ThemeResource("img/reindeer.png"));
-                        notif.show(Page.getCurrent());
-                        UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_READING.getViewName());
+                            Notification notif = new Notification("ÉXITO:", "Operación realizada con éxito.", Notification.Type.HUMANIZED_MESSAGE);
+                            notif.setDelayMsec(3000);
+                            notif.setPosition(Position.MIDDLE_CENTER);
+                            notif.show(Page.getCurrent());
+                            UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_READING.getViewName());
                     } else {
                         Notification.show("ERROR:", "Ocurrió un error al guardar la lectura.\n" + lectura.getDescError(), Notification.Type.ERROR_MESSAGE);
                         return;
@@ -1142,7 +1170,7 @@ public class PrReading extends VerticalLayout implements View {
                 nfd.setWidth(100f, Unit.PIXELS);
                 nfd.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 nfd.addStyleName("align-right");
-                nfd.setEnabled(editar);
+//                nfd.setEnabled(editar); //ASG 
                 nfd.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
@@ -1178,7 +1206,7 @@ public class PrReading extends VerticalLayout implements View {
         tableElectronicas.addGeneratedColumn("colCalibracion", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("eCalibracion");  //Atributo del bean
+                Property pro = source.getItem(itemId).getItemProperty("mCalibracion");  //Atributo del bean
 //                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
                 final TextField nfd = new TextField(utils.getPropertyFormatterDouble_3Digit(pro));
                 nfd.setWidth(60f, Unit.PIXELS);
@@ -1191,7 +1219,25 @@ public class PrReading extends VerticalLayout implements View {
                         DtoLectura dtol = bcrElectronicas.getItem(itemId).getBean();
                         Double diff = dtol.geteFinal() - dtol.geteInicial() - Double.parseDouble(nfd.getValue());
                         bcrElectronicas.getItem(itemId).getItemProperty("eVolumen").setValue(diff);
-                        bcrManuales.getItem(itemId).getItemProperty("mCalibracion").setValue(Double.parseDouble(nfd.getValue()));   //replicar en calibraciones manuales
+//                        bcrManuales.getItem(itemId).getItemProperty("mCalibracion").setValue(Double.parseDouble(nfd.getValue()));   //replicar en calibraciones manuales  ASG COMENTADO
+
+                        //ASG 
+                        boolean valida = false;
+                        DtoLectura dlectura2;
+                        for (Integer id : (List<Integer>) tableElectronicas.getItemIds()) {
+                            dlectura2 = (DtoLectura) ((BeanItem) tableElectronicas.getItem(id)).getBean();
+                            if (dlectura2.getmCalibracion() != null) {
+                                if (dlectura2.getmCalibracion() > 0) {
+                                    valida = true;
+                                }
+                            }
+                        }
+                        if (valida) {
+                            txtNumeroCaso.setVisible(true);
+                        } else {
+                            txtNumeroCaso.setVisible(false);
+                        }
+                        /*FIN ASG*/
                     }
                 });
                 return nfd;
@@ -1297,7 +1343,7 @@ public class PrReading extends VerticalLayout implements View {
                 nfd.setWidth(100f, Unit.PIXELS);
                 nfd.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 nfd.addStyleName("align-right");
-                nfd.setEnabled(editar);
+//                nfd.setEnabled(editar); //ASG 
 //                nfd.setEnabled(
 //                        dia.getFecha() != null && ultimoDia.getFecha() != null && turno.getEstadoId() != null
 //                        && dia.getFecha().equals(ultimoDia.getFecha())
@@ -1397,23 +1443,33 @@ public class PrReading extends VerticalLayout implements View {
                         Double diff = dtol.getmFinal() - dtol.getmInicial() - Double.parseDouble(nfd.getValue());
                         bcrManuales.getItem(itemId).getItemProperty("mTotal").setValue(diff);
                         try {
-                            Double cantConvertida = Double.valueOf(nfd.getValue());
-                            if (cantConvertida > 0) {
+                            //ASG//
+                            boolean valida = false;
+                            DtoLectura dlectura;
+                            for (Integer id : (List<Integer>) tableManuales.getItemIds()) {
+                                dlectura = (DtoLectura) ((BeanItem) tableManuales.getItem(id)).getBean();
+                                if (dlectura.getmCalibracion() != null) {
+                                    if (dlectura.getmCalibracion() > 0) {
+                                        valida = true;
+                                    }
+                                }
+                            }
+                            if (valida) {
                                 txtNumeroCaso.setVisible(true);
-                                cantCalibrar = 1.00;
                             } else {
                                 txtNumeroCaso.setVisible(false);
-                                cantCalibrar = 0.00;
                             }
+                            /*FIN ASG*/
                         } catch (Exception e) {
-
+                            e.printStackTrace();
                         }
-
                     }
-                });
+                }
+                );
                 return nfd;
             }
-        });
+        }
+        );
 
         Object[] columns = new Object[]{"bomba", "producto", "colInicial", "colFinal", "colCalibracion", "colTotal"};
         String[] tittles = new String[]{"Bomba", "Producto", "Inicial", "Final", "Calibración", "Venta"};
@@ -1426,11 +1482,17 @@ public class PrReading extends VerticalLayout implements View {
         }
 
         tableManuales.setVisibleColumns(columns);
+
         tableManuales.setColumnHeaders(tittles);
+
         tableManuales.setColumnAlignments(aligns);
-        tableManuales.setFooterVisible(true);
-        tableManuales.setColumnFooter("bomba", "Totales:");
-        tableManuales.setColumnFooter("colDiferencia", numberFmt.format(totalDiferencia));
+
+        tableManuales.setFooterVisible(
+                true);
+        tableManuales.setColumnFooter(
+                "bomba", "Totales:");
+        tableManuales.setColumnFooter(
+                "colDiferencia", numberFmt.format(totalDiferencia));
 
     }
 
@@ -1441,11 +1503,6 @@ public class PrReading extends VerticalLayout implements View {
             totalVenta += Double.parseDouble(bcrManuales.getItem(id).getItemProperty("mTotal").getValue().toString());
         }
         tableManuales.setColumnFooter("colTotal", numberFmt.format(totalVenta));
-    }
-
-    @Override
-    public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     private void buildLabelInfo() {
@@ -1536,20 +1593,38 @@ public class PrReading extends VerticalLayout implements View {
                     }
                 }
                 if (lecturaFinalTurnoActual) {    //cerrado
+                    //ASG
+                    String numeroCaso = "";
                     for (DtoLectura dlec : lecturasTurnoActivoElectronicas) {
                         if (dlec.getBombaId().equals(itemId) && dlec.getProductoId().equals(p.getProductoId()) && dlec.getTipodespachoId().equals(bomba.getTipoDespachoId())) {
                             //tfdNameSeller.setValue(dlec.getNombrePistero());
                             //tfdNameChief.setValue(dlec.getNombreJefe());
                             dla.seteInicial(dlec.getmInicial());
                             dla.seteFinal(dlec.getmFinal());
-//                                            dla.setmCalibracion(dlec.getmCalibracion());
+                            dla.setmCalibracion(dlec.getmCalibracion());  ///ASG
+                            if (dlec.getNumeroCaso() != null) {
+                                numeroCaso = dlec.getNumeroCaso();
+                            }
                             dla.setEsNueva(Boolean.FALSE);
                             dla.setLecturaId(dlec.getLecturaId());
 //                                            dla.setmTotal(dlec.getmFinal() - dlec.getmInicial() - dlec.getmCalibracion());
-                            dla.seteVolumen(dlec.getmFinal() - dlec.getmInicial());
+//                            dla.seteVolumen(dlec.getmFinal() - dlec.getmInicial());  //ASG COMENTE
+                            dla.seteVolumen(dlec.getmTotal());//ASG
+
                             break;
                         }
                     }
+                    // ASG
+
+                    System.out.println("NUMERO CASOOO " + numeroCaso);
+                    if (!numeroCaso.equals("")) {
+                        txtNumeroCaso.setVisible(true);
+                        txtNumeroCaso.setValue(numeroCaso);
+                    } else {
+                        txtNumeroCaso.setVisible(false);
+                        txtNumeroCaso.setValue("");
+                    }
+                    //FIN
                 } else {
                     //al crear nuevo conjunto de lecturas, la lectura inicial se obtiene de esta tabla.
                     for (Lecturafinal lfinal : lecturasUltimaElectronicas) {
@@ -1560,6 +1635,8 @@ public class PrReading extends VerticalLayout implements View {
                         }
 //                                        tfdNameSeller.setValue(dlec.getNombrePistero());
 //                                        tfdNameChief.setValue(dlec.getNombreJefe());
+                        txtNumeroCaso.setVisible(false);
+                        txtNumeroCaso.setValue("");
                     }
                 }
 
@@ -1653,4 +1730,15 @@ public class PrReading extends VerticalLayout implements View {
         }
     }
 
+    @Override
+    public void enter(ViewChangeListener.ViewChangeEvent event) {
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        if (acceso.isCambiar() || acceso.isAgregar()) {
+            btnSave.setEnabled(true);
+        } else {
+            btnSave.setEnabled(false);
+        }
+    }
 }

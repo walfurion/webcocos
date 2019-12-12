@@ -1,5 +1,6 @@
 package com.fundamental.view;
 
+import com.fundamental.model.Acceso;
 import com.fundamental.model.Arqueocaja;
 import com.fundamental.model.ArqueocajaBomba;
 import com.fundamental.model.ArqueocajaDetalle;
@@ -29,6 +30,7 @@ import com.fundamental.services.SvcClientePrepago;
 import com.fundamental.services.SvcCuadre;
 import com.fundamental.services.SvcDetalleLubricantes;
 import com.fundamental.services.SvcProducto;
+import com.fundamental.services.SvcTarjetaCredito;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
@@ -36,10 +38,14 @@ import com.fundamental.utils.CreateComponents;
 import com.fundamental.utils.Mail;
 import com.fundamental.utils.Util;
 import com.sisintegrados.generic.bean.GenericProduct;
+import com.sisintegrados.generic.bean.GenericTarjeta;
+import com.sisintegrados.generic.bean.genericMedioTarjeta;
 import com.sisintegrados.view.form.FormDetalleVenta;
 import com.sisintegrados.view.form.FormDetalleVenta2;
 import com.sisintegrados.view.form.FormClientePrepago;
+import com.sisintegrados.view.form.FormClientesCredito;
 import com.sisintegrados.view.form.FormDetalleLubricantes;
+import com.sisintegrados.view.form.FormTarjetasCredito;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -90,6 +96,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -145,7 +152,6 @@ public class PrCuadre extends Panel implements View {
 
     TextField tfdNameSeller, tfdNameChief;
     DateField dfdFecha = new DateField("Fecha:");
-    Upload upload;
 
     Pais pais;
     Estacion estacion;
@@ -178,9 +184,7 @@ public class PrCuadre extends Panel implements View {
             bcrPartida = new BeanContainer<Integer, Mediopago>(Mediopago.class);
     BeanContainer<Integer, DtoProducto> bcFactElect = new BeanContainer<Integer, DtoProducto>(DtoProducto.class),
             bcDiferencias = new BeanContainer<Integer, DtoProducto>(DtoProducto.class),
-            bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class),
-            bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class),
-            bcrCreditC = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+            bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
 
     Double totalArqueoVol = 0D, totalArqueoCurr = 0D, totalArqueoDif = 0D, totalArqueoElectronico = 0D;
     Double totalProducto = 0D, totalMediosPago = 0D, totalEfectivo = 0D;
@@ -208,6 +212,24 @@ public class PrCuadre extends Panel implements View {
     double tmpDoubleProdUno;
     double tmpDoubleProdNoUno;
     SvcDetalleLubricantes daoLubs = new SvcDetalleLubricantes();
+
+    /*Detalle Clientes Credito*/
+    FormClientesCredito formClientesCredito;
+    BeanContainer<Integer, DtoProducto> bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+    /*Detalle Clientes Credito*/
+    double tmpDoubleCredito;
+
+    /*Detalle Tarjeta Credito*/
+    FormTarjetasCredito formTarjetasCredito;
+    BeanContainer<Integer, GenericTarjeta> bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+    SvcTarjetaCredito daoTrC = new SvcTarjetaCredito();
+    double tmpDoubleTarjetaCredito;
+
+    Acceso acceso = new Acceso();
+    boolean modificar = false;
+    boolean crear = false;
+
+    double tmpTotal = 0.00;
 
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -280,11 +302,10 @@ public class PrCuadre extends Panel implements View {
         cltMedios.setSizeFull();
         Responsive.makeResponsive(cltMedios);
 
-        CssLayout cltUpload = new CssLayout(utils.vlContainer(upload));
-        cltUpload.setSizeFull();
-        cltUpload.setVisible(false);
-        Responsive.makeResponsive(cltUpload);
-
+//        CssLayout cltUpload = new CssLayout(utils.vlContainer(upload));
+//        cltUpload.setSizeFull();
+//        cltUpload.setVisible(false);
+//        Responsive.makeResponsive(cltUpload);
         CssLayout cltTaDiff = buildDetalleMontos();
         cltTaDiff.setSizeFull();
         cltTaDiff.addComponent(btnSave);
@@ -355,7 +376,8 @@ public class PrCuadre extends Panel implements View {
 ////           }
 ////       });
         CssLayout cltMain = new CssLayout(hlLabels, hlCombo, cltEmpleado, cltVentas, cltMedios, //utils.vlContainer(tblPartida), 
-                cltUpload, cltTaDiff);
+                //cltUpload,
+                cltTaDiff);
         Responsive.makeResponsive(cltMain);
         tabsheet.addTab(cltMain, "Principal", FontAwesome.LIST);
 
@@ -671,145 +693,162 @@ public class PrCuadre extends Panel implements View {
         cbxEmpleado.addValueChangeListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
-                tfdNameSeller.setValue(null);
-                tfdNameChief.setValue(null);
+//                tfdNameSeller.setValue(null);
+//                tfdNameChief.setValue(null);
                 for (Integer itemId : bcrBombas.getItemIds()) {
                     bcrBombas.getItem(itemId).getItemProperty("selected").setValue(false);
                     onChangeCheckboxBomba(itemId, false);
                 }
-                for (Bomba bomba : ((Empleado) cbxEmpleado.getValue()).getBombas()) {
-                    for (Integer itemId : bcrBombas.getItemIds()) {
-                        if (bomba.getId().equals(itemId)) {
-                            bcrBombas.getItem(itemId).getItemProperty("selected").setValue(true);
-                            onChangeCheckboxBomba(itemId, true);
-                            break;
+                if (cbxEmpleado.getValue() != null) {  //ASG
+                    for (Bomba bomba : ((Empleado) cbxEmpleado.getValue()).getBombas()) {
+                        for (Integer itemId : bcrBombas.getItemIds()) {
+                            if (bomba.getId().equals(itemId)) {
+                                bcrBombas.getItem(itemId).getItemProperty("selected").setValue(true);
+                                onChangeCheckboxBomba(itemId, true);
+                                break;
+                            }
                         }
                     }
-                }
-
+                } //ASG
 //                SvcCuadre service = new SvcCuadre();
 //                String[] nombres = service.getEmpleadoByEstacionTurnoEmpleado(estacion.getEstacionId(), turno.getTurnoId(), ((Empleado) cbxEmpleado.getValue()).getEmpleadoId());
-                Arqueocaja arqueocaja = ((Empleado) cbxEmpleado.getValue()).getArqueo();
-                if (arqueocaja != null) {
-                    tfdNameSeller.setValue(arqueocaja.getNombrePistero());
-                    tfdNameChief.setValue(arqueocaja.getNombreJefe());
+                Arqueocaja arqueocaja = new Arqueocaja(); //ASG
+                if (cbxEmpleado.getValue() != null) {  //ASG
+                    arqueocaja = ((Empleado) cbxEmpleado.getValue()).getArqueo();
+                } //ASG 
+                if (arqueocaja != null && arqueocaja.getArqueocajaId() != null) {
+//                        tfdNameSeller.setValue(arqueocaja.getNombrePistero());
+//                        tfdNameChief.setValue(arqueocaja.getNombreJefe());
                     onchangeCbxArqueo(arqueocaja.getArqueocajaId().toString());
 
                     /*Recupera Detalle Cliente Prepago*/ //ASG
                     bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
                     bcrPrepaid = dao.getDetallePrepago(arqueocaja.getArqueocajaId());
-                    
+
                     /*Recupera Detalle Lubricantes*/ //JLopez
-                    bcrLubs= new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
                     bcrLubs = daoLubs.getDetalleProducto(arqueocaja.getArqueocajaId());
 
+                    /*Recupera Detalle Cliente Credito*/ //MAG
+                    bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrClientes = dao.getDetalleCredito(arqueocaja.getArqueocajaId());
+
+                    /*Recupera Detalle tarjeta de credito*/ //MAG
+                    bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+                    bcrCreditC = daoTrC.getDetalleTarjetaCredito(arqueocaja.getArqueocajaId());
+
+                } else {
+                    /*ASG*/
+                    //no existen arqueos se limpian las colecciones.
+                    bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                    bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+                    listaEfectivo.removeAll(listaEfectivo); //ASG
                 }
 
-
             }
         });
 
-        tfdNameSeller = utils.buildTextField("Pistero:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
-
-        tfdNameChief = utils.buildTextField("Jefe de pista:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
-
-        upload = new Upload("Selección:", new Upload.Receiver() {
-            @Override
-            public OutputStream receiveUpload(String filename, String mimeType) {
-                //Validaciones
-                try {
-                    Constant constant = new Constant();
-                    if (constant.MAP_MIMETYPES_EXT.containsKey(mimeType)) {
-                        System.out.println("receiveUpload::: " + filename + "; " + mimeType);
-                        tmpString = "Faltante" + user.getEstacionLogin().getNombre().replaceAll(" ", "-").concat(Constant.SDF_yyyyMMddHHmmss.format(new Date()));
-                        tempFile = File.createTempFile(tmpString, constant.MAP_MIMETYPES_EXT.get(mimeType));
-                        return new FileOutputStream(tempFile);
-                    } else {
-                        Notification.show("ERROR", "Tipo de documento NO reconocido", Notification.Type.ERROR_MESSAGE);
-                        return null;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        });
-        upload.addFinishedListener(new Upload.FinishedListener() {
-            @Override
-            public void uploadFinished(Upload.FinishedEvent finishedEvent) {
-                try {
-                    System.out.println("uploadFinished::: " + finishedEvent.getFilename() + "; " + finishedEvent.getMIMEType() + "; " + finishedEvent.getLength() + "; " + finishedEvent.toString());
-                    if (tempFile != null && tempFile.exists()) {
-//                        XlsxReader(tempFile, true);
-                    }
-                } catch (Exception ex) {
-//                    Notification.show("Fila: " + line + "; " + ex.getMessage(), Notification.Type.ERROR_MESSAGE);
-                }
-            }
-        });
-        upload.addSucceededListener(new Upload.SucceededListener() {
-            @Override
-            public void uploadSucceeded(Upload.SucceededEvent event) {
-                System.out.println("uploadSucceeded::: ");
-            }
-        });
-        upload.addProgressListener(new Upload.ProgressListener() {
-            @Override
-            public void updateProgress(long readBytes, long contentLength) {
-                System.out.println("updateProgress::: " + new Date());
-            }
-        });
-        upload.addFailedListener(new Upload.FailedListener() {
-            @Override
-            public void uploadFailed(Upload.FailedEvent event) {
-                System.out.println("uploadFailed::: ");
-            }
-        });
-        upload.setButtonCaption("Cargar comprobante");
-        upload.addStyleName(ValoTheme.BUTTON_SMALL);
-
+//        tfdNameSeller = utils.buildTextField("Pistero:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
+//
+//        tfdNameChief = utils.buildTextField("Jefe de pista:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
+//        upload = new Upload("Selección:", new Upload.Receiver() {
+//            @Override
+//            public OutputStream receiveUpload(String filename, String mimeType) {
+//                //Validaciones
+//                try {
+//                    Constant constant = new Constant();
+//                    if (constant.MAP_MIMETYPES_EXT.containsKey(mimeType)) {
+//                        System.out.println("receiveUpload::: " + filename + "; " + mimeType);
+//                        tmpString = "Faltante" + user.getEstacionLogin().getNombre().replaceAll(" ", "-").concat(Constant.SDF_yyyyMMddHHmmss.format(new Date()));
+//                        tempFile = File.createTempFile(tmpString, constant.MAP_MIMETYPES_EXT.get(mimeType));
+//                        return new FileOutputStream(tempFile);
+//                    } else {
+//                        Notification.show("ERROR", "Tipo de documento NO reconocido", Notification.Type.ERROR_MESSAGE);
+//                        return null;
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    return null;
+//                }
+//            }
+//        });
+//        upload.addFinishedListener(new Upload.FinishedListener() {
+//            @Override
+//            public void uploadFinished(Upload.FinishedEvent finishedEvent) {
+//                try {
+//                    System.out.println("uploadFinished::: " + finishedEvent.getFilename() + "; " + finishedEvent.getMIMEType() + "; " + finishedEvent.getLength() + "; " + finishedEvent.toString());
+//                    if (tempFile != null && tempFile.exists()) {
+////                        XlsxReader(tempFile, true);
+//                    }
+//                } catch (Exception ex) {
+////                    Notification.show("Fila: " + line + "; " + ex.getMessage(), Notification.Type.ERROR_MESSAGE);
+//                }
+//            }
+//        });
+//        upload.addSucceededListener(new Upload.SucceededListener() {
+//            @Override
+//            public void uploadSucceeded(Upload.SucceededEvent event) {
+//                System.out.println("uploadSucceeded::: ");
+//            }
+//        });
+//        upload.addProgressListener(new Upload.ProgressListener() {
+//            @Override
+//            public void updateProgress(long readBytes, long contentLength) {
+//                System.out.println("updateProgress::: " + new Date());
+//            }
+//        });
+//        upload.addFailedListener(new Upload.FailedListener() {
+//            @Override
+//            public void uploadFailed(Upload.FailedEvent event) {
+//                System.out.println("uploadFailed::: ");
+//            }
+//        });
+//        upload.setButtonCaption("Cargar comprobante");
+//        upload.addStyleName(ValoTheme.BUTTON_SMALL);
 //        determinarPermisos();
     }
 
     private void determinarPermisos() {
-        boolean explorar = false, editar = false, crearCuadre = false;
-        try {
-            if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
-                    && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
-                explorar = crearCuadre = true;
-            } else if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
-                    && dia.getFecha().before(ultimoDia.getFecha())) {
-                explorar = true;
-            } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO)
-                    || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
-                    && dia.getEstadoId() != null && dia.getEstadoId() == 2
-                    && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
-                explorar = true;
-            } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) && dia.getEstadoId() == 1 && turno.getEstadoId() == 2) {
-                explorar = true;
-            } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR)
-                    && dia.getEstadoId() != null && dia.getEstadoId() == 1
-                    && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
-                explorar = crearCuadre = true;
-            } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
-                    && dia.getEstadoId() != null && dia.getEstadoId() == 1
-                    && turno.getEstadoId() != null && turno.getEstadoId() == 1) {
-//            explorar = false;
-                explorar = true;
-                editar = crearCuadre = true;
-            } else if (user.isAdministrativo()) {
-                explorar = true;
-                crearCuadre = true;
-            } else if (user.isGerente()) {
-                explorar = crearCuadre = true;
-            }
-        } catch (Exception ignore) {
-            ignore.printStackTrace();
-        }
-        dfdFecha.setEnabled(explorar);   //habilitado
-        cbxTurno.setEnabled(explorar);    //habilitado
-//        crearCuadre = (editar && crearCuadre)
-        btnSave.setEnabled(crearCuadre);    //habilitado (cerrado)
+//        boolean explorar = false, editar = false, crearCuadre = false;
+//        try {
+//            if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                    && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
+//                explorar = crearCuadre = true;
+//            } else if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
+//                    && dia.getFecha().before(ultimoDia.getFecha())) {
+//                explorar = true;
+//            } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO)
+//                    || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
+//                    && dia.getEstadoId() != null && dia.getEstadoId() == 2
+//                    && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
+//                explorar = true;
+//            } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) && dia.getEstadoId() == 1 && turno.getEstadoId() == 2) {
+//                explorar = true;
+//            } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR)
+//                    && dia.getEstadoId() != null && dia.getEstadoId() == 1
+//                    && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
+//                explorar = crearCuadre = true;
+//            } else if ((user.getRolLogin().equals(Constant.ROL_LOGIN_CAJERO) || user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR))
+//                    && dia.getEstadoId() != null && dia.getEstadoId() == 1
+//                    && turno.getEstadoId() != null && turno.getEstadoId() == 1) {
+////            explorar = false;
+//                explorar = true;
+//                editar = crearCuadre = true;
+//            } else if (user.isAdministrativo()) {
+//                explorar = true;
+//                crearCuadre = true;
+//            } else if (user.isGerente()) {
+//                explorar = crearCuadre = true;
+//            }
+//        } catch (Exception ignore) {
+//            ignore.printStackTrace();
+//        }
+//        dfdFecha.setEnabled(explorar);   //habilitado
+//        cbxTurno.setEnabled(explorar);    //habilitado
+////        crearCuadre = (editar && crearCuadre)
+//        btnSave.setEnabled(crearCuadre);    //habilitado (cerrado)
     }
 
     private void recalcularFooter() {
@@ -874,7 +913,7 @@ public class PrCuadre extends Panel implements View {
         btnClienteCredito = new Button("Clientes Credito", FontAwesome.PLUS);
         btnClienteCredito.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnClienteCredito.addStyleName(ValoTheme.BUTTON_SMALL);
-//        btnClienteCredito.addClickListener(clickEvent -> metodo1());
+        btnClienteCredito.addClickListener(clickEvent -> formCredito(estacion.getEstacionId(), currencySymbol, pais.getPaisId()));
 
         btnClientePrepago = new Button("Clientes Prepago", FontAwesome.PLUS);
         btnClientePrepago.addStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -884,7 +923,7 @@ public class PrCuadre extends Panel implements View {
         btnTarjetaCredito = new Button("Tarjetas Credito", FontAwesome.PLUS);
         btnTarjetaCredito.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnTarjetaCredito.addStyleName(ValoTheme.BUTTON_SMALL);
-//        btnTarjetaCredito.addClickListener(clickEvent -> metodo1());
+        btnTarjetaCredito.addClickListener(clickEvent -> formTarjetaCredito(currencySymbol));
 
         btnAll = new Button("Todas");
         btnAll.addStyleName(ValoTheme.BUTTON_BORDERLESS);
@@ -975,7 +1014,7 @@ public class PrCuadre extends Panel implements View {
                                 System.out.println("ADD " + Dao.ACTION_ADD);
                                 System.out.println("UPDATE " + Dao.ACTION_UPDATE);
                                 arqueo = (arqueo == null || arqueo.getArqueocajaId() == null)
-                                        ? new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), turno.getFecha(), 1, user.getUsername(), user.getNombreLogin(), ((Empleado) cbxEmpleado.getValue()).getEmpleadoId(), tfdNameChief.getValue(), tfdNameSeller.getValue())
+                                        ? new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), turno.getFecha(), 1, user.getUsername(), user.getNombreLogin(), ((Empleado) cbxEmpleado.getValue()).getEmpleadoId())/*Retire nombre jefe y pistero ASG*/
                                         : arqueo;
                                 arqueo.setCreado_por(user.getUsername());
                                 arqueo.setCreado_persona(user.getNombreLogin());
@@ -1042,29 +1081,32 @@ public class PrCuadre extends Panel implements View {
                                 }
 
                                 tmpString = (user.getPaisLogin() != null) ? user.getPaisLogin().getNombre() : ((Pais) cbxPais.getValue()).getNombre();
-                                Parametro parametro = svcTurno.getParameterByName("CORREO_CALIBRACIONES_" + tmpString.toUpperCase().replaceAll(" ", ""));
+//                                Parametro parametro = svcTurno.getParameterByName("CORREO_CALIBRACIONES_" + tmpString.toUpperCase().replaceAll(" ", "")); //COMENTADO CORREO NO SE USA  ASG
 
                                 svcTurno.closeConnections();
 
                                 if (arqueo.getArqueocajaId() != null) {
 
-                                    if (diferencia < 0 && myAction.equals(Dao.ACTION_ADD)) {
-                                        tmpString = (user.getEstacionLogin() != null) ? user.getEstacionLogin().getNombre() : ((Estacion) cbxEstacion.getValue()).getNombre();
-                                        System.out.println("PrCuadre.doSave::: " + tmpString + "; " + turno.getTurnoId());
-                                        Mail mail = new Mail(parametro.getValor(), "Web COCOs - Diferencia " + tmpString,
-                                                String.format("Se ha encontrado una diferencia en el cuadre de caja de la estación %s del turno: %s", tmpString, turno.getTurnoId()),
-                                                new ArrayList(Arrays.asList(tempFile.getAbsolutePath())));
-                                        mail.run();
-                                    }
-
+                                    //COMENTADO YA NO EXISTE CORREOS ASG
+//                                    if (diferencia < 0 && myAction.equals(Dao.ACTION_ADD)) {
+//                                        tmpString = (user.getEstacionLogin() != null) ? user.getEstacionLogin().getNombre() : ((Estacion) cbxEstacion.getValue()).getNombre();
+//                                        System.out.println("PrCuadre.doSave::: " + tmpString + "; " + turno.getTurnoId());
+//                                        Mail mail = new Mail(parametro.getValor(), "Web COCOs - Diferencia " + tmpString,
+//                                                String.format("Se ha encontrado una diferencia en el cuadre de caja de la estación %s del turno: %s", tmpString, turno.getTurnoId()),
+//                                                new ArrayList(Arrays.asList(tempFile.getAbsolutePath())));
+//                                        mail.run();
+//                                    }
+                                    //FIN ASG
                                     //*Registro detalle de clientes*// ASG
                                     try {
                                         dao.CreaClienteDetalle(arqueo.getArqueocajaId(), bcrPrepaid, user.getUsername());
+                                        dao.CreaClienteDetalleCredito(arqueo.getArqueocajaId(), bcrClientes, user.getUsername());//Clientes Credito
+                                        daoTrC.CreaDetalleTarjetaCredito(arqueo.getArqueocajaId(), bcrCreditC, user.getUsername());//Clientes Tarjeta credito
                                     } catch (SQLException ex) {
                                         ex.printStackTrace();
                                     }
                                     /*fin registro detalle*/
-                                    
+
                                     //*Registro detalle de lubricantes*// JLopez
                                     try {
                                         daoLubs.CreaProductoDetalle(arqueo.getArqueocajaId(), bcrLubs, user.getUsername());
@@ -1072,8 +1114,6 @@ public class PrCuadre extends Panel implements View {
                                         ex.printStackTrace();
                                     }
                                     /*fin registro detalle*/
-                                    
-                                    
 
                                     myAction = (myAction.equals(Dao.ACTION_ADD)) ? "cuadrado" : "actualizado";
                                     Notification notif = new Notification("ÉXITO:", "Se ha " + myAction + " las bombas con éxito.", Notification.Type.HUMANIZED_MESSAGE);
@@ -1108,8 +1148,6 @@ public class PrCuadre extends Panel implements View {
                             }
                         })
                         .open();
-                //Fin MessageBox
-
             }
         });
 
@@ -1146,13 +1184,10 @@ public class PrCuadre extends Panel implements View {
                 tmpDoubleProdUno = (Double) VaadinSession.getCurrent().getAttribute("totalProductoUno");
                 tmpDoubleProdNoUno = (Double) VaadinSession.getCurrent().getAttribute("totalProducto");
                 tmpDoublePr = (Double) VaadinSession.getCurrent().getAttribute("totalProd");
-                System.out.println("tmpDoubleProdUno --------" + tmpDoubleProdUno);
-                System.out.println("tmpDoubleProdNoUno --------" + tmpDoubleProdNoUno);
 
                 for (Integer itemId : bcrProducto.getItemIds()) {
                     System.out.println("bcrProducto.getItem(itemId).getBean().getProductoId()" + bcrProducto.getItem(itemId).getBean().getProductoId());
                 }
-                
 
                 for (Integer itemId : bcrProducto.getItemIds()) {
                     if (bcrProducto.getItem(itemId).getBean().getProductoId() == Constant.MP_CRI_VENTA_LUBS_UNO) {
@@ -1160,7 +1195,7 @@ public class PrCuadre extends Panel implements View {
                         break;
                     }
                 }
-                
+
                 for (Integer itemId : bcrProducto.getItemIds()) {
                     if (bcrProducto.getItem(itemId).getBean().getProductoId() == Constant.MP_CRI_VENTA_LUBS) {
                         bcrProducto.getItem(itemId).getItemProperty("value").setValue(tmpDoubleProdNoUno);
@@ -1170,6 +1205,92 @@ public class PrCuadre extends Panel implements View {
             });
             getUI().addWindow(formProductos);
             formProductos.focus();
+        }
+    }
+
+    /*Metodo Llama Forma Clientes Credito*///MAG
+    private void formCredito(Integer idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxEmpleado.getValue() != null) {
+            formClientesCredito = new FormClientesCredito(idestacion, simboloMoneda, idpais, bcrClientes);
+            formClientesCredito.addCloseListener((e) -> {
+                bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                bcrClientes = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detalleCredito");
+                tmpDoubleCredito = (Double) VaadinSession.getCurrent().getAttribute("totalCredito");
+                for (Integer itemId : bcrMediopago.getItemIds()) {
+                    if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_VENTA_CREDITO) {
+                        bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDoubleCredito);
+                        break;
+                    }
+                }
+            });
+            getUI().addWindow(formClientesCredito);
+            formClientesCredito.focus();
+        }
+    }
+
+    /*Metodo Llama Forma tarjeta credito*///MAG
+    private void formTarjetaCredito(String simboloMoneda) {
+        if (cbxEmpleado.getValue() != null) {
+            tmpTotal = 0.00;
+            HashMap<Integer, genericMedioTarjeta> listaIDSEncontrados = new HashMap<Integer, genericMedioTarjeta>();
+            HashMap<Integer, genericMedioTarjeta> listaIDSDepurados = new HashMap<Integer, genericMedioTarjeta>();
+
+            formTarjetasCredito = new FormTarjetasCredito(simboloMoneda, bcrCreditC, pais.getPaisId());
+            formTarjetasCredito.addCloseListener((e) -> {
+                bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+                bcrCreditC = (BeanContainer<Integer, GenericTarjeta>) VaadinSession.getCurrent().getAttribute("detalleTarjetaCredito");
+                tmpDoubleTarjetaCredito = (Double) VaadinSession.getCurrent().getAttribute("totalTarjetaCredito");
+                tmpTotal = 0.00;
+                for (Integer itemId : bcrMediopago.getItemIds()) {
+                    if (bcrMediopago.getItem(itemId).getBean().isIsTCredito()) {
+                        genericMedioTarjeta genDep = new genericMedioTarjeta();
+                        genDep.setIdmedio(bcrMediopago.getItem(itemId).getBean().getMediopagoId());
+                        genDep.setMonto(0.00);
+                        listaIDSDepurados.put(bcrMediopago.getItem(itemId).getBean().getMediopagoId(), genDep);
+//                        System.out.println("###PADRE### " + bcrMediopago.getItem(itemId).getBean().getMediopagoId() + " " + bcrMediopago.getItem(itemId).getBean().getNombre());
+                        for (Integer idmedio : bcrCreditC.getItemIds()) {
+//                            System.out.println("HIJO " + bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id() + " " + bcrCreditC.getItem(idmedio).getBean().getTarjeta().getNombre());
+                            if (bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id() == bcrMediopago.getItem(itemId).getBean().getMediopagoId()) {
+//                                System.out.println("VALOR DEL HIJO ENCONTRADO " + bcrCreditC.getItem(idmedio).getBean().getMonto());
+                                genericMedioTarjeta genEnc = new genericMedioTarjeta();
+                                genEnc.setIdmedio(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id());
+                                genEnc.setMonto(bcrCreditC.getItem(idmedio).getBean().getMonto());
+                                if (listaIDSEncontrados.containsKey(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id())) {
+                                    genericMedioTarjeta genEncc = new genericMedioTarjeta();
+                                    genEncc = listaIDSEncontrados.get(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id());
+                                    genEncc.setMonto(genEncc.getMonto() + genEnc.getMonto());
+                                    listaIDSEncontrados.remove(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id());
+                                    listaIDSEncontrados.put(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id(), genEncc);
+                                } else {
+                                    listaIDSEncontrados.put(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id(), genEnc);
+                                }
+                            }
+                        }
+                    }
+                }
+                /*Recorro para limpiar valores no asignados en tarjetas*/
+                for (genericMedioTarjeta integer : listaIDSEncontrados.values()) {
+//                    System.out.println("IDS ENCONTRADOS " + integer.getIdmedio() + "  " + integer.getMonto());
+                    listaIDSDepurados.remove(integer.getIdmedio());
+                    for (Integer itemId : bcrMediopago.getItemIds()) {
+                        if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == integer.getIdmedio()) {
+                            bcrMediopago.getItem(itemId).getItemProperty("value").setValue(integer.getMonto());
+                        }
+                    }
+                }
+
+                for (genericMedioTarjeta listaidsdepurado : listaIDSDepurados.values()) {
+//                    System.out.println("IDS DEPURADOS " + listaidsdepurado.getIdmedio());
+                    for (Integer itemId : bcrMediopago.getItemIds()) {
+                        if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == listaidsdepurado.getIdmedio()) {
+                            bcrMediopago.getItem(itemId).getItemProperty("value").setValue(0.00);
+                        }
+                    }
+                }
+
+            });
+            getUI().addWindow(formTarjetasCredito);
+            formTarjetasCredito.focus();
         }
     }
 
@@ -1261,8 +1382,8 @@ public class PrCuadre extends Panel implements View {
                 tfdValue.setWidth("100px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
-                if((Integer) proid.getValue()==9||(Integer) proid.getValue()==10){
-                    tfdValue.setReadOnly(true);
+                if ((Integer) proid.getValue() == 9 || (Integer) proid.getValue() == 10) {
+//                    tfdValue.setReadOnly(true); // ASG DESCOMENTAR CUANDO CORRIGAN LA DATA DE LUBRICANTES
                 }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
@@ -1341,7 +1462,7 @@ public class PrCuadre extends Panel implements View {
                 tfdValue.setWidth("125px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
-                if ((Integer) desc.getValue() == 6 || (Integer) desc.getValue() == 5) {
+                if ((Integer) desc.getValue() == 6 || (Integer) desc.getValue() == 5 || (Integer) desc.getValue() == 108) {
                     tfdValue.setReadOnly(true);
                 }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
@@ -1450,7 +1571,8 @@ public class PrCuadre extends Panel implements View {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("medioPago");  //Atributo del bean DtoEfectivo
-                Container contMediosPago = new ListContainer<Mediopago>(Mediopago.class, mediosPagoEfectivo);
+                Container contMediosPago = new ListContainer<Mediopago>(Mediopago.class,
+                        mediosPagoEfectivo);
                 final ComboBox combo = new ComboBox("", contMediosPago);
                 combo.setItemCaptionPropertyId("nombre");   //atributo de medio de pago
                 combo.setPropertyDataSource(pro);
@@ -1635,7 +1757,6 @@ public class PrCuadre extends Panel implements View {
                 bcEfectivo.removeAllItems();
                 listaEfectivo.add(new DtoEfectivo(itemId, null, 0D));
                 bcEfectivo.addAll(listaEfectivo);
-
             }
         });
 
@@ -2087,112 +2208,111 @@ public class PrCuadre extends Panel implements View {
         });
     }
 
-    public void buildTableCreditCard() {
-
-        tblCreditCard = utils.buildTable("Detalle tarjetas de crédito:", 100f, 100f, bcrCreditC,
-                new String[]{"nombre"},
-                new String[]{"Nombre"}
-        );
-        tblCreditCard.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
-        tblCreditCard.addStyleName(ValoTheme.TABLE_COMPACT);
-        tblCreditCard.addStyleName(ValoTheme.TABLE_SMALL);
-        tblCreditCard.setImmediate(true);
-        tblCreditCard.addGeneratedColumn("colCliente", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
-                ComboBox cbxCliente = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, contCreditC);
-                cbxCliente.setPropertyDataSource(pro);
-                cbxCliente.setFilteringMode(FilteringMode.CONTAINS);
-                return cbxCliente;
-            }
-        });
-        tblCreditCard.addGeneratedColumn("colMonto", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("valor");  //Atributo del bean
-                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
-                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
-                nfd.setValue(numberFmt.format(value));
-                nfd.setWidth("100px");
-                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
-                nfd.addStyleName("align-right");
-                nfd.addValueChangeListener(new Property.ValueChangeListener() {
-                    @Override
-                    public void valueChange(Property.ValueChangeEvent event) {
-//                        updateTableFooterPrepaid();
-                    }
-                });
-                return nfd;
-            }
-        });
-        tblCreditCard.addGeneratedColumn("colLote", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("presentacion");  //Atributo del bean
+//    public void buildTableCreditCard() {
+//
+//        tblCreditCard = utils.buildTable("Detalle tarjetas de crédito:", 100f, 100f, bcrCreditC,
+//                new String[]{"nombre"},
+//                new String[]{"Nombre"}
+//        );
+//        tblCreditCard.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
+//        tblCreditCard.addStyleName(ValoTheme.TABLE_COMPACT);
+//        tblCreditCard.addStyleName(ValoTheme.TABLE_SMALL);
+//        tblCreditCard.setImmediate(true);
+//        tblCreditCard.addGeneratedColumn("colCliente", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
+//                ComboBox cbxCliente = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, contCreditC);
+//                cbxCliente.setPropertyDataSource(pro);
+//                cbxCliente.setFilteringMode(FilteringMode.CONTAINS);
+//                return cbxCliente;
+//            }
+//        });
+//        tblCreditCard.addGeneratedColumn("colMonto", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("valor");  //Atributo del bean
 //                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
 //                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
 //                nfd.setValue(numberFmt.format(value));
-                final TextField nfd = new TextField(pro);
-                nfd.setNullRepresentation("");
-                nfd.setWidth("100px");
-                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
-                nfd.addStyleName("align-right");
-                nfd.addValueChangeListener(new Property.ValueChangeListener() {
-                    @Override
-                    public void valueChange(Property.ValueChangeEvent event) {
+//                nfd.setWidth("100px");
+//                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+//                nfd.addStyleName("align-right");
+//                nfd.addValueChangeListener(new Property.ValueChangeListener() {
+//                    @Override
+//                    public void valueChange(Property.ValueChangeEvent event) {
+////                        updateTableFooterPrepaid();
+//                    }
+//                });
+//                return nfd;
+//            }
+//        });
+//        tblCreditCard.addGeneratedColumn("colLote", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("presentacion");  //Atributo del bean
+////                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
+////                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
+////                nfd.setValue(numberFmt.format(value));
+//                final TextField nfd = new TextField(pro);
+//                nfd.setNullRepresentation("");
+//                nfd.setWidth("100px");
+//                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+//                nfd.addStyleName("align-right");
+//                nfd.addValueChangeListener(new Property.ValueChangeListener() {
+//                    @Override
+//                    public void valueChange(Property.ValueChangeEvent event) {
+////                        updateTableFooterPrepaid();
+//                    }
+//                });
+//                return nfd;
+//            }
+//        });
+//        tblCreditCard.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Button btnDelete = new Button(FontAwesome.TRASH);
+//                btnDelete.addStyleName(ValoTheme.BUTTON_DANGER);
+//                btnDelete.addStyleName(ValoTheme.BUTTON_SMALL);
+//                btnDelete.addClickListener(new Button.ClickListener() {
+//                    @Override
+//                    public void buttonClick(Button.ClickEvent event) {
+//                        bcrCreditC.removeItem(itemId);
+//                        List<DtoProducto> tempList = new ArrayList();
+//                        for (DtoProducto deo : listPrepaid) {
+//                            if (deo.getProductoId() != itemId) {
+//                                tempList.add(deo);
+//                            }
+//                        }
+//                        listPrepaid = tempList;
 //                        updateTableFooterPrepaid();
-                    }
-                });
-                return nfd;
-            }
-        });
-        tblCreditCard.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Button btnDelete = new Button(FontAwesome.TRASH);
-                btnDelete.addStyleName(ValoTheme.BUTTON_DANGER);
-                btnDelete.addStyleName(ValoTheme.BUTTON_SMALL);
-                btnDelete.addClickListener(new Button.ClickListener() {
-                    @Override
-                    public void buttonClick(Button.ClickEvent event) {
-                        bcrCreditC.removeItem(itemId);
-                        List<DtoProducto> tempList = new ArrayList();
-                        for (DtoProducto deo : listPrepaid) {
-                            if (deo.getProductoId() != itemId) {
-                                tempList.add(deo);
-                            }
-                        }
-                        listPrepaid = tempList;
-                        updateTableFooterPrepaid();
-                    }
-                });
-                return btnDelete;
-            }
-        });
-        tblCreditCard.setVisibleColumns(new Object[]{"colCliente", "colLote", "colMonto", "colDelete"});
-        tblCreditCard.setColumnHeaders(new String[]{"Tarjeta", "Lote", "Monto", "Borrar"});
-        tblCreditCard.setColumnAlignments(Align.LEFT, Align.RIGHT, Align.RIGHT, Align.CENTER);
-        tblCreditCard.setSizeUndefined();
-        tblCreditCard.setHeight(200f, Unit.PIXELS);
-
-        btnAddCreditC = new Button("Agregar", FontAwesome.PLUS);
-        btnAddCreditC.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        btnAddCreditC.addStyleName(ValoTheme.BUTTON_SMALL);
-        btnAddCreditC.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-//                bcrCreditC.removeAllItems();
-                DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
-                dtoprod.setValor(0D);
-                bcrCreditC.addBean(dtoprod);
-                tblCreditCard.refreshRowCache();
-//                listPrepaid.add(dtoprod);
-//                bcrCreditC.addAll(listPrepaid);
-            }
-        });
-    }
-
+//                    }
+//                });
+//                return btnDelete;
+//            }
+//        });
+//        tblCreditCard.setVisibleColumns(new Object[]{"colCliente", "colLote", "colMonto", "colDelete"});
+//        tblCreditCard.setColumnHeaders(new String[]{"Tarjeta", "Lote", "Monto", "Borrar"});
+//        tblCreditCard.setColumnAlignments(Align.LEFT, Align.RIGHT, Align.RIGHT, Align.CENTER);
+//        tblCreditCard.setSizeUndefined();
+//        tblCreditCard.setHeight(200f, Unit.PIXELS);
+//
+//        btnAddCreditC = new Button("Agregar", FontAwesome.PLUS);
+//        btnAddCreditC.addStyleName(ValoTheme.BUTTON_PRIMARY);
+//        btnAddCreditC.addStyleName(ValoTheme.BUTTON_SMALL);
+//        btnAddCreditC.addClickListener(new Button.ClickListener() {
+//            @Override
+//            public void buttonClick(Button.ClickEvent event) {
+////                bcrCreditC.removeAllItems();
+//                DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
+//                dtoprod.setValor(0D);
+//                bcrCreditC.addBean(dtoprod);
+//                tblCreditCard.refreshRowCache();
+////                listPrepaid.add(dtoprod);
+////                bcrCreditC.addAll(listPrepaid);
+//            }
+//        });
+//    }
     public void updateTableFooterCxC() {
         tmpDouble = 0;
         for (Integer itemId : bcrClientes.getItemIds()) {
@@ -2438,6 +2558,7 @@ public class PrCuadre extends Panel implements View {
             List<Mediopago> efectivos = svcTC.getEfectivoByArqueoid(arqueoCajaId);
             bcEfectivo.removeAllItems();
             listaEfectivo = new ArrayList();
+            System.out.println("onchangeCbxArqueo ");
             int itemId = 1;
             for (Mediopago mp : efectivos) {
                 for (Mediopago mpoe : mediosPagoEfectivo) {
@@ -2471,6 +2592,19 @@ public class PrCuadre extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Dao dao = new Dao();
+        acceso = dao.getAccess(event.getViewName());
+        dao.closeConnections();
+        modificar = acceso.isCambiar();
+        crear = acceso.isAgregar();
+        if (acceso.isCambiar() || acceso.isAgregar()) {
+            modificar = true;
+            crear = true;
+            btnSave.setEnabled(true);
+        } else {
+            modificar = false;
+            crear = false;
+            btnSave.setEnabled(false);
+        }
     }
 }

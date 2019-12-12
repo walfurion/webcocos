@@ -376,7 +376,33 @@ public class SvcMaintenance extends Dao {
         return result;
     }
 
-    public List<Producto> getAllProducts(boolean includeInactive) {
+//    public List<Producto> getAllProducts(boolean includeInactive) {
+//        List<Producto> result = new ArrayList();
+//        try {
+//            query = (includeInactive) ? "" : " AND p.estado = 'A' ";
+//            query = "SELECT p.producto_id, p.nombre, p.codigo, p.tipo_id, p.orden_pos, p.estado, p.codigo_num, p.presentacion, p.codigo_barras, p.id_marca, p.codigo_envoy "
+//                    + ", t.tipo_id, t.nombre, m.id_marca, m.nombre, p.sku " //12,...
+//                    + "FROM tipoproducto t, producto p "
+//                    + "LEFT JOIN marca m ON p.id_marca = m.id_marca "
+//                    + "WHERE p.tipo_id = t.tipo_id "
+//                    + query;
+//            pst = getConnection().prepareStatement(query);
+//            ResultSet rst = pst.executeQuery();
+//            Producto producto;
+//            while (rst.next()) {
+//                producto = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getInt(5), rst.getString(6), rst.getInt(7), rst.getString(8), rst.getString(9), rst.getInt(10), rst.getString(11), rst.getString(16));
+//                producto.setTypeProd(new Tipoproducto(rst.getInt(12), rst.getString(13), "A"));
+//                producto.setMarca(new Marca(rst.getInt(14), rst.getString(15), "A"));
+//                producto.setStatus(new DtoGenericBean(rst.getString(6), (rst.getString(6).equals("A") ? "Activo" : "Inactivo")));
+//                result.add(producto);
+//            }
+//        } catch (Exception exc) {
+//            exc.printStackTrace();
+//        }
+//        return result;
+//    }
+        public List<Producto> getAllProducts(boolean includeInactive) {
+//            System.out.println("getAllProducts() ");
         List<Producto> result = new ArrayList();
         try {
             query = (includeInactive) ? "" : " AND p.estado = 'A' ";
@@ -389,12 +415,56 @@ public class SvcMaintenance extends Dao {
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Producto producto;
+            List<Producto> lstProd = getAllProductsWhitCountry();
             while (rst.next()) {
                 producto = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getInt(5), rst.getString(6), rst.getInt(7), rst.getString(8), rst.getString(9), rst.getInt(10), rst.getString(11), rst.getString(16));
                 producto.setTypeProd(new Tipoproducto(rst.getInt(12), rst.getString(13), "A"));
                 producto.setMarca(new Marca(rst.getInt(14), rst.getString(15), "A"));
                 producto.setStatus(new DtoGenericBean(rst.getString(6), (rst.getString(6).equals("A") ? "Activo" : "Inactivo")));
                 result.add(producto);
+            }
+            for(Producto p : result){
+                for(Producto p2:lstProd){
+                    if(p.getProductoId()==p2.getProductoId()){
+                        p.setCountrys("[ "+p2.getCountrys().trim()+" ]");
+                        break;
+//                        System.out.println("p "+p.getCountrys());
+                    }
+                }
+//                System.out.println("p "+p.getProductoId()+" - "+p.getCountrys());
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        }
+        return result;
+    }
+    public List<Producto> getAllProductsWhitCountry() {
+        List<Producto> result = new ArrayList();
+        try {
+            query = "select p2.PRODUCTO_ID,p.PAIS_ID,p.NOMBRE from pais p join pais_producto p2 \n"
+                    + " on\n"
+                    + " p.pais_id=p2.PAIS_ID order by P2.PRODUCTO_ID";
+//            System.out.println("paises "+query);
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            Producto p_ant = new Producto();
+            Producto p;
+            p_ant.setProductoId(-99);
+            while (rst.next()) {
+                p = new Producto();
+                p.setProductoId(rst.getInt(1));
+                p.setCountrys(rst.getString(3));
+                if(p.getProductoId()==p_ant.getProductoId()){
+                    p_ant.setCountrys(p_ant.getCountrys()+", "+p.getCountrys());
+                }else {
+                    if(p_ant.getProductoId()>0){
+                        result.add(p_ant);
+                    }
+                    p_ant = p;
+                }
+            }
+            if(p_ant.getProductoId()>0){
+                result.add(p_ant);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
