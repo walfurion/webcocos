@@ -356,6 +356,11 @@ public class ExcelGenerator {
             styleFecha.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy"));
             styleFecha.setWrapText(true);
 
+            /*Para Porcentaje %*/
+            CellStyle stylePorcentaje = workbook.createCellStyle();
+            stylePorcentaje.setDataFormat(createHelper.createDataFormat().getFormat("##.##%"));
+            stylePorcentaje.setWrapText(true);
+
             XSSFRow datos;
             XSSFCell datoscell;
             Integer ii;
@@ -366,10 +371,12 @@ public class ExcelGenerator {
             for (GenericMTD itemId : lista.getItemIds()) {
                 datos = sheet.createRow(j);
                 ii = 3;
+                /*Fecha*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getFecha());
                 datoscell.setCellStyle(styleFecha);
                 ii++;
+                /*Precio*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getP_super());
                 datoscell.setCellStyle(styleNumber);
@@ -382,7 +389,8 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getP_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-
+                
+                /* VENTAS EN LITROS*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getL_super());
                 datoscell.setCellStyle(styleNumber);
@@ -405,9 +413,10 @@ public class ExcelGenerator {
 
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(0);
-                datoscell.setCellStyle(styleNumber);
+                datoscell.setCellStyle(stylePorcentaje);
                 ii++;
 
+                /*VENTAS EN COLONES*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getC_super());
                 datoscell.setCellStyle(styleNumber);
@@ -430,9 +439,10 @@ public class ExcelGenerator {
 
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(0);
-                datoscell.setCellStyle(styleNumber);
+                datoscell.setCellStyle(stylePorcentaje);
                 ii++;
 
+                /*VENTAS TIENDA*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getTienda_total());
                 datoscell.setCellStyle(styleNumber);
@@ -440,9 +450,10 @@ public class ExcelGenerator {
 
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(0);
-                datoscell.setCellStyle(styleNumber);
+                datoscell.setCellStyle(stylePorcentaje);
                 ii++;
 
+                /*VENTAS CANASTA BASICA*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getCanasta_total());
                 datoscell.setCellStyle(styleNumber);
@@ -450,9 +461,10 @@ public class ExcelGenerator {
 
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(0);
-                datoscell.setCellStyle(styleNumber);
+                datoscell.setCellStyle(stylePorcentaje);
                 ii++;
 
+                /*VENTAS MEDICAMENTOS*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getMedicamento_total());
                 datoscell.setCellStyle(styleNumber);
@@ -460,9 +472,11 @@ public class ExcelGenerator {
 
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(0);
-                datoscell.setCellStyle(styleNumber);
+                datoscell.setCellStyle(stylePorcentaje);
                 ii++;
 
+                /*VENTAS LUBRICANTES*/
+                /*OTROS LUBRICANTES*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getOtros_lub_total());
                 datoscell.setCellStyle(styleNumber);
@@ -470,9 +484,10 @@ public class ExcelGenerator {
 
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(0);
-                datoscell.setCellStyle(styleNumber);
+                datoscell.setCellStyle(stylePorcentaje);
                 ii++;
-
+                
+                /*LUBRICANTES UNO*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getUno_lub_total());
                 datoscell.setCellStyle(styleNumber);
@@ -480,9 +495,10 @@ public class ExcelGenerator {
 
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(0);
-                datoscell.setCellStyle(styleNumber);
+                datoscell.setCellStyle(stylePorcentaje);
                 ii++;
 
+                /*VENTAS POR TURNOS COLONES*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getVenta_turno_a());
                 datoscell.setCellStyle(styleNumber);
@@ -498,6 +514,7 @@ public class ExcelGenerator {
                 datoscell.setCellStyle(styleNumber);
                 ii++;
 
+                /*VENTAS POR BOMBAS LITROS*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getVenta_bomba_1());
                 datoscell.setCellStyle(styleNumber);
@@ -528,44 +545,565 @@ public class ExcelGenerator {
                 datoscell.setCellStyle(styleNumber);
                 ii++;
 
-                /*Segun Forma De pago*/
-                
+                /*INGRESOS SEGUN FORMA DE PAGO*/
+                /*GRAN TOTAL*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getTotal_medio_pago());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getContado());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getPorc_contado());
-                datoscell.setCellStyle(styleNumber);
+                datoscell.setCellStyle(stylePorcentaje);
                 ii++;
-                
+
+                /*CAJA TARJETAS CREDOMATIC*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getCredomatic());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getPorc_credomatic());
-                datoscell.setCellStyle(styleNumber);
+                datoscell.setCellStyle(stylePorcentaje);
                 ii++;
-                
+
+                /*CAJA TARJETAS BANCO NACIONAL*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getBank_nacional());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getPorc_bank_nacional());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*CAJA TARJETAS BCR*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getBcr());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
 
- /*Al Final*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPorc_bcr());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*CAJA TARJETAS FLEET MAGIC SB*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFleet_magic_sb());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPorc_fleet_magic());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*FM DAVIVIENDA*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFm_davivienda());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPorc_davivienda());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*VERSATEC*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getVersatec());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPorc_versatec());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+                
+                /*FLOTA BCR*/
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFlota_bcr());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPorc_flota_bcr());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*FLOTA BAC*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFlota_bac());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPorc_flota_bac());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*UNO PLUS*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getUno_plus());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPorc_uno_plus());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*CUPONES*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCupon());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPorc_cupon());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*CLIENTES CREDITO*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPrepago());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPorc_prepago());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+                
+                /*TARJETAS TC DAVIVIENDA*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getDavivienda());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPorc_davivienda());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*CLIENTES CREDITO*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCredito());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPorc_credito());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*CONTADO USD*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getContado_usd());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPorc_contado_usd());
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*Inventario Final en Litros*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getWs_l_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getWs_l_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getWs_l_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getWs_l_total());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(0);
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*Compras de Combustibles en litros*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getWs_cl_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getWs_cl_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getWs_cl_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getWs_cl_total());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(0);
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*Calibraciones en Litros*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCalibracion_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCalibracion_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCalibracion_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCalibracion_total());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(0);
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*Faltantes y Sobrantes Colones*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getSobrante_l());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFaltante_l());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getSo_fal_total());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(0);
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*CxC Empleados*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCxc_total());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(0);
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                /*Faltante/Sobrante litros y el final en galones(Reporte vrs Tanque)*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getSuper_l_fal_sob());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(0);
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getRegular_l_fal_sob());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(0);
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getRegular_l_fal_sob());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(0);
+                datoscell.setCellStyle(stylePorcentaje);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(0);
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                /*CAJA EFECTIVO*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getEfe_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getEfe_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getEfe_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                /*CAJA TARJETAS CREDOMATIC*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCredomatic_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCredito_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCredomatic_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA TC BANCO NACIONAL*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getBank_nacional_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getBank_nacional_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getBank_nacional_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA TC BCR*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getBcr_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getBcr_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getBcr_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA TC FLEET MAGIC SB*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFleet_magic_sb_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFleet_magic_sb_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFleet_magic_sb_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA TC FM DAVIVIENDA*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFm_davivienda_sb_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFm_davivienda_sb_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFm_davivienda_sb_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA TC VERSATEC*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getVersatec_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getVersatec_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getVersatec_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA T FLOTA BCR*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFlota_bcr_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFlota_bcr_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFlota_bcr_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA T FLOTA BAC*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFlota_bac_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFlota_bac_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getFlota_bac_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA T UNO PLUS*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getUno_plus_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getUno_plus_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getUno_plus_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA CUPON*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCupon_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCupon_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCupon_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA PREPAGOS*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPrepago_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPrepago_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getPrepago_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA CREDITO*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCredito_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCredito_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getCredito_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA EFECTIVO USD*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getEfectivo_usd_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getEfectivo_usd_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getEfectivo_usd_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*CAJA TC DAVIVIENDA*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getDavivienda_super());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getDavivienda_regular());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getDavivienda_diesel());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+                
+                /*Al Final*/
                 j++;
             }
 

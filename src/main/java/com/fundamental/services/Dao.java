@@ -132,10 +132,10 @@ public class Dao {
             rst = pst.executeQuery();
             while (rst.next()) {
                 Rol rl = new Rol(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5));
-                try{
-                List<Acceso> accesos = maintenace.getAccessByRolid(rst.getInt(1));
-                rl.setAccesos(accesos);
-                }catch(Exception e){
+                try {
+                    List<Acceso> accesos = maintenace.getAccessByRolid(rst.getInt(1));
+                    rl.setAccesos(accesos);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 result.add(rl);
@@ -447,7 +447,8 @@ public class Dao {
         }
         return result;
     }
-    public Turno getUltimoTurnoByEstacionid2(Integer estacionId,Date Fecha) {
+
+    public Turno getUltimoTurnoByEstacionid2(Integer estacionId, Date Fecha) {
         Turno result = new Turno();
         ResultSet rst = null;
         String dateString = Constant.SDF_ddMMyyyy.format(Fecha);
@@ -456,7 +457,7 @@ public class Dao {
                     + ", h.horario_id, h.nombre, h.hora_inicio, h.hora_fin, h.estado, h.descripcion "
                     + "FROM turno t, horario h "
                     + "WHERE t.horario_id = h.horario_id AND t.estacion_id = ? "
-                    + "AND fecha = to_date('"+dateString+"','dd/mm/yyyy')"
+                    + "AND fecha = to_date('" + dateString + "','dd/mm/yyyy')"
                     + " ORDER BY t.turno_id DESC";
             pst = getConnection().prepareStatement(miQuery);
             pst.setObject(1, estacionId);
@@ -543,6 +544,36 @@ public class Dao {
     }
 
     public List<Producto> getCombustiblesByEstacionid(Integer estacionId) {
+        List<Producto> result = new ArrayList();
+        ResultSet rst = null;
+        try {
+            miQuery = "SELECT p.producto_id, p.nombre, p.codigo, p.estado, p.orden_pos "
+                    + "FROM estacion_producto ep, producto p "
+                    + "WHERE ep.producto_id = p.producto_id AND p.tipo_id = 1 AND ep.estacion_id = " + estacionId
+                    + " ORDER BY p.producto_id";
+            pst = getConnection().prepareStatement(miQuery);
+            rst = pst.executeQuery();
+            Producto product;
+            while (rst.next()) {
+                product = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), null, rst.getInt(5));
+                product.setPriceAS(0D);
+                product.setPriceSC(0D);
+                result.add(product);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
+    public List<Producto> getCombustiblesByEstacionid2(Integer estacionId) {
         List<Producto> result = new ArrayList();
         ResultSet rst = null;
         try {
@@ -824,7 +855,7 @@ public class Dao {
                     + ") tabl "
                     + "GROUP BY tabl.arqueocaja_id "
                     + "ORDER BY tabl.arqueocaja_id";
-            System.out.println("mi query "+miQuery);
+            System.out.println("mi query " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             while (rst.next()) {
@@ -1044,7 +1075,7 @@ public class Dao {
         try {
             miQuery = "SELECT estacion_id, fecha, estado_id, creado_por, creado_persona "
                     + "FROM dia "
-                    + "WHERE estado_id = 1 AND estacion_id = " + estacionId+ " "
+                    + "WHERE estado_id = 1 AND estacion_id = " + estacionId + " "
                     + " ORDER BY fecha DESC ";
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
@@ -1130,14 +1161,14 @@ public class Dao {
                     + " START WITH a.padre IS NULL "
                     + " ORDER BY NVL(a.padre, 0), a.orden";
             System.out.println("valida user = "+miQuery);
-            */
+             */
             String isNotSysadmin = (isSysadmin) ? " WHERE a.estado = 'A' " : ", acceso_rol ar, rol_usuario ru, usuario u WHERE a.estado = 'A' AND a.acceso_id = ar.acceso_id AND ar.rol_id = ru.rol_id AND ru.usuario_id = u.usuario_id AND u.usuario_id = " + usuarioId;
             miQuery = "SELECT DISTINCT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, a.estado "
-//                    + " ,ar.ver,ar.cambiar,ar.agregar,ar.eliminar "
+                    //                    + " ,ar.ver,ar.cambiar,ar.agregar,ar.eliminar "
                     + "FROM acceso a " + isNotSysadmin
                     + " CONNECT BY PRIOR a.acceso_id = a.padre "
                     + " ORDER BY NVL(a.padre, 0), a.orden";
-            System.out.println("valida user = "+miQuery);
+            System.out.println("valida user = " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             Acceso access;
@@ -1155,7 +1186,7 @@ public class Dao {
 //                access.setCambiar(rst.getInt(9)==1?true:false);
 //                access.setAgregar(rst.getInt(10)==1?true:false);
 //                access.setEliminar(rst.getInt(11)==1?true:false);
-                
+
                 if (rst.getString(3) == null || rst.getInt(3) == 0) { //padres
                     result.add(access);
 ////                    result.add(new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7)));
@@ -1357,7 +1388,7 @@ public class Dao {
         miQuery = "SELECT parametro_id, nombre, valor, descripcion, estado, creado_por, creado_el "
                 + "FROM parametro "
                 + "WHERE nombre = ?";
-        System.out.println("parametro "+miQuery);
+        System.out.println("parametro " + miQuery);
         try {
             pst = getConnection().prepareStatement(miQuery);
             pst.setString(1, name);
@@ -1567,7 +1598,7 @@ public class Dao {
 //        }
 //        return result;
 //    }
-public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int type, Integer brandId, boolean includeInactive) {
+    public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int type, Integer brandId, boolean includeInactive) {
         List<Producto> result = new ArrayList();
         ResultSet rst = null;
         try {
@@ -1578,13 +1609,13 @@ public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int t
                     + " LEFT JOIN estacion_producto ep ON ep.producto_id = p.producto_id "
                     + " LEFT JOIN marca m ON p.id_marca = m.id_marca "
                     + " LEFT JOIN estacion e ON e.estacion_id = ep.estacion_id AND e.pais_id = " + countryId
-                    + " LEFT JOIN LUBRICANTEPRECIO LP ON LP.PAIS_ID="+countryId+" AND LP.PRODUCTO_ID=p.PRODUCTO_ID "
+                    + " LEFT JOIN LUBRICANTEPRECIO LP ON LP.PAIS_ID=" + countryId + " AND LP.PRODUCTO_ID=p.PRODUCTO_ID "
                     + " WHERE p.tipo_id = " + type
                     + miQuery
                     + tmpString
                     + " and lp.PRODUCTO_ID is null "
                     + " ORDER BY m.nombre, p.nombre";
-            System.out.println("getAllProductosByCountryTypeBrand "+miQuery);
+            System.out.println("getAllProductosByCountryTypeBrand " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             Producto producto;
@@ -1618,12 +1649,12 @@ public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int t
         }
         return result;
     }
-    
+
     public List<Producto> getAllProducts() {
         List<Producto> result = new ArrayList();
         try {
             miQuery = "select PRODUCTO_ID,NOMBRE,CODIGO from PRODUCTO where TIPO_ID=2 and ESTADO='A' AND ID_MARCA=100";
-            System.out.println("mi query "+miQuery);
+            System.out.println("mi query " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
             ResultSet rst = pst.executeQuery();
             Producto pro;
@@ -1718,16 +1749,16 @@ public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int t
         }
         return result;
     }
-    
-     public List<Acceso> getParents() {
+
+    public List<Acceso> getParents() {
         List<Acceso> p = new ArrayList();
         ResultSet rst = null;
         try {
-            String query =  " select ACCESO_ID,TITULO,PADRE,ORDEN,DESCRIPCION " +
-                            " from acceso where PADRE is null and upper(estado)='A' order by orden";
+            String query = " select ACCESO_ID,TITULO,PADRE,ORDEN,DESCRIPCION "
+                    + " from acceso where PADRE is null and upper(estado)='A' order by orden";
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
-             Acceso access;
+            Acceso access;
             while (rst.next()) {
                 access = new Acceso();
                 access.setAccesoId(rst.getInt(1));
@@ -1737,7 +1768,7 @@ public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int t
                 access.setDescripcion(rst.getString(5));
                 access.setAccesos(new ArrayList<Acceso>());
                 p.add(access);
-                
+
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -1750,20 +1781,21 @@ public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int t
         }
         return p;
     }
-    public Acceso getAccess(String screen){
+
+    public Acceso getAccess(String screen) {
 //        System.out.println("screen "+screen);
         Acceso acceso = new Acceso();
-         Usuario user = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
-                for (Acceso a : user.getRoles().get(0).getAccesos()) {
-                    if (a.getRecursoInterno().trim().toUpperCase().equals(screen)) {
-                        acceso.setVer(true);
-                        acceso.setCambiar(a.isCambiar());
-                        acceso.setEliminar(a.isEliminar());
-                        acceso.setAgregar(a.isAgregar());
+        Usuario user = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
+        for (Acceso a : user.getRoles().get(0).getAccesos()) {
+            if (a.getRecursoInterno().trim().toUpperCase().equals(screen)) {
+                acceso.setVer(true);
+                acceso.setCambiar(a.isCambiar());
+                acceso.setEliminar(a.isEliminar());
+                acceso.setAgregar(a.isAgregar());
 //                        System.out.println("nombre "+a.getRecursoInterno()+" cambiar "+acceso.isCambiar()+" agregar "+acceso.isAgregar());
-                        return acceso;
-                    }
-                }
                 return acceso;
-    }    
+            }
+        }
+        return acceso;
+    }
 }
