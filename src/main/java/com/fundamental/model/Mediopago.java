@@ -26,9 +26,23 @@ public class Mediopago {
     private Integer efectivoId;
     private DtoGenericBean status;
     private Pais country;
+    private Integer depositoId;
     
     public Mediopago() {
     }
+
+    public Mediopago(Integer mediopagoId, String nombre) {
+        this.mediopagoId = mediopagoId;
+        this.nombre = nombre;
+    }
+
+    public Mediopago(Integer mediopagoId) {
+        this.mediopagoId = mediopagoId;
+    }
+    
+    
+    
+    
 
     public Mediopago(Integer mediopago_id, String nombre, Integer tipo, String creadoPor, int orden, String nombrePais, boolean isTCredito, String estado) {
         this.mediopagoId = mediopago_id;
@@ -223,5 +237,6 @@ public class Mediopago {
     public void setCountry(Pais country) {
         this.country = country;
     }
+    
 
 }
