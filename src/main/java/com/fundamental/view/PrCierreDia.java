@@ -343,11 +343,14 @@ public class PrCierreDia extends Panel implements View {
                 inventarioHoy.add(invdto);
             }
             if (dia != null && dia.getEstadoId() != null && dia.getEstadoId() == 2) { //cerrado
-                bcrRecepcion.addAll(service.getRecepcion(estacion.getPaisId(), estacion.getEstacionId(), dfdFecha.getValue()));
-                recepcion = bcrRecepcion.getItem(bcrRecepcion.getItemIds().get(0)).getBean();
-                tfdDriver.setValue(recepcion.getPiloto());
-                tfdUnit.setValue(recepcion.getUnidad());
-                tfdBill.setValue(recepcion.getFactura());
+                List<RecepcionInventario> listRec = service.getRecepcion(estacion.getPaisId(), estacion.getEstacionId(), dfdFecha.getValue()); 
+                if(!listRec.isEmpty()){
+                    bcrRecepcion.addAll(listRec);
+                    recepcion = bcrRecepcion.getItem(bcrRecepcion.getItemIds().get(0)).getBean();
+                    tfdDriver.setValue(recepcion.getPiloto());
+                    tfdUnit.setValue(recepcion.getUnidad());
+                    tfdBill.setValue(recepcion.getFactura());
+                }                                                
                 List<InventarioRecepcion> listTmpInv = service.getInventarioByFechaEstacion(dia.getFecha(), estacion.getEstacionId());
                 if (!listTmpInv.isEmpty()) {    //cubre el caso cuando se olvido ingresar inventario dia anterior.
                     inventarioHoy = listTmpInv;
