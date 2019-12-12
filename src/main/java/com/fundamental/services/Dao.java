@@ -589,7 +589,6 @@ public class Dao {
                 product = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), null, rst.getInt(5));
                 product.setPriceAS(0D);
                 product.setPriceSC(0D);
-                product.setTanque(rst.getString(6));
                 result.add(product);
             }
         } catch (Exception exc) {
@@ -604,7 +603,7 @@ public class Dao {
         }
         return result;
     }
-
+    
     public List<Lecturafinal> getLecturasfinales(Integer estacionId, String tipoLectura) {
         List<Lecturafinal> result = new ArrayList();
         ResultSet rst = null;

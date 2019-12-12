@@ -126,6 +126,11 @@ public class MntHorario extends Panel implements View {
         vltCenter.setMargin(new MarginInfo(false, true, true, false));
         vltCenter.setComponentAlignment(btnSave, Alignment.MIDDLE_CENTER);
         vltCenter.setSizeUndefined();
+        pdfHourStart.setEnabled(false);
+        pdfHourEnd.setEnabled(false);
+        tfdName.setEnabled(false);
+        cbxStatus.setEnabled(false);
+        txaDescription.setEnabled(false);
 
         VerticalLayout vltRight = utils.buildVertical("vltRight", false, true, true, false, null);
         vltRight.addComponents(cbxCountry, tblStations);
@@ -183,6 +188,11 @@ public class MntHorario extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (cbxCountry.getValue()!=null) {
+                    pdfHourStart.setEnabled(true);
+                    pdfHourEnd.setEnabled(true);
+                    tfdName.setEnabled(true);
+                    cbxStatus.setEnabled(true);
+                    txaDescription.setEnabled(true);
                     int countryId = ((Pais) cbxCountry.getValue()).getPaisId();
                     bcrStations.removeAllItems();
                     List<Estacion> tmpListStation = new ArrayList();
@@ -305,6 +315,11 @@ public class MntHorario extends Panel implements View {
                 listStations.stream().forEach((Estacion item) -> {
                     item.setSelected(false);
                 });
+                        pdfHourStart.setEnabled(true);
+                        pdfHourEnd.setEnabled(true);
+                        tfdName.setEnabled(true);
+                        cbxStatus.setEnabled(true);
+                        txaDescription.setEnabled(true);
                 action = Dao.ACTION_ADD;
                 horario = new Horario();
                 horario.setListStations(new ArrayList());

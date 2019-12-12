@@ -38,6 +38,7 @@ import java.util.Date;
 import com.fundamental.services.SvcReporteControlMediosPago;
 import com.fundamental.utils.XlsxReportGenerator;
 import com.sisintegrados.generic.bean.GenericEstacion;
+import com.sisintegrados.generic.bean.GenericRprControlMediosPago;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.Sizeable;
@@ -238,16 +239,21 @@ public class RptControDeMediosDePago extends Panel implements View {
         btnGenerar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(final Button.ClickEvent event) {
-                 String fecha_ini;
-                 String fecha_fin;
-                 Integer estaciones;
-                 String paisid;
-                 Connection cn = null;
-
-                 
-       // CallableStatement cst = cn.prepareCall("{call rep (?,?,?,?)}");
-        
-       
+                if (cmbPais.getValue() != null && cmbFechaInicio.getValue() != null && cmbFechaFin.getValue() != null && optStation.size() > 0) {
+                    try {
+                        SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), 361,"188");
+                        ArrayList<GenericRprControlMediosPago> listadb = new ArrayList<GenericRprControlMediosPago>();
+                        listadb = SvcReporteControlMediosPago.getCtlMediosPago();
+                        for (GenericRprControlMediosPago GenericRprControlMediosPago : listadb) {
+                            System.out.println(" RECUPERE "+GenericRprControlMediosPago.getMonto_neto());
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    Notification.show("ERROR:", "Ocurrió un error al guardar el precio.\n", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
             }
         });
 

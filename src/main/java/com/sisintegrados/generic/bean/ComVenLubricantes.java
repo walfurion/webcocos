@@ -19,6 +19,7 @@ public class ComVenLubricantes {
     private int compraId;
     private int marcaId;
     private int productoId;
+    private int paisId;
     private Date fecha;
     private Double invInicial;
     private Double compra;
