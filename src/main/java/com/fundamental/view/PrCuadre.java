@@ -27,6 +27,7 @@ import com.fundamental.model.dto.DtoEfectivo;
 import com.fundamental.model.dto.DtoProducto;
 import com.fundamental.services.SvcArqueo;
 import com.fundamental.services.SvcClientePrepago;
+import com.fundamental.services.SvcComVenLubricantes;
 import com.fundamental.services.SvcCuadre;
 import com.fundamental.services.SvcDetalleLubricantes;
 import com.fundamental.services.SvcProducto;
@@ -212,6 +213,7 @@ public class PrCuadre extends Panel implements View {
     double tmpDoubleProdUno;
     double tmpDoubleProdNoUno;
     SvcDetalleLubricantes daoLubs = new SvcDetalleLubricantes();
+    SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();
 
     /*Detalle Clientes Credito*/
     FormClientesCredito formClientesCredito;
@@ -1110,6 +1112,17 @@ public class PrCuadre extends Panel implements View {
                                     //*Registro detalle de lubricantes*// JLopez
                                     try {
                                         daoLubs.CreaProductoDetalle(arqueo.getArqueocajaId(), bcrLubs, user.getUsername());
+                                        Pais pais = new Pais();
+                                        pais = (Pais) cbxPais.getValue();
+                                        if (pais != null) {
+                                            for (Integer itemId : bcrLubs.getItemIds()) {
+                                                bcrLubs.getItem(itemId).getBean().getProducto().getProductoId();
+                                                bcrLubs.getItem(itemId).getBean().getCantidad(); //Venta
+                                                dfdFecha.getValue();
+                                                pais.getPaisId();
+                                                daoVentaLubs.insertVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), pais.getPaisId(), Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), dfdFecha.getValue());
+                                            }
+                                        }
                                     } catch (SQLException ex) {
                                         ex.printStackTrace();
                                     }
@@ -1131,12 +1144,14 @@ public class PrCuadre extends Panel implements View {
                         },
                                 new ButtonOption() {
                             @Override
-                            public void apply(MessageBox mb, Button button) {
+                            public void apply(MessageBox mb, Button button
+                            ) {
 //                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                             }
                         }
                         )
                         .withCancelButton(new Runnable() {
+
                             public void run() {
                                 /*Nothing to do here*/
                             }
@@ -1149,7 +1164,8 @@ public class PrCuadre extends Panel implements View {
                         })
                         .open();
             }
-        });
+        }
+        );
 
     }
 
@@ -1158,7 +1174,8 @@ public class PrCuadre extends Panel implements View {
         if (cbxEmpleado.getValue() != null) {
             formClientePrepago = new FormClientePrepago(idestacion, simboloMoneda, idpais, bcrPrepaid);
             formClientePrepago.addCloseListener((e) -> {
-                bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class
+                );
                 bcrPrepaid = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detallePrepago");
                 tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("totalPrepago");
                 for (Integer itemId : bcrMediopago.getItemIds()) {
@@ -1179,7 +1196,8 @@ public class PrCuadre extends Panel implements View {
         if (cbxEmpleado.getValue() != null) {
             formProductos = new FormDetalleLubricantes(idestacion, simboloMoneda, idpais, bcrLubs);
             formProductos.addCloseListener((e) -> {
-                bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class
+                );
                 bcrLubs = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detalleProducto");
                 tmpDoubleProdUno = (Double) VaadinSession.getCurrent().getAttribute("totalProductoUno");
                 tmpDoubleProdNoUno = (Double) VaadinSession.getCurrent().getAttribute("totalProducto");
@@ -1213,7 +1231,8 @@ public class PrCuadre extends Panel implements View {
         if (cbxEmpleado.getValue() != null) {
             formClientesCredito = new FormClientesCredito(idestacion, simboloMoneda, idpais, bcrClientes);
             formClientesCredito.addCloseListener((e) -> {
-                bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+                bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class
+                );
                 bcrClientes = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detalleCredito");
                 tmpDoubleCredito = (Double) VaadinSession.getCurrent().getAttribute("totalCredito");
                 for (Integer itemId : bcrMediopago.getItemIds()) {
@@ -1237,7 +1256,8 @@ public class PrCuadre extends Panel implements View {
 
             formTarjetasCredito = new FormTarjetasCredito(simboloMoneda, bcrCreditC, pais.getPaisId());
             formTarjetasCredito.addCloseListener((e) -> {
-                bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+                bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class
+                );
                 bcrCreditC = (BeanContainer<Integer, GenericTarjeta>) VaadinSession.getCurrent().getAttribute("detalleTarjetaCredito");
                 tmpDoubleTarjetaCredito = (Double) VaadinSession.getCurrent().getAttribute("totalTarjetaCredito");
                 tmpTotal = 0.00;
