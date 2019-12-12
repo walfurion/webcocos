@@ -546,10 +546,9 @@ public class Dao {
         List<Producto> result = new ArrayList();
         ResultSet rst = null;
         try {
-            miQuery = "SELECT p.producto_id, p.nombre, p.codigo, p.estado, p.orden_pos, t.DESCRIPCION "
-                    + "FROM estacion_producto ep, producto p, TANQUE t "
-                    + "WHERE ep.producto_id = p.producto_id and t.PRODUCTO_ID=p.PRODUCTO_ID and t.ESTACION_ID=ep.ESTACION_ID "
-                    + "AND p.tipo_id = 1 AND ep.estacion_id = " + estacionId
+            miQuery = "SELECT p.producto_id, p.nombre, p.codigo, p.estado, p.orden_pos "
+                    + "FROM estacion_producto ep, producto p "
+                    + "WHERE ep.producto_id = p.producto_id AND p.tipo_id = 1 AND ep.estacion_id = " + estacionId
                     + " ORDER BY p.producto_id";
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
@@ -558,7 +557,6 @@ public class Dao {
                 product = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), null, rst.getInt(5));
                 product.setPriceAS(0D);
                 product.setPriceSC(0D);
-                product.setTanque(rst.getString(6));
                 result.add(product);
             }
         } catch (Exception exc) {
