@@ -348,7 +348,7 @@ public class ExcelGenerator {
             CreationHelper createHelper = workbook.getCreationHelper();
             /*Para Numero*/
             CellStyle styleNumber = workbook.createCellStyle();
-            styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("#########.####"));
+//            styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("#########.####"));
             styleNumber.setWrapText(true);
 
             /*Para Fecha*/
@@ -673,7 +673,7 @@ public class ExcelGenerator {
                 datoscell.setCellStyle(stylePorcentaje);
                 ii++;
 
-                /*CLIENTES CREDITO*/
+                /*CLIENTES PREPAGO*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getPrepago());
                 datoscell.setCellStyle(styleNumber);
