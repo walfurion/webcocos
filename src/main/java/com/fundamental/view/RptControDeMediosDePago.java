@@ -36,6 +36,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import com.fundamental.services.SvcReporteControlMediosPago;
+import com.fundamental.utils.ExcelGeneratorCrlMediosPago;
 import com.fundamental.utils.XlsxReportGenerator;
 import com.sisintegrados.generic.bean.GenericEstacion;
 import com.sisintegrados.generic.bean.GenericRprControlMediosPago;
@@ -43,9 +44,11 @@ import com.vaadin.data.util.BeanContainer;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.StreamResource;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.OptionGroup;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -85,7 +88,10 @@ public class RptControDeMediosDePago extends Panel implements View {
 
     //traer estaciones con su checkbox
     BeanContainer<Integer, GenericEstacion> checkestacionesm = new BeanContainer<>(GenericEstacion.class);
+    BeanItemContainer<GenericRprControlMediosPago> sourceGeneric = new BeanItemContainer<GenericRprControlMediosPago>(GenericRprControlMediosPago.class);
     OptionGroup optStation = new OptionGroup();
+    Grid grid;
+    ExcelGeneratorCrlMediosPago excel = new ExcelGeneratorCrlMediosPago();
 
     public RptControDeMediosDePago() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
@@ -95,17 +101,16 @@ public class RptControDeMediosDePago extends Panel implements View {
         usuario = VaadinSession.getCurrent().getAttribute(Usuario.class);
         super.setContent(components.createVertical(Constant.styleTransactions, "100%", false, true, true, new Component[]{buildForm()}));
         checkestacionesm.setBeanIdProperty("estacionid");
-       // cargaInfoSesion();
+        cargaInfoSesion();
 
-//        //Para exportar
-//        StreamResource sre = getExcelStreamResourceFilas();
-//        FileDownloader fdr = new FileDownloader(sre);
-//        fdr.extend(btnExportar);
+        //Para exportar
+        StreamResource sr = GenerarExcel();
+        FileDownloader fileDownloader = new FileDownloader(sr);
+        fileDownloader.extend(btnExportar);
     }
-    Pais pais;
 
     private Component buildForm() {
-        return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), /*buildToolbar2(),*/ buildButtons()});
+        return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), buildTableData(),/*buildToolbar2(),*/ buildButtons()});
     }
 
     private Component buildTitle() {
@@ -180,6 +185,7 @@ public class RptControDeMediosDePago extends Panel implements View {
                     vl.addComponent(lblestacion);
                     optStation = new OptionGroup(null, checkestacionesm);
                     optStation.setMultiSelect(true);
+                    optStation.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
                     vl.addComponent(optStation);
                     for (Integer noid : checkestacionesm.getItemIds()) {
                         optStation.setItemCaption(checkestacionesm.getItem(noid).getBean().getEstacionid(), checkestacionesm.getItem(noid).getBean().getNombre());
@@ -225,6 +231,15 @@ public class RptControDeMediosDePago extends Panel implements View {
 //        return toolbarContainerTables;
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarContainerTables)});
     }
+
+    private CssLayout toolbarData;
+
+    private Component buildTableData() {
+        toolbarData = new CssLayout();
+//        return toolbarContainerTables;
+        return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarData)});
+    }
+
     private CssLayout toolBar2;
 
     private Component buildToolbar() {
@@ -241,22 +256,49 @@ public class RptControDeMediosDePago extends Panel implements View {
             public void buttonClick(final Button.ClickEvent event) {
                 if (cmbPais.getValue() != null && cmbFechaInicio.getValue() != null && cmbFechaFin.getValue() != null && optStation.size() > 0) {
                     try {
-                        SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), 361,"188");
-                        ArrayList<GenericRprControlMediosPago> listadb = new ArrayList<GenericRprControlMediosPago>();
-                        listadb = SvcReporteControlMediosPago.getCtlMediosPago();
-                        for (GenericRprControlMediosPago GenericRprControlMediosPago : listadb) {
-                            System.out.println(" RECUPERE "+GenericRprControlMediosPago.getMonto_neto());
-                        }
+                        SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), 361, "188");
+
+                        sourceGeneric.addAll(SvcReporteControlMediosPago.getCtlMediosPago());
+                        grid = new Grid(sourceGeneric);
+                        grid.setCaption("Control de medios de pago");
+                        grid.setWidth("1080px");
+//                        grid.setContainerDataSource(sourceGeneric);
+//                        grid.removeAllColumns();
+//                        grid.addColumn("fecha");
+//                        grid.addColumn("lote");
+//                        grid.addColumn("monto_bruto");
+//                        grid.addColumn("comision");
+//                        grid.addColumn("monto_neto");
+//                        grid.addColumn("comentarios");
+//                        Grid.Column fecha = grid.getColumn("fecha");
+//                        fecha.setHeaderCaption("Fecha");
+//                        Grid.Column lote = grid.getColumn("lote");
+//                        lote.setHeaderCaption("Lote");
+//                        Grid.Column monto_bruto = grid.getColumn("monto_bruto");
+//                        monto_bruto.setHeaderCaption("Monto bruto");
+//                        Grid.Column comision = grid.getColumn("comision");
+//                        comision.setHeaderCaption("Comision");
+//                        Grid.Column monto_neto = grid.getColumn("monto_neto");
+//                        monto_neto.setHeaderCaption("Monto neto");
+//                        Grid.Column comentarios = grid.getColumn("comentarios");
+//                        comentarios.setHeaderCaption("Comentarios");
+//                        grid.setColumnOrder("fecha", "lote", "monto_bruto", "comision", "monto_neto", "comentarios");
+                        toolbarData.removeAllComponents();
+                        toolbarData.addComponent(grid);
+//                   
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 } else {
-                    Notification.show("ERROR:", "Ocurrió un error al guardar el precio.\n", Notification.Type.ERROR_MESSAGE);
+                    Notification.show("ERROR:", "Debe seleccionar todos los campos necesarios.\n", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
             }
         });
 
+        btnExportar.setCaption("Exportar a Excel");
+        btnExportar.setStyleName(ValoTheme.BUTTON_PRIMARY);
+        btnExportar.setIcon(FontAwesome.EDIT);
         btnExportar.setStyleName(ValoTheme.BUTTON_PRIMARY);
         btnExportar.addClickListener(new Button.ClickListener() {
             @Override
@@ -266,35 +308,9 @@ public class RptControDeMediosDePago extends Panel implements View {
                 Seleccion = getSeleccion();
                 /*Recorro la seleccion de estaciones para enviarlas al query*/
                 for (String string : Seleccion) {
-//                    System.out.println(" Tamaño " + string.length());
-//*Ejemplo de query */
+                    //*Ejemplo de query */
                     System.out.println("Select * from estacion where estacion_id = " + string.trim());
                 }
-//                Integer algo;
-//                algo = (Integer) checkestaciones.getIdByIndex(2);
-//
-//                System.out.println("objetos " + optStation.getValue());
-////                System.out.println("objetos " + rayos);
-//                System.out.println("algo " + algo);
-//                System.out.println("Valor " + valor);
-
-//                listaestaciones.add(checkestaciones.getItem(optStation.getValue()).getBean());
-//                System.out.println(" ALGO "+algo.length);
-//                String algo = optStation.getValue();
-//                for (String string : algo) {
-//                    System.out.println("TVALOR GRUPO "+string);
-//                }
-//                System.out.println("TVALOR GRUPO "+optStation.getValue());
-//                if (bcrPrecios.getItemIds().size() == counter) {
-//                    Notification notif = new Notification("ÉXITO:", "El registro se ha actualizado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
-//                    notif.setDelayMsec(3000);
-//                    notif.setPosition(Position.MIDDLE_CENTER);
-//                    notif.show(Page.getCurrent());
-//                    UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_TURN.getViewName());
-//                } else {
-//                    Notification.show("ERROR:", "Ocurrió un error al actualizar el registro.\n", Notification.Type.ERROR_MESSAGE);
-//                    return;
-//                }
             }
         });
 
@@ -304,6 +320,40 @@ public class RptControDeMediosDePago extends Panel implements View {
         footer.setWidth(
                 100.0f, Sizeable.Unit.PERCENTAGE);
         return footer;
+    }
+
+    private StreamResource GenerarExcel() {
+        StreamResource.StreamSource source = new StreamResource.StreamSource() {
+            public InputStream getStream() {
+                ByteArrayOutputStream stream;
+                InputStream input = null;
+                List<String> tituloscolumnas = new ArrayList<String>();
+                String[] titulos = new String[]{"Fecha", "Lote", "Monto bruto", "Comision", "Monto neto", "Comentarios"};
+
+                tituloscolumnas = Arrays.asList(titulos);
+                XSSFWorkbook workbook = new XSSFWorkbook();
+                /*Generar Reporte en XLS*/
+                workbook = excel.generar(1, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION(ES) " + optStation.getValue().toString(), "Control medios de pago", sourceGeneric, null);
+
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                try {
+                    workbook.write(bos);
+                } catch (Exception exc) {
+                    try {
+                        bos.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    exc.printStackTrace();
+                }
+                stream = bos;
+                input = new ByteArrayInputStream(stream.toByteArray());
+                return input;
+            }
+        };
+        String fileName = "COCOs_CrtMediosPagonew_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
+        StreamResource resource = new StreamResource(source, fileName);
+        return resource;
     }
 
     private String[] getSeleccion() {
@@ -342,81 +392,18 @@ public class RptControDeMediosDePago extends Panel implements View {
         toolBar2.addComponent(utils.vlContainer2(lblUltimoTurno));
     }
 
-//    private StreamResource getExcelStreamResourceFilas() {
-//        StreamResource.StreamSource source = new StreamResource.StreamSource() {
-//            public InputStream getStream() {
-//                ByteArrayOutputStream stream;
-//                InputStream input = null;
-//              //  try {
-//                    List<String> lTitles = new ArrayList(Arrays.asList("FECHA", "LOTE", "MONTO BRUTO", "COMISION", "MONTO NETO", "COMENTARIO"));
-//                    List<Integer> lTypes = new ArrayList(Arrays.asList(CELL_TYPE_STRING, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC, CELL_TYPE_STRING));
-//
-//                    SvcMedioPago svcMP = new SvcMedioPago();
-//                    pais = (Pais) cmbPais.getValue();
-////                    checkestacionesm = svcMP.getCheckEstacionesM();
-////                    checkestacionesm.addAll(svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2));
-////                
-//                    Integer paisId = (cmbPais != null && cmbPais.getValue() != null) ? ((Pais) cmbPais.getValue()).getPaisId() : null;
-////                    midata = svcMP.getMediospagoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-////                    midata1 = svcMP.getEfectivoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-// //                   List<String[]> dataVol = svcMP.getVolumenesReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-//                    svcMP.closeConnections();
-//
-////Quitamos la columna mediopago_id
-//                    List<String[]> data = new ArrayList();
-// //                   for (String[] dato : midata) {
-//                        data.add(new String[]{
-// //                           dato[0], dato[1], dato[2], dato[3], dato[4], dato[6], dato[7]
-//                        });
-//                    }
-////for (String[] dato : midata1) {
-////    data.add(new String[]{ 
-////        dato[0], dato[1], dato[2], dato[3], dato[4], dato[6], dato[7]
-////    });
-////}
-//
-//                    XlsxReportGenerator xrg = new XlsxReportGenerator();
-// //                   XSSFWorkbook workbook = xrg.generate(null, "Medios de pago", new HashMap(), lTitles.toArray(new String[lTitles.size()]), data, lTypes.toArray(new Integer[lTypes.size()]));
-//
-////-- Para generar dos reportes en un mismo archivo de Excel
-//              //      lTitles = new ArrayList(Arrays.asList("CÓDIGO", "BU", "DEPÓSITO", "ESTACIÓN", "DÍA", "CÓDIGO NUM", "CÓDIGO ALF", "PRODUCTO", "VOLUMEN", "MONTO"));
-//                //    lTypes = new ArrayList(Arrays.asList(4, 4, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, 4, CELL_TYPE_STRING, CELL_TYPE_STRING, CELL_TYPE_NUMERIC, CELL_TYPE_NUMERIC));
-//                //    workbook = xrg.generate(workbook, "Volúmenes", new HashMap(), lTitles.toArray(new String[lTitles.size()]), dataVol, lTypes.toArray(new Integer[lTypes.size()]));
-////-- Para generar dos reportes en un mismo archivo de Excel
-//
-//                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//                    try {
-//                 //       workbook.write(bos);
-//                    } catch (Exception exc) {
-//                  //      bos.close();
-//                    }
-//
-//                    stream = bos;
-//                    input = new ByteArrayInputStream(stream.toByteArray());
-//
-//              //  } catch (Exception ex) {
-//              //      ex.printStackTrace();
-//            //    }
-//        //        return input;
-//        //    }
-//     //   };
-////        String fileName = "COCOs_MediosPago_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
-////        StreamResource resource = new StreamResource(source, fileName);
-////        return resource;
-////    }
-////
-////    private void cargaInfoSesion() {
-////        if (usuario.getPaisId() != null) {
-////            int i = 0;
-////            for (i = 0; i < contPais.size(); i++) {
-////                Pais hh = new Pais();
-////                hh = contPais.getIdByIndex(i);
-////                if (usuario.getPaisId().toString().trim().equals(hh.getPaisId().toString().trim())) {
-////                    cmbPais.setValue(contPais.getIdByIndex(i));
-////                }
-////            }
-////        }
-////    }
+    private void cargaInfoSesion() {
+        if (usuario.getPaisId() != null) {
+            int i = 0;
+            for (i = 0; i < contPais.size(); i++) {
+                Pais hh = new Pais();
+                hh = contPais.getIdByIndex(i);
+                if (usuario.getPaisId().toString().trim().equals(hh.getPaisId().toString().trim())) {
+                    cmbPais.setValue(contPais.getIdByIndex(i));
+                }
+            }
+        }
+    }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
