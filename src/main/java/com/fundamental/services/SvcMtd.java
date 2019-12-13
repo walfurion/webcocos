@@ -49,35 +49,36 @@ public class SvcMtd extends Dao {
         ArrayList<GenericMTD> result = new ArrayList<GenericMTD>();
         GenericMTD genmtd = new GenericMTD();
         try {
-            query = "Select FECHA, P_SUPER, P_REGULAR, P_DIESEL, \n" +
-"                L_SUPER, L_REGULAR, L_DIESEL, C_DIESEL, C_SUPER, \n" +
-"                C_REGULAR, L_TOTAL, C_TOTAL, TIENDA_TOTAL, CANASTA_TOTAL, \n" +
-"                MEDICAMENTO_TOTAL, OTROS_LUB_TOTAL, UNO_LUB_TOTAL, VENTA_TURNO_A, VENTA_TURNO_B, \n" +
-"                VENTA_TURNO_C, VENTA_BOMBA_1, VENTA_BOMBA_2, VENTA_BOMBA_3, VENTA_BOMBA_4, \n" +
-"                VENTA_BOMBA_5, VENTA_BOMBA_6, TOTAL_MEDIO_PAGO, CONTADO, PORC_CONTADO, \n" +
-"                CREDOMATIC, PORC_CREDOMATIC, BANK_NACIONAL, PORC_BANK_NACIONAL, BCR, \n" +
-"                PORC_BCR, FLEET_MAGIC_SB, PORC_FLEET_MAGIC, FM_DAVIVIENDA, PORC_FM_DAVIVIENDA, \n" +
-"                VERSATEC, PORC_VERSATEC, FLOTA_BCR, PORC_FLOTA_BCR, FLOTA_BAC, \n" +
-"                PORC_FLOTA_BAC, UNO_PLUS, PORC_UNO_PLUS, CUPON,PORC_CUPON, PREPAGO,PORC_PREPAGO, \n" +
-"                DAVIVIENDA, PORC_DAVIVIENDA, CREDITO, PORC_CREDITO, CONTADO_USD, \n" +
-"                PORC_CONTADO_USD, WS_L_SUPER, WS_L_REGULAR, WS_L_DIESEL, WS_L_TOTAL, \n" +
-"                CALIBRACION_SUPER, CALIBRACION_REGULAR, CALIBRACION_DIESEL, CALIBRACION_TOTAL, SOBRANTE_L, \n" +
-"                FALTANTE_L, SO_FAL_TOTAL, CXC_TOTAL, PORC_CXC_TOTAL, SUPER_L_FAL_SOB, \n" +
-"                REGULAR_L_FAL_SOB, DIESEL_L_FAL_SOB, EFE_SUPER, EFE_REGULAR, EFE_DIESEL, \n" +
-"                CREDOMATIC_SUPER, CREDOMATIC_REGULAR, CREDOMATIC_DIESEL, BANK_NACIONAL_SUPER, BANK_NACIONAL_REGULAR, \n" +
-"                BANK_NACIONAL_DIESEL, BCR_SUPER, BCR_REGULAR, BCR_DIESEL, FLEET_MAGIC_SB_SUPER, \n" +
-"                FLEET_MAGIC_SB_REGULAR, FLEET_MAGIC_SB_DIESEL, VERSATEC_SUPER, VERSATEC_REGULAR, VERSATEC_DIESEL, \n" +
-"                FLOTA_BCR_SUPER, FLOTA_BCR_REGULAR, FLOTA_BCR_DIESEL, FLOTA_BAC_SUPER, FLOTA_BAC_REGULAR, \n" +
-"                FLOTA_BAC_DIESEL, UNO_PLUS_SUPER, UNO_PLUS_REGULAR, UNO_PLUS_DIESEL, CUPON_SUPER, \n" +
-"                CUPON_REGULAR, CUPON_DIESEL, PREPAGO_SUPER, PREPAGO_REGULAR, PREPAGO_DIESEL, \n" +
-"                CREDITO_SUPER, CREDITO_REGULAR, CREDITO_DIESEL, EFECTIVO_USD_SUPER, EFECTIVO_USD_REGULAR, \n" +
-"                EFECTIVO_USD_DIESEL, DAVIVIENDA_SUPER, DAVIVIENDA_REGULAR, DAVIVIENDA_DIESEL "
+            query = "Select FECHA, P_SUPER, P_REGULAR, P_DIESEL, \n"
+                    + "                L_SUPER, L_REGULAR, L_DIESEL, C_DIESEL, C_SUPER, \n"
+                    + "                C_REGULAR, L_TOTAL, C_TOTAL, TIENDA_TOTAL, CANASTA_TOTAL, \n"
+                    + "                MEDICAMENTO_TOTAL, OTROS_LUB_TOTAL, UNO_LUB_TOTAL, VENTA_TURNO_A, VENTA_TURNO_B, \n"
+                    + "                VENTA_TURNO_C, VENTA_BOMBA_1, VENTA_BOMBA_2, VENTA_BOMBA_3, VENTA_BOMBA_4, \n"
+                    + "                VENTA_BOMBA_5, VENTA_BOMBA_6, TOTAL_MEDIO_PAGO, CONTADO, PORC_CONTADO, \n"
+                    + "                CREDOMATIC, PORC_CREDOMATIC, BANK_NACIONAL, PORC_BANK_NACIONAL, BCR, \n"
+                    + "                PORC_BCR, FLEET_MAGIC_SB, PORC_FLEET_MAGIC, FM_DAVIVIENDA, PORC_FM_DAVIVIENDA, \n"
+                    + "                VERSATEC, PORC_VERSATEC, FLOTA_BCR, PORC_FLOTA_BCR, FLOTA_BAC, \n"
+                    + "                PORC_FLOTA_BAC, UNO_PLUS, PORC_UNO_PLUS, CUPON,PORC_CUPON, PREPAGO,PORC_PREPAGO, \n"
+                    + "                DAVIVIENDA, PORC_DAVIVIENDA, CREDITO, PORC_CREDITO, CONTADO_USD, \n"
+                    + "                PORC_CONTADO_USD, WS_L_SUPER, WS_L_REGULAR, WS_L_DIESEL, WS_L_TOTAL, WS_CL_SUPER, WS_CL_REGULAR,WS_CL_DIESEL,WS_CL_TOTAL,  \n"
+                    + "                CALIBRACION_SUPER, CALIBRACION_REGULAR, CALIBRACION_DIESEL, CALIBRACION_TOTAL, SOBRANTE_L, \n"
+                    + "                FALTANTE_L, SO_FAL_TOTAL, CXC_TOTAL, PORC_CXC_TOTAL, SUPER_L_FAL_SOB, \n"
+                    + "                REGULAR_L_FAL_SOB, DIESEL_L_FAL_SOB, EFE_SUPER, EFE_REGULAR, EFE_DIESEL, \n"
+                    + "                CREDOMATIC_SUPER, CREDOMATIC_REGULAR, CREDOMATIC_DIESEL, BANK_NACIONAL_SUPER, BANK_NACIONAL_REGULAR, \n"
+                    + "                BANK_NACIONAL_DIESEL, BCR_SUPER, BCR_REGULAR, BCR_DIESEL, FLEET_MAGIC_SB_SUPER, \n"
+                    + "                FLEET_MAGIC_SB_REGULAR, FLEET_MAGIC_SB_DIESEL,FM_DAVIVIENDA_SB_SUPER,FM_DAVIVIENDA_SB_REGULAR,FM_DAVIVIENDA_SB_DIESEL, VERSATEC_SUPER, VERSATEC_REGULAR, VERSATEC_DIESEL, \n"
+                    + "                FLOTA_BCR_SUPER, FLOTA_BCR_REGULAR, FLOTA_BCR_DIESEL, FLOTA_BAC_SUPER, FLOTA_BAC_REGULAR, \n"
+                    + "                FLOTA_BAC_DIESEL, UNO_PLUS_SUPER, UNO_PLUS_REGULAR, UNO_PLUS_DIESEL, CUPON_SUPER, \n"
+                    + "                CUPON_REGULAR, CUPON_DIESEL, PREPAGO_SUPER, PREPAGO_REGULAR, PREPAGO_DIESEL, \n"
+                    + "                CREDITO_SUPER, CREDITO_REGULAR, CREDITO_DIESEL, EFECTIVO_USD_SUPER, EFECTIVO_USD_REGULAR, \n"
+                    + "                EFECTIVO_USD_DIESEL, DAVIVIENDA_SUPER, DAVIVIENDA_REGULAR, DAVIVIENDA_DIESEL "
                     + "from PV_MTD order by fecha asc";
 //            System.out.println("QUERY "+query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
-                genmtd = new GenericMTD(rst.getDate(1), rst.getDouble(2),
+                genmtd = new GenericMTD(rst.getDate(1),
+                        rst.getDouble(2),
                         rst.getDouble(3),
                         rst.getDouble(4),
                         rst.getDouble(5),
@@ -190,7 +191,15 @@ public class SvcMtd extends Dao {
                         rst.getDouble(112),
                         rst.getDouble(113),
                         rst.getDouble(114),
-                        rst.getDouble(115));
+                        rst.getDouble(115),
+                        rst.getDouble(116),
+                        rst.getDouble(117),
+                        rst.getDouble(118),
+                        rst.getDouble(119),
+                        rst.getDouble(120),
+                        rst.getDouble(121),
+                        rst.getDouble(122)
+                );
                 result.add(genmtd);
             }
         } catch (Exception exc) {

@@ -18,6 +18,7 @@ import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
@@ -366,6 +367,19 @@ public class Utils {
         return false;
     }
     
+
+    public PasswordField buildPasswordField(String caption, String nullRepresentation, boolean nullSettingAllowed, int maxLength, boolean required, String style) {
+        PasswordField result = new PasswordField(caption);
+        result.setNullRepresentation(nullRepresentation);
+        result.setNullSettingAllowed(nullSettingAllowed);
+        result.setMaxLength(maxLength);
+        result.setRequired(required);
+        if (style != null) {
+            result.addStyleName(style);
+        }
+        return result;
+    }
+
     public PropertyFormatter getPropertyFormatterDoubleP(Property pro) {
         return new PropertyFormatter(pro) {
             public String format(Object value) {
@@ -380,6 +394,7 @@ public class Utils {
                 }
             }
         };
+
     }
 
 }

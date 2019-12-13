@@ -22,10 +22,12 @@ import com.fundamental.view.RptControDeMediosDePago;
 import com.fundamental.view.RptVolumenes;
 import com.fundamental.view.RptWSM;
 import com.fundamental.view.TurnoPr;
+import com.fundamental.view.maintenance.CambioClave;
 import com.fundamental.view.maintenance.MntEmpleado;
 import com.fundamental.view.maintenance.MntLubricantPrice;
 import com.fundamental.view.maintenance.MntProducto;
 import com.fundamental.view.maintenance.MntRol;
+import com.fundamental.view.maintenance.MntTanque;
 import com.vaadin.navigator.View;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
@@ -33,6 +35,7 @@ import com.vaadin.server.Resource;
 public enum DashboardViewType {
     
     HOME("Home", Home.class, FontAwesome.HOME, true),
+    CAMBIO_CLAVE("CAMBIO_CLAVE", CambioClave.class, FontAwesome.LOCK, true),
     //    SALES("sales", SalesView.class, FontAwesome.BAR_CHART_O, false), 
     //    TRANSACTIONS("transactions", TransactionsView.class, FontAwesome.TABLE, false), 
     //    REPORTS("reports", ReportsView.class, FontAwesome.FILE_TEXT_O, true), 
@@ -60,6 +63,7 @@ public enum DashboardViewType {
     MNT_ROL("MNT_ROL", MntRol.class, FontAwesome.COGS, false),
     MNT_PRODUCTO("MNT_PRODUCTO", MntProducto.class, FontAwesome.COGS, false),
     MNT_EMPLEADO("MNT_EMPLEADO", MntEmpleado.class, FontAwesome.USER, false),
+    MNT_TANQUE("MNT_TANQUE", MntTanque.class, FontAwesome.CLOUD, false),
     
     RPT_MEDIOPAGO("RPT_MEDIOPAGO", RptMediopago.class, FontAwesome.FILE, false),
     RPT_CONTROLMEDIOPAGO("RPT_CONTROLMEDIOPAGO", RptControDeMediosDePago.class, FontAwesome.FILE, false),

@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class GenericMTD {
+
     private Date fecha;
     private Double p_super;
     private Double p_regular;
@@ -79,6 +80,10 @@ public class GenericMTD {
     private Double ws_l_regular;
     private Double ws_l_diesel;
     private Double ws_l_total;
+    private Double ws_cl_super;
+    private Double ws_cl_regular;
+    private Double ws_cl_diesel;
+    private Double ws_cl_total;
     private Double calibracion_super;
     private Double calibracion_regular;
     private Double calibracion_diesel;
@@ -106,6 +111,9 @@ public class GenericMTD {
     private Double fleet_magic_sb_super;
     private Double fleet_magic_sb_regular;
     private Double fleet_magic_sb_diesel;
+    private Double fm_davivienda_sb_super;
+    private Double fm_davivienda_sb_regular;
+    private Double fm_davivienda_sb_diesel;
     private Double versatec_super;
     private Double versatec_regular;
     private Double versatec_diesel;
@@ -134,7 +142,7 @@ public class GenericMTD {
     private Double davivienda_regular;
     private Double davivienda_diesel;
 
-    public GenericMTD(Date fecha, Double p_super, Double p_regular, Double p_diesel, Double l_super, Double l_regular, Double l_diesel, Double c_diesel, Double c_super, Double c_regular, Double l_total, Double c_total, Double tienda_total, Double canasta_total, Double medicamento_total, Double otros_lub_total, Double uno_lub_total, Double venta_turno_a, Double venta_turno_b, Double venta_turno_c, Double venta_bomba_1, Double venta_bomba_2, Double venta_bomba_3, Double venta_bomba_4, Double venta_bomba_5, Double venta_bomba_6, Double total_medio_pago, Double contado, Double porc_contado, Double credomatic, Double porc_credomatic, Double bank_nacional, Double porc_bank_nacional, Double bcr, Double porc_bcr, Double fleet_magic_sb, Double porc_fleet_magic, Double fm_davivienda, Double porc_fm_davivienda, Double versatec, Double porc_versatec, Double flota_bcr, Double porc_flota_bcr, Double flota_bac, Double porc_flota_bac, Double uno_plus, Double porc_uno_plus, Double cupon, Double porc_cupon, Double prepago, Double porc_prepago, Double davivienda, Double porc_davivienda, Double credito, Double porc_credito, Double contado_usd, Double porc_contado_usd, Double ws_l_super, Double ws_l_regular, Double ws_l_diesel, Double ws_l_total, Double calibracion_super, Double calibracion_regular, Double calibracion_diesel, Double calibracion_total, Double sobrante_l, Double faltante_l, Double so_fal_total, Double cxc_total, Double porc_cxc_total, Double super_l_fal_sob, Double regular_l_fal_sob, Double diesel_l_fal_sob, Double efe_super, Double efe_regular, Double efe_diesel, Double credomatic_super, Double credomatic_regular, Double credomatic_diesel, Double bank_nacional_super, Double bank_nacional_regular, Double bank_nacional_diesel, Double bcr_super, Double bcr_regular, Double bcr_diesel, Double fleet_magic_sb_super, Double fleet_magic_sb_regular, Double fleet_magic_sb_diesel, Double versatec_super, Double versatec_regular, Double versatec_diesel, Double flota_bcr_super, Double flota_bcr_regular, Double flota_bcr_diesel, Double flota_bac_super, Double flota_bac_regular, Double flota_bac_diesel, Double uno_plus_super, Double uno_plus_regular, Double uno_plus_diesel, Double cupon_super, Double cupon_regular, Double cupon_diesel, Double prepago_super, Double prepago_regular, Double prepago_diesel, Double credito_super, Double credito_regular, Double credito_diesel, Double efectivo_usd_super, Double efectivo_usd_regular, Double efectivo_usd_diesel, Double davivienda_super, Double davivienda_regular, Double davivienda_diesel) {
+    public GenericMTD(Date fecha, Double p_super, Double p_regular, Double p_diesel, Double l_super, Double l_regular, Double l_diesel, Double c_diesel, Double c_super, Double c_regular, Double l_total, Double c_total, Double tienda_total, Double canasta_total, Double medicamento_total, Double otros_lub_total, Double uno_lub_total, Double venta_turno_a, Double venta_turno_b, Double venta_turno_c, Double venta_bomba_1, Double venta_bomba_2, Double venta_bomba_3, Double venta_bomba_4, Double venta_bomba_5, Double venta_bomba_6, Double total_medio_pago, Double contado, Double porc_contado, Double credomatic, Double porc_credomatic, Double bank_nacional, Double porc_bank_nacional, Double bcr, Double porc_bcr, Double fleet_magic_sb, Double porc_fleet_magic, Double fm_davivienda, Double porc_fm_davivienda, Double versatec, Double porc_versatec, Double flota_bcr, Double porc_flota_bcr, Double flota_bac, Double porc_flota_bac, Double uno_plus, Double porc_uno_plus, Double cupon, Double porc_cupon, Double prepago, Double porc_prepago, Double davivienda, Double porc_davivienda, Double credito, Double porc_credito, Double contado_usd, Double porc_contado_usd, Double ws_l_super, Double ws_l_regular, Double ws_l_diesel, Double ws_l_total, Double ws_cl_super, Double ws_cl_regular, Double ws_cl_diesel, Double ws_cl_total, Double calibracion_super, Double calibracion_regular, Double calibracion_diesel, Double calibracion_total, Double sobrante_l, Double faltante_l, Double so_fal_total, Double cxc_total, Double porc_cxc_total, Double super_l_fal_sob, Double regular_l_fal_sob, Double diesel_l_fal_sob, Double efe_super, Double efe_regular, Double efe_diesel, Double credomatic_super, Double credomatic_regular, Double credomatic_diesel, Double bank_nacional_super, Double bank_nacional_regular, Double bank_nacional_diesel, Double bcr_super, Double bcr_regular, Double bcr_diesel, Double fleet_magic_sb_super, Double fleet_magic_sb_regular, Double fleet_magic_sb_diesel,Double fm_davivienda_sb_super, Double fm_davivienda_sb_regular, Double fm_davivienda_sb_diesel, Double versatec_super, Double versatec_regular, Double versatec_diesel, Double flota_bcr_super, Double flota_bcr_regular, Double flota_bcr_diesel, Double flota_bac_super, Double flota_bac_regular, Double flota_bac_diesel, Double uno_plus_super, Double uno_plus_regular, Double uno_plus_diesel, Double cupon_super, Double cupon_regular, Double cupon_diesel, Double prepago_super, Double prepago_regular, Double prepago_diesel, Double credito_super, Double credito_regular, Double credito_diesel, Double efectivo_usd_super, Double efectivo_usd_regular, Double efectivo_usd_diesel, Double davivienda_super, Double davivienda_regular, Double davivienda_diesel) {
         this.fecha = fecha;
         this.p_super = p_super;
         this.p_regular = p_regular;
@@ -196,6 +204,10 @@ public class GenericMTD {
         this.ws_l_regular = ws_l_regular;
         this.ws_l_diesel = ws_l_diesel;
         this.ws_l_total = ws_l_total;
+        this.ws_cl_super = ws_cl_super;
+        this.ws_cl_regular = ws_cl_regular;
+        this.ws_cl_diesel = ws_cl_diesel;
+        this.ws_cl_total = ws_cl_total;
         this.calibracion_super = calibracion_super;
         this.calibracion_regular = calibracion_regular;
         this.calibracion_diesel = calibracion_diesel;
@@ -223,6 +235,9 @@ public class GenericMTD {
         this.fleet_magic_sb_super = fleet_magic_sb_super;
         this.fleet_magic_sb_regular = fleet_magic_sb_regular;
         this.fleet_magic_sb_diesel = fleet_magic_sb_diesel;
+        this.fm_davivienda_sb_super = fm_davivienda_sb_super;
+        this.fm_davivienda_sb_regular = fm_davivienda_sb_regular;
+        this.fm_davivienda_sb_diesel = fm_davivienda_sb_diesel;
         this.versatec_super = versatec_super;
         this.versatec_regular = versatec_regular;
         this.versatec_diesel = versatec_diesel;

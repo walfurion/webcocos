@@ -10,6 +10,7 @@ import com.fundamental.model.Rol;
 import com.fundamental.model.Tipoproducto;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.dto.DtoGenericBean;
+import com.sisintegrados.generic.bean.Tanque;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -193,9 +194,9 @@ public class SvcMaintenance extends Dao {
         List<Acceso> result = new ArrayList();
         try {
             query = " SELECT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, a.estado,ar.ver,ar.cambiar,ar.agregar,ar.eliminar"
-                   +" FROM acceso a, acceso_rol ar "
-                   +" WHERE ar.acceso_id = a.acceso_id AND ar.rol_id = " + rolId
-                   +" ORDER BY a.padre, a.orden DESC";
+                    + " FROM acceso a, acceso_rol ar "
+                    + " WHERE ar.acceso_id = a.acceso_id AND ar.rol_id = " + rolId
+                    + " ORDER BY a.padre, a.orden DESC";
 //            System.out.println("getAccesByRolinid "+query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
@@ -210,12 +211,12 @@ public class SvcMaintenance extends Dao {
                 access.setRecursoInterno(rst.getString(5));
                 access.setDescripcion(rst.getString(6));
                 access.setEstado(rst.getString(7));
-                access.setVer(rst.getInt(8)==1?true:false);
-                access.setCambiar(rst.getInt(9)==1?true:false);
-                access.setAgregar(rst.getInt(10)==1?true:false);
-                access.setEliminar(rst.getInt(11)==1?true:false);
+                access.setVer(rst.getInt(8) == 1 ? true : false);
+                access.setCambiar(rst.getInt(9) == 1 ? true : false);
+                access.setAgregar(rst.getInt(10) == 1 ? true : false);
+                access.setEliminar(rst.getInt(11) == 1 ? true : false);
                 result.add(access);
-                
+
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -245,10 +246,10 @@ public class SvcMaintenance extends Dao {
                 access.setDescripcion(rst.getString(6));
                 access.setEstado(rst.getString(7));
                 access.setNombrePadre(rst.getString(8));
-                access.setVer(rst.getInt(9)==1?true:false);
-                access.setCambiar(rst.getInt(10)==1?true:false);
-                access.setAgregar(rst.getInt(11)==1?true:false);
-                access.setEliminar(rst.getInt(12)==1?true:false);
+                access.setVer(rst.getInt(9) == 1 ? true : false);
+                access.setCambiar(rst.getInt(10) == 1 ? true : false);
+                access.setAgregar(rst.getInt(11) == 1 ? true : false);
+                access.setEliminar(rst.getInt(12) == 1 ? true : false);
                 result.add(access);
             }
         } catch (Exception exc) {
@@ -285,10 +286,10 @@ public class SvcMaintenance extends Dao {
                     pst.setObject(1, item.getAccesoId());
                     pst.setObject(2, rol.getRolId());
                     pst.setObject(3, rol.getCreadoPor());
-                    pst.setObject(4, item.isVer()==true?1:0);
-                    pst.setObject(5, item.isCambiar()==true?1:0);
-                    pst.setObject(6, item.isAgregar()==true?1:0);
-                    pst.setObject(7, item.isEliminar()==true?1:0);
+                    pst.setObject(4, item.isVer() == true ? 1 : 0);
+                    pst.setObject(5, item.isCambiar() == true ? 1 : 0);
+                    pst.setObject(6, item.isAgregar() == true ? 1 : 0);
+                    pst.setObject(7, item.isEliminar() == true ? 1 : 0);
                     pst.executeUpdate();
                     closePst();
                 }
@@ -317,7 +318,7 @@ public class SvcMaintenance extends Dao {
                     pst.setObject(1, rol.getRolId());
                     try {
                         pst.executeUpdate();
-                    }catch(Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     closePst();
@@ -330,10 +331,10 @@ public class SvcMaintenance extends Dao {
                     pst.setObject(1, item.getAccesoId());
                     pst.setObject(2, rol.getRolId());
                     pst.setObject(3, rol.getCreadoPor());
-                    pst.setObject(4, item.isVer()?1:0);
-                    pst.setObject(5, item.isCambiar()?1:0);
-                    pst.setObject(6, item.isAgregar()?1:0);
-                    pst.setObject(7, item.isEliminar()?1:0);
+                    pst.setObject(4, item.isVer() ? 1 : 0);
+                    pst.setObject(5, item.isCambiar() ? 1 : 0);
+                    pst.setObject(6, item.isAgregar() ? 1 : 0);
+                    pst.setObject(7, item.isEliminar() ? 1 : 0);
                     try {
                         pst.executeUpdate();
                     } catch (Exception ignore) {
@@ -401,7 +402,7 @@ public class SvcMaintenance extends Dao {
 //        }
 //        return result;
 //    }
-        public List<Producto> getAllProducts(boolean includeInactive) {
+    public List<Producto> getAllProducts(boolean includeInactive) {
 //            System.out.println("getAllProducts() ");
         List<Producto> result = new ArrayList();
         try {
@@ -423,10 +424,10 @@ public class SvcMaintenance extends Dao {
                 producto.setStatus(new DtoGenericBean(rst.getString(6), (rst.getString(6).equals("A") ? "Activo" : "Inactivo")));
                 result.add(producto);
             }
-            for(Producto p : result){
-                for(Producto p2:lstProd){
-                    if(p.getProductoId()==p2.getProductoId()){
-                        p.setCountrys("[ "+p2.getCountrys().trim()+" ]");
+            for (Producto p : result) {
+                for (Producto p2 : lstProd) {
+                    if (p.getProductoId() == p2.getProductoId()) {
+                        p.setCountrys("[ " + p2.getCountrys().trim() + " ]");
                         break;
 //                        System.out.println("p "+p.getCountrys());
                     }
@@ -438,6 +439,7 @@ public class SvcMaintenance extends Dao {
         }
         return result;
     }
+
     public List<Producto> getAllProductsWhitCountry() {
         List<Producto> result = new ArrayList();
         try {
@@ -454,16 +456,16 @@ public class SvcMaintenance extends Dao {
                 p = new Producto();
                 p.setProductoId(rst.getInt(1));
                 p.setCountrys(rst.getString(3));
-                if(p.getProductoId()==p_ant.getProductoId()){
-                    p_ant.setCountrys(p_ant.getCountrys()+", "+p.getCountrys());
-                }else {
-                    if(p_ant.getProductoId()>0){
+                if (p.getProductoId() == p_ant.getProductoId()) {
+                    p_ant.setCountrys(p_ant.getCountrys() + ", " + p.getCountrys());
+                } else {
+                    if (p_ant.getProductoId() > 0) {
                         result.add(p_ant);
                     }
                     p_ant = p;
                 }
             }
-            if(p_ant.getProductoId()>0){
+            if (p_ant.getProductoId() > 0) {
                 result.add(p_ant);
             }
         } catch (Exception exc) {
@@ -508,7 +510,7 @@ public class SvcMaintenance extends Dao {
                 mediopago = new Mediopago(rst.getInt(1), rst.getString(2), rst.getInt(3), null, rst.getInt(5), rst.getString(8), rst.getBoolean(11), rst.getString(4));
                 mediopago.setPaisId(rst.getInt(6));
                 mediopago.setTipoprodId(rst.getInt(7));
-                mediopago.setCountry(new Pais(rst.getInt(6), rst.getString(8), rst.getString(12), null, null, null,null));
+                mediopago.setCountry(new Pais(rst.getInt(6), rst.getString(8), rst.getString(12), null, null, null, null));
                 query = (rst.getString(4).equals("A")) ? "Activo" : "Inactivo";
                 mediopago.setStatus(new DtoGenericBean(rst.getString(4), query));
                 mediopago.setPartidacontPor(rst.getDouble(9));
@@ -583,37 +585,42 @@ public class SvcMaintenance extends Dao {
         }
         return result;
     }
-    
+
     public List<Pais> getAllPaisbyProduct(Integer idProducto) {
         List<Pais> result = new ArrayList<Pais>();
         miQuery = "SELECT p.pais_id, nombre, codigo, moneda_simbolo, estado, vol_simbolo, pp.PRODUCTO_ID "
                 + "FROM pais p "
-                + "LEFT JOIN  pais_producto pp ON p.pais_id = pp.pais_id AND  pp.PRODUCTO_ID = "+idProducto+" "
+                + "LEFT JOIN  pais_producto pp ON p.pais_id = pp.pais_id AND  pp.PRODUCTO_ID = " + idProducto + " "
                 + "ORDER BY p.pais_id";
-        ResultSet rst = null; try {
+        ResultSet rst = null;
+        try {
             rst = getConnection().prepareStatement(miQuery).executeQuery();
             while (rst.next()) {
-                result.add(new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5),null, rst.getInt(7)>0));
+                result.add(new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5), null, rst.getInt(7) > 0));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { rst.close(); pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
-    
-    public boolean setProductoPais(List<Pais> paises,Producto product){
-        query = "DELETE FROM  pais_producto WHERE producto_id =  "+product.getProductoId();
+
+    public boolean setProductoPais(List<Pais> paises, Producto product) {
+        query = "DELETE FROM  pais_producto WHERE producto_id =  " + product.getProductoId();
         try {
             pst = getConnection().prepareStatement(query);
             pst.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(SvcMaintenance.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        for(Pais pais:paises) {
-            if(pais.isSelected()){
+
+        for (Pais pais : paises) {
+            if (pais.isSelected()) {
                 query = "INSERT INTO pais_producto (pais_id, producto_id,creado_por) "
                         + "VALUES (?, ?, ?)";
                 try {
@@ -629,37 +636,203 @@ public class SvcMaintenance extends Dao {
         }
         return true;
     }
-    
-    public boolean existeE1Producto(String codigo){
+
+    public boolean existeE1Producto(String codigo) {
         boolean result = false;
-        ResultSet rst = null; try {
+        ResultSet rst = null;
+        try {
             miQuery = "SELECT codigo "
                     + "FROM PRODUCTO "
-                    + "WHERE codigo = '" + codigo+"'";
+                    + "WHERE codigo = '" + codigo + "'";
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
-            result =  rst.next();
+            result = rst.next();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-                try { rst.close(); pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
+    public boolean existeCodEnvoyProducto(String CODIGO_ENVOY) {
+        boolean result = false;
+        ResultSet rst = null;
+        try {
+            miQuery = "SELECT CODIGO_ENVOY "
+                    + "FROM PRODUCTO "
+                    + "WHERE CODIGO_ENVOY = '" + CODIGO_ENVOY + "'";
+            pst = getConnection().prepareStatement(miQuery);
+            rst = pst.executeQuery();
+            result = rst.next();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
+    public List<Tanque> getAllTanques() {
+        List<Tanque> result = new ArrayList();
+        //result = null;
+
+        try {
+            miQuery = "select a.IDTANQUE, a.PRODUCTO_ID, a.ESTACION_ID, a.DESCRIPCION,\n"
+                    + "       a.USUARIO_CREACION, a.FECHA_CREACION, a.USUARIO_MODIFICACION, a.FECHA_MODIFICACION,\n"
+                    + "       b.NOMBRE, c.NOMBRE\n"
+                    + "from TANQUE a, ESTACION b, PRODUCTO c\n"
+                    + "where a.ESTACION_ID = b.ESTACION_ID\n"
+                    + "  and a.PRODUCTO_ID = c.PRODUCTO_ID";
+            System.out.println("MiQuery   " + miQuery);
+            pst = getConnection().prepareStatement(miQuery);
+            ResultSet rst = pst.executeQuery();
+            while (rst.next()) {
+                Producto prod = new Producto();
+                prod.setProductoId(rst.getInt(2));
+                Estacion est = new Estacion();
+                est.setEstacionId(rst.getInt(3));
+                result.add(new Tanque(rst.getInt(1), prod, est, rst.getString(4), rst.getString(10), rst.getString(9)));
+            }
+            closePst();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
+    public List<Producto> getProductsToTanques() {
+        List<Producto> result = new ArrayList();
+        //result = null;
+
+        try {
+            miQuery = "select PRODUCTO_ID, NOMBRE from PRODUCTO where TIPO_ID = 1 and ESTADO = 'A'";
+            System.out.println("MiQuery   " + miQuery);
+            pst = getConnection().prepareStatement(miQuery);
+            ResultSet rst = pst.executeQuery();
+            while (rst.next()) {
+                result.add(new Producto(rst.getInt(1), rst.getString(2)));
+            }
+            closePst();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
+    public List<Estacion> getEstacionToTanques() {
+        List<Estacion> result = new ArrayList();
+        //result = null;
+
+        try {
+            miQuery = "select ESTACION_ID, NOMBRE from ESTACION";
+            System.out.println("MiQuery   " + miQuery);
+            pst = getConnection().prepareStatement(miQuery);
+            ResultSet rst = pst.executeQuery();
+            while (rst.next()) {
+                result.add(new Estacion(rst.getInt(1), rst.getString(2)));
+            }
+            closePst();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
+    public Tanque doActionTanque(String action, Tanque tanque) {
+        Tanque result = new Tanque();
+        try {
+            if (action.equals(Dao.ACTION_ADD)) {
+                System.out.println("ingresa metodo guardar");
+                query = "SELECT seq_tanque.nextval FROM DUAL";
+                pst = getConnection().prepareStatement(query);
+                ResultSet rst = pst.executeQuery();
+                tanque.setIdtanque((rst.next()) ? rst.getInt(1) : 0);
+                closePst();
+                query = "INSERT INTO tanque (idtanque, producto_id, estacion_id, descripcion, usuario_creacion, fecha_creacion) "
+                        + "VALUES (?, ?, ?, ?, ?, SYSDATE)";
+                
+                pst = getConnection().prepareStatement(query);
+                pst.setObject(1, tanque.getIdtanque());
+                pst.setObject(2, tanque.getProducto().getProductoId());
+                pst.setObject(3, tanque.getEstacion().getEstacionId());
+                pst.setObject(4, tanque.getDescripcion());
+                pst.setObject(5, tanque.getUsuarioCreacion());
+                //pst.setObject(6, tanque.getFechaCreacion());
+
+                pst.executeUpdate();
+                result = tanque;
+            } else if (action.equals(Dao.ACTION_UPDATE)) {
+                System.out.println("ingresa metodo actualizar");
+                query = "UPDATE tanque "
+                        + "SET producto = ?, estacion = ?, descripcion = ?"
+                        + "  usuario_modificacion = ?, fecha_modificacion = SYSDATE"
+                        + "WHERE idtanque = ?";
+                pst = getConnection().prepareStatement(query);
+                pst.setObject(1, tanque.getProducto().getProductoId());
+                pst.setObject(2, tanque.getEstacion().getEstacionId());
+                pst.setObject(3, tanque.getDescripcion());
+                pst.setObject(4, tanque.getUsuarioModificacion());
+                pst.setObject(5, tanque.getIdtanque());
+
+                pst.executeUpdate();
+                result = tanque;
+            }
+        } catch (Exception exc) {
+            // result.setDescError(exc.getMessage());
+            exc.printStackTrace();
+        } finally {
+            closePst();
         }
         return result;
     }
     
-    public boolean existeCodEnvoyProducto(String CODIGO_ENVOY){
-        boolean result = false;
-        ResultSet rst = null; try {
-            miQuery = "SELECT CODIGO_ENVOY "
-                    + "FROM PRODUCTO "
-                    + "WHERE CODIGO_ENVOY = '" + CODIGO_ENVOY+"'";
-            pst = getConnection().prepareStatement(miQuery);
-            rst = pst.executeQuery();
-            result =  rst.next();
+    
+    public Usuario doActionPassword(Usuario usuario) {
+        Usuario result = new Usuario();
+        try{
+            System.out.println("ingresa metodo actualizar");
+                query = "UPDATE usuario "
+                        + "SET clave = ?, "
+                        + "  modificado_por = ?, modificado_el = SYSDATE"
+                        + " WHERE usuario_id = ?";
+                System.out.println("query  " + query);
+                pst = getConnection().prepareStatement(query);
+                pst.setObject(1, usuario.getClave());
+                pst.setObject(2, usuario.getModificadoPor());
+                pst.setObject(3, usuario.getUsuarioId());
+
+                pst.executeUpdate();
+                result = usuario;
+            
         } catch (Exception exc) {
+            // result.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-                try { rst.close(); pst.close(); } catch (Exception ignore) { }
+            closePst();
         }
         return result;
     }
