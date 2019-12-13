@@ -11,18 +11,32 @@ import com.fundamental.model.Turno;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoArqueo;
+
+import com.fundamental.model.dto.DtoProducto;
+import com.fundamental.model.dto.InventarioDto;
+import com.fundamental.model.dto.RecepcionDto;
+
 import com.fundamental.services.Dao;
+import com.fundamental.services.SvcDeposito;
 import com.fundamental.services.SvcEstacion;
+import com.fundamental.services.SvcMedioPago;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
+
+import com.sisintegrados.generic.bean.GenericDepositoDet;
+import com.sisintegrados.view.form.FormClientesCredito;
+import com.sisintegrados.view.form.FormDetalleDeposito;
+
 import com.sisintegrados.generic.bean.InventarioRecepcion;
 import com.sisintegrados.generic.bean.RecepcionInventario;
+
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import com.vaadin.demo.dashboard.view.DashboardViewType;
 import com.vaadin.navigator.View;
@@ -53,6 +67,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -86,6 +101,7 @@ public class PrCierreDia extends Panel implements View {
     ComboBox cbxPais, cbxEstacion;
 
     Table tableTurno = new Table();
+
 //    {
 //        @Override
 //        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
@@ -95,7 +111,6 @@ public class PrCierreDia extends Panel implements View {
 //            return super.formatPropertyValue(rowId, colId, property);
 //        }
 //    };
-
     Table tableVentas = new Table() {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
@@ -136,6 +151,16 @@ public class PrCierreDia extends Panel implements View {
         }
     };
 
+    Table tableDeposito = new Table() {
+        @Override
+        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
+            if (colId.equals("value")) {
+                return numberFmt.format(property.getValue());
+            }
+            return super.formatPropertyValue(rowId, colId, property);
+        }
+    };
+
     Table tblInventory = new Table("Inventario:");
 
     TextField tfdDriver = new TextField("Piloto:"), tfdUnit = new TextField("Unidad:"), tfdBill = new TextField("Factura:");
@@ -149,6 +174,9 @@ public class PrCierreDia extends Panel implements View {
     BeanContainer<Integer, Mediopago> bcrEfectivo = new BeanContainer<Integer, Mediopago>(Mediopago.class);
     BeanContainer<Integer, InventarioRecepcion> bcrInventario = new BeanContainer<Integer, InventarioRecepcion>(InventarioRecepcion.class);
 
+    BeanContainer<Integer, GenericDepositoDet> bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
+    BeanItemContainer<GenericDepositoDet> ContDepositoDet = new BeanItemContainer<GenericDepositoDet>(GenericDepositoDet.class);
+
     Double totalVentas = 0D, totalDinero = 0D;
     String symCurrency, symVolumen;
 
@@ -160,6 +188,12 @@ public class PrCierreDia extends Panel implements View {
     List<Precio> precios;
     List<Producto> productos;
     Acceso acceso = new Acceso();
+    FormDetalleDeposito formDetalleDeposito; //jlopez
+    Button btnDetalleDeposito;
+
+    SvcDeposito daoDeposito = new SvcDeposito();
+    String currencySymbol;
+    Pais pais = new Pais();
 
     public PrCierreDia() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -176,6 +210,7 @@ public class PrCierreDia extends Panel implements View {
         symVolumen = (user.getPaisLogin() == null) ? "" : user.getPaisLogin().getVolSimbolo().concat(". ");
         root.addComponent(utils.buildHeader("Cierre de día", true, true));
         root.addComponent(utils.buildSeparator());
+        currencySymbol = (user.getPaisLogin() == null) ? "" : user.getPaisLogin().getMonedaSimbolo() + ". ";
         getAllData();
 //***
         buildControls();
@@ -187,6 +222,7 @@ public class PrCierreDia extends Panel implements View {
         buildTableProductos();
         buildTableMediosPago();
         buildTableEfectivo();
+        buildTableDeposito();
         buildTableInventario();
         buildButtons();
 
@@ -226,7 +262,7 @@ public class PrCierreDia extends Panel implements View {
 
         HorizontalLayout hlCombo = utils.buildHorizontal("hlCombo", false, false, true, false);
         hlCombo.setSizeUndefined();
-        CssLayout cltCombo = new CssLayout(utils.vlContainer(cbxPais), utils.vlContainer(cbxEstacion), utils.vlContainer(dfdFecha));
+        CssLayout cltCombo = new CssLayout(utils.vlContainer(cbxPais), utils.vlContainer(cbxEstacion), utils.vlContainer(dfdFecha), utils.vlContainer(btnDetalleDeposito));
         hlCombo.addComponents(cltCombo);
 
         HorizontalLayout hlBtnsSel = new HorizontalLayout();
@@ -258,7 +294,7 @@ public class PrCierreDia extends Panel implements View {
         content.addComponents(
                 utils.vlContainer(vlTableButtons),
                 utils.vlContainer(tableVentas), utils.vlContainer(tableProductos),
-                utils.vlContainer(tableMediosPago), utils.vlContainer(tableEfectivo),
+                utils.vlContainer(tableMediosPago), utils.vlContainer(tableEfectivo), utils.vlContainer(tableDeposito),
                 //                utils.vlContainer(tblInventory),
                 vltInventory,
                 utils.vlContainer(hlContent4)
@@ -280,7 +316,10 @@ public class PrCierreDia extends Panel implements View {
         bcrMediospago.setBeanIdProperty("mediopagoId");
         bcrEfectivo.setBeanIdProperty("efectivoId");
         bcrInventario.setBeanIdProperty("idDto");
-        SvcTurnoCierre service = new SvcTurnoCierre();        
+
+        bcrDeposito.setBeanIdProperty("idGenerico");
+
+        SvcTurnoCierre service = new SvcTurnoCierre();
 
         estacion = (Estacion) ((cbxEstacion != null && cbxEstacion.getValue() != null)
                 ? cbxEstacion.getValue() : ((user.getEstacionLogin() != null) ? user.getEstacionLogin() : new Estacion()));
@@ -436,12 +475,14 @@ public class PrCierreDia extends Panel implements View {
         cbxPais.addValueChangeListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
-                Pais pais = (Pais) cbxPais.getValue();
+                pais = new Pais();
+                pais = (Pais) cbxPais.getValue();
                 SvcEstacion svcEstacion = new SvcEstacion();
 //                List<Estacion> estaciones = svcEstacion.getStationsByCountry(pais.getPaisId());
                 Container estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));
                 svcEstacion.closeConnections();
                 cbxEstacion.setContainerDataSource(estacionContainer);
+                currencySymbol = pais.getMonedaSimbolo() + " ";
             }
         });
 
@@ -462,6 +503,7 @@ public class PrCierreDia extends Panel implements View {
                 bcrProducto.removeAllItems();
                 bcrMediospago.removeAllItems();
                 bcrEfectivo.removeAllItems();
+                bcrDeposito.removeAllItems();
                 calcularSumas();
                 printDataLabel();
 
@@ -490,6 +532,7 @@ public class PrCierreDia extends Panel implements View {
                     bcrProducto.removeAllItems();
                     bcrMediospago.removeAllItems();
                     bcrEfectivo.removeAllItems();
+                    bcrDeposito.removeAllItems();
                     SvcTurno svcTurno = new SvcTurno();
                     //se obtiene de base de datos pues necesitamos saber el estado.
                     dia = svcTurno.getDiaByEstacionidFecha(estacion.getEstacionId(), dfdFecha.getValue());
@@ -498,13 +541,20 @@ public class PrCierreDia extends Panel implements View {
                     getAllData();
                     for (Integer tid : bcrTurnos.getItemIds()) {
                         bcrTurnos.getItem(tid).getItemProperty("selected").setValue(Boolean.TRUE);
-                    }                    
+                    }
+
+                    bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
+                    //  ContDepositoDet = new BeanItemContainer<GenericDepositoDet>(GenericDepositoDet.class);
+                    //  bcrDeposito.addAll(daoDeposito.getDepositoByEstacion(estacion.getEstacionId()));
+
+                  //  }                    
                     //Importante
 //                    binder.bindMemberFields(this);
 //                    binder.setItemDataSource(recepcion);
 //                    
 //                    recepcion = bcrRecepcion.getItem(dfdFecha.getValue()).getBean();
 //                    binder.setItemDataSource(recepcion);
+
                     determinarPermisos();
                     calcularSumas();
                     printDataLabel();
@@ -514,8 +564,6 @@ public class PrCierreDia extends Panel implements View {
             }
         });
         dfdFecha.setValue(dia.getFecha());
-
-        determinarPermisos();
     }
 
     private void determinarPermisos() {
@@ -582,7 +630,7 @@ public class PrCierreDia extends Panel implements View {
 
     private void calcularSumas() {
         totalVentas = totalDinero = 0D;
-        Double tpVolumen = 0D, tpVentas = 0D, tpProducto = 0D, tpMediospago = 0D, tpEfectivo = 0D;
+        Double tpVolumen = 0D, tpVentas = 0D, tpProducto = 0D, tpMediospago = 0D, tpEfectivo = 0D, tpDeposito = 0D;
         for (Integer id : bcrVentas.getItemIds()) {
             totalVentas += bcrVentas.getItem(id).getBean().getVenta();
             tpVentas += bcrVentas.getItem(id).getBean().getVenta();
@@ -601,6 +649,11 @@ public class PrCierreDia extends Panel implements View {
             tpEfectivo += bcrEfectivo.getItem(id).getBean().getValue();
         }
 
+        for (Integer id : bcrDeposito.getItemIds()) {
+            totalDinero += bcrDeposito.getItem(id).getBean().getMonto();
+            tpDeposito += bcrDeposito.getItem(id).getBean().getMonto();
+        }
+
         tableVentas.setFooterVisible(true);
         tableVentas.setColumnFooter("nombreDespacho", "Total:");
         tableVentas.setColumnFooter("venta", symCurrency + numberFmt.format(tpVentas));
@@ -615,6 +668,9 @@ public class PrCierreDia extends Panel implements View {
         tableEfectivo.setFooterVisible(true);
         tableEfectivo.setColumnFooter("nombre", "Total:");
         tableEfectivo.setColumnFooter("value", symCurrency + numberFmt.format(tpEfectivo));
+        tableDeposito.setFooterVisible(true);
+        tableDeposito.setColumnFooter("nombre", "Total:");
+        tableDeposito.setColumnFooter("value", symCurrency + numberFmt.format(tpDeposito));
 
     }
 
@@ -668,6 +724,17 @@ public class PrCierreDia extends Panel implements View {
         tableEfectivo.setHeight(200f, Unit.PIXELS);
         tableEfectivo.addStyleName(ValoTheme.TABLE_COMPACT);
         tableEfectivo.addStyleName(ValoTheme.TABLE_SMALL);
+    }
+
+    private void buildTableDeposito() {
+        tableDeposito.setCaption("Depósito:");
+        tableDeposito.setContainerDataSource(bcrDeposito);
+        tableDeposito.setVisibleColumns(new Object[]{"mediopago", "numeroboleta","monto"});
+        tableDeposito.setColumnHeaders(new String[]{"Nombre", "Número Boleta","Valor"});
+        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT);
+        tableDeposito.setHeight(200f, Unit.PIXELS);
+        tableDeposito.addStyleName(ValoTheme.TABLE_COMPACT);
+        tableDeposito.addStyleName(ValoTheme.TABLE_SMALL);
     }
 
     private void buildTableInventario() {
@@ -980,6 +1047,10 @@ public class PrCierreDia extends Panel implements View {
     }
 
     private void buildButtons() {
+        btnDetalleDeposito = new Button("Detalle Efectivo", FontAwesome.PLUS);
+        btnDetalleDeposito.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        btnDetalleDeposito.addStyleName(ValoTheme.BUTTON_SMALL);
+        btnDetalleDeposito.addClickListener(clickEvent -> formDeposito(estacion.getEstacionId(), currencySymbol, pais.getPaisId()));
 
         btnAll.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         btnAll.addStyleName(ValoTheme.BUTTON_LINK);
@@ -1107,6 +1178,7 @@ public class PrCierreDia extends Panel implements View {
 
             }
         });
+
     }
 
     private HorizontalLayout buildDetalleMontos() {
@@ -1141,6 +1213,7 @@ public class PrCierreDia extends Panel implements View {
 
     private void refreshAllData() {
         SvcTurnoCierre svcTC = new SvcTurnoCierre();
+        SvcDeposito svcDep = new SvcDeposito();
 //                        String arqueosIds = "";
 //                        //Determinar bombas
 ////                        bcrBombas.removeAllItems();
@@ -1173,6 +1246,8 @@ public class PrCierreDia extends Panel implements View {
             bcrProducto.addAll(svcTC.getProductoByTurnoid(turnosIds));
             bcrMediospago.addAll(svcTC.getMediopagoByTurnosid(turnosIds));
             bcrEfectivo.addAll(svcTC.getEfectivoByTurnosid(turnosIds));
+            String p = new SimpleDateFormat("yyyy-MM-dd").format(dfdFecha.getValue());
+            bcrDeposito.addAll(svcDep.getDepositoByEstacion(estacion.getEstacionId().toString(), p));
         }
         svcTC.closeConnections();
         calcularSumas();
@@ -1321,4 +1396,23 @@ public class PrCierreDia extends Panel implements View {
         //btnGuardar.setEnabled(acceso.isAgregar());
         btnGuardar.setEnabled(acceso.isCambiar());
     }
+
+    /*Metodo Llama Forma Detalle de depositos */// jlopez
+    private void formDeposito(Integer idestacion, String simboloMoneda, Integer idpais) {
+        System.out.println("ingresa a metodo formDeposito");
+        if (cbxEstacion.getValue() != null) {
+            System.out.println("dentro de for cbxestacion");
+            formDetalleDeposito = new FormDetalleDeposito(simboloMoneda, bcrDeposito, idpais, idestacion);
+            //formDetalleDeposito = new FormDetalleDeposito(simboloMoneda, idpais, idestacion);
+            formDetalleDeposito.addCloseListener((e) -> {
+                bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
+                bcrDeposito = (BeanContainer<Integer, GenericDepositoDet>) VaadinSession.getCurrent().getAttribute("detalleDeposito");
+
+            });
+            getUI().addWindow(formDetalleDeposito);
+            formDetalleDeposito.focus();
+        }
+    }
+
+
 }

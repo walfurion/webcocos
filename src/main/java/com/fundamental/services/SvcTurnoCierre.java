@@ -481,6 +481,7 @@ public class SvcTurnoCierre extends Dao {
         }
         return result;
     }
+
     public List<RecepcionInventario> getRecepcion(Integer pais, Integer estacion, Date fecha) {
         List<RecepcionInventario> result = new ArrayList();
         ResultSet rst = null;
@@ -512,4 +513,5 @@ public class SvcTurnoCierre extends Dao {
         }
         return result;
     }
+
 }
