@@ -85,7 +85,7 @@ public class MntLubricanteCV extends Panel implements View {
     List<Marca> listBrands = new ArrayList();
     List<ComVenLubricantes> listProducts = new ArrayList();        
     Table tblProduct = new Table();
-    boolean bloqueo = true;
+    boolean bloqueo = false;
 
     public MntLubricanteCV() {
 
@@ -162,7 +162,7 @@ public class MntLubricanteCV extends Panel implements View {
             comVen = (ComVenLubricantes) ((BeanItem) contLub.getItem(pi)).getBean();
             if(comVen.getInvInicial()!=0.0){
                 System.out.println("entra "+comVen.getInvInicial());
-                bloqueo = false;
+                bloqueo = true;
             }
         }
     }
@@ -250,9 +250,7 @@ public class MntLubricanteCV extends Panel implements View {
         cmbFecha.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
-                if (cmbProducto.getValue() != null) {
-                    getAllData();
-                }
+                getAllData();
             }
         });
 
@@ -295,7 +293,7 @@ public class MntLubricanteCV extends Panel implements View {
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.setNullRepresentation("0.00");
                 tfdValue.addStyleName("align-right");
-//                tfdValue.setEnabled(bloqueo);
+                tfdValue.setReadOnly(bloqueo);
                 return tfdValue;
             }
         }); 
@@ -364,11 +362,14 @@ public class MntLubricanteCV extends Panel implements View {
                 ComVenLubricantes comVenLub = new ComVenLubricantes();
                 for (Integer i : (List<Integer>) tblProduct.getItemIds()) {
                     ComVenLubricantes lub;
-                    lub = (ComVenLubricantes) ((BeanItem) tblProduct.getItem(i)).getBean();     
-                    comVenLub.setInvInicial(lub.getInvInicial());
-                    comVenLub.setCompra(lub.getCompra());
+                    lub = (ComVenLubricantes) ((BeanItem) tblProduct.getItem(i)).getBean();                         
+                    Double invInicial = lub.getInvInicial()==null?0.0:lub.getInvInicial();
+                    Double compra = lub.getCompra()==null?0.0:lub.getCompra();
+                    Double invfinal = lub.getInvfinal()==null?invInicial:lub.getInvfinal();
+                    comVenLub.setInvInicial(invInicial);
+                    comVenLub.setCompra(compra);
                     comVenLub.setVenta(lub.getVenta());
-                    comVenLub.setInvfinal(lub.getInvfinal());
+                    comVenLub.setInvfinal(invfinal);
                 }
                 comVenLub.setFecha(cmbFecha.getValue());
                 comVenLub.setMarcaId(((Marca)cmbMarca.getValue()).getIdMarca());
@@ -378,7 +379,7 @@ public class MntLubricanteCV extends Panel implements View {
                 comVenLub.setCreadopor(usuario.getUsername());
                 SvcComVenLubricantes service = new SvcComVenLubricantes();
                 service.insertCompra(comVenLub);
-//                service.insertVenta(123, 188, 150.00, cmbFecha.getValue());
+//                service.insertVenta(126, 188, 150.00, cmbFecha.getValue());
                 service.closeConnections();
                 if (comVenLub.getProductoId()>0) {
                     Notification notif = new Notification("ÉXITO:", "El registro se realizó con éxito.", Notification.Type.HUMANIZED_MESSAGE);

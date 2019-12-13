@@ -691,11 +691,19 @@ public class PrCierreDia extends Panel implements View {
                     public void valueChange(Property.ValueChangeEvent event) {
                         InventarioRecepcion invdto = (InventarioRecepcion) ((BeanItem) tblInventory.getItem(itemId)).getBean();
 //                        invdto.setVentas((invdto.getInicialDto() + invdto.getComprasDto()) - (invdto.getFinallDto() + invdto.getCalibracion()));
-                        invdto.setVentas(invdto.getInicialDto() + invdto.getComprasDto() + invdto.getCalibracion() - invdto.getFinallDto());
-                        invdto.setDiferencia(invdto.getVentasCons() - invdto.getVentas());
+                        Double valIniDto = invdto.getInicialDto()==null?0.0:invdto.getInicialDto();
+                        Double valComprasDto = invdto.getComprasDto()==null?0.0:invdto.getComprasDto(); 
+                        Double valCalibracion = invdto.getCalibracion()==null?0.0:invdto.getCalibracion();
+                        Double valFinalDto = invdto.getFinallDto()==null?0.0:invdto.getFinallDto();
+                        Double valVentasCons = invdto.getVentasCons()==null?0.0:invdto.getVentasCons();
+                        Double valCompras = invdto.getCompras()==null?0.0:invdto.getCompras();
+
+                        invdto.setVentas(valIniDto + valComprasDto + valCalibracion - valFinalDto);
+                        invdto.setDiferencia(valVentasCons - invdto.getVentas());
                         invdto.setEstado((invdto.getDiferencia() > 0) ? "SOBRANTE" : ((invdto.getDiferencia() == 0) ? "OK" : "FALTANTE"));
                         bcrInventario.getItem(itemId).getItemProperty("ventas").setValue(invdto.getVentas());
                         bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invdto.getDiferencia());
+                        bcrInventario.getItem(itemId).getItemProperty("lecturaVeederRoot").setValue(valIniDto+valCompras-valVentasCons);
                         bcrInventario.getItem(itemId).getItemProperty("estado").setValue(invdto.getEstado());
                     }
                 });
@@ -767,7 +775,7 @@ public class PrCierreDia extends Panel implements View {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("varianza");  //Atributo del bean
-                Label lbl = new Label(utils.getPropertyFormatterDoubleP(pro));
+                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
                 lbl.setWidth("85px");
                 lbl.addStyleName(ValoTheme.LABEL_SMALL);
                 lbl.addStyleName("align-right");
@@ -787,8 +795,9 @@ public class PrCierreDia extends Panel implements View {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
                         InventarioRecepcion invdto = bcrInventario.getItem(itemId).getBean();
-                        Double invFis = invdto.getInventarioFisico();
-                        bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invdto.getInventarioFisico()-invdto.getLecturaVeederRoot());
+                        Double invFis = invdto.getInventarioFisico()==null?0.0:invdto.getInventarioFisico();
+                        Double invTeo = invdto.getLecturaVeederRoot()==null?0.0:invdto.getLecturaVeederRoot();
+                        bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invFis-invTeo);
                         bcrInventario.getItem(itemId).getItemProperty("varianza").setValue((invdto.getDiferencia()/invdto.getVentasCons())*100);
 //                        bcrInventario.getItem(itemId).getItemProperty("inventarioFisico").setValue(invFis);                        
                     }

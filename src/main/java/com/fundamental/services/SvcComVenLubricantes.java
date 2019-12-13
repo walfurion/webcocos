@@ -101,16 +101,15 @@ public class SvcComVenLubricantes extends Dao{
             int val = countLub(lub.getProductoId(),lub.getFecha(),lub.getPaisId());
             if(val>0){
                 miQuery = "UPDATE COMPRA_VENTA_LUBRICANTE "
-                    + "SET INV_INICIAL=?,COMPRA=?, VENTA=?, INV_FINAL=?, MODIFICADO_POR=?, MODIFICADO_EL=SYSDATE "
+                    + "SET INV_INICIAL=?,COMPRA=?, INV_FINAL=?, MODIFICADO_POR=?, MODIFICADO_EL=SYSDATE "
                     + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy') ";
                 pst = getConnection().prepareStatement(miQuery);
                 pst.setDouble(1, lub.getInvInicial());
                 pst.setDouble(2, lub.getCompra());
-                pst.setDouble(3, lub.getVenta());
-                pst.setDouble(4, lub.getInvfinal());
-                pst.setString(5, lub.getModificadopor());
-                pst.setInt(6, lub.getProductoId());
-                pst.setString(7,Constant.SDF_ddMMyyyy.format(lub.getFecha()));
+                pst.setDouble(3, lub.getInvfinal());
+                pst.setString(4, lub.getModificadopor());
+                pst.setInt(5, lub.getProductoId());
+                pst.setString(6,Constant.SDF_ddMMyyyy.format(lub.getFecha()));
                 pst.executeUpdate();
                 result = lub;
             }else{
@@ -155,13 +154,15 @@ public class SvcComVenLubricantes extends Dao{
             Double valFinal = valorFinal(paisId, idMarca, productoId, fecha);
             Double valFinalAnt = valorFinal(paisId, idMarca, productoId, ayer.getTime());
             Double compra = compra(paisId, idMarca, productoId, fecha);
+            Double valInicial = valorInicial(paisId, idMarca, productoId, fecha);
             if(val>0){                
                 miQuery = "UPDATE COMPRA_VENTA_LUBRICANTE "
                     + "SET VENTA=?, INV_FINAL=?, MODIFICADO_EL=SYSDATE "
                     + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy')";
                 pst = getConnection().prepareStatement(miQuery);
                 pst.setDouble(1, venta);
-                pst.setDouble(2, valFinal + compra - venta);
+                System.out.println("valFinal "+valFinal);
+                pst.setDouble(2, valInicial + compra - venta);
                 pst.setInt(3,productoId);
                 pst.setString(4, Constant.SDF_ddMMyyyy.format(fecha));
                 pst.executeUpdate();
@@ -229,6 +230,31 @@ public class SvcComVenLubricantes extends Dao{
                 rst = pst.executeQuery();            
                 while (rst.next()) {         
                     System.out.println("fsdfsd "+rst.getDouble(1));
+                    valor = rst.getDouble(1);
+                }
+            }catch(Exception exc){
+                exc.printStackTrace();
+            }
+        return valor;
+    }
+    
+    private Double valorInicial(int countryId, int brandId, int productId, Date fecha){        
+        ResultSet rst = null;
+        Double valor = 0.00;
+            try{        
+                query = "select l.INV_INICIAL "
+                        + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p "
+                        + "where l.PRODUCTO_ID = p.PRODUCTO_ID "
+                        + "AND l.PAIS_ID=? and l.MARCA_ID=? and l.PRODUCTO_ID=? "
+                        + "and l.FECHA = to_date(?,'dd/mm/yyyy') ";
+                pst = getConnection().prepareStatement(query);
+                pst.setInt(1, countryId);
+                pst.setInt(2, brandId);
+                pst.setInt(3, productId);
+                pst.setString(4, Constant.SDF_ddMMyyyy.format(fecha));
+                rst = pst.executeQuery();            
+                while (rst.next()) {         
+                    System.out.println("INV_INICIAL "+rst.getDouble(1));
                     valor = rst.getDouble(1);
                 }
             }catch(Exception exc){

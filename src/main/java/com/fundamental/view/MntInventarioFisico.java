@@ -141,18 +141,20 @@ public class MntInventarioFisico extends Panel implements View {
     
     private void getAllData(){
         contLub.removeAllItems();
-        contLub.setBeanIdProperty("inventario_id");
+        contLub.setBeanIdProperty("producto_id");
         toolbarContainerTables.removeAllComponents();
         toolbarContainerTables.addComponent(buildTableContent());
         SvcInventarioFisico service = new SvcInventarioFisico();
         int countryId = ((Pais) cmbPais.getValue()).getPaisId();
         int brandId = ((Marca) cmbMarca.getValue()).getIdMarca();        
-        list = service.getLubricantes(countryId, brandId, cmbFecha.getValue());  
-        ComInventarioFisico fis;
-        for(ComInventarioFisico c: list){
-//            fis.set
-        }
-        contLub.addAll(listProducts);  
+        contLub.addAll(service.getLubricantes(countryId, brandId, cmbFecha.getValue()));  
+//        ComInventarioFisico fis;
+//        for(ComInventarioFisico c: list){
+//            fis.setProductoNombre(c.getProductoNombre());
+//            System.out.println("fis "+fis.getProductoNombre());            
+//        }
+//        listProducts.add(fis);
+//        contLub.addAll(listProducts);  
     }
 
     private Component buildHeader() {
