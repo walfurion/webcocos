@@ -44,4 +44,11 @@ public class Estacion {
         this.estado = estado;
         this.factElectronica = factElectronica;
     }
+
+    public Estacion(Integer estacionId, String nombre) {
+        this.estacionId = estacionId;
+        this.nombre = nombre;
+    }
+    
+    
 }

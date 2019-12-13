@@ -27,19 +27,18 @@ public class SvcInventarioFisico extends Dao {
                     + "l.INV_FINAL, l.PAIS_ID, l.PRODUCTO_ID "
                     + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p, LUBRICANTEPRECIO lp "
                     + "where l.PRODUCTO_ID = p.PRODUCTO_ID and l.PRODUCTO_ID = lp.PRODUCTO_ID "
-                    + "AND l.PAIS_ID=? and l.MARCA_ID=? and l.FECHA=last_day(to_date(?,'dd/mm/yyyy')) ";
+                    + "AND l.PAIS_ID=? and l.MARCA_ID=? ";
+            System.out.println("query "+query);
+            System.out.println("countryId "+countryId);
+            System.out.println("brandId "+brandId);
             pst = getConnection().prepareStatement(query);
             pst.setInt(1, countryId);
             pst.setInt(2, brandId);
-            pst.setString(3, Constant.SDF_ddMMyyyy.format(fecha));
+//            pst.setString(3, Constant.SDF_ddMMyyyy.format(fecha));
             ResultSet rst = pst.executeQuery();
-            ComInventarioFisico inv = new ComInventarioFisico();
-            while (rst.next()) {                
-                inv.setNumero(rst.getInt(1));
-                inv.setProductoNombre(rst.getString(2));
-                inv.setPresentacion(rst.getString(3));
-                inv.setPrecio(rst.getDouble(4));
-                inv.setInv_final(rst.getDouble(5));
+            ComInventarioFisico inv;
+            while (rst.next()) {    
+                inv = new ComInventarioFisico(rst.getInt(7), rst.getInt(1), rst.getDouble(5),rst.getString(2), rst.getString(3), rst.getDouble(4));
                 result.add(inv);
             }
         } catch (Exception exc) {

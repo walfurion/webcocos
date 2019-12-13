@@ -37,4 +37,6 @@
     
 
     
+
+    <inherits name="com.vaadin.addon.responsive.ResponsiveWidgetSet" />
 </module>

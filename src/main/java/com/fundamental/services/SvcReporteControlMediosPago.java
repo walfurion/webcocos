@@ -79,6 +79,10 @@ public class SvcReporteControlMediosPago extends Dao {
     }
 
     public void generar_datacrt(Date fecha_ini, Date fecha_fin, int estaciones, String paisid) throws SQLException {
+        System.out.println("fecha ini " + fecha_ini);
+        System.out.println("fecha fin " + fecha_fin);
+        System.out.println("estacion " + estaciones);
+        System.out.println("paisid " + paisid);
         String query = "{call rep (?,?,?,?)}";
         CallableStatement cst = getConnection().prepareCall(query);
 String sfecha_ini = Constant.SDF_ddMMyyyy.format(fecha_ini);

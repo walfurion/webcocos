@@ -48,7 +48,10 @@ public class Producto {
         this.presentacion = presentacion;
     }
 
-    
+    public Producto(Integer productoId, String nombre) {
+        this.productoId = productoId;
+        this.nombre = nombre;
+    }
 
     public Producto(Integer productoId, String nombre, String codigo, Integer tipoId, Integer ordenPos, String estado, Integer codigoNumerico, String presentacion, String codigoBarras, Integer idMarca, String codigoEnvoy, String sku) {
         this.productoId = productoId;

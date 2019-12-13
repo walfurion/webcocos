@@ -5,13 +5,19 @@
  */
 package com.sisintegrados.view.form;
 
+import com.fundamental.model.Cliente;
+import com.fundamental.model.Mediopago;
 import com.fundamental.model.Utils;
-import com.fundamental.services.SvcTarjetaCredito;
+import com.fundamental.model.dto.DtoProducto;
+import com.fundamental.services.SvcCuadre;
+import com.fundamental.services.SvcMedioPago;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
-import com.sisintegrados.generic.bean.GenericTarjeta;
-import com.sisintegrados.generic.bean.Tarjeta;
+import com.sisintegrados.generic.bean.DepositoDet;
+import com.sisintegrados.generic.bean.GenericDepositoDet;
+import com.sisintegrados.generic.bean.GenericMedioPago;
 import com.sisintegrados.generic.bean.Usuario;
+import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItemContainer;
@@ -36,12 +42,13 @@ import com.vaadin.ui.themes.ValoTheme;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import org.vaadin.maddon.ListContainer;
 
 /**
  *
- * @author Allan G.
+ * @author Jorge
  */
-public class FormTarjetasCredito extends Window {
+public class FormDetalleDeposito extends Window {
 
     static final DecimalFormat numberFmt = new DecimalFormat("### ###,##0.00;-#");
     static final DecimalFormat numberFmt3D = new DecimalFormat("### ###,##0.000;-#");
@@ -51,21 +58,27 @@ public class FormTarjetasCredito extends Window {
     Button btnasignar = new Button();
     Button btnguardar = new Button();
     Usuario usuario = VaadinSession.getCurrent().getAttribute(Usuario.class);
-    Table tblCreditCard;
-    BeanItemContainer<Tarjeta> ContCreditC = new BeanItemContainer<Tarjeta>(Tarjeta.class);
-    BeanContainer<Integer, GenericTarjeta> bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
+    Table tblDeposito; //tblDeposito
+    BeanItemContainer<GenericMedioPago> ContMedioPago = new BeanItemContainer<GenericMedioPago>(GenericMedioPago.class);
+    BeanContainer<Integer, GenericDepositoDet> bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
     Utils utils = new Utils();
-    SvcTarjetaCredito dao = new SvcTarjetaCredito();
+    SvcMedioPago dao = new SvcMedioPago();
     Button btnAddCreditC;
     double tmpDouble;
+    double tmpDoubleDolar;
+    double tmpDoubleOther;
     String currencySymbol;
-    List<GenericTarjeta> listTarjeta = new ArrayList();
+    List<GenericDepositoDet> listTarjeta = new ArrayList();
     Integer idpais;
+    Integer idestacion;
 
-    public FormTarjetasCredito(String currencySymbol, BeanContainer<Integer, GenericTarjeta> bcrCreditC, Integer idpais) {
-        this.bcrCreditC = bcrCreditC;
+    public FormDetalleDeposito(String currencySymbol, BeanContainer<Integer, GenericDepositoDet> bcrDeposito, Integer idpais, Integer idestacion) {
+        //public FormDetalleDeposito(String currencySymbol, Integer idpais, Integer idestacion) {
+        this.bcrDeposito = bcrDeposito;
         this.currencySymbol = currencySymbol;
         this.idpais = idpais;
+        this.idestacion = idestacion;
+
         addStyleName(Constant.stylePopUps);
         Responsive.makeResponsive(this);
         setModal(true);
@@ -85,8 +98,8 @@ public class FormTarjetasCredito extends Window {
         detailsWrapper.addStyleName(ValoTheme.TABSHEET_CENTERED_TABS);
         content.addComponent(detailsWrapper);
         content.setExpandRatio(detailsWrapper, 1f);
-//        ContCreditC = new BeanItemContainer<Tarjeta>(Tarjeta.class);
-//        ContCreditC.addAll(dao.getTarjetas());
+//        ContMedioPago = new BeanItemContainer<Tarjeta>(Tarjeta.class);
+//        ContMedioPago.addAll(dao.getTarjetas());
         detailsWrapper.addComponent(buildFields());
         content.addComponent(buildButtons());
     }
@@ -96,10 +109,10 @@ public class FormTarjetasCredito extends Window {
         btnasignar.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnasignar.addStyleName(ValoTheme.BUTTON_SMALL);
         btnasignar.addClickListener((Button.ClickListener) event -> {
-            GenericTarjeta genericTarjeta = new GenericTarjeta(utils.getRandomNumberInRange(1, 1000), null, null, null);
+            GenericDepositoDet genericTarjeta = new GenericDepositoDet(utils.getRandomNumberInRange(1, 1000), null, null, null, null);
             genericTarjeta.setMonto(0D);
             listTarjeta.add(genericTarjeta);
-            bcrCreditC.addAll(listTarjeta);
+            bcrDeposito.addAll(listTarjeta);
         });
         btnasignar.focus();
 
@@ -108,10 +121,12 @@ public class FormTarjetasCredito extends Window {
         btnguardar.addStyleName(ValoTheme.BUTTON_FRIENDLY);
         btnguardar.addStyleName(ValoTheme.BUTTON_SMALL);
         btnguardar.addClickListener((Button.ClickListener) event -> {
-            if (bcrCreditC.size() <= 0) {
-                bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);;
-                VaadinSession.getCurrent().setAttribute("detalleTarjetaCredito", bcrCreditC);
-                VaadinSession.getCurrent().setAttribute("totalTarjetaCredito", 0.00);
+            if (bcrDeposito.size() <= 0) {
+                System.out.println("ingresa a bcrdep menor de 0");
+                bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
+                VaadinSession.getCurrent().setAttribute("detalleDeposito", bcrDeposito);
+                VaadinSession.getCurrent().setAttribute("totalDolar", 0.00);
+                VaadinSession.getCurrent().setAttribute("totalOtro", 0.00);
             } else {
                 updateTableFooterCreditCard();
             }
@@ -129,32 +144,31 @@ public class FormTarjetasCredito extends Window {
 
     private Component buildFields() {
         HorizontalLayout hl = new HorizontalLayout();
-        hl.setCaption("Tarjetas de credito");
+        hl.setCaption("Detalle de Depósitos");
         hl.setIcon(FontAwesome.FLAG);
         hl.setSpacing(true);
         buildTableCreditCard();
-        hl.addComponent(tblCreditCard);
+        hl.addComponent(tblDeposito);
         return hl;
     }
 
     public void buildTableCreditCard() {
-        bcrCreditC.setBeanIdProperty("idGenerico");
-        tblCreditCard = new Table();
-        tblCreditCard.setContainerDataSource(bcrCreditC);
-        tblCreditCard.setWidth(650f, Unit.PIXELS);
-        tblCreditCard.setHeight(335f, Unit.PIXELS);
+        bcrDeposito.setBeanIdProperty("idGenerico");
+        tblDeposito = new Table();
+        tblDeposito.setContainerDataSource(bcrDeposito);
+        tblDeposito.setWidth(650f, Unit.PIXELS);
+        tblDeposito.setHeight(335f, Unit.PIXELS);
 
-        tblCreditCard.addStyleName(ValoTheme.TABLE_BORDERLESS);
-        tblCreditCard.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
-        tblCreditCard.setImmediate(true);
-        tblCreditCard.addGeneratedColumn("colTarjeta", new Table.ColumnGenerator() {
+        tblDeposito.addStyleName(ValoTheme.TABLE_BORDERLESS);
+        tblDeposito.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
+        tblDeposito.setImmediate(true);
+        tblDeposito.addGeneratedColumn("colMedioPago", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("tarjeta");  //Atributo del bean
-                ContCreditC = new BeanItemContainer<Tarjeta>(Tarjeta.class);
-                ContCreditC.addAll(dao.getTarjetas(idpais));
-                //ComboBox cmbTarjeta = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, ContCreditC);
-                ComboBox cmbTarjeta = new ComboBox(null, ContCreditC);
+                Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
+                ContMedioPago = new BeanItemContainer<GenericMedioPago>(GenericMedioPago.class);
+                ContMedioPago.addAll(dao.getMedioPagoByCountry(idpais));
+                ComboBox cmbTarjeta = new ComboBox(null, ContMedioPago);
                 cmbTarjeta.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
                 cmbTarjeta.setItemCaptionPropertyId("nombre");
                 cmbTarjeta.setNullSelectionAllowed(false);
@@ -165,7 +179,7 @@ public class FormTarjetasCredito extends Window {
                 return cmbTarjeta;
             }
         });
-        tblCreditCard.addGeneratedColumn("colMonto", new Table.ColumnGenerator() {
+        tblDeposito.addGeneratedColumn("colMonto", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("monto");  //Atributo del bean
@@ -184,10 +198,10 @@ public class FormTarjetasCredito extends Window {
                 return nfd;
             }
         });
-        tblCreditCard.addGeneratedColumn("colLote", new Table.ColumnGenerator() {
+        tblDeposito.addGeneratedColumn("colObservaciones", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("lote");  //Atributo del bean
+                Property pro = source.getItem(itemId).getItemProperty("observaciones");  //Atributo del bean
                 final TextField nfd = new TextField(pro);
                 nfd.setNullRepresentation("");
                 nfd.setWidth("85px");
@@ -202,7 +216,25 @@ public class FormTarjetasCredito extends Window {
                 return nfd;
             }
         });
-        tblCreditCard.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
+        tblDeposito.addGeneratedColumn("colBoleta", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("numeroboleta");  //Atributo del bean
+                final TextField nfd = new TextField(pro);
+                nfd.setNullRepresentation("");
+                nfd.setWidth("85px");
+                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+                nfd.addStyleName("align-right");
+                nfd.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+                        updateTableFooterCreditCard();
+                    }
+                });
+                return nfd;
+            }
+        });
+        tblDeposito.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Button btnDelete = new Button(FontAwesome.TRASH);
@@ -211,7 +243,7 @@ public class FormTarjetasCredito extends Window {
                 btnDelete.addClickListener(new Button.ClickListener() {
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
-                        bcrCreditC.removeItem(itemId);
+                        bcrDeposito.removeItem(itemId);
 //                        List<DtoProducto> tempList = new ArrayList();
 //                        for (DtoProducto deo : listTarjeta) {
 //                            if (deo.getProductoId() != itemId) {
@@ -219,27 +251,43 @@ public class FormTarjetasCredito extends Window {
 //                            }
 //                        }
 //                        listTarjeta = tempList;
-                        tblCreditCard.refreshRowCache();
+                        tblDeposito.refreshRowCache();
                         updateTableFooterCreditCard();
                     }
                 });
                 return btnDelete;
             }
         });
-        tblCreditCard.setVisibleColumns(new Object[]{"colTarjeta", "colLote", "colMonto", "colDelete"});
-        tblCreditCard.setColumnHeaders(new String[]{"Tarjeta", "Lote", "Monto", "Borrar"});
-        tblCreditCard.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.CENTER);
+        tblDeposito.setVisibleColumns(new Object[]{"colMedioPago", "colMonto", "colObservaciones", "colBoleta", "colDelete"});
+        tblDeposito.setColumnHeaders(new String[]{"Medio Pago", "Monto", "Observaciones", "Boleta", "Borrar"});
+        tblDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.CENTER, Table.Align.CENTER);
     }
 
     public void updateTableFooterCreditCard() {
         tmpDouble = 0;
-        for (Integer itemId : bcrCreditC.getItemIds()) {
-            tmpDouble += bcrCreditC.getItem(itemId).getBean().getMonto();
+        tmpDoubleDolar = 0;
+        tmpDoubleOther = 0;
+        for (Integer itemId : bcrDeposito.getItemIds()) {
+            tmpDouble += bcrDeposito.getItem(itemId).getBean().getMonto();
+            if (bcrDeposito.getItem(itemId).getBean().getMediopago().getNombre().contains("Efectivo USD")) {
+                tmpDoubleDolar += bcrDeposito.getItem(itemId).getBean().getMonto();
+            } else {
+                tmpDoubleOther += bcrDeposito.getItem(itemId).getBean().getMonto();
+            }
+
         }
-        tblCreditCard.setFooterVisible(true);
-        tblCreditCard.setColumnFooter("colCliente", "Total:");
-        tblCreditCard.setColumnFooter("colMonto", currencySymbol + numberFmt.format(tmpDouble).trim());
-        VaadinSession.getCurrent().setAttribute("detalleTarjetaCredito", bcrCreditC);
-        VaadinSession.getCurrent().setAttribute("totalTarjetaCredito", tmpDouble);
+        
+        System.out.println("total dolar  " + tmpDoubleDolar);
+        System.out.println("total otros  " + tmpDoubleOther);
+        
+
+        tblDeposito.setFooterVisible(true);
+        tblDeposito.setColumnFooter("colMedioPago", "Total:");
+        tblDeposito.setColumnFooter("colMonto", currencySymbol + numberFmt.format(tmpDouble).trim());
+        
+        VaadinSession.getCurrent().setAttribute("detalleDeposito", bcrDeposito);
+        VaadinSession.getCurrent().setAttribute("totalDolar", tmpDoubleDolar);
+        VaadinSession.getCurrent().setAttribute("totalOtro", tmpDoubleOther);
+        VaadinSession.getCurrent().setAttribute("total", tmpDouble);
     }
 }

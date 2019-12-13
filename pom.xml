@@ -247,6 +247,12 @@
             <artifactId>exporter</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin.addon.responsive</groupId>
+            <artifactId>responsive</artifactId>
+            <version>1.0.0.alpha4</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <build>
