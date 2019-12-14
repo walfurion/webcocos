@@ -11,6 +11,10 @@ import com.fundamental.model.Utils;
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcGeneral;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.view.form.FormUploadTarjetas;
+import com.vaadin.addon.tableexport.DefaultTableHolder;
+import com.vaadin.addon.tableexport.ExcelExport;
+import com.vaadin.addon.tableexport.TableHolder;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
@@ -22,6 +26,7 @@ import com.vaadin.demo.dashboard.view.DashboardViewType;
 import com.vaadin.event.FieldEvents;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.ShortcutListener;
+
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -64,13 +69,22 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.FileInputStream;
 import java.util.Iterator;
 import java.io.IOException;
+import org.vaadin.addons.excelexporter.ExportExcelComponentConfiguration;
+import org.vaadin.addons.excelexporter.ExportExcelConfiguration;
+import org.vaadin.addons.excelexporter.ExportExcelSheetConfiguration;
+import org.vaadin.addons.excelexporter.ExportToExcelUtility;
+import org.vaadin.addons.excelexporter.ExportType;
+import org.vaadin.addons.excelexporter.builder.ExportExcelComponentConfigurationBuilder;
+import org.vaadin.addons.excelexporter.builder.ExportExcelConfigurationBuilder;
+import org.vaadin.addons.excelexporter.builder.ExportExcelSheetConfigurationBuilder;
 
 /**
  * @author Henry Barrientos
  */
 public class MntLubricantPrice extends Panel implements View {
+
     Acceso acceso = new Acceso();
-    Button btnSave, btnAdd, btnFilterClear;
+    Button btnSave, btnAdd, btnFilterClear, btnExcel, btnCarga;
     TextField tfdFilter;
     BeanContainer<Integer, Lubricanteprecio> bcrProduct = new BeanContainer<Integer, Lubricanteprecio>(Lubricanteprecio.class);
     Table tblProduct = new Table() {
@@ -116,8 +130,7 @@ public class MntLubricantPrice extends Panel implements View {
     private final VerticalLayout vlRoot;
     private Utils utils = new Utils();
     private Usuario user;
-    
-            
+    FormUploadTarjetas frmUploadTarjetas;
 
     public MntLubricantPrice() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -142,7 +155,6 @@ public class MntLubricantPrice extends Panel implements View {
         buildControls();
         buildTableContent();
         buildButtons();
-        
 
         CssLayout filtering = new CssLayout();
         filtering.addComponents(tfdFilter, btnFilterClear);
@@ -162,21 +174,24 @@ public class MntLubricantPrice extends Panel implements View {
         vlLeft.setComponentAlignment(btnAdd, Alignment.MIDDLE_CENTER);
         Responsive.makeResponsive(vlLeft);
 
-        VerticalLayout vlRight = new VerticalLayout(cbxCountry, cbxBrand, cbxProduct, dfdStart, dfdEnd, tfdPrice, btnSave);
+        VerticalLayout vlRight = new VerticalLayout(cbxCountry, cbxBrand, cbxProduct, dfdStart, dfdEnd, tfdPrice, btnSave, btnExcel, btnCarga);
         vlRight.setSpacing(true);
         vlRight.setSizeUndefined();
         vlRight.setId("vlRight");
         vlRight.setComponentAlignment(btnSave, Alignment.MIDDLE_CENTER);
+        vlRight.setComponentAlignment(btnExcel, Alignment.MIDDLE_CENTER);
+        vlRight.setComponentAlignment(btnCarga, Alignment.MIDDLE_CENTER);
+        
         Responsive.makeResponsive(vlRight);
 
-        VerticalLayout vlUpload = new VerticalLayout(upload);
-        vlUpload.setSpacing(true);
-        vlUpload.setSizeUndefined();
-        vlUpload.setId("vlUpload");
-        vlUpload.setComponentAlignment(upload, Alignment.MIDDLE_CENTER);
-        Responsive.makeResponsive(vlUpload);
+//        VerticalLayout vlUpload = new VerticalLayout(upload);
+//        vlUpload.setSpacing(true);
+//        vlUpload.setSizeUndefined();
+//        vlUpload.setId("vlUpload");
+//        vlUpload.setComponentAlignment(upload, Alignment.MIDDLE_CENTER);
+//        Responsive.makeResponsive(vlUpload);
 
-        CssLayout cltTables = new CssLayout(utils.vlContainer(vlLeft), utils.vlContainer(vlRight), utils.vlContainer(vlUpload));
+        CssLayout cltTables = new CssLayout(utils.vlContainer(vlLeft), utils.vlContainer(vlRight));
         cltTables.setId("cltTables");
         cltTables.setSizeUndefined();
         Responsive.makeResponsive(cltTables);
@@ -297,36 +312,36 @@ public class MntLubricantPrice extends Panel implements View {
             }
         });
 
-        upload = new Upload("Selección de archivo:", new Upload.Receiver() {
-            @Override
-            public OutputStream receiveUpload(String filename, String mimeType) {
-                if (filename.isEmpty() || !filename.toUpperCase().contains(".XLSX")) {
-                    Notification.show("Debe seleccionar un archivo y ser de formato .xlsx", Notification.Type.WARNING_MESSAGE);
-                    return null;
-                }
-                try {
-                    tempFile = File.createTempFile("tempCocoFile", ".xlsx");
-                    return new FileOutputStream(tempFile);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        });
-        upload.addFinishedListener(new Upload.FinishedListener() {
-            @Override
-            public void uploadFinished(Upload.FinishedEvent finishedEvent) {
-                try {
-                    if (tempFile != null && tempFile.exists()) {
-                        XlsxReader(tempFile, true);
-                    }
-                } catch (Exception ex) {
-                    Notification.show("Fila: " + line + "; " + ex.getMessage(), Notification.Type.ERROR_MESSAGE);
-                }
-            }
-        });
-        upload.setButtonCaption("Cargar");
-        
+//        upload = new Upload("Selección de archivo:", new Upload.Receiver() {
+//            @Override
+//            public OutputStream receiveUpload(String filename, String mimeType) {
+//                if (filename.isEmpty() || !filename.toUpperCase().contains(".XLSX")) {
+//                    Notification.show("Debe seleccionar un archivo y ser de formato .xlsx", Notification.Type.WARNING_MESSAGE);
+//                    return null;
+//                }
+//                try {
+//                    tempFile = File.createTempFile("tempCocoFile", ".xlsx");
+//                    return new FileOutputStream(tempFile);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    return null;
+//                }
+//            }
+//        });
+//        upload.addFinishedListener(new Upload.FinishedListener() {
+//            @Override
+//            public void uploadFinished(Upload.FinishedEvent finishedEvent) {
+//                try {
+//                    if (tempFile != null && tempFile.exists()) {
+//                        XlsxReader(tempFile, true);
+//                    }
+//                } catch (Exception ex) {
+//                    Notification.show("Fila: " + line + "; " + ex.getMessage(), Notification.Type.ERROR_MESSAGE);
+//                }
+//            }
+//        });
+//        upload.setButtonCaption("Cargar");
+
         //Importante
 //        binder.bindMemberFields(this);
 //        binder.setItemDataSource(lubricante);
@@ -349,11 +364,11 @@ public class MntLubricantPrice extends Panel implements View {
                     btnSave.setEnabled(true);
                     action = Dao.ACTION_UPDATE;
                     lubricante = bcrProduct.getItem(tblProduct.getValue()).getBean();
-                    lubricante_log = (Lubricanteprecio)lubricante.clone();
-                    if(lubricante_log.getModificadoEl()==null){
+                    lubricante_log = (Lubricanteprecio) lubricante.clone();
+                    if (lubricante_log.getModificadoEl() == null) {
                         lubricante_log.setModificadoEl(lubricante.getCreadoEl());
                     }
-                    if(lubricante_log.getModificadoPor()==null || !lubricante_log.getModificadoPor().trim().equals("")){
+                    if (lubricante_log.getModificadoPor() == null || !lubricante_log.getModificadoPor().trim().equals("")) {
                         lubricante_log.setModificadoPor(lubricante.getCreadoPor());
                     }
                     allLubricants.add(lubricante.getProducto());
@@ -361,8 +376,8 @@ public class MntLubricantPrice extends Panel implements View {
                     cbxProduct.removeAllItems();
                     cbxProduct.addItem(lubricante.getProducto());
                     cbxProduct.select(lubricante.getProducto());
-                    
-                    System.out.println("lubricante_log "+lubricante_log.toString());
+
+                    System.out.println("lubricante_log " + lubricante_log.toString());
                     binder.setItemDataSource(bcrProduct.getItem(tblProduct.getValue()));
                 }
             }
@@ -373,20 +388,20 @@ public class MntLubricantPrice extends Panel implements View {
                 Property pro = source.getItem(itemId).getItemProperty("lubricanteprecio");  //Atributo del bean
                 Property pnom = source.getItem(itemId).getItemProperty("productoNombre");  //Atributo del bean
                 int id = (int) pro.getValue();
-                  Button btnHist = new Button("Historial");
-                  btnHist.setStyleName(BaseTheme.BUTTON_LINK);
-                  btnHist.addClickListener(new Button.ClickListener() {
+                Button btnHist = new Button("Historial");
+                btnHist.setStyleName(BaseTheme.BUTTON_LINK);
+                btnHist.addClickListener(new Button.ClickListener() {
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
-                        getHistory(id,pnom.getValue().toString());
+                        getHistory(id, pnom.getValue().toString());
                     }
                 });
-                  return btnHist;
+                return btnHist;
             }
         });
-        tblProduct.setVisibleColumns(new Object[]{"paisNombre", "marcaNombre", "productoNombre", "fechaInicio", "fechaFin", "precio","history"});
-        tblProduct.setColumnHeaders(new String[]{"Pais", "Marca", "Producto", "Inicio", "Fin", "Precio","Historial"});
-        tblProduct.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT,Table.Align.CENTER);
+        tblProduct.setVisibleColumns(new Object[]{"paisNombre", "marcaNombre", "productoNombre", "fechaInicio", "fechaFin", "precio", "history"});
+        tblProduct.setColumnHeaders(new String[]{"Pais", "Marca", "Producto", "Inicio", "Fin", "Precio", "Historial"});
+        tblProduct.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.CENTER);
     }
 
     private void buildButtons() {
@@ -411,9 +426,9 @@ public class MntLubricantPrice extends Panel implements View {
             @Override
             public void buttonClick(Button.ClickEvent event) {
                 if (!cbxCountry.isValid() || !cbxBrand.isValid() || !cbxProduct.isValid()
-                        || !dfdStart.isValid() 
+                        || !dfdStart.isValid()
                         || !dfdEnd.isValid()
-                        || tfdPrice.getValue() == null 
+                        || tfdPrice.getValue() == null
                         || !tfdPrice.isValid()) {
                     Notification.show("Los campos marcados son requeridos.", Notification.Type.ERROR_MESSAGE);
                     return;
@@ -423,15 +438,15 @@ public class MntLubricantPrice extends Panel implements View {
                 } catch (Exception ex) {
                     Logger.getLogger(MntLubricantPrice.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                lubricante.setPaisId(((Pais)cbxCountry.getValue()).getPaisId());
-                lubricante.setProductoId(((Producto)cbxProduct.getValue()).getProductoId());
+                lubricante.setPaisId(((Pais) cbxCountry.getValue()).getPaisId());
+                lubricante.setProductoId(((Producto) cbxProduct.getValue()).getProductoId());
                 lubricante.setCreadoPor(user.getUsername());
                 lubricante.setModificadoPor(user.getUsername());
 //                lubricante_log.setModificadoPor(user.getUsername());
                 SvcGeneral service = new SvcGeneral();
 //                lubricante = service.doActionLubprecio(action, lubricante);
-                
-                lubricante = service.doActionLubprecio(action, lubricante,lubricante_log);
+
+                lubricante = service.doActionLubprecio(action, lubricante, lubricante_log);
                 service.closeConnections();
                 if (lubricante.getLubricanteprecio() > 0) {
                     Notification notif = new Notification("¡Exito!", "La acción se ha ejecutado correctamente.", Notification.Type.HUMANIZED_MESSAGE);
@@ -466,7 +481,31 @@ public class MntLubricantPrice extends Panel implements View {
 //                }
             }
         });
-        
+
+        btnExcel = utils.buildButton("Exportar", FontAwesome.TABLE, ValoTheme.BUTTON_FRIENDLY);
+        btnExcel.setDescription("Exportar a Excel");
+        btnExcel.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+                if (tblProduct.isVisible()) {
+                    generaExcel().export();
+                }
+            }
+        });
+
+        btnCarga = utils.buildButton("Cargar", FontAwesome.UPLOAD, ValoTheme.BUTTON_FRIENDLY);
+        btnCarga.setDescription("Cargar desde Excel");
+        btnCarga.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+                Marca m = (Marca) cbxBrand.getValue();
+                Pais p = (Pais) cbxCountry.getValue();
+                frmUploadTarjetas = new FormUploadTarjetas(p, m);
+                getUI().addWindow(frmUploadTarjetas);
+                frmUploadTarjetas.focus();
+            }
+        });
+
     }
 
     private boolean filterByProperty(final String prop, final Item item, final String text) {
@@ -534,10 +573,12 @@ public class MntLubricantPrice extends Panel implements View {
         dao.closeConnections();
         btnAdd.setEnabled(acceso.isAgregar());
         btnSave.setEnabled(acceso.isCambiar());
+        btnExcel.setEnabled(acceso.isAgregar());
+        btnCarga.setEnabled(acceso.isAgregar());
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    public void getHistory(int id,String descproduct){
+
+    public void getHistory(int id, String descproduct) {
         System.out.println("getHItory");
         VerticalLayout v = new VerticalLayout();
         v.setSizeFull();
@@ -554,7 +595,7 @@ public class MntLubricantPrice extends Panel implements View {
         bcrProductH.removeAllItems();
         bcrProductH.addAll(new ArrayList());
         bcrProductH.addAll(listProductsH);
-        
+
         Table tblProductH = new Table() {
             @Override
             protected String formatPropertyValue(Object rowId, Object colId, Property property) {
@@ -572,20 +613,44 @@ public class MntLubricantPrice extends Panel implements View {
         tblProductH.addStyleName(ValoTheme.TABLE_COMPACT);
         tblProductH.addStyleName(ValoTheme.TABLE_SMALL);
         tblProductH.setSizeUndefined();
-        tblProductH.setVisibleColumns(new Object[]{"fechaInicio", "fechaFin", "precio","modificadoPor","modificadoEl"});
-        tblProductH.setColumnHeaders(new String[]{"Inicio", "Fin", "Precio","Modificado por","Modificado el"});
+        tblProductH.setVisibleColumns(new Object[]{"fechaInicio", "fechaFin", "precio", "modificadoPor", "modificadoEl"});
+        tblProductH.setColumnHeaders(new String[]{"Inicio", "Fin", "Precio", "Modificado por", "Modificado el"});
         tblProductH.setColumnAlignments(Table.Align.CENTER, Table.Align.CENTER, Table.Align.LEFT, Table.Align.CENTER, Table.Align.CENTER);
         v.addComponent(tblProductH);
         Window window = new Window("Historico");
         window.setWidth(500, Unit.PIXELS);
-        window.setHeight(500,Unit.PIXELS);
+        window.setHeight(500, Unit.PIXELS);
         window.center();
         window.setContent(v);
         this.getUI().getUI().addWindow(window);
     }
-    public void enabledField(boolean enabled){
+
+    public void enabledField(boolean enabled) {
         cbxCountry.setEnabled(enabled);
         cbxProduct.setEnabled(enabled);
         cbxBrand.setEnabled(enabled);
     }
+
+    public ExcelExport generaExcel() {
+        TableHolder tableHolder = new DefaultTableHolder(tblProduct);
+        ExcelExport excelExport = new ExcelExport(tableHolder);
+        excelExport.excludeCollapsedColumns();
+        excelExport.setReportTitle("LubricantesPrecio");
+        excelExport.setExportFileName("LubricantesPrecio" + ".xls");
+        return excelExport;
+    }
+
+    private void uploadTarjetas() {
+        if (tblProduct.isVisible()) {
+            Pais pais = (Pais) cbxCountry.getValue();
+            Marca marca = (Marca) cbxBrand.getValue();
+            frmUploadTarjetas = new FormUploadTarjetas(pais, marca);
+            frmUploadTarjetas.addCloseListener((e) -> {
+                //buscar.click();
+            });
+            getUI().addWindow(frmUploadTarjetas);
+            frmUploadTarjetas.focus();
+        }
+    }
+
 }
