@@ -1151,6 +1151,8 @@ public class PrCierreDia extends Panel implements View {
                                     inventario.setVarianza(bcrInventario.getItem(id).getBean().getVarianza());
                                     inventario.setCompartimiento(bcrInventario.getItem(id).getBean().getCompartimiento());
                                     inventario.setGalonesCisterna(bcrInventario.getItem(id).getBean().getGalonesCisterna());
+                                    inventario.setVentas(bcrInventario.getItem(id).getBean().getVentasCons());
+                                    inventario.setCalibracion(bcrInventario.getItem(id).getBean().getCalibracion());
 //                                    svcTC.doActionInventario( (invNuevo ? Dao.ACTION_ADD : Dao.ACTION_UPDATE), 
                                     inventario.setVolFacturado(id);
                                     svcTC.doActionInventario((inventario.getEsNuevo() ? Dao.ACTION_ADD : Dao.ACTION_UPDATE),inventario);

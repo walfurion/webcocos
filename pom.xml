@@ -258,6 +258,29 @@
             <artifactId>excel-uploader</artifactId>
             <version>8.1.0</version>
         </dependency>
+<!--        <dependency>
+            <groupId>com.vaadin.addon</groupId>
+            <artifactId>tableexport-for-vaadin</artifactId>
+            <version>1.6.2</version>
+        </dependency>-->
+<!--        <dependency>
+            <groupId>com.vaadin.addon</groupId>
+            <artifactId>tableexport-for-vaadin</artifactId>
+            <version>1.6.2</version>
+            <type>jar</type>
+        </dependency>-->
+        <dependency>
+            <groupId>org.vaadin.addon</groupId>
+            <artifactId>tableexport-for-vaadin</artifactId>
+            <version>1.6.0</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.vaadin.addons</groupId>
+            <artifactId>jain-i18N</artifactId>
+            <version>1.1.9</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <build>
