@@ -25,21 +25,25 @@ public class SvcComVenLubricantes extends Dao{
         ResultSet rst = null;        
         Calendar ayer = Calendar.getInstance();
         ayer.setTime(fecha);
-        ayer.add(Calendar.DATE, -1);
-        try {                        
+        ayer.add(Calendar.DATE, -1);        
+        try {   
+            String parametro = "";
+            System.out.println("productId "+productId);
+            if(productId > 0){
+                parametro = "and p.PRODUCTO_ID = "+productId+"";
+            }
             query = "SELECT p.producto_id,p.nombre,m.id_marca, c.pais_id, c.PAIS_ID "
                     + "FROM lubricanteprecio l, pais c, producto p, marca m "
                     + "WHERE l.pais_id = c.pais_id AND p.id_marca = m.id_marca and p.TIPO_ID=2 "
-                    + "AND l.producto_id = p.producto_id and p.ESTADO='A' AND l.pais_id = ? "
-                    + "AND p.id_marca = ? and l.producto_id= ? ";
+                    + "AND l.producto_id = p.producto_id and p.ESTADO='A' AND l.pais_id = "+countryId+" "
+                    + "AND p.id_marca = "+brandId+ " "+parametro+" ";
+            System.out.println("query "+query);
             pst = getConnection().prepareStatement(query);
-            pst.setInt(1, countryId);
-            pst.setInt(2, brandId);
-            pst.setInt(3, productId);
             rst = pst.executeQuery();
             Double valFinal = valorFinal(countryId, brandId, productId, ayer.getTime());
-            ComVenLubricantes lub = new ComVenLubricantes();
-            while (rst.next()) {                
+            ComVenLubricantes lub;
+            while (rst.next()) {    
+                lub = new ComVenLubricantes(rst.getInt(3), rst.getInt(1), rst.getInt(4), fecha, valFinal, rst.getString(2));
                 lub.setProductoId(rst.getInt(1));
                 lub.setProductoNombre(rst.getString(2));
                 lub.setMarcaId(rst.getInt(3));
@@ -59,28 +63,23 @@ public class SvcComVenLubricantes extends Dao{
     public List<ComVenLubricantes> getComVenLubAnterior(int countryId, int brandId, int productId, Date fecha) {
         List<ComVenLubricantes> result = new ArrayList();
         try {
+            String parametro = "";
+            System.out.println("productId "+productId);
+            if(productId > 0){
+                parametro = "and p.PRODUCTO_ID = "+productId+"";
+            }
             query = "select l.PRODUCTO_ID, p.NOMBRE, l.FECHA, "
                     + "l.INV_INICIAL, l.COMPRA, l.VENTA, l.INV_FINAL, l.PAIS_ID "
                     + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p "
-                    + "where l.PRODUCTO_ID = p.PRODUCTO_ID "
-                    + "AND l.PAIS_ID=? and l.MARCA_ID=? and l.PRODUCTO_ID=? "
-                    + "and l.FECHA = to_date(?,'dd/mm/yyyy') ";
+                    + "where l.PRODUCTO_ID = p.PRODUCTO_ID "+parametro+" "
+                    + "AND l.PAIS_ID="+countryId+" and l.MARCA_ID="+brandId+" "
+                    + "and l.FECHA = to_date('"+Constant.SDF_ddMMyyyy.format(fecha)+"','dd/mm/yyyy') ";
+            System.out.println("query,.,.,. "+query);
             pst = getConnection().prepareStatement(query);
-            pst.setInt(1, countryId);
-            pst.setInt(2, brandId);
-            pst.setInt(3, productId);
-            pst.setString(4, Constant.SDF_ddMMyyyy.format(fecha));
             ResultSet rst = pst.executeQuery();
-            ComVenLubricantes lub = new ComVenLubricantes();
-            while (rst.next()) {                
-                lub.setProductoId(rst.getInt(1));
-                lub.setProductoNombre(rst.getString(2));
-                lub.setFecha(rst.getDate(3));
-                lub.setInvInicial(rst.getDouble(4));
-                lub.setCompra(rst.getDouble(5));
-                lub.setVenta(rst.getDouble(6));
-                lub.setInvfinal(rst.getDouble(7));
-                lub.setPaisId(rst.getInt(8));
+            ComVenLubricantes lub;
+            while (rst.next()) {
+                lub = new ComVenLubricantes(rst.getInt(1),rst.getInt(8), rst.getDate(3), rst.getDouble(4), rst.getDouble(5), rst.getDouble(6), rst.getDouble(7), rst.getString(2));
                 result.add(lub);
             }
         } catch (Exception exc) {

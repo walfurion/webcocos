@@ -31,4 +31,23 @@ public class ComVenLubricantes {
     private Date modificadoel;
     
     private String productoNombre;
+
+    public ComVenLubricantes(int productoId, int paisId, Date fecha, Double invInicial, Double compra, Double venta, Double invfinal, String productoNombre) {
+        this.productoId = productoId;
+        this.paisId = paisId;
+        this.fecha = fecha;
+        this.invInicial = invInicial;
+        this.compra = compra;
+        this.venta = venta;
+        this.invfinal = invfinal;
+        this.productoNombre = productoNombre;
+    }
+    public ComVenLubricantes(int marcaId, int productoId, int paisId, Date fecha, Double invInicial, String productoNombre) {
+        this.marcaId = marcaId;
+        this.productoId = productoId;
+        this.paisId = paisId;
+        this.fecha = fecha;
+        this.invInicial = invInicial;
+        this.productoNombre = productoNombre;
+    }
 }

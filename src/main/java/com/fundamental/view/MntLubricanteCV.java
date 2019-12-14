@@ -148,7 +148,11 @@ public class MntLubricanteCV extends Panel implements View {
         SvcComVenLubricantes service = new SvcComVenLubricantes();
         int countryId = ((Pais) cmbPais.getValue()).getPaisId();
         int brandId = ((Marca) cmbMarca.getValue()).getIdMarca();
-        int productId = ((Producto) cmbProducto.getValue()).getProductoId();
+        int productId = 0;
+        if(cmbProducto.getValue() != null){
+            productId = ((Producto) cmbProducto.getValue()).getProductoId();
+        }
+        
         int count = service.countLub(productId, cmbFecha.getValue(), countryId);
         List<ComVenLubricantes> lubAnterior = new ArrayList();
         if(count>0){
