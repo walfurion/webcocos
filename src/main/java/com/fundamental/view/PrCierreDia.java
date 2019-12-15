@@ -318,6 +318,9 @@ public class PrCierreDia extends Panel implements View {
         bcrInventario.setBeanIdProperty("idDto");
 
         bcrDeposito.setBeanIdProperty("idGenerico");
+        tfdDriver.setValue("");
+        tfdUnit.setValue("");
+        tfdBill.setValue("");
 
         SvcTurnoCierre service = new SvcTurnoCierre();
 
@@ -731,7 +734,7 @@ public class PrCierreDia extends Panel implements View {
         tableDeposito.setContainerDataSource(bcrDeposito);
         tableDeposito.setVisibleColumns(new Object[]{"mediopago", "numeroboleta","monto"});
         tableDeposito.setColumnHeaders(new String[]{"Nombre", "Número Boleta","Valor"});
-        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT,Table.Align.RIGHT);
+        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT);
         tableDeposito.setHeight(200f, Unit.PIXELS);
         tableDeposito.addStyleName(ValoTheme.TABLE_COMPACT);
         tableDeposito.addStyleName(ValoTheme.TABLE_SMALL);
@@ -1150,7 +1153,8 @@ public class PrCierreDia extends Panel implements View {
                                     inventario.setDiferencia(bcrInventario.getItem(id).getBean().getDiferencia());
                                     inventario.setVarianza(bcrInventario.getItem(id).getBean().getVarianza());
                                     inventario.setCompartimiento(bcrInventario.getItem(id).getBean().getCompartimiento());
-                                    inventario.setGalonesCisterna(bcrInventario.getItem(id).getBean().getGalonesCisterna());
+                                    int galones = bcrInventario.getItem(id).getBean().getGalonesCisterna()==null?0:bcrInventario.getItem(id).getBean().getGalonesCisterna();
+                                    inventario.setGalonesCisterna(galones);
                                     inventario.setVentas(bcrInventario.getItem(id).getBean().getVentasCons());
                                     inventario.setCalibracion(bcrInventario.getItem(id).getBean().getCalibracion());
 //                                    svcTC.doActionInventario( (invNuevo ? Dao.ACTION_ADD : Dao.ACTION_UPDATE), 
