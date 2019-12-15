@@ -352,10 +352,14 @@ public class SvcTurnoCierre extends Dao {
 
             query = "SELECT 'rownum', p.nombre, i.fecha, i.estacion_id, i.producto_id, i.inicial, i.final, i.compras, "
                     + "i.INV_FISICO, i.COMPARTIMIENTO, i.GALONES, t.DESCRIPCION "
-                    + "FROM RECEPCION_INVENTARIO_DETALLE i, producto p,  TANQUE t "
-                    + "WHERE i.producto_id = p.producto_id and t.PRODUCTO_ID=p.PRODUCTO_ID and i.ESTACION_ID=t.ESTACION_ID "
+                    + "FROM RECEPCION_INVENTARIO_DETALLE i, producto p "
+                    + "left join TANQUE t on t.PRODUCTO_ID=p.PRODUCTO_ID "
+                    + "WHERE i.producto_id = p.producto_id "
                     + "AND i.fecha = TO_DATE(?, 'dd/mm/yyyy') AND i.estacion_id = ? "
                     + "ORDER BY p.producto_id";
+//            System.out.println("Inventario "+query);
+//            System.out.println("fecha "+Constant.SDF_ddMMyyyy.format(fecha));
+//            System.out.println("estacion "+estacionId);
             pst = getConnection().prepareStatement(query);
             pst.setString(1, Constant.SDF_ddMMyyyy.format(fecha));
             pst.setInt(2, estacionId);

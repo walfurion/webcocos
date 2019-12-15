@@ -734,7 +734,7 @@ public class PrCierreDia extends Panel implements View {
         tableDeposito.setContainerDataSource(bcrDeposito);
         tableDeposito.setVisibleColumns(new Object[]{"mediopago", "numeroboleta","monto"});
         tableDeposito.setColumnHeaders(new String[]{"Nombre", "Número Boleta","Valor"});
-//        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT);
+        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT,Table.Align.RIGHT);
         tableDeposito.setHeight(200f, Unit.PIXELS);
         tableDeposito.addStyleName(ValoTheme.TABLE_COMPACT);
         tableDeposito.addStyleName(ValoTheme.TABLE_SMALL);
