@@ -1538,6 +1538,9 @@ public class PrReading extends VerticalLayout implements View {
     }
 
     private void onChangeCheckboxBomba(Object itemId, boolean isselected) {
+        System.out.println("item "+itemId);
+        System.out.println("isselected "+isselected);
+        System.out.println("action "+action);
         if (action.equals(Dao.ACTION_UPDATE)) {
             bcrElectronicas.removeAllItems();
             bcrManuales.removeAllItems();

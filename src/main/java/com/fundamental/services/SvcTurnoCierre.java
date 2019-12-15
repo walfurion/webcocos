@@ -352,10 +352,14 @@ public class SvcTurnoCierre extends Dao {
 
             query = "SELECT 'rownum', p.nombre, i.fecha, i.estacion_id, i.producto_id, i.inicial, i.final, i.compras, "
                     + "i.INV_FISICO, i.COMPARTIMIENTO, i.GALONES, t.DESCRIPCION "
-                    + "FROM RECEPCION_INVENTARIO_DETALLE i, producto p,  TANQUE t "
-                    + "WHERE i.producto_id = p.producto_id and t.PRODUCTO_ID=p.PRODUCTO_ID and i.ESTACION_ID=t.ESTACION_ID "
+                    + "FROM RECEPCION_INVENTARIO_DETALLE i, producto p "
+                    + "left join TANQUE t on t.PRODUCTO_ID=p.PRODUCTO_ID "
+                    + "WHERE i.producto_id = p.producto_id "
                     + "AND i.fecha = TO_DATE(?, 'dd/mm/yyyy') AND i.estacion_id = ? "
                     + "ORDER BY p.producto_id";
+//            System.out.println("Inventario "+query);
+//            System.out.println("fecha "+Constant.SDF_ddMMyyyy.format(fecha));
+//            System.out.println("estacion "+estacionId);
             pst = getConnection().prepareStatement(query);
             pst.setString(1, Constant.SDF_ddMMyyyy.format(fecha));
             pst.setInt(2, estacionId);
@@ -406,48 +410,53 @@ public class SvcTurnoCierre extends Dao {
             if (action.equals(Dao.ACTION_ADD)) {
                 query = "INSERT INTO RECEPCION_INVENTARIO_DETALLE (INVRECEPCION_DET_ID,INVRECEPCION_ID, inicial, "
                         + "final, compras, creado_por, creado_persona, creado_el, fecha, estacion_id, producto_id "
-                        + ", inv_fisico, lectura_veeder, diferencia, varianza, compartimiento, vol_facturado, galones) "
+                        + ", inv_fisico, lectura_veeder, diferencia, varianza, compartimiento, vol_facturado, galones, ventas, calibracion) "
                         + "VALUES (INVENTARIO_DETALLE_SEQ.NEXTVAL,"+idInv+",?, ?, ?, ?, ?, SYSDATE, ?, ?, ? "
-                        + ", ?, ?, ?, ?, ?, ?, ?)";
+                        + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 pst = getConnection().prepareStatement(query);
                 pst.setDouble(1, inventario.getInicial());
                 pst.setDouble(2, inventario.getFinall());
-                pst.setObject(3, inventario.getCompras());
+                pst.setDouble(3, inventario.getCompras());
                 pst.setString(4, inventario.getCreadoPor());
                 pst.setString(5, inventario.getCreadoPersona());
                 pst.setDate(6, (java.sql.Date) inventario.getFecha());
                 pst.setInt(7, inventario.getEstacionId());
                 pst.setInt(8, inventario.getProductoId());
-                pst.setObject(9, inventario.getInventarioFisico());
-                pst.setObject(10, inventario.getLecturaVeederRoot());
-                pst.setObject(11, inventario.getDiferencia());
-                pst.setObject(12, inventario.getVarianza());
-                pst.setObject(13, inventario.getCompartimiento());
-                pst.setObject(14, inventario.getVolFacturado());
-                pst.setObject(15, inventario.getGalonesCisterna());
+                pst.setDouble(9, inventario.getInventarioFisico());
+                pst.setDouble(10, inventario.getLecturaVeederRoot());
+                pst.setDouble(11, inventario.getDiferencia());
+                pst.setDouble(12, inventario.getVarianza());
+                pst.setString(13, inventario.getCompartimiento());
+                pst.setDouble(14, inventario.getVolFacturado());
+                pst.setDouble(15, inventario.getGalonesCisterna());
+                pst.setDouble(16, inventario.getVentas());
+                pst.setDouble(17, inventario.getCalibracion());
                 pst.executeUpdate();
             } else if (action.equals(Dao.ACTION_UPDATE)) {
                 query = "UPDATE RECEPCION_INVENTARIO_DETALLE "
                         + "SET final = ?, compras = ?, modificado_por = ?, modificado_persona = ?, modificado_el = SYSDATE "
                         + " , inv_fisico = ?, lectura_veeder = ?, diferencia = ?, varianza = ?, compartimiento = ?, vol_facturado = ?, galones = ? "
+                        + ", ventas = ?, calibracion = ?"
                         + "WHERE fecha = ? AND estacion_id = ? AND producto_id = ?";
                 pst = getConnection().prepareStatement(query);
 //                pst.setDouble(1, inventario.getInicial());
                 pst.setDouble(1, inventario.getFinall());
-                pst.setObject(2, inventario.getCompras());
+                pst.setDouble(2, inventario.getCompras());
                 pst.setString(3, inventario.getModificadoPor());
                 pst.setString(4, inventario.getModificadoPersona());
-                pst.setObject(5, inventario.getInventarioFisico());
-                pst.setObject(6, inventario.getLecturaVeederRoot());
-                pst.setObject(7, inventario.getDiferencia());
-                pst.setObject(8, inventario.getVarianza());
-                pst.setObject(9, inventario.getCompartimiento());
-                pst.setObject(10, inventario.getVolFacturado());
-                pst.setObject(11, inventario.getGalonesCisterna());
+                pst.setDouble(5, inventario.getInventarioFisico());
+                pst.setDouble(6, inventario.getLecturaVeederRoot());
+                pst.setDouble(7, inventario.getDiferencia());
+                pst.setDouble(8, inventario.getVarianza());
+                pst.setString(9, inventario.getCompartimiento());
+                pst.setInt(10, inventario.getVolFacturado());
+                pst.setDouble(11, inventario.getGalonesCisterna());
+                pst.setDouble(12, inventario.getVentas());
+                pst.setDouble(13, inventario.getCalibracion());
                 //pk
-                pst.setDate(12, (java.sql.Date) inventario.getFecha());
-                pst.setInt(13, inventario.getEstacionId());
-                pst.setInt(14, inventario.getProductoId());
+                pst.setDate(14, (java.sql.Date) inventario.getFecha());
+                pst.setInt(15, inventario.getEstacionId());
+                pst.setInt(16, inventario.getProductoId());                
                 pst.executeUpdate();
             }
         } catch (Exception exc) {
