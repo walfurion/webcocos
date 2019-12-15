@@ -73,7 +73,7 @@ public class SvcMtd extends Dao {
                     + "                CREDITO_SUPER, CREDITO_REGULAR, CREDITO_DIESEL, EFECTIVO_USD_SUPER, EFECTIVO_USD_REGULAR, \n"
                     + "                EFECTIVO_USD_DIESEL, DAVIVIENDA_SUPER, DAVIVIENDA_REGULAR, DAVIVIENDA_DIESEL "
                     + "from PV_MTD order by fecha asc";
-            System.out.println("QUERY "+query);
+//            System.out.println("QUERY "+query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {

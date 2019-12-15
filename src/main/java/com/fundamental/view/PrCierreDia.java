@@ -1258,7 +1258,7 @@ public class PrCierreDia extends Panel implements View {
             bcrMediospago.addAll(svcTC.getMediopagoByTurnosid(turnosIds));
             bcrEfectivo.addAll(svcTC.getEfectivoByTurnosid(turnosIds));
             String p = new SimpleDateFormat("yyyy-MM-dd").format(dfdFecha.getValue());
-            bcrDeposito.addAll(svcDep.getDepositoByEstacion(estacion.getEstacionId().toString(), p));
+            //bcrDeposito.addAll(svcDep.getDepositoByEstacion(estacion.getEstacionId().toString(), p));
         }
         svcTC.closeConnections();
         calcularSumas();

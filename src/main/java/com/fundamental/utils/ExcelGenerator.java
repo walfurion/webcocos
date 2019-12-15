@@ -389,7 +389,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getP_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /* VENTAS EN LITROS*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getL_super());
@@ -476,7 +476,7 @@ public class ExcelGenerator {
                 ii++;
 
                 /*VENTAS LUBRICANTES*/
-                /*OTROS LUBRICANTES*/
+ /*OTROS LUBRICANTES*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getOtros_lub_total());
                 datoscell.setCellStyle(styleNumber);
@@ -486,7 +486,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(0);
                 datoscell.setCellStyle(stylePorcentaje);
                 ii++;
-                
+
                 /*LUBRICANTES UNO*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getUno_lub_total());
@@ -546,7 +546,7 @@ public class ExcelGenerator {
                 ii++;
 
                 /*INGRESOS SEGUN FORMA DE PAGO*/
-                /*GRAN TOTAL*/
+ /*GRAN TOTAL*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getTotal_medio_pago());
                 datoscell.setCellStyle(styleNumber);
@@ -627,9 +627,8 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getPorc_versatec());
                 datoscell.setCellStyle(stylePorcentaje);
                 ii++;
-                
-                /*FLOTA BCR*/
 
+                /*FLOTA BCR*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getFlota_bcr());
                 datoscell.setCellStyle(styleNumber);
@@ -683,7 +682,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getPorc_prepago());
                 datoscell.setCellStyle(stylePorcentaje);
                 ii++;
-                
+
                 /*TARJETAS TC DAVIVIENDA*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getDavivienda());
@@ -863,7 +862,11 @@ public class ExcelGenerator {
                 datoscell.setCellStyle(styleNumber);
                 ii++;
 
+                if (ii == 95) {
+                    ii = 99;
+                }
                 /*CAJA EFECTIVO*/
+//                System.out.println("FILA DEL DEMONIO "+ii);
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getEfe_super());
                 datoscell.setCellStyle(styleNumber);
@@ -886,7 +889,7 @@ public class ExcelGenerator {
                 ii++;
 
                 datoscell = datos.createCell(ii);
-                datoscell.setCellValue(itemId.getCredito_regular());
+                datoscell.setCellValue(itemId.getCredomatic_regular());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
 
@@ -894,7 +897,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getCredomatic_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA TC BANCO NACIONAL*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getBank_nacional_super());
@@ -910,7 +913,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getBank_nacional_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA TC BCR*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getBcr_super());
@@ -926,7 +929,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getBcr_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA TC FLEET MAGIC SB*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getFleet_magic_sb_super());
@@ -942,7 +945,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getFleet_magic_sb_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA TC FM DAVIVIENDA*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getFm_davivienda_sb_super());
@@ -958,7 +961,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getFm_davivienda_sb_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA TC VERSATEC*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getVersatec_super());
@@ -974,7 +977,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getVersatec_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA T FLOTA BCR*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getFlota_bcr_super());
@@ -990,7 +993,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getFlota_bcr_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA T FLOTA BAC*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getFlota_bac_super());
@@ -1006,7 +1009,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getFlota_bac_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA T UNO PLUS*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getUno_plus_super());
@@ -1022,7 +1025,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getUno_plus_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA CUPON*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getCupon_super());
@@ -1038,7 +1041,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getCupon_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA PREPAGOS*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getPrepago_super());
@@ -1054,7 +1057,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getPrepago_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA CREDITO*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getCredito_super());
@@ -1070,7 +1073,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getCredito_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA EFECTIVO USD*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getEfectivo_usd_super());
@@ -1086,7 +1089,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getEfectivo_usd_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*CAJA TC DAVIVIENDA*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getDavivienda_super());
@@ -1102,7 +1105,7 @@ public class ExcelGenerator {
                 datoscell.setCellValue(itemId.getDavivienda_diesel());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
-                
+
                 /*Al Final*/
                 j++;
             }
