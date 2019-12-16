@@ -145,8 +145,9 @@ public class FormUploadTarjetas extends Window {
                         System.out.println("genCard.getPRODUCTO() " + genCard.getPRODUCTO());
                         for (Lubricanteprecio pr : listProducts) {
                             if (genCard.getPRODUCTO().trim().toUpperCase().equals(pr.getProducto().getNombre().trim().toUpperCase())
-                                    && genCard.getPAIS().equals(pr.getPais().getNombre())
-                                    && genCard.getMARCA().equals(marca.getNombre())) {
+                                    && genCard.getPAIS().equals(pr.getPais().getNombre()))
+                                    //&& genCard.getMARCA().equals(marca.getNombre())) 
+                                    {
                                 /*
                             Si existe el producto en sistema, se procede a actualizar
                                  */
@@ -157,8 +158,10 @@ public class FormUploadTarjetas extends Window {
                                 Date date1 = null;
                                 Date date2 = null;
                                 try {
-                                    date1 = new SimpleDateFormat("dd/MM/yyyy").parse(genCard.getINICIO());
-                                    date2 = new SimpleDateFormat("dd/MM/yyyy").parse(genCard.getFIN());
+                                    date1 = new SimpleDateFormat("mm/dd/yyyy").parse(genCard.getINICIO());
+                                    date2 = new SimpleDateFormat("mm/dd/yyyy").parse(genCard.getFIN());
+                                    System.out.println("date1 " + date1);
+                                    System.out.println("date2 " + date2);
                                 } catch (ParseException ex) {
                                     Logger.getLogger(FormUploadTarjetas.class.getName()).log(Level.SEVERE, null, ex);
                                 }
@@ -188,8 +191,10 @@ public class FormUploadTarjetas extends Window {
                                     Date date1 = null;
                                     Date date2 = null;
                                     try {
-                                        date1 = new SimpleDateFormat("dd/MM/yyyy").parse(genCard.getINICIO());
-                                        date2 = new SimpleDateFormat("dd/MM/yyyy").parse(genCard.getFIN());
+                                        date1 = new SimpleDateFormat("mm/dd/yyyy").parse(genCard.getINICIO());
+                                        date2 = new SimpleDateFormat("mm/dd/yyyy").parse(genCard.getFIN());
+                                        System.out.println("date1 " + date1);
+                                        System.out.println("date2 " + date2);
                                     } catch (ParseException ex) {
                                         Logger.getLogger(FormUploadTarjetas.class.getName()).log(Level.SEVERE, null, ex);
                                     }
