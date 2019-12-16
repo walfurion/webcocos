@@ -48,6 +48,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -147,7 +148,7 @@ public class MntInventarioFisico extends Panel implements View {
         SvcInventarioFisico service = new SvcInventarioFisico();
         int countryId = ((Pais) cmbPais.getValue()).getPaisId();
         int brandId = ((Marca) cmbMarca.getValue()).getIdMarca();        
-        contLub.addAll(service.getLubricantes(countryId, brandId, cmbFecha.getValue()));  
+        contLub.addAll(service.getLubricantes(brandId, cmbFecha.getValue()));  
 //        ComInventarioFisico fis;
 //        for(ComInventarioFisico c: list){
 //            fis.setProductoNombre(c.getProductoNombre());
@@ -271,9 +272,45 @@ public class MntInventarioFisico extends Panel implements View {
                 tfdValue.addStyleName("align-right");
                 return tfdValue;
             }
-        });        
-        tblProduct.setVisibleColumns(new Object[]{"numero","productoNombre", "presentacion",  "precio", "inv_final", "uniFisTienda", "uniFisBodega", "uniFisPista"});
-        tblProduct.setColumnHeaders(new String[]{"#","Descripcion", "Presentacion", "Precio de venta", "Inventario final", "Unidades fisicas en tienda", "Unidades fisicas en Bodega", "Unidades fisicas en Pista"});
+        }); 
+        tblProduct.removeGeneratedColumn("totalInvUniFis");
+        tblProduct.addGeneratedColumn("totalInvUniFis", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("total_unidad_fisica");  //Atributo del bean
+                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
+                lbl.setWidth("85px");
+                lbl.addStyleName(ValoTheme.LABEL_SMALL);
+                lbl.addStyleName("align-right");
+                return lbl;
+            }
+        });
+        tblProduct.removeGeneratedColumn("difInvFinal");
+        tblProduct.addGeneratedColumn("difInvFinal", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("diferencia_inv");  //Atributo del bean
+                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
+                lbl.setWidth("85px");
+                lbl.addStyleName(ValoTheme.LABEL_SMALL);
+                lbl.addStyleName("align-right");
+                return lbl;
+            }
+        });
+        tblProduct.removeGeneratedColumn("colComentario");
+        tblProduct.addGeneratedColumn("colComentario", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("comentario");  //Atributo del bean
+                TextArea tfdValue = new TextArea(pro);
+                tfdValue.setWidth("85px");
+                tfdValue.setStyleName(ValoTheme.TEXTAREA_SMALL);
+                tfdValue.setNullRepresentation("");
+                return tfdValue;
+            }
+        }); 
+        tblProduct.setVisibleColumns(new Object[]{"numero","productoNombre", "presentacion",  "precio", "inv_final", "uniFisTienda", "uniFisBodega", "uniFisPista","totalInvUniFis","difInvFinal","colComentario"});
+        tblProduct.setColumnHeaders(new String[]{"#","Descripcion", "Presentacion", "Precio de venta", "Inventario final", "Unidades fisicas en tienda", "Unidades fisicas en Bodega", "Unidades fisicas en Pista","Total unidades fisicas","Diferencia inv. final en mov. vrs toma","Comentarios"});
 //        tblProduct.setColumnAlignments(new Table.Align[]{Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT});
         return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tblProduct)});
     }
