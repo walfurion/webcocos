@@ -115,7 +115,7 @@ public class SvcGeneral extends Dao {
                 lpo.setProductoNombre(rst.getString(11));
                 lpo.setMarca(new Marca(rst.getInt(12), rst.getString(13), rst.getString(14)));
                 lpo.setMarcaNombre(rst.getString(13));
-                lpo.setPais(new Pais(rst.getInt(2), rst.getString(9), rst.getString(15), null, null, null,null));
+                lpo.setPais(new Pais(rst.getInt(2), rst.getString(9), rst.getString(15), null, null, null, null));
                 lpo.setProducto(new Producto(rst.getInt(4), rst.getString(11), rst.getString(16), null, null, null));
                 result.add(lpo);
             }
@@ -126,7 +126,7 @@ public class SvcGeneral extends Dao {
         }
         return result;
     }
-    
+
     public List<Lubricanteprecio> getLubpriceByProduct(int countryId, int brandId, int productId) {
         List<Lubricanteprecio> result = new ArrayList();
         try {
@@ -151,7 +151,7 @@ public class SvcGeneral extends Dao {
                 lpo.setProductoNombre(rst.getString(11));
                 lpo.setMarca(new Marca(rst.getInt(12), rst.getString(13), rst.getString(14)));
                 lpo.setMarcaNombre(rst.getString(13));
-                lpo.setPais(new Pais(rst.getInt(2), rst.getString(9), rst.getString(15), null, null, null,null));
+                lpo.setPais(new Pais(rst.getInt(2), rst.getString(9), rst.getString(15), null, null, null, null));
                 lpo.setProducto(new Producto(rst.getInt(4), rst.getString(11), rst.getString(16), null, null, null));
                 result.add(lpo);
             }
@@ -228,7 +228,7 @@ public class SvcGeneral extends Dao {
 
                 query = "INSERT INTO horario (horario_id, nombre, descripcion, hora_inicio, hora_fin, creado_por) "
                         + "VALUES (" + horarioId + ", ?, ?, ?, ?, ?)";
-                System.out.println("HORARIO " + query ); //MG
+                System.out.println("HORARIO " + query); //MG
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, horario.getNombre());
                 pst.setObject(2, horario.getDescripcion());
@@ -275,22 +275,22 @@ public class SvcGeneral extends Dao {
                 }
                 query = "DELETE FROM estacion_horario "
                         + "WHERE horario_id = ? AND paisestacion_id = ? ";//MG
-                      //  + "AND estacion_id NOT IN (" + tmpString + ")";
-                System.out.println("DELETE "+ query); //MG
+                //  + "AND estacion_id NOT IN (" + tmpString + ")";
+                System.out.println("DELETE " + query); //MG
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, horario.getHorarioId());
                 pst.setObject(2, horario.getListStations().get(0).getPaisId());
-                System.out.println("HORARIO-1 " + horario.getHorarioId()  );
-                System.out.println("HORARIO-2 " + + horario.getListStations().get(0).getPaisId());
-                
+                System.out.println("HORARIO-1 " + horario.getHorarioId());
+                System.out.println("HORARIO-2 " + +horario.getListStations().get(0).getPaisId());
+
                 pst.executeUpdate();
                 closePst();
                 try {
                     query = "INSERT INTO estacion_horario (horario_id, estacion_id, creado_por, estacionconfhead_id, paisestacion_id) "
                             + "VALUES (?, ?, ?, ?, ?)";
-                    
-                    for (Estacion item : horario.getListStations()){
-                       System.out.println("INSERT " + query + " " + item.toString()); //MG
+
+                    for (Estacion item : horario.getListStations()) {
+                        System.out.println("INSERT " + query + " " + item.toString()); //MG
                         pst = getConnection().prepareStatement(query);
                         pst.setObject(1, horario.getHorarioId());
                         System.out.println("1 " + horario.getHorarioId());
@@ -381,12 +381,12 @@ public class SvcGeneral extends Dao {
                 pst = getConnection().prepareStatement(query);
                 ResultSet rst = pst.executeQuery();
                 int lubprecioId = (rst.next()) ? rst.getInt(1) : 0;
-                System.out.println("lub precio "+lubprecioId);
+                System.out.println("lub precio " + lubprecioId);
                 lub.setLubricanteprecio(lubprecioId);
                 closePst();
                 query = "INSERT INTO lubricanteprecio (pais_id, producto_id, fecha_inicio, fecha_fin, precio, creado_por, lubricanteprecio) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?)";
-                System.out.println("doActionLubprecio "+query+" "+lub.toString());
+                System.out.println("doActionLubprecio " + query + " " + lub.toString());
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, lub.getPaisId());
                 pst.setObject(2, lub.getProductoId());
@@ -414,12 +414,16 @@ public class SvcGeneral extends Dao {
             result = lub;
             getConnection().commit();
         } catch (Exception exc) {
-            try { getConnection().rollback(); } catch(Exception ignore) {}
+            try {
+                getConnection().rollback();
+            } catch (Exception ignore) {
+            }
             result.setDescError(exc.getMessage());
             exc.printStackTrace();
         }
         return result;
     }
+
     public String doBulkInsert(List<String> listInsert) {
         String result = null, currentInsert = "";
         int count = 0;
@@ -435,14 +439,17 @@ public class SvcGeneral extends Dao {
             getConnection().commit();
             result = Integer.toString(count);
         } catch (Exception exc) {
-            try { getConnection().rollback(); } catch(Exception ignore) {}
-            result = count +"; "+exc.getMessage();
+            try {
+                getConnection().rollback();
+            } catch (Exception ignore) {
+            }
+            result = count + "; " + exc.getMessage();
             System.out.println("" + exc.getMessage() + "\n " + currentInsert);
             exc.printStackTrace();
         }
         return result;
     }
-    
+
     public Map<String, Integer> getStationsMap() {
         Map<String, Integer> result = new HashMap<>();
         try {
@@ -477,36 +484,41 @@ public class SvcGeneral extends Dao {
         }
         return result;
     }
+
     public void doActionLubprecioLog(Lubricanteprecio lub) {
         try {
-                getConnection().setAutoCommit(false);
-                query = "INSERT INTO LUBRICANTEPRECIOLOG (lubricanteprecio, fecha_inicio, fecha_fin, precio, modificado_por,modificado_el) "
-                        + "VALUES (?, ?, ?, ?, ?, ?)";
-                System.out.println("doActionLubprecio "+query+" "+lub.toString());
-                pst = getConnection().prepareStatement(query);
-                pst.setObject(1, lub.getLubricanteprecio());
-                pst.setObject(2, new java.sql.Date(lub.getFechaInicio().getTime()));
-                pst.setObject(3, new java.sql.Date(lub.getFechaFin().getTime()));
-                pst.setObject(4, lub.getPrecio());
-                pst.setObject(5, lub.getModificadoPor());
-                if(lub.getModificadoEl()==null){
-                    lub.setModificadoEl(new Date());
-                }
-                pst.setObject(6, new java.sql.Date(lub.getModificadoEl().getTime()));
-                pst.executeUpdate();
-                getConnection().commit();
+            getConnection().setAutoCommit(false);
+            query = "INSERT INTO LUBRICANTEPRECIOLOG (lubricanteprecio, fecha_inicio, fecha_fin, precio, modificado_por,modificado_el) "
+                    + "VALUES (?, ?, ?, ?, ?, ?)";
+            System.out.println("doActionLubprecio " + query + " " + lub.toString());
+            pst = getConnection().prepareStatement(query);
+            pst.setObject(1, lub.getLubricanteprecio());
+            pst.setObject(2, new java.sql.Date(lub.getFechaInicio().getTime()));
+            pst.setObject(3, new java.sql.Date(lub.getFechaFin().getTime()));
+            pst.setObject(4, lub.getPrecio());
+            pst.setObject(5, lub.getModificadoPor());
+            if (lub.getModificadoEl() == null) {
+                lub.setModificadoEl(new Date());
+            }
+            pst.setObject(6, new java.sql.Date(lub.getModificadoEl().getTime()));
+            pst.executeUpdate();
+            getConnection().commit();
         } catch (Exception exc) {
-            try { getConnection().rollback(); } catch(Exception ignore) {}
+            try {
+                getConnection().rollback();
+            } catch (Exception ignore) {
+            }
             exc.printStackTrace();
         }
     }
+
     public List<Lubricanteprecio> getLubpriceHistory(int id) {
         List<Lubricanteprecio> result = new ArrayList();
         try {
-            query =   " SELECT rownum,FECHA_INICIO,FECHA_FIN,PRECIO,MODIFICADO_POR,MODIFICADO_EL "
+            query = " SELECT rownum,FECHA_INICIO,FECHA_FIN,PRECIO,MODIFICADO_POR,MODIFICADO_EL "
                     + " FROM LUBRICANTEPRECIOLOG "
                     + " WHERE LUBRICANTEPRECIO = ? ";
-            System.out.println("getLub "+query);
+            System.out.println("getLub " + query);
             pst = getConnection().prepareStatement(query);
             pst.setInt(1, id);
             ResultSet rst = pst.executeQuery();
@@ -528,8 +540,8 @@ public class SvcGeneral extends Dao {
         }
         return result;
     }
-    
-    public Lubricanteprecio doActionLubprecioCarga(String action, Lubricanteprecio lub) {
+
+    public Lubricanteprecio doActionLubprecioCarga(String action, Lubricanteprecio lub, Lubricanteprecio lubAnterior) {
         Lubricanteprecio result = new Lubricanteprecio();
         try {
             getConnection().setAutoCommit(false);
@@ -538,12 +550,12 @@ public class SvcGeneral extends Dao {
                 pst = getConnection().prepareStatement(query);
                 ResultSet rst = pst.executeQuery();
                 int lubprecioId = (rst.next()) ? rst.getInt(1) : 0;
-                System.out.println("lub precio "+ lubprecioId);
+                System.out.println("lub precio " + lubprecioId);
                 lub.setLubricanteprecio(lubprecioId);
                 closePst();
                 query = "INSERT INTO lubricanteprecio (lubricanteprecio, pais_id, producto_id, fecha_inicio, fecha_fin, precio, creado_por, creado_el) "
-                        + "VALUES ("+lubprecioId+",?, ?, ?, ?, ?, ?, sysdate)";
-                System.out.println("doActionLubprecio "+query+" "+lub.toString());
+                        + "VALUES (" + lubprecioId + ",?, ?, ?, ?, ?, ?, sysdate)";
+                System.out.println("doActionLubprecio " + query + " " + lub.toString());
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, lub.getPaisId());
                 pst.setObject(2, lub.getProductoId());
@@ -556,7 +568,7 @@ public class SvcGeneral extends Dao {
             } else if (action.equals(Dao.ACTION_UPDATE)) {
                 query = "UPDATE lubricanteprecio "
                         + "SET pais_id = ?, producto_id = ?, fecha_inicio = ?, fecha_fin = ?, precio = ?, modificado_por = ?, modificado_el = SYSDATE "
-                        + "WHERE lubricanteprecio = ?";
+                        + "WHERE lubricanteprecio = ? ";
                 System.out.println("query update " + query);
                 System.out.println("lub para update " + lub.toString());
                 pst = getConnection().prepareStatement(query);
@@ -568,17 +580,43 @@ public class SvcGeneral extends Dao {
                 pst.setObject(6, lub.getModificadoPor());
                 pst.setObject(7, lub.getLubricanteprecio());
                 pst.executeUpdate();
-               // doActionLubprecioLog(lubricante_log);
+                doActionLubprecioLog(lubAnterior);
             }
             result = lub;
             getConnection().commit();
         } catch (Exception exc) {
-            try { getConnection().rollback(); } catch(Exception ignore) {}
+            try {
+                getConnection().rollback();
+            } catch (Exception ignore) {
+            }
             result.setDescError(exc.getMessage());
             exc.printStackTrace();
         }
         return result;
     }
-    
-    
+
+    public List<Producto> getProductsNotInLubsPrecio() {
+        List<Producto> result = new ArrayList();
+        try {
+            query = "select PRODUCTO_ID, NOMBRE from PRODUCTO "
+                    + " WHERE PRODUCTO_ID NOT IN(SELECT PRODUCTO_ID FROM LUBRICANTEPRECIO)";
+            System.out.println("getProductsNotInLubsPrecio " + query);
+            pst = getConnection().prepareStatement(query);
+            //pst.setInt(1, id);
+            ResultSet rst = pst.executeQuery();
+            Producto prod;
+            while (rst.next()) {
+                prod = new Producto();
+                prod.setProductoId(rst.getInt(1));
+                prod.setNombre(rst.getString(2));
+                result.add(prod);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
+
 }

@@ -84,6 +84,7 @@ public class FormUploadTarjetas extends Window {
     CreateComponents components = new CreateComponents();
     Constant cons = new Constant();
     List<Lubricanteprecio> listProducts = new ArrayList();
+    List<Producto> listProductsNoPrecio = new ArrayList();
     SvcGeneral service = new SvcGeneral();
     List<Pais> listCountries;
     List<Marca> listBrands = new ArrayList();
@@ -136,13 +137,14 @@ public class FormUploadTarjetas extends Window {
                 if (validarData()) {
 
                     listProducts = service.getLubpriceByCountryidStationid(pais.getPaisId(), marca.getIdMarca());
-                    // listProducts = service.getAllProductosByCountryTypeBrand(pais.getPaisId(), 2, marca.getIdMarca(),false);
-
+                    listProductsNoPrecio = service.getProductsNotInLubsPrecio();
+                    System.out.println("tamaño de lista ListProducts ---- " + listProducts.size());
+                    System.out.println("tamaño de lista productos sin precio ---- " + listProductsNoPrecio.size());
                     for (GenericLubricantePrecio genCard : container.getItemIds()) {
                         System.out.println("genCard ---------- " + genCard.toString());
                         System.out.println("genCard.getPRODUCTO() " + genCard.getPRODUCTO());
                         for (Lubricanteprecio pr : listProducts) {
-                            if (genCard.getPRODUCTO().equals(pr.getProducto().getNombre())
+                            if (genCard.getPRODUCTO().trim().toUpperCase().equals(pr.getProducto().getNombre().trim().toUpperCase())
                                     && genCard.getPAIS().equals(pr.getPais().getNombre())
                                     && genCard.getMARCA().equals(marca.getNombre())) {
                                 /*
@@ -164,36 +166,45 @@ public class FormUploadTarjetas extends Window {
                                 lubPrecio.setFechaFin(date2);
                                 lubPrecio.setPrecio(Double.valueOf(genCard.getPRECIO()));
                                 lubPrecio.setModificadoPor(usuario.getNombre());
+                                pr.setModificadoPor(usuario.getNombre());
                                 System.out.println("fila a enviar update " + lubPrecio.toString());
-                                Lubricanteprecio p = service.doActionLubprecioCarga(Dao.ACTION_UPDATE, lubPrecio);
+                                Lubricanteprecio p = service.doActionLubprecioCarga(Dao.ACTION_UPDATE, lubPrecio, pr);
                                 System.out.println("p " + p.toString());
+
                             }
-//                        else {
-//                            /*
-//                            No existe en sistema, se hara insert.
-//                             */
-//                      
-//                            Lubricanteprecio lubPrecio = new Lubricanteprecio();
-//
-//                            lubPrecio.setPaisId(pais.getPaisId());
-//                            lubPrecio.setProductoId(pr.getProductoId());
-//                            Date date1 = null;  
-//                            Date date2 = null;  
-//                            try {
-//                                date1 = new SimpleDateFormat("MM/dd/yyyy").parse(genCard.getINICIO());
-//                                date2 = new SimpleDateFormat("MM/dd/yyyy").parse(genCard.getFIN());
-//                            } catch (ParseException ex) {
-//                                System.out.println("error con fecha");
-//                                Logger.getLogger(FormUploadTarjetas.class.getName()).log(Level.SEVERE, null, ex);
-//                            }
-//                            lubPrecio.setFechaInicio(date1);
-//                            lubPrecio.setFechaFin(date2);
-//                            lubPrecio.setPrecio(Double.valueOf(genCard.getPRECIO()));
-//                            lubPrecio.setCreadoPor(usuario.getNombre());
-//                            System.out.println("fila a enviar  create  " + lubPrecio.toString());
-//                            service.doActionLubprecioCarga(Dao.ACTION_ADD, lubPrecio);
-//                            
-//                        }
+
+                        }
+
+                        for (Producto prod : listProductsNoPrecio) {
+                            if (genCard.getPRODUCTO().trim().toUpperCase().equals(prod.getNombre().trim().toUpperCase())) {
+                                {
+                                    /*
+                            No existe el producto en sistema, se procede a crear
+                                     */
+                                    Lubricanteprecio lubPrecio = new Lubricanteprecio();
+                                    //lubPrecio.setLubricanteprecio(Integer.valueOf(genCard.getPRECIO()));
+                                    lubPrecio.setPaisId(pais.getPaisId());
+                                    lubPrecio.setProductoId(prod.getProductoId());
+                                    Date date1 = null;
+                                    Date date2 = null;
+                                    try {
+                                        date1 = new SimpleDateFormat("dd/MM/yyyy").parse(genCard.getINICIO());
+                                        date2 = new SimpleDateFormat("dd/MM/yyyy").parse(genCard.getFIN());
+                                    } catch (ParseException ex) {
+                                        Logger.getLogger(FormUploadTarjetas.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                    lubPrecio.setFechaInicio(date1);
+                                    lubPrecio.setFechaFin(date2);
+                                    lubPrecio.setPrecio(Double.valueOf(genCard.getPRECIO()));
+                                    //lubPrecio.setModificadoPor(usuario.getNombre());
+                                    lubPrecio.setCreadoPor(usuario.getNombre());
+                                    System.out.println("fila a enviar create " + lubPrecio.toString());
+                                    Lubricanteprecio p = service.doActionLubprecioCarga(Dao.ACTION_ADD, lubPrecio, lubPrecio);
+                                    System.out.println("p " + p.toString());
+
+                                }
+
+                            }
                         }
                     }
                     components.crearNotificacion("Carga procesada exitosamente");
@@ -204,8 +215,8 @@ public class FormUploadTarjetas extends Window {
                 }
 
             } else {
-                    Notification.show("Error", "Debe cargar un archivo", Notification.Type.ERROR_MESSAGE);
-                }
+                Notification.show("Error", "Debe cargar un archivo", Notification.Type.ERROR_MESSAGE);
+            }
         });
         guardar.focus();
 
@@ -228,7 +239,6 @@ public class FormUploadTarjetas extends Window {
     private boolean validarData() {
         boolean val = true;
         for (GenericLubricantePrecio genCard : container.getItemIds()) {
-
             if ((genCard.getPAIS().length() < 0) || (genCard.getPAIS().length() < 0) || (genCard.getPRODUCTO().length() < 0) || (genCard.getINICIO().length() < 0) || (genCard.getFIN().length() < 0) || (genCard.getPRECIO().length() < 0)) {
                 val = false;
             }
@@ -273,7 +283,7 @@ public class FormUploadTarjetas extends Window {
         upload.setButtonCaption("Cargar");
         upload.setReceiver(excelUploader);
         upload.addSucceededListener(excelUploader);
-        
+
         return regresa;
     }
 
