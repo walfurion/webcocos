@@ -52,4 +52,9 @@ public class Pais {
         this.selected = selected;
     }
 
+    public Pais(Integer paisId) {
+        this.paisId = paisId;
+    }
+    
+
 }

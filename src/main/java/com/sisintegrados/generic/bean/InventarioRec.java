@@ -34,7 +34,9 @@ public class InventarioRec {
     private Integer volFacturado;
     private Integer galonesCisterna;
     private String compartimiento;
-    private String pulgadas;    
+    private String pulgadas; 
+    private Double ventas; 
+    private Double calibracion; 
 
     public InventarioRec(Date fecha, Integer estacionId, Integer productoId, Double inicial, Double finall, Double compras, String creadoPor, String creadoPersona) {
         this.fecha = fecha;

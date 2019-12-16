@@ -70,7 +70,7 @@ public class MntLubricanteCV extends Panel implements View {
     ComboBox cmbPais = new ComboBox();
 //    ComboBox cmbEstacion = new ComboBox();
     ComboBox cmbMarca = new ComboBox();
-    ComboBox cmbProducto = new ComboBox();
+//    ComboBox cmbProducto = new ComboBox();
     DateField cmbFecha = new DateField("Fecha:");
     Usuario usuario = new Usuario();
     Utils utils = new Utils();
@@ -85,7 +85,7 @@ public class MntLubricanteCV extends Panel implements View {
     List<Marca> listBrands = new ArrayList();
     List<ComVenLubricantes> listProducts = new ArrayList();        
     Table tblProduct = new Table();
-    boolean bloqueo = true;
+    boolean bloqueo = false;
 
     public MntLubricanteCV() {
 
@@ -148,23 +148,27 @@ public class MntLubricanteCV extends Panel implements View {
         SvcComVenLubricantes service = new SvcComVenLubricantes();
         int countryId = ((Pais) cmbPais.getValue()).getPaisId();
         int brandId = ((Marca) cmbMarca.getValue()).getIdMarca();
-        int productId = ((Producto) cmbProducto.getValue()).getProductoId();
-        int count = service.countLub(productId, cmbFecha.getValue(), countryId);
-        List<ComVenLubricantes> lubAnterior = new ArrayList();
-        if(count>0){
-            listProducts = service.getComVenLubAnterior(countryId, brandId, productId, cmbFecha.getValue());
-        }else{
-            listProducts = service.getComVenLub(countryId, brandId, productId, cmbFecha.getValue());
-        }               
+//        int productId = 0;
+//        if(cmbProducto.getValue() != null){
+//            productId = ((Producto) cmbProducto.getValue()).getProductoId();
+//        }
+        
+//        int count = service.countLub(productId, cmbFecha.getValue(), countryId);
+//        List<ComVenLubricantes> lubAnterior = new ArrayList();
+//        if(count>0){
+//            listProducts = service.getComVenLubAnterior(countryId, brandId, cmbFecha.getValue());
+//        }else{
+            listProducts = service.getComVenLub(countryId, brandId, cmbFecha.getValue());
+//        }               
         contLub.addAll(listProducts);  
-        ComVenLubricantes comVen;
-        for (Integer pi : (List<Integer>) contLub.getItemIds()) {
-            comVen = (ComVenLubricantes) ((BeanItem) contLub.getItem(pi)).getBean();
-            if(comVen.getInvInicial()!=0.0){
-                System.out.println("entra "+comVen.getInvInicial());
-                bloqueo = false;
-            }
-        }
+//        ComVenLubricantes comVen;
+//        for (Integer pi : (List<Integer>) contLub.getItemIds()) {
+//            comVen = (ComVenLubricantes) ((BeanItem) contLub.getItem(pi)).getBean();
+//            if(comVen.getInvInicial()!=0.0){
+//                System.out.println("entra "+comVen.getInvInicial());
+//                bloqueo = true;
+//            }
+//        }
     }
 
     private Component buildHeader() {
@@ -234,7 +238,6 @@ public class MntLubricanteCV extends Panel implements View {
                 if (cmbMarca.getValue() != null) {
                     Dao dao = new Dao();
                     allLubricants = dao.getAllProducts();
-                    cmbProducto.setContainerDataSource(new ListContainer<Producto>(Producto.class, allLubricants));
                 }
             }
         });
@@ -250,31 +253,29 @@ public class MntLubricanteCV extends Panel implements View {
         cmbFecha.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
-                if (cmbProducto.getValue() != null) {
-                    getAllData();
-                }
+                getAllData();
             }
         });
 
-        cmbProducto = new ComboBox("Producto:");
-        cmbProducto.setItemCaptionPropertyId("nombre");
-        cmbProducto.setNullSelectionAllowed(false);
-        cmbProducto.setFilteringMode(FilteringMode.CONTAINS);
-        cmbProducto.setRequired(true);
-        cmbProducto.setRequiredError("Debe seleccionar un Producto");
-        cmbProducto.setWidth("230px");
-        cmbProducto.addStyleName(ValoTheme.COMBOBOX_SMALL);
-        cmbProducto.setContainerDataSource(new ListContainer<Producto>(Producto.class, allLubricants));
-        cmbProducto.addListener(new Property.ValueChangeListener() {
-            @Override
-            public void valueChange(final Property.ValueChangeEvent event) {
-                if (cmbProducto.getValue() != null) {
-                    getAllData();
-                }
-            }
-        });
+//        cmbProducto = new ComboBox("Producto:");
+//        cmbProducto.setItemCaptionPropertyId("nombre");
+//        cmbProducto.setNullSelectionAllowed(false);
+//        cmbProducto.setFilteringMode(FilteringMode.CONTAINS);
+//        cmbProducto.setRequired(true);
+//        cmbProducto.setRequiredError("Debe seleccionar un Producto");
+//        cmbProducto.setWidth("230px");
+//        cmbProducto.addStyleName(ValoTheme.COMBOBOX_SMALL);
+//        cmbProducto.setContainerDataSource(new ListContainer<Producto>(Producto.class, allLubricants));
+//        cmbProducto.addListener(new Property.ValueChangeListener() {
+//            @Override
+//            public void valueChange(final Property.ValueChangeEvent event) {
+//                if (cmbProducto.getValue() != null) {
+//                    getAllData();
+//                }
+//            }
+//        });
 
-        Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(cmbPais), utils.vlContainer(cmbMarca), utils.vlContainer(cmbFecha), utils.vlContainer(cmbProducto)});
+        Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(cmbPais), utils.vlContainer(cmbMarca), utils.vlContainer(cmbFecha)});
         VerticalLayout v = new VerticalLayout(toolBar);
         return components.createHorizontal(Constant.styleViewheader, Constant.sizeFull, false, false, true, new Component[]{v});
     }
@@ -295,7 +296,7 @@ public class MntLubricanteCV extends Panel implements View {
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.setNullRepresentation("0.00");
                 tfdValue.addStyleName("align-right");
-//                tfdValue.setEnabled(bloqueo);
+                tfdValue.setReadOnly(bloqueo);
                 return tfdValue;
             }
         }); 
@@ -321,32 +322,32 @@ public class MntLubricanteCV extends Panel implements View {
                 return tfdValue;
             }
         }); 
-        tblProduct.removeGeneratedColumn("colVenta");
-        tblProduct.addGeneratedColumn("colVenta", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("venta");  //Atributo del bean
-                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
-                lbl.setWidth("85px");
-                lbl.addStyleName(ValoTheme.LABEL_SMALL);
-                lbl.addStyleName("align-right");
-                return lbl;
-            }
-        }); 
-        tblProduct.removeGeneratedColumn("colInvFinal");
-        tblProduct.addGeneratedColumn("colInvFinal", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("invfinal");  //Atributo del bean
-                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
-                lbl.setWidth("85px");
-                lbl.addStyleName(ValoTheme.LABEL_SMALL);
-                lbl.addStyleName("align-right");
-                return lbl;
-            }
-        });
-        tblProduct.setVisibleColumns(new Object[]{"fecha","productoNombre", "colInvInicial", "ColCompra", "colVenta", "colInvFinal"});
-        tblProduct.setColumnHeaders(new String[]{"Fecha","Nombre", "Inventario Inicial", "Compra", "Venta", "Inventario Final"});
+//        tblProduct.removeGeneratedColumn("colVenta");
+//        tblProduct.addGeneratedColumn("colVenta", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("venta");  //Atributo del bean
+//                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
+//                lbl.setWidth("85px");
+//                lbl.addStyleName(ValoTheme.LABEL_SMALL);
+//                lbl.addStyleName("align-right");
+//                return lbl;
+//            }
+//        }); 
+//        tblProduct.removeGeneratedColumn("colInvFinal");
+//        tblProduct.addGeneratedColumn("colInvFinal", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("invfinal");  //Atributo del bean
+//                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
+//                lbl.setWidth("85px");
+//                lbl.addStyleName(ValoTheme.LABEL_SMALL);
+//                lbl.addStyleName("align-right");
+//                return lbl;
+//            }
+//        });
+        tblProduct.setVisibleColumns(new Object[]{"fecha","productoNombre", "colInvInicial", "ColCompra"});
+        tblProduct.setColumnHeaders(new String[]{"Fecha","Nombre", "Inventario Inicial", "Compra"});
 //        tblProduct.setColumnAlignments(new Table.Align[]{Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT});
         return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tblProduct)});
     }
@@ -357,29 +358,36 @@ public class MntLubricanteCV extends Panel implements View {
         btnGuardar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                if (!cmbPais.isValid() || !cmbProducto.isValid() || !cmbMarca.isValid() || !cmbFecha.isValid())  {
+                if (!cmbPais.isValid() || !cmbMarca.isValid() || !cmbFecha.isValid())  {
                     Notification.show("Los campos marcados son requeridos.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
+                SvcComVenLubricantes service = new SvcComVenLubricantes();
                 ComVenLubricantes comVenLub = new ComVenLubricantes();
                 for (Integer i : (List<Integer>) tblProduct.getItemIds()) {
                     ComVenLubricantes lub;
-                    lub = (ComVenLubricantes) ((BeanItem) tblProduct.getItem(i)).getBean();     
-                    comVenLub.setInvInicial(lub.getInvInicial());
-                    comVenLub.setCompra(lub.getCompra());
+                    lub = contLub.getItem(i).getBean();
+//                    lub = (ComVenLubricantes) ((BeanItem) tblProduct.getItem(i)).getBean(); 
+                    Double invInicial = lub.getInvInicial()==null?0.0:lub.getInvInicial();
+                    Double compra = lub.getCompra()==null?0.0:lub.getCompra();
+                    Double invfinal = lub.getInvfinal()==null?invInicial:lub.getInvfinal();
+                    comVenLub.setInvInicial(invInicial);
+                    comVenLub.setCompra(compra);
                     comVenLub.setVenta(lub.getVenta());
-                    comVenLub.setInvfinal(lub.getInvfinal());
-                }
-                comVenLub.setFecha(cmbFecha.getValue());
-                comVenLub.setMarcaId(((Marca)cmbMarca.getValue()).getIdMarca());
-                comVenLub.setPaisId(((Pais)cmbPais.getValue()).getPaisId());
-                Integer idProducto = (((Producto)cmbProducto.getValue()).getProductoId()>0 ? ((Producto)cmbProducto.getValue()).getProductoId() : null);
-                comVenLub.setProductoId(idProducto);
-                comVenLub.setCreadopor(usuario.getUsername());
-                SvcComVenLubricantes service = new SvcComVenLubricantes();
-                service.insertCompra(comVenLub);
-//                service.insertVenta(123, 188, 150.00, cmbFecha.getValue());
-                service.closeConnections();
+                    comVenLub.setInvfinal(invfinal);
+                    comVenLub.setProductoId(lub.getProductoId());
+                    comVenLub.setFecha(cmbFecha.getValue());
+                    comVenLub.setMarcaId(((Marca)cmbMarca.getValue()).getIdMarca());
+                    comVenLub.setPaisId(((Pais)cmbPais.getValue()).getPaisId());
+                    comVenLub.setCreadopor(usuario.getUsername());
+                    if(comVenLub.getInvInicial()>0.0){
+                        service.insertCompra(comVenLub);
+                        service.closeConnections();
+                    }
+                    
+                }                
+//                service.insertVenta(126, 188, 150.00, cmbFecha.getValue());
+                
                 if (comVenLub.getProductoId()>0) {
                     Notification notif = new Notification("ÉXITO:", "El registro se realizó con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);
