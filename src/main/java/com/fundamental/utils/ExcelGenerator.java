@@ -848,7 +848,7 @@ public class ExcelGenerator {
                 ii++;
 
                 datoscell = datos.createCell(ii);
-                datoscell.setCellValue(itemId.getRegular_l_fal_sob());
+                datoscell.setCellValue(itemId.getDiesel_l_fal_sob());
                 datoscell.setCellStyle(styleNumber);
                 ii++;
 
