@@ -20,7 +20,12 @@ public class SvcInventarioFisico extends Dao {
     private String query;
     public List<ComInventarioFisico> getLubricantes(int brandId, Date fecha) {
         List<ComInventarioFisico> result = new ArrayList();
-        
+        String fecha1 = Constant.SDF_ddMMyyyy.format(fecha);
+        String fecha2 = Constant.SDF_ddMMyyyy.format(fecha);
+        fecha1 = fecha2.substring(3,5);
+        fecha2 = fecha2.substring(6);   
+        System.out.println("fecha1 "+fecha1);
+        System.out.println("fecha2 "+fecha2);
         try {
 //            Date fecha2 = recuperaFecha(countryId,brandId)
             query = "select rownum as numero,p.NOMBRE,p.PRESENTACION,lp.PRECIO, "
@@ -33,12 +38,12 @@ public class SvcInventarioFisico extends Dao {
                     "(select COMENTARIO from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('01/10/2019','mm/yyyy')) as Comentario "
                     + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p, LUBRICANTEPRECIO lp "
                     + "where l.PRODUCTO_ID = p.PRODUCTO_ID and l.PRODUCTO_ID = lp.PRODUCTO_ID "
-                    + "and l.MARCA_ID=? ";
+                    + "and l.MARCA_ID="+brandId+" "
+                    + "and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.MARCA_ID="+brandId+" and "+fecha1+"=extract(MONTH from b.fecha)" 
+                    + "AND "+fecha2+"=extract(YEAR from b.fecha))  order by FECHA desc ";
             System.out.println("query "+query);
             System.out.println("brandId "+brandId);
             pst = getConnection().prepareStatement(query);
-            pst.setInt(1, brandId);
-//            pst.setString(3, Constant.SDF_ddMMyyyy.format(fecha));
             ResultSet rst = pst.executeQuery();
             ComInventarioFisico inv;
             while (rst.next()) {    
@@ -117,7 +122,7 @@ public class SvcInventarioFisico extends Dao {
         int result = 0;
         String dateString = Constant.SDF_ddMMyyyy.format(fecha);
         try {
-            miQuery = "SELECT count(*) FROM COMPRA_VENTA_LUBRICANTE where PRODUCTO_ID="+idProducto+" "
+            miQuery = "SELECT count(*) FROM INVENTARIO_FISICO_LUB where PRODUCTO_ID="+idProducto+" "
                     + "and trunc(FECHA) =  to_date('"+dateString+"','dd/mm/yyyy')";
             System.out.println("mi ueryryry "+miQuery);
             pst = getConnection().prepareStatement(miQuery);

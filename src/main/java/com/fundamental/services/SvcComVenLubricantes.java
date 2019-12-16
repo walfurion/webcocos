@@ -214,8 +214,6 @@ public class SvcComVenLubricantes extends Dao{
         String fecha2 = Constant.SDF_ddMMyyyy.format(fecha);
         fecha1 = fecha2.substring(3,5);
         fecha2 = fecha2.substring(6);   
-        System.out.println("fecha1 "+fecha1);
-        System.out.println("fecha2 "+fecha2);
             try{        
                 query = "select INV_FINAL "
                         + "from COMPRA_VENTA_LUBRICANTE "
