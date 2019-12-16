@@ -327,4 +327,25 @@ public class SvcComVenLubricantes extends Dao{
             }
         return valor;
     }
+    
+    private int venta(int productId, Date fecha){        
+        ResultSet rst = null;
+        int valor = 0;
+            try{        
+                query = "select INV_FINAL from  COMPRA_VENTA_LUBRICANTE\n" 
+                      + "where PRODUCTO_ID = productId \n" 
+                      + "and FECHA = to_date(fecha,'dd/mm/yyyy')";  
+                        
+                pst = getConnection().prepareStatement(query);
+                pst.setInt(1, productId);
+                pst.setString(2, Constant.SDF_ddMMyyyy.format(fecha));
+                rst = pst.executeQuery();            
+                while (rst.next()) {         
+                    valor = rst.getInt(1);
+                }
+            }catch(Exception exc){
+                exc.printStackTrace();
+            }
+        return valor;
+    }
 }
