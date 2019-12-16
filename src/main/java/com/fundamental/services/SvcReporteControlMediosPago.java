@@ -29,7 +29,7 @@ public class SvcReporteControlMediosPago extends Dao {
         ArrayList<GenericEstacion> result = new ArrayList<GenericEstacion>();
         GenericEstacion gnestacion = new GenericEstacion();
         try {
-            query = "Select estacion_id,nombre from estacion where pais_id ="+idpais;
+            query = "Select estacion_id,nombre from estacion where pais_id =" + idpais;
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
@@ -48,15 +48,15 @@ public class SvcReporteControlMediosPago extends Dao {
         }
         return result;
     }
-    
+
     public ArrayList<GenericRprControlMediosPago> getCtlMediosPago() {
         ArrayList<GenericRprControlMediosPago> result = new ArrayList<GenericRprControlMediosPago>();
         GenericRprControlMediosPago genctl = new GenericRprControlMediosPago();
         try {
-            query = "Select FECHA, LOTE, MONTO_BRUTO, COMISION, \n" +
-"                MONTO_NETO, COMENTARIOS "
+            query = "Select FECHA, MEDIOPAGO_ID, LOTE, MONTO_BRUTO, COMISION, \n"
+                    + "                MONTO_NETO, COMENTARIOS, CODIGO, ESTACION, BANCO, NODEPOSITO, MONTOCH, MONTOUSD "
                     + "from CTRL_Medios_pago order by fecha asc";
-            System.out.println("QUERY "+query);
+            System.out.println("QUERY " + query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
@@ -64,8 +64,15 @@ public class SvcReporteControlMediosPago extends Dao {
                         rst.getDouble(3),
                         rst.getDouble(4),
                         rst.getDouble(5),
-                        rst.getString(6));
-                result.add(genctl); 
+                        rst.getDouble(6),
+                        rst.getString(7),
+                        rst.getString(8),
+                        rst.getString(9),
+                        rst.getString(10),
+                        rst.getString(11),
+                        rst.getDouble(12),
+                        rst.getDouble(13));
+                result.add(genctl);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -78,27 +85,22 @@ public class SvcReporteControlMediosPago extends Dao {
         return result;
     }
 
-    public void generar_datacrt(Date fecha_ini, Date fecha_fin, int estaciones, String paisid) throws SQLException {
-        System.out.println("fecha ini " + fecha_ini);
-        System.out.println("fecha fin " + fecha_fin);
-        System.out.println("estacion " + estaciones);
-        System.out.println("paisid " + paisid);
+    public void generar_datacrt(Date fecha_ini, Date fecha_fin, String estaciones, String paisid) throws SQLException {
         String query = "{call rep (?,?,?,?)}";
         CallableStatement cst = getConnection().prepareCall(query);
-String sfecha_ini = Constant.SDF_ddMMyyyy.format(fecha_ini);
-String sfecha_fin = Constant.SDF_ddMMyyyy.format(fecha_fin);
+//        String sfecha_ini = Constant.SDF_ddMMyyyy.format(fecha_ini);
+//        String sfecha_fin = Constant.SDF_ddMMyyyy.format(fecha_fin);
 
-//        java.sql.Date sqlDateIni = new java.sql.Date(fecha_ini.getTime());
-       // java.sql.Date sqlDateFin = new java.sql.Date(fecha_fin.getTime());
-        
-        System.out.println("PROCEDIMIENTO "+ query);
+         java.sql.Date sqlDateIni = new java.sql.Date(fecha_ini.getTime());
+         java.sql.Date sqlDateFin = new java.sql.Date(fecha_fin.getTime());
+        System.out.println("PROCEDIMIENTO " + query);
 
         /*Envio parametros necesarios*/
-        cst.setString(1, sfecha_ini);
-        cst.setString(2, sfecha_fin);
-        cst.setInt(3, estaciones);
+        cst.setDate(1, sqlDateIni);
+        cst.setDate(2, sqlDateFin);
+        cst.setString(3, estaciones);
         cst.setString(4, paisid);
         cst.execute();
     }
 
-  }
+}

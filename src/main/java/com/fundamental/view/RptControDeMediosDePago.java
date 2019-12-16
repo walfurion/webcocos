@@ -54,6 +54,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -256,33 +257,33 @@ public class RptControDeMediosDePago extends Panel implements View {
             public void buttonClick(final Button.ClickEvent event) {
                 if (cmbPais.getValue() != null && cmbFechaInicio.getValue() != null && cmbFechaFin.getValue() != null && optStation.size() > 0) {
                     try {
-                        SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), 361, "188");
+                        SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), "361", "188");
 
                         sourceGeneric.addAll(SvcReporteControlMediosPago.getCtlMediosPago());
                         grid = new Grid(sourceGeneric);
                         grid.setCaption("Control de medios de pago");
                         grid.setWidth("1080px");
-//                        grid.setContainerDataSource(sourceGeneric);
-//                        grid.removeAllColumns();
-//                        grid.addColumn("fecha");
-//                        grid.addColumn("lote");
-//                        grid.addColumn("monto_bruto");
-//                        grid.addColumn("comision");
-//                        grid.addColumn("monto_neto");
-//                        grid.addColumn("comentarios");
-//                        Grid.Column fecha = grid.getColumn("fecha");
-//                        fecha.setHeaderCaption("Fecha");
-//                        Grid.Column lote = grid.getColumn("lote");
-//                        lote.setHeaderCaption("Lote");
-//                        Grid.Column monto_bruto = grid.getColumn("monto_bruto");
-//                        monto_bruto.setHeaderCaption("Monto bruto");
-//                        Grid.Column comision = grid.getColumn("comision");
-//                        comision.setHeaderCaption("Comision");
-//                        Grid.Column monto_neto = grid.getColumn("monto_neto");
-//                        monto_neto.setHeaderCaption("Monto neto");
-//                        Grid.Column comentarios = grid.getColumn("comentarios");
-//                        comentarios.setHeaderCaption("Comentarios");
-//                        grid.setColumnOrder("fecha", "lote", "monto_bruto", "comision", "monto_neto", "comentarios");
+                        grid.setContainerDataSource(sourceGeneric);
+                        grid.removeAllColumns();
+                        grid.addColumn("fecha");
+                        grid.addColumn("lote");
+                        grid.addColumn("monto_bruto");
+                        grid.addColumn("comision");
+                        grid.addColumn("monto_neto");
+                        grid.addColumn("comentarios");
+                        Grid.Column fecha = grid.getColumn("fecha");
+                        fecha.setHeaderCaption("Fecha");
+                        Grid.Column lote = grid.getColumn("lote");
+                        lote.setHeaderCaption("Lote");
+                        Grid.Column monto_bruto = grid.getColumn("monto_bruto");
+                        monto_bruto.setHeaderCaption("Monto bruto");
+                        Grid.Column comision = grid.getColumn("comision");
+                        comision.setHeaderCaption("Comision");
+                        Grid.Column monto_neto = grid.getColumn("monto_neto");
+                        monto_neto.setHeaderCaption("Monto neto");
+                        Grid.Column comentarios = grid.getColumn("comentarios");
+                        comentarios.setHeaderCaption("Comentarios");
+                        grid.setColumnOrder("fecha", "lote", "monto_bruto", "comision", "monto_neto", "comentarios");
                         toolbarData.removeAllComponents();
                         toolbarData.addComponent(grid);
 //                   
@@ -329,11 +330,27 @@ public class RptControDeMediosDePago extends Panel implements View {
                 InputStream input = null;
                 List<String> tituloscolumnas = new ArrayList<String>();
                 String[] titulos = new String[]{"Fecha", "Lote", "Monto bruto", "Comision", "Monto neto", "Comentarios"};
-
+                /*como crear un objeto arrylist de tipo string*/
+                ArrayList<String> tituloshoja = new ArrayList<String>();
+                tituloshoja.add("VERSATEC");
+                tituloshoja.add("TC FLOTA BCR");
+                tituloshoja.add("TARJETA BANCO NACIONAL");
+                tituloshoja.add("TARJETA CREDOMATIC");
+                tituloshoja.add("FLEET MAGIC DAVIVIENDA");
+                tituloshoja.add("TARJETA FLEET MAGIC SB");
+                tituloshoja.add("TARJETA BCR");
+                tituloshoja.add("TC FLOTA BAC");
+                tituloshoja.add("UNO PLUS");
+                tituloshoja.add("TC DAVIVIENDA");
+                
                 tituloscolumnas = Arrays.asList(titulos);
+                
+                
+
+                
                 XSSFWorkbook workbook = new XSSFWorkbook();
                 /*Generar Reporte en XLS*/
-                workbook = excel.generar(1, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION(ES) " + optStation.getValue().toString(), "Control medios de pago", sourceGeneric, null);
+                workbook = excel.generar(10, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION(ES) " + optStation.getValue().toString(), "Flota BAC", sourceGeneric, tituloshoja);
 
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 try {
@@ -355,7 +372,7 @@ public class RptControDeMediosDePago extends Panel implements View {
         StreamResource resource = new StreamResource(source, fileName);
         return resource;
     }
-
+    
     private String[] getSeleccion() {
         String[] result;
         String valor = String.valueOf(optStation.getValue());
