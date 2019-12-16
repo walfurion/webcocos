@@ -274,13 +274,12 @@ public class FormDetalleDeposito extends Window {
             } else {
                 tmpDoubleOther += bcrDeposito.getItem(itemId).getBean().getMonto();
             }
-
-        }
+         }
         
         System.out.println("total dolar  " + tmpDoubleDolar);
         System.out.println("total otros  " + tmpDoubleOther);
+        tmpDouble = (tmpDoubleDolar * 560) + tmpDoubleOther;
         
-
         tblDeposito.setFooterVisible(true);
         tblDeposito.setColumnFooter("colMedioPago", "Total:");
         tblDeposito.setColumnFooter("colMonto", currencySymbol + numberFmt.format(tmpDouble).trim());

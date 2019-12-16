@@ -101,7 +101,9 @@ public class PrCierreDia extends Panel implements View {
     ComboBox cbxPais, cbxEstacion;
 
     Table tableTurno = new Table();
-
+    double tmpDouble;
+    double tmpDoubleDolar;
+    double tmpDoubleOther;
 //    {
 //        @Override
 //        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
@@ -370,9 +372,9 @@ public class PrCierreDia extends Panel implements View {
                     if (p.getProductoId().equals(idto.getProductoId())) {
 //                        invdto.setInicial(idto.getFinall());
                         invdto.setInicialDto(idto.getInventarioFisico());
-                        invdto.setLecturaVeederRoot(invdto.getInicialDto()+invdto.getComprasDto()-invdto.getVentasCons());
-                        invdto.setDiferencia(invdto.getInventarioFisico()-invdto.getLecturaVeederRoot());
-                        invdto.setVarianza((invdto.getDiferencia()/invdto.getVentasCons())*100);
+                        invdto.setLecturaVeederRoot(invdto.getInicialDto() + invdto.getComprasDto() - invdto.getVentasCons());
+                        invdto.setDiferencia(invdto.getInventarioFisico() - invdto.getLecturaVeederRoot());
+                        invdto.setVarianza((invdto.getDiferencia() / invdto.getVentasCons()) * 100);
                         break;
                     }
                 }
@@ -385,14 +387,14 @@ public class PrCierreDia extends Panel implements View {
                 inventarioHoy.add(invdto);
             }
             if (dia != null && dia.getEstadoId() != null && dia.getEstadoId() == 2) { //cerrado
-                List<RecepcionInventario> listRec = service.getRecepcion(estacion.getPaisId(), estacion.getEstacionId(), dfdFecha.getValue()); 
-                if(!listRec.isEmpty()){
+                List<RecepcionInventario> listRec = service.getRecepcion(estacion.getPaisId(), estacion.getEstacionId(), dfdFecha.getValue());
+                if (!listRec.isEmpty()) {
                     bcrRecepcion.addAll(listRec);
                     recepcion = bcrRecepcion.getItem(bcrRecepcion.getItemIds().get(0)).getBean();
                     tfdDriver.setValue(recepcion.getPiloto());
                     tfdUnit.setValue(recepcion.getUnidad());
                     tfdBill.setValue(recepcion.getFactura());
-                }                                                
+                }
                 List<InventarioRecepcion> listTmpInv = service.getInventarioByFechaEstacion(dia.getFecha(), estacion.getEstacionId());
                 if (!listTmpInv.isEmpty()) {    //cubre el caso cuando se olvido ingresar inventario dia anterior.
                     inventarioHoy = listTmpInv;
@@ -408,9 +410,9 @@ public class PrCierreDia extends Panel implements View {
                         item.setDiferencia(item.getVentasCons() - item.getVentas());
                         item.setEstado((item.getDiferencia() > 0) ? "SOBRANTE" : ((item.getDiferencia() == 0) ? "OK" : "FALTANTE"));
                         item.setEsNuevo(Boolean.FALSE);
-                        item.setLecturaVeederRoot(item.getInicialDto()+item.getComprasDto()-item.getVentasCons());
-                        item.setDiferencia(item.getInventarioFisico()-item.getLecturaVeederRoot());
-                        item.setVarianza((item.getDiferencia()/item.getVentasCons())*100);
+                        item.setLecturaVeederRoot(item.getInicialDto() + item.getComprasDto() - item.getVentasCons());
+                        item.setDiferencia(item.getInventarioFisico() - item.getLecturaVeederRoot());
+                        item.setVarianza((item.getDiferencia() / item.getVentasCons()) * 100);
                     }
                 }
             }
@@ -550,14 +552,13 @@ public class PrCierreDia extends Panel implements View {
                     //  ContDepositoDet = new BeanItemContainer<GenericDepositoDet>(GenericDepositoDet.class);
                     //  bcrDeposito.addAll(daoDeposito.getDepositoByEstacion(estacion.getEstacionId()));
 
-                  //  }                    
+                    //  }                    
                     //Importante
 //                    binder.bindMemberFields(this);
 //                    binder.setItemDataSource(recepcion);
 //                    
 //                    recepcion = bcrRecepcion.getItem(dfdFecha.getValue()).getBean();
 //                    binder.setItemDataSource(recepcion);
-
                     determinarPermisos();
                     calcularSumas();
                     printDataLabel();
@@ -672,8 +673,8 @@ public class PrCierreDia extends Panel implements View {
         tableEfectivo.setColumnFooter("nombre", "Total:");
         tableEfectivo.setColumnFooter("value", symCurrency + numberFmt.format(tpEfectivo));
         tableDeposito.setFooterVisible(true);
-        tableDeposito.setColumnFooter("nombre", "Total:");
-        tableDeposito.setColumnFooter("value", symCurrency + numberFmt.format(tpDeposito));
+        tableDeposito.setColumnFooter("mediopago", "Total:");
+        tableDeposito.setColumnFooter("monto", symCurrency + numberFmt.format(tpDeposito));
 
     }
 
@@ -732,8 +733,8 @@ public class PrCierreDia extends Panel implements View {
     private void buildTableDeposito() {
         tableDeposito.setCaption("Depósito:");
         tableDeposito.setContainerDataSource(bcrDeposito);
-        tableDeposito.setVisibleColumns(new Object[]{"mediopago", "numeroboleta","monto"});
-        tableDeposito.setColumnHeaders(new String[]{"Nombre", "Número Boleta","Valor"});
+        tableDeposito.setVisibleColumns(new Object[]{"mediopago", "numeroboleta", "monto"});
+        tableDeposito.setColumnHeaders(new String[]{"Nombre", "Número Boleta", "Valor"});
         tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT);
         tableDeposito.setHeight(200f, Unit.PIXELS);
         tableDeposito.addStyleName(ValoTheme.TABLE_COMPACT);
@@ -761,19 +762,19 @@ public class PrCierreDia extends Panel implements View {
                     public void valueChange(Property.ValueChangeEvent event) {
                         InventarioRecepcion invdto = (InventarioRecepcion) ((BeanItem) tblInventory.getItem(itemId)).getBean();
 //                        invdto.setVentas((invdto.getInicialDto() + invdto.getComprasDto()) - (invdto.getFinallDto() + invdto.getCalibracion()));
-                        Double valIniDto = invdto.getInicialDto()==null?0.0:invdto.getInicialDto();
-                        Double valComprasDto = invdto.getComprasDto()==null?0.0:invdto.getComprasDto(); 
-                        Double valCalibracion = invdto.getCalibracion()==null?0.0:invdto.getCalibracion();
-                        Double valFinalDto = invdto.getFinallDto()==null?0.0:invdto.getFinallDto();
-                        Double valVentasCons = invdto.getVentasCons()==null?0.0:invdto.getVentasCons();
-                        Double valCompras = invdto.getCompras()==null?0.0:invdto.getCompras();
+                        Double valIniDto = invdto.getInicialDto() == null ? 0.0 : invdto.getInicialDto();
+                        Double valComprasDto = invdto.getComprasDto() == null ? 0.0 : invdto.getComprasDto();
+                        Double valCalibracion = invdto.getCalibracion() == null ? 0.0 : invdto.getCalibracion();
+                        Double valFinalDto = invdto.getFinallDto() == null ? 0.0 : invdto.getFinallDto();
+                        Double valVentasCons = invdto.getVentasCons() == null ? 0.0 : invdto.getVentasCons();
+                        Double valCompras = invdto.getCompras() == null ? 0.0 : invdto.getCompras();
 
                         invdto.setVentas(valIniDto + valComprasDto + valCalibracion - valFinalDto);
                         invdto.setDiferencia(valVentasCons - invdto.getVentas());
                         invdto.setEstado((invdto.getDiferencia() > 0) ? "SOBRANTE" : ((invdto.getDiferencia() == 0) ? "OK" : "FALTANTE"));
                         bcrInventario.getItem(itemId).getItemProperty("ventas").setValue(invdto.getVentas());
                         bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invdto.getDiferencia());
-                        bcrInventario.getItem(itemId).getItemProperty("lecturaVeederRoot").setValue(valIniDto+valCompras-valVentasCons);
+                        bcrInventario.getItem(itemId).getItemProperty("lecturaVeederRoot").setValue(valIniDto + valCompras - valVentasCons);
                         bcrInventario.getItem(itemId).getItemProperty("estado").setValue(invdto.getEstado());
                     }
                 });
@@ -797,12 +798,12 @@ public class PrCierreDia extends Panel implements View {
                         invdto.setVentas(invdto.getInicialDto() + invdto.getComprasDto() + invdto.getCalibracion() - invdto.getFinallDto());
                         invdto.setDiferencia(invdto.getVentasCons() - invdto.getVentas());
                         invdto.setEstado((invdto.getDiferencia() > 0) ? "SOBRANTE" : ((invdto.getDiferencia() == 0) ? "OK" : "FALTANTE"));
-                        bcrInventario.getItem(itemId).getItemProperty("ventas").setValue(invdto.getVentas());                        
+                        bcrInventario.getItem(itemId).getItemProperty("ventas").setValue(invdto.getVentas());
                         bcrInventario.getItem(itemId).getItemProperty("estado").setValue(invdto.getEstado());
                         bcrInventario.getItem(itemId).getItemProperty("inicialDto").setValue(invdto.getInicialDto());
-                        bcrInventario.getItem(itemId).getItemProperty("lecturaVeederRoot").setValue(invdto.getInicialDto()+invdto.getComprasDto()-invdto.getVentasCons());
+                        bcrInventario.getItem(itemId).getItemProperty("lecturaVeederRoot").setValue(invdto.getInicialDto() + invdto.getComprasDto() - invdto.getVentasCons());
                         bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invdto.getDiferencia());
-                        bcrInventario.getItem(itemId).getItemProperty("varianza").setValue(invdto.getDiferencia()/invdto.getVentasCons());
+                        bcrInventario.getItem(itemId).getItemProperty("varianza").setValue(invdto.getDiferencia() / invdto.getVentasCons());
                     }
                 });
                 return tfdValue;
@@ -865,10 +866,10 @@ public class PrCierreDia extends Panel implements View {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
                         InventarioRecepcion invdto = bcrInventario.getItem(itemId).getBean();
-                        Double invFis = invdto.getInventarioFisico()==null?0.0:invdto.getInventarioFisico();
-                        Double invTeo = invdto.getLecturaVeederRoot()==null?0.0:invdto.getLecturaVeederRoot();
-                        bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invFis-invTeo);
-                        bcrInventario.getItem(itemId).getItemProperty("varianza").setValue((invdto.getDiferencia()/invdto.getVentasCons())*100);
+                        Double invFis = invdto.getInventarioFisico() == null ? 0.0 : invdto.getInventarioFisico();
+                        Double invTeo = invdto.getLecturaVeederRoot() == null ? 0.0 : invdto.getLecturaVeederRoot();
+                        bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invFis - invTeo);
+                        bcrInventario.getItem(itemId).getItemProperty("varianza").setValue((invdto.getDiferencia() / invdto.getVentasCons()) * 100);
 //                        bcrInventario.getItem(itemId).getItemProperty("inventarioFisico").setValue(invFis);                        
                     }
                 });
@@ -888,8 +889,8 @@ public class PrCierreDia extends Panel implements View {
                     public void valueChange(Property.ValueChangeEvent event) {
                         InventarioRecepcion invdto = bcrInventario.getItem(itemId).getBean();
                         Double invFis = invdto.getInventarioFisico();
-                        bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invdto.getInventarioFisico()-invdto.getLecturaVeederRoot());
-                        bcrInventario.getItem(itemId).getItemProperty("varianza").setValue((invdto.getDiferencia()/invdto.getVentasCons())*100);
+                        bcrInventario.getItem(itemId).getItemProperty("diferencia").setValue(invdto.getInventarioFisico() - invdto.getLecturaVeederRoot());
+                        bcrInventario.getItem(itemId).getItemProperty("varianza").setValue((invdto.getDiferencia() / invdto.getVentasCons()) * 100);
 //                        bcrInventario.getItem(itemId).getItemProperty("inventarioFisico").setValue(invFis);                        
                     }
                 });
@@ -991,7 +992,7 @@ public class PrCierreDia extends Panel implements View {
 //                return tfdValue;
 //            }
 //        });
-            tblInventory.addGeneratedColumn("colTanque", new Table.ColumnGenerator() {
+        tblInventory.addGeneratedColumn("colTanque", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("tanque");  //Atributo del bean
@@ -1001,8 +1002,8 @@ public class PrCierreDia extends Panel implements View {
                 return lbl;
             }
         });
-        tblInventory.setVisibleColumns(new Object[]{"tanque","productoNombre", "colInicial", "colCompras", "colVentas", "colCalibracion", "colVeederroot", "colInvFisico", "colDiferencia", "colVarianza", "colCompartimiento", "colGalones"});
-        tblInventory.setColumnHeaders(new String[]{"Nombre tanque","Producto", "Iniicial", "Compras", "Ventas", "Calibración", "Inv teórico", "Inv físico", "Diferencia", "% Varianza sobre ventas", "Compartimiento", "Galones"});
+        tblInventory.setVisibleColumns(new Object[]{"tanque", "productoNombre", "colInicial", "colCompras", "colVentas", "colCalibracion", "colVeederroot", "colInvFisico", "colDiferencia", "colVarianza", "colCompartimiento", "colGalones"});
+        tblInventory.setColumnHeaders(new String[]{"Nombre tanque", "Producto", "Iniicial", "Compras", "Ventas", "Calibración", "Inv teórico", "Inv físico", "Diferencia", "% Varianza sobre ventas", "Compartimiento", "Galones"});
 
         /*        tblInventory.addGeneratedColumn("colFinal", new Table.ColumnGenerator() {
             @Override
@@ -1059,6 +1060,7 @@ public class PrCierreDia extends Panel implements View {
     }
 
     private void buildButtons() {
+
         btnDetalleDeposito = new Button("Detalle Efectivo", FontAwesome.PLUS);
         btnDetalleDeposito.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnDetalleDeposito.addStyleName(ValoTheme.BUTTON_SMALL);
@@ -1131,13 +1133,13 @@ public class PrCierreDia extends Panel implements View {
                                 dia.setModificadoPersona(user.getNombreLogin());
                                 dia.setModificadoPor(user.getUsername());
                                 dia = svcTC.doActionDia(Dao.ACTION_UPDATE, dia);
-                                
+
                                 if (tfdDriver.getValue() != null && tfdUnit.getValue() != null && tfdBill.getValue() != null) {
                                     RecepcionInventario recepcion = new RecepcionInventario(null, dia.getFecha(), estacion.getPaisId(), estacion.getEstacionId(), tfdDriver.getValue(), tfdUnit.getValue(), tfdBill.getValue());
                                     recepcion.setCreado_por(user.getUsername());
                                     svcTC.doActionInvRecepcion(Dao.ACTION_ADD, recepcion);
                                 }
-                                
+
                                 InventarioRecepcion inventario;
                                 //InventarioRecepcion idto;
                                 for (Integer id : (List<Integer>) tblInventory.getItemIds()) {
@@ -1148,19 +1150,19 @@ public class PrCierreDia extends Panel implements View {
                                     inventario.setCreadoPor(user.getUsername());
                                     inventario.setCreadoPersona(user.getNombreLogin());
                                     inventario.setModificadoPor(user.getUsername());
-                                    inventario.setModificadoPersona(user.getNombreLogin());                                    
+                                    inventario.setModificadoPersona(user.getNombreLogin());
                                     inventario.setInventarioFisico(bcrInventario.getItem(id).getBean().getInventarioFisico());
                                     inventario.setDiferencia(bcrInventario.getItem(id).getBean().getDiferencia());
                                     inventario.setVarianza(bcrInventario.getItem(id).getBean().getVarianza());
                                     inventario.setCompartimiento(bcrInventario.getItem(id).getBean().getCompartimiento());
-                                    int galones = bcrInventario.getItem(id).getBean().getGalonesCisterna()==null?0:bcrInventario.getItem(id).getBean().getGalonesCisterna();
+                                    int galones = bcrInventario.getItem(id).getBean().getGalonesCisterna() == null ? 0 : bcrInventario.getItem(id).getBean().getGalonesCisterna();
                                     inventario.setGalonesCisterna(galones);
                                     inventario.setVentas(bcrInventario.getItem(id).getBean().getVentasCons());
                                     inventario.setCalibracion(bcrInventario.getItem(id).getBean().getCalibracion());
 //                                    svcTC.doActionInventario( (invNuevo ? Dao.ACTION_ADD : Dao.ACTION_UPDATE), 
                                     inventario.setVolFacturado(id);
-                                    svcTC.doActionInventario((inventario.getEsNuevo() ? Dao.ACTION_ADD : Dao.ACTION_UPDATE),inventario);
-                                }                                
+                                    svcTC.doActionInventario((inventario.getEsNuevo() ? Dao.ACTION_ADD : Dao.ACTION_UPDATE), inventario);
+                                }
 
                                 svcTC.closeConnections();
                                 if (dia.getFecha() != null) {
@@ -1262,7 +1264,7 @@ public class PrCierreDia extends Panel implements View {
             bcrMediospago.addAll(svcTC.getMediopagoByTurnosid(turnosIds));
             bcrEfectivo.addAll(svcTC.getEfectivoByTurnosid(turnosIds));
             String p = new SimpleDateFormat("yyyy-MM-dd").format(dfdFecha.getValue());
-            //bcrDeposito.addAll(svcDep.getDepositoByEstacion(estacion.getEstacionId().toString(), p));
+            bcrDeposito.addAll(svcDep.getDepositoByEstacion(estacion.getEstacionId().toString(), p));
         }
         svcTC.closeConnections();
         calcularSumas();
@@ -1353,9 +1355,9 @@ public class PrCierreDia extends Panel implements View {
                                 break;
                             }
                         }
-                        System.out.println("entra a lectura veeder "+item.getInicialDto());
-                        System.out.println("entra a lectura veeder "+item.getComprasDto());
-                        item.setLecturaVeederRoot(item.getInicialDto()+item.getComprasDto());
+                        System.out.println("entra a lectura veeder " + item.getInicialDto());
+                        System.out.println("entra a lectura veeder " + item.getComprasDto());
+                        item.setLecturaVeederRoot(item.getInicialDto() + item.getComprasDto());
                         item.setVentas((item.getInicialDto() + item.getComprasDto()) - (item.getFinallDto() + item.getCalibracion()));
                         item.setDiferencia(item.getVentasCons() - item.getVentas());
                         item.setEstado((item.getDiferencia() > 0) ? "SOBRANTE" : ((item.getDiferencia() == 0) ? "OK" : "FALTANTE"));
@@ -1418,16 +1420,16 @@ public class PrCierreDia extends Panel implements View {
         if (cbxEstacion.getValue() != null) {
             System.out.println("dentro de for cbxestacion");
             formDetalleDeposito = new FormDetalleDeposito(simboloMoneda, bcrDeposito, idpais, idestacion);
-            //formDetalleDeposito = new FormDetalleDeposito(simboloMoneda, idpais, idestacion);
             formDetalleDeposito.addCloseListener((e) -> {
                 bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
                 bcrDeposito = (BeanContainer<Integer, GenericDepositoDet>) VaadinSession.getCurrent().getAttribute("detalleDeposito");
-
+                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("total");
+                tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
+                tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
             });
             getUI().addWindow(formDetalleDeposito);
             formDetalleDeposito.focus();
         }
     }
-
 
 }
