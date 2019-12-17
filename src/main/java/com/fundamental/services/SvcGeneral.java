@@ -544,20 +544,19 @@ public class SvcGeneral extends Dao {
 
     public Lubricanteprecio doActionLubprecioCarga(String action, Lubricanteprecio lub, Lubricanteprecio lubAnterior) {
         Lubricanteprecio result = new Lubricanteprecio();
-        System.out.println("fechhhhhhhhhhhhha " + lub.getFechaFin()+ " " + lub.getFechaInicio());
-        try {
+                try {
             getConnection().setAutoCommit(false);
             if (action.equals(Dao.ACTION_ADD)) {
                 query = "SELECT lubricanteprecio_seq.NEXTVAL FROM DUAL";
                 pst = getConnection().prepareStatement(query);
                 ResultSet rst = pst.executeQuery();
                 int lubprecioId = (rst.next()) ? rst.getInt(1) : 0;
-                System.out.println("lub precio " + lubprecioId);
+
                 lub.setLubricanteprecio(lubprecioId);
                 closePst();
                 query = "INSERT INTO lubricanteprecio (lubricanteprecio, pais_id, producto_id, fecha_inicio, fecha_fin, precio, creado_por, creado_el) "
                         + "VALUES (" + lubprecioId + ",?, ?, to_date(?,'dd/mm/yyyy'), to_date(?,'dd/mm/yyyy'), ?, ?, sysdate)";
-                System.out.println("doActionLubprecio " + query + " " + lub.toString());
+         
                 
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, lub.getPaisId());
@@ -572,8 +571,7 @@ public class SvcGeneral extends Dao {
                 query = "UPDATE lubricanteprecio "
                         + "SET pais_id = ?, producto_id = ?, fecha_inicio = to_date(?,'dd/mm/yyyy'), fecha_fin = to_date(?,'dd/mm/yyyy'), precio = ?, modificado_por = ?, modificado_el = SYSDATE "
                         + "WHERE lubricanteprecio = ? ";
-                System.out.println("query update " + query);
-                System.out.println("lub para update " + lub.toString());
+
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, lub.getPaisId());
                 pst.setObject(2, lub.getProductoId());
