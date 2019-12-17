@@ -128,6 +128,8 @@ public class SvcMedioPago extends Dao {
 //        return result;
 //    }
     
+    
+    
 //    public List<GenericMedioPago> getMedioPagoByCountry(Integer idpais) {
 //        List<GenericMedioPago> result = new ArrayList();
 //        try {

@@ -141,4 +141,62 @@ public class SvcDeposito extends Dao {
 //        }
 //        return result;
 //    }
+    
+    public List<Estacion> getAllEstaciones(boolean includeInactive) {
+        List<Estacion> result = new ArrayList();
+        //String statusName;
+        ResultSet rst = null;
+        try {
+            miQuery = (includeInactive) ? "" : " AND e.estado = 'A' ";
+            miQuery = "SELECT e.estacion_id, e.nombre "
+                     + "FROM estacion e, pais p "
+                    + "WHERE e.pais_id = p.pais_id "
+                    + miQuery
+                    + " ORDER BY p.nombre ";
+            pst = getConnection().prepareStatement(miQuery);
+            rst = pst.executeQuery();
+            Estacion estacion;
+            while (rst.next()) {
+                estacion = new Estacion(rst.getInt(1), rst.getString(2));
+                result.add(estacion);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+    
+    public List<Mediopago> getAllMediosPago(boolean includeInactives) {
+        List<Mediopago> result = new ArrayList();
+        try {
+            String query = (includeInactives) ? "" : " AND m.estado = 'A' ";
+            query = "SELECT m.mediopago_id, m.nombre "
+                    + "FROM mediopago m, pais p "
+                    + "WHERE m.pais_id = p.pais_id "
+                    + query
+                    + " ORDER BY m.nombre";
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            Mediopago mediopago;
+            while (rst.next()) {
+                mediopago = new Mediopago(rst.getInt(1), rst.getString(2));
+                result.add(mediopago);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
 }
