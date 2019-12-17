@@ -75,4 +75,52 @@ public class SvcDeposito extends Dao {
         }
         return result;
     }
+    
+//    public Tanque doActionTanque(String action, Tanque tanque) {
+//        Tanque result = new Tanque();
+//        try {
+//            if (action.equals(Dao.ACTION_ADD)) {
+//                System.out.println("ingresa metodo guardar");
+//                query = "SELECT seq_tanque.nextval FROM DUAL";
+//                pst = getConnection().prepareStatement(query);
+//                ResultSet rst = pst.executeQuery();
+//                tanque.setIdtanque((rst.next()) ? rst.getInt(1) : 0);
+//                closePst();
+//                query = "INSERT INTO tanque (idtanque, producto_id, estacion_id, descripcion, usuario_creacion, fecha_creacion) "
+//                        + "VALUES (?, ?, ?, ?, ?, SYSDATE)";
+//                
+//                pst = getConnection().prepareStatement(query);
+//                pst.setObject(1, tanque.getIdtanque());
+//                pst.setObject(2, tanque.getProducto().getProductoId());
+//                pst.setObject(3, tanque.getEstacion().getEstacionId());
+//                pst.setObject(4, tanque.getDescripcion());
+//                pst.setObject(5, tanque.getUsuarioCreacion());
+//                //pst.setObject(6, tanque.getFechaCreacion());
+//
+//                pst.executeUpdate();
+//                result = tanque;
+//            } else if (action.equals(Dao.ACTION_UPDATE)) {
+//                System.out.println("ingresa metodo actualizar");
+//                query = "UPDATE tanque "
+//                        + "SET producto = ?, estacion = ?, descripcion = ?"
+//                        + "  usuario_modificacion = ?, fecha_modificacion = SYSDATE"
+//                        + "WHERE idtanque = ?";
+//                pst = getConnection().prepareStatement(query);
+//                pst.setObject(1, tanque.getProducto().getProductoId());
+//                pst.setObject(2, tanque.getEstacion().getEstacionId());
+//                pst.setObject(3, tanque.getDescripcion());
+//                pst.setObject(4, tanque.getUsuarioModificacion());
+//                pst.setObject(5, tanque.getIdtanque());
+//
+//                pst.executeUpdate();
+//                result = tanque;
+//            }
+//        } catch (Exception exc) {
+//            // result.setDescError(exc.getMessage());
+//            exc.printStackTrace();
+//        } finally {
+//            closePst();
+//        }
+//        return result;
+//    }
 }

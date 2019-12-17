@@ -308,5 +308,6 @@ public class FormDetalleLubricantes extends Window {
         VaadinSession.getCurrent().setAttribute("totalProd", tmpDouble);
         VaadinSession.getCurrent().setAttribute("totalProductoUno", totalUno);
         VaadinSession.getCurrent().setAttribute("totalProducto", totalNoUno);
+        
     }
 }

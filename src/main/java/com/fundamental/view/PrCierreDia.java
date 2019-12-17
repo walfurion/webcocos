@@ -1426,6 +1426,10 @@ public class PrCierreDia extends Panel implements View {
                 tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("total");
                 tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
                 tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
+                System.out.println("tmodouble en cierre" + tmpDouble );
+                System.out.println("tmodouble en cierre" + tmpDoubleDolar );
+                System.out.println("tmodoubleother en cierre" + tmpDoubleOther);
+                
             });
             getUI().addWindow(formDetalleDeposito);
             formDetalleDeposito.focus();

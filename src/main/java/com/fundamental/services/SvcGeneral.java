@@ -9,6 +9,7 @@ import com.fundamental.model.Marca;
 import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Producto;
 import com.fundamental.model.dto.DtoGenericBean;
+import com.fundamental.utils.Constant;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,10 +31,12 @@ public class SvcGeneral extends Dao {
             String type) {
         List<Cliente> result = new ArrayList();
         try {
-            query = "SELECT c.cliente_id, c.codigo, c.nombre, c.estacion_id, c.estado, c.creado_por, c.creado_el, c.tipo, c.codigo_envoy, c.cedula_juridica, e.nombre, p.pais_id, p.nombre "
+            query = "SELECT c.cliente_id, c.codigo, c.nombre, c.estacion_id,  decode(c.estado,'A','Activo','Inactivo'), c.creado_por, c.creado_el, decode(c.tipo,'P','Prepago','Crédito'), c.codigo_envoy, c.cedula_juridica, e.nombre, p.pais_id, p.nombre "
                     + "FROM cliente c, estacion e, pais p "
-                    + "WHERE c.estacion_id = e.estacion_id AND e.pais_id = p.pais_id " //c.estacion_id = "+estacionId+" AND "
-                    + "AND c.tipo = '" + type + "'";
+                    + "WHERE c.estacion_id = e.estacion_id AND e.pais_id = p.pais_id "; //c.estacion_id = "+estacionId+" AND "
+                    if(type!=null && "".equals(type.trim())){
+                        query = query + " AND c.tipo = '" + type + "'";
+                    }
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Cliente cliente;
@@ -43,6 +46,34 @@ public class SvcGeneral extends Dao {
                 cliente.setPaisId(rst.getInt(12));
                 cliente.setPaisNombre(rst.getString(13));
                 result.add(cliente);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
+    
+    public Map<String,Cliente> getCustomersByStationidTypeMap(//Integer estacionId, 
+            String type) {
+        Map<String,Cliente> result = new HashMap<String,Cliente>();
+        try {
+            query = "SELECT c.cliente_id, c.codigo, c.nombre, c.estacion_id,  decode(c.estado,'A','Activo','Inactivo'), c.creado_por, c.creado_el, decode(c.tipo,'P','Prepago','Crédito'), c.codigo_envoy, c.cedula_juridica, e.nombre, p.pais_id, p.nombre "
+                    + "FROM cliente c, estacion e, pais p "
+                    + "WHERE c.estacion_id = e.estacion_id AND e.pais_id = p.pais_id "; //c.estacion_id = "+estacionId+" AND "
+                    if(type!=null && "".equals(type.trim())){
+                        query = query + " AND c.tipo = '" + type + "'";
+                    }
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            Cliente cliente;
+            while (rst.next()) {
+                cliente = new Cliente(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5), rst.getString(6), null, rst.getString(8), rst.getString(9), rst.getString(10));
+                cliente.setEstacionNombre(rst.getString(11));
+                cliente.setPaisId(rst.getInt(12));
+                cliente.setPaisNombre(rst.getString(13));
+                result.put(cliente.getPaisId()+""+cliente.getCodigo(),cliente);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -70,16 +101,18 @@ public class SvcGeneral extends Dao {
                 result = true;
             } else if (action.equals(Dao.ACTION_UPDATE)) {
                 query = "UPDATE cliente "
-                        + "SET codigo = ?, nombre = ?, estacion_id = ?, modificado_por = ?, codigo_envoy = ?, cedula_juridica = ?, modificado_el = SYSDATE "
-                        + "WHERE cliente_id = ?";
+                        + "SET codigo = ?, nombre = ?, estacion_id = ?, modificado_por = ?, codigo_envoy = ?, cedula_juridica = ?, modificado_el = SYSDATE , estado = ? "
+                        + " WHERE cliente_id = ? ";
                 pst = getConnection().prepareStatement(query);
                 pst.setString(1, cliente.getCodigo());
                 pst.setString(2, cliente.getNombre());
                 pst.setInt(3, cliente.getEstacionId());
                 pst.setString(4, cliente.getCreadoPor());
-                pst.setInt(5, cliente.getClienteId());
-                pst.setString(6, cliente.getCodigoEnvoy());
-                pst.setString(7, cliente.getCedulaJuridica());
+                pst.setString(5, cliente.getCodigoEnvoy());
+                pst.setString(6, cliente.getCedulaJuridica());
+                System.out.println("estado "+cliente.getEstado());
+                pst.setString(7, cliente.getEstado());                
+                pst.setInt(8, cliente.getClienteId());
                 pst.executeUpdate();
                 result = true;
             }
@@ -543,39 +576,39 @@ public class SvcGeneral extends Dao {
 
     public Lubricanteprecio doActionLubprecioCarga(String action, Lubricanteprecio lub, Lubricanteprecio lubAnterior) {
         Lubricanteprecio result = new Lubricanteprecio();
-        try {
+                try {
             getConnection().setAutoCommit(false);
             if (action.equals(Dao.ACTION_ADD)) {
                 query = "SELECT lubricanteprecio_seq.NEXTVAL FROM DUAL";
                 pst = getConnection().prepareStatement(query);
                 ResultSet rst = pst.executeQuery();
                 int lubprecioId = (rst.next()) ? rst.getInt(1) : 0;
-                System.out.println("lub precio " + lubprecioId);
+
                 lub.setLubricanteprecio(lubprecioId);
                 closePst();
                 query = "INSERT INTO lubricanteprecio (lubricanteprecio, pais_id, producto_id, fecha_inicio, fecha_fin, precio, creado_por, creado_el) "
-                        + "VALUES (" + lubprecioId + ",?, ?, ?, ?, ?, ?, sysdate)";
-                System.out.println("doActionLubprecio " + query + " " + lub.toString());
+                        + "VALUES (" + lubprecioId + ",?, ?, to_date(?,'dd/mm/yyyy'), to_date(?,'dd/mm/yyyy'), ?, ?, sysdate)";
+         
+                
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, lub.getPaisId());
                 pst.setObject(2, lub.getProductoId());
-                pst.setObject(3, new java.sql.Date(lub.getFechaInicio().getTime()));
-                pst.setObject(4, new java.sql.Date(lub.getFechaFin().getTime()));
+                pst.setString(3, Constant.SDF_ddMMyyyy.format(lub.getFechaInicio()));
+                pst.setString(4, Constant.SDF_ddMMyyyy.format(lub.getFechaFin()));
                 pst.setObject(5, lub.getPrecio());
                 pst.setObject(6, lub.getCreadoPor());
                 //pst.setObject(7, lub.getLubricanteprecio());
                 pst.executeUpdate();
             } else if (action.equals(Dao.ACTION_UPDATE)) {
                 query = "UPDATE lubricanteprecio "
-                        + "SET pais_id = ?, producto_id = ?, fecha_inicio = ?, fecha_fin = ?, precio = ?, modificado_por = ?, modificado_el = SYSDATE "
+                        + "SET pais_id = ?, producto_id = ?, fecha_inicio = to_date(?,'dd/mm/yyyy'), fecha_fin = to_date(?,'dd/mm/yyyy'), precio = ?, modificado_por = ?, modificado_el = SYSDATE "
                         + "WHERE lubricanteprecio = ? ";
-                System.out.println("query update " + query);
-                System.out.println("lub para update " + lub.toString());
+
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, lub.getPaisId());
                 pst.setObject(2, lub.getProductoId());
-                pst.setObject(3, new java.sql.Date(lub.getFechaInicio().getTime()));
-                pst.setObject(4, new java.sql.Date(lub.getFechaFin().getTime()));
+                pst.setString(3, Constant.SDF_ddMMyyyy.format(lub.getFechaInicio()));
+                pst.setString(4, Constant.SDF_ddMMyyyy.format(lub.getFechaFin()));
                 pst.setObject(5, lub.getPrecio());
                 pst.setObject(6, lub.getModificadoPor());
                 pst.setObject(7, lub.getLubricanteprecio());
