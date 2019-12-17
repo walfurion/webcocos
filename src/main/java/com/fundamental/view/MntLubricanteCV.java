@@ -148,27 +148,8 @@ public class MntLubricanteCV extends Panel implements View {
         SvcComVenLubricantes service = new SvcComVenLubricantes();
         int countryId = ((Pais) cmbPais.getValue()).getPaisId();
         int brandId = ((Marca) cmbMarca.getValue()).getIdMarca();
-//        int productId = 0;
-//        if(cmbProducto.getValue() != null){
-//            productId = ((Producto) cmbProducto.getValue()).getProductoId();
-//        }
-        
-//        int count = service.countLub(productId, cmbFecha.getValue(), countryId);
-//        List<ComVenLubricantes> lubAnterior = new ArrayList();
-//        if(count>0){
-//            listProducts = service.getComVenLubAnterior(countryId, brandId, cmbFecha.getValue());
-//        }else{
-            listProducts = service.getComVenLub(countryId, brandId, cmbFecha.getValue());
-//        }               
+        listProducts = service.getComVenLub(countryId, brandId, cmbFecha.getValue());            
         contLub.addAll(listProducts);  
-//        ComVenLubricantes comVen;
-//        for (Integer pi : (List<Integer>) contLub.getItemIds()) {
-//            comVen = (ComVenLubricantes) ((BeanItem) contLub.getItem(pi)).getBean();
-//            if(comVen.getInvInicial()!=0.0){
-//                System.out.println("entra "+comVen.getInvInicial());
-//                bloqueo = true;
-//            }
-//        }
     }
 
     private Component buildHeader() {
@@ -292,11 +273,14 @@ public class MntLubricanteCV extends Panel implements View {
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("invInicial");  //Atributo del bean
                 TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
+                Property inicial = source.getItem(itemId).getItemProperty("invInicial");
                 tfdValue.setWidth("85px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.setNullRepresentation("0.00");
+                if ((Double) inicial.getValue() > 0.0) {
+                    tfdValue.setReadOnly(true);
+                }
                 tfdValue.addStyleName("align-right");
-                tfdValue.setReadOnly(bloqueo);
                 return tfdValue;
             }
         }); 

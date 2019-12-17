@@ -266,4 +266,6 @@ public class GenericMTD {
         this.davivienda_regular = davivienda_regular;
         this.davivienda_diesel = davivienda_diesel;
     }
+    
+    
 }

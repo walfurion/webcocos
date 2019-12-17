@@ -244,6 +244,18 @@ public class MntInventarioFisico extends Panel implements View {
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.setNullRepresentation("0.00");
                 tfdValue.addStyleName("align-right");
+                tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+                        ComInventarioFisico invdto = (ComInventarioFisico) ((BeanItem) tblProduct.getItem(itemId)).getBean();
+                        Double fisTienda = invdto.getUnidad_fis_tienda() == null ? 0.0 : invdto.getUnidad_fis_tienda();
+                        Double fisBodega = invdto.getUnidad_fis_bodega() == null ? 0.0 : invdto.getUnidad_fis_bodega();
+                        Double fisPista = invdto.getUnidad_fis_pista() == null ? 0.0 : invdto.getUnidad_fis_pista();
+
+                        invdto.setTotal_unidad_fisica(fisTienda+fisBodega+fisPista);
+                        contLub.getItem(itemId).getItemProperty("total_unidad_fisica").setValue(invdto.getTotal_unidad_fisica());
+                    }
+                });
                 return tfdValue;
             }
         });
@@ -257,6 +269,18 @@ public class MntInventarioFisico extends Panel implements View {
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.setNullRepresentation("0.00");
                 tfdValue.addStyleName("align-right");
+                tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+                        ComInventarioFisico invdto = (ComInventarioFisico) ((BeanItem) tblProduct.getItem(itemId)).getBean();
+                        Double fisTienda = invdto.getUnidad_fis_tienda() == null ? 0.0 : invdto.getUnidad_fis_tienda();
+                        Double fisBodega = invdto.getUnidad_fis_bodega() == null ? 0.0 : invdto.getUnidad_fis_bodega();
+                        Double fisPista = invdto.getUnidad_fis_pista() == null ? 0.0 : invdto.getUnidad_fis_pista();
+
+                        invdto.setTotal_unidad_fisica(fisTienda+fisBodega+fisPista);
+                        contLub.getItem(itemId).getItemProperty("total_unidad_fisica").setValue(invdto.getTotal_unidad_fisica());
+                    }
+                });
                 return tfdValue;
             }
         }); 
@@ -270,6 +294,18 @@ public class MntInventarioFisico extends Panel implements View {
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.setNullRepresentation("0.00");
                 tfdValue.addStyleName("align-right");
+                tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+                        ComInventarioFisico invdto = (ComInventarioFisico) ((BeanItem) tblProduct.getItem(itemId)).getBean();
+                        Double fisTienda = invdto.getUnidad_fis_tienda() == null ? 0.0 : invdto.getUnidad_fis_tienda();
+                        Double fisBodega = invdto.getUnidad_fis_bodega() == null ? 0.0 : invdto.getUnidad_fis_bodega();
+                        Double fisPista = invdto.getUnidad_fis_pista() == null ? 0.0 : invdto.getUnidad_fis_pista();
+
+                        invdto.setTotal_unidad_fisica(fisTienda+fisBodega+fisPista);
+                        contLub.getItem(itemId).getItemProperty("total_unidad_fisica").setValue(invdto.getTotal_unidad_fisica());
+                    }
+                });
                 return tfdValue;
             }
         }); 
@@ -282,6 +318,17 @@ public class MntInventarioFisico extends Panel implements View {
                 lbl.setWidth("85px");
                 lbl.addStyleName(ValoTheme.LABEL_SMALL);
                 lbl.addStyleName("align-right");
+                lbl.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+                        ComInventarioFisico invdto = (ComInventarioFisico) ((BeanItem) tblProduct.getItem(itemId)).getBean();
+                        Double invFinal = invdto.getInv_final() == null ? 0.0 : invdto.getInv_final();
+                        Double totalUniFis = invdto.getTotal_unidad_fisica() == null ? 0.0 : invdto.getTotal_unidad_fisica();
+
+                        invdto.setDiferencia_inv(invFinal-totalUniFis);
+                        contLub.getItem(itemId).getItemProperty("diferencia_inv").setValue(invdto.getDiferencia_inv());
+                    }
+                });
                 return lbl;
             }
         });
@@ -325,6 +372,7 @@ public class MntInventarioFisico extends Panel implements View {
                     Notification.show("Los campos marcados son requeridos.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
+                SvcInventarioFisico service = new SvcInventarioFisico();
                 ComInventarioFisico comInv = new ComInventarioFisico();
                 ComInventarioFisico inv;
                 for (Integer i : (List<Integer>) tblProduct.getItemIds()) {
@@ -334,16 +382,23 @@ public class MntInventarioFisico extends Panel implements View {
                     comInv.setPresentacion(lub.getPresentacion());
                     comInv.setPrecio(lub.getPrecio());
                     comInv.setInv_final(lub.getInv_final());
+                    comInv.setProducto_id(lub.getProducto_id());
+                    comInv.setFecha(cmbFecha.getValue());                
+                    comInv.setCreado_por(usuario.getUsername());
+                    comInv.setCreado_el(usuario.getCreadoEl());
+                    comInv.setUnidad_fis_tienda(lub.getUnidad_fis_tienda());
+                    comInv.setUnidad_fis_bodega(lub.getUnidad_fis_bodega());
+                    comInv.setUnidad_fis_pista(lub.getUnidad_fis_pista());
+                    comInv.setDiferencia_inv(lub.getDiferencia_inv());
+                    comInv.setTotal_unidad_fisica(lub.getTotal_unidad_fisica());
+                    comInv.setComentario(lub.getComentario());                    
+                    service.insertCompra(comInv);
                 }
-                for (Integer pid : contLub.getItemIds()) {
-                    inv = contLub.getItem(pid).getBean();
-                    comInv.setProducto_id(inv.getProducto_id());
-                    
-                }
-                comInv.setFecha(cmbFecha.getValue());                
-                comInv.setCreado_por(usuario.getUsername());
-                SvcInventarioFisico service = new SvcInventarioFisico();
-                service.insertCompra(comInv);
+//                for (Integer pid : contLub.getItemIds()) {
+//                    inv = contLub.getItem(pid).getBean();
+//                    comInv.setProducto_id(inv.getProducto_id());
+//                    
+//                }                
 //                service.insertVenta(123, 188, 150.00, cmbFecha.getValue());
                 service.closeConnections();
                 if (comInv.getProducto_id()>0) {
@@ -351,7 +406,7 @@ public class MntInventarioFisico extends Panel implements View {
                     notif.setDelayMsec(3000);
                     notif.setPosition(Position.MIDDLE_CENTER);
                     notif.show(Page.getCurrent());
-                    UI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_LUBS_CV.getViewName());
+                    UI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_INV_FIS.getViewName());
                 } else {
                     Notification.show("Ocurrió un error al ejecutar la acción. \n", Notification.Type.ERROR_MESSAGE);
                     return;

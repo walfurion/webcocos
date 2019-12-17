@@ -150,10 +150,11 @@ public class FormUploadClientes extends Window {
                         estacion = stations.get(t.getEstacion());
                         p = countries.get(t.getPais());
                         if(estacion!=null && p!=null){
-                            System.out.println("estacion "+estacion.toString());
-                            System.out.println("p "+p.toString());  
                             c = result.get(p.getPaisId()+""+t.getCodigo_e1());
                             if(c!=null){ 
+                                try{
+                                System.out.println(c.getEstado().equals(t.getEstado().trim())+" "+c.getNombre().equals(t.getNombre().trim()) 
+                                +" "+c.getTipo().equals(t.getTipo().trim())+" "+c.getCodigoEnvoy().equals(t.getCodigoEnvoy().trim()));
                                 if(!c.getEstado().equals(t.getEstado())  || !c.getNombre().equals(t.getNombre()) || !c.getTipo().equals(t.getTipo())
                                         || !c.getCodigoEnvoy().equals(t.getCodigoEnvoy())){
                                     c.setEstado(t.getEstado().equals("Activo")?"A":"I");
@@ -161,7 +162,11 @@ public class FormUploadClientes extends Window {
                                     c.setTipo(t.getTipo().equals("Prepago")?"P":"C");
                                     c.setCodigoEnvoy(t.getCodigoEnvoy());
                                     service.doActionCustomer(Dao.ACTION_UPDATE, c);
-                                    u = u++;
+                                    u = u + 1 ;                                    
+                                    System.out.println(u+" u "+c.toString());
+                                }
+                                }catch(Exception ex){
+                                    
                                 }
                             }else{
                                 c = new Cliente(0, t.getCodigo_e1(), t.getNombre(),estacion.getEstacionId(),
@@ -169,7 +174,8 @@ public class FormUploadClientes extends Window {
                                         usuario.getUsername(), new java.util.Date(),  t.getTipo().equals("Prepago")?"P":"C", t.getCodigoEnvoy(), "");
                                 System.out.println(c.toString());
                                 service.doActionCustomer(Dao.ACTION_ADD,c);
-                                i = i++;
+                                i = i+ 1;
+                                System.out.println(i+" i "+c.toString());
                             }
                         }
                         

@@ -11,6 +11,9 @@ import com.fundamental.model.Utils;
 import com.fundamental.services.SvcMtd;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcUsuario;
+import com.fundamental.utils.AdvancedFileDownloader;
+import com.fundamental.utils.AdvancedFileDownloader.AdvancedDownloaderListener;
+import com.fundamental.utils.AdvancedFileDownloader.DownloaderEvent;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
 import com.fundamental.utils.ExcelGenerator;
@@ -93,9 +96,10 @@ public class RptMTD2 extends Panel implements View {
     Grid grid;
     ExcelGenerator excel = new ExcelGenerator();
     String Estacion = "";
+//    StreamResource sr;
+//    FileDownloader fileDownloader;
+    final AdvancedFileDownloader downloader = new AdvancedFileDownloader();
 
-//    StreamResource sr = GenerarExcel();
-//    FileDownloader fileDownloader = new FileDownloader(sr);
     public RptMTD2() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
         super.addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -106,9 +110,9 @@ public class RptMTD2 extends Panel implements View {
         checkestaciones.setBeanIdProperty("estacionid");
         cargaInfoSesion();
         //Para exportar
-        StreamResource sr = GenerarExcel();
-        FileDownloader fileDownloader = new FileDownloader(sr);
-        fileDownloader.extend(btnExportar2);
+//        sr = GenerarExcel();
+//        fileDownloader = new FileDownloader(sr);
+//        fileDownloader.extend(btnExportar2);
     }
 
     private Component buildForm() {
@@ -261,55 +265,59 @@ public class RptMTD2 extends Panel implements View {
             @Override
             public void buttonClick(final Button.ClickEvent event) {
                 if (cmbPais.getValue() != null && cmbFechaInicio.getValue() != null && cmbFechaFin.getValue() != null && optStation.size() > 0) {
-                    try {
-                        sourceGeneric = new BeanItemContainer<GenericMTD>(GenericMTD.class);
-                        svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), optStation.getValue().toString());
-                        sourceGeneric.addAll(svcmtd.getMTD());
-                        Estacion = svcmtd.getEstacion(Integer.parseInt(optStation.getValue().toString()));
-                        grid = new Grid(sourceGeneric);
+                    if (optStation.getValue() != null) {
+                        try {
+                            sourceGeneric = new BeanItemContainer<GenericMTD>(GenericMTD.class);
+                            svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), optStation.getValue().toString());
+                            sourceGeneric.addAll(svcmtd.getMTD());
+                            Estacion = svcmtd.getEstacion(Integer.parseInt(optStation.getValue().toString()));
+                            grid = new Grid(sourceGeneric);
 //                        grid.setCaption("Ventas Diarias e Inventario");
-                        grid.setWidth("1080px");
+                            grid.setWidth("1080px");
 //                        grid.setContainerDataSource(sourceGeneric);
-                        grid.removeAllColumns();
-                        grid.addColumn("p_super");
-                        grid.addColumn("p_regular");
-                        grid.addColumn("p_diesel");
-                        grid.addColumn("l_super");
-                        grid.addColumn("l_regular");
-                        grid.addColumn("l_diesel");
-                        grid.addColumn("c_diesel");
-                        grid.addColumn("c_super");
-                        grid.addColumn("c_regular");
-                        grid.addColumn("l_total");
-                        grid.addColumn("c_total");
-                        Grid.Column p_super = grid.getColumn("p_super");
-                        p_super.setHeaderCaption("Precio Super");
-                        Grid.Column p_regular = grid.getColumn("p_regular");
-                        p_regular.setHeaderCaption("Precio Regular");
-                        Grid.Column p_diesel = grid.getColumn("p_diesel");
-                        p_diesel.setHeaderCaption("Precio Diesel");
-                        Grid.Column l_super = grid.getColumn("l_super");
-                        l_super.setHeaderCaption("Litros Super");
-                        Grid.Column l_regular = grid.getColumn("l_regular");
-                        l_regular.setHeaderCaption("Litros Regular");
-                        Grid.Column l_diesel = grid.getColumn("l_diesel");
-                        l_diesel.setHeaderCaption("Litros Diesel");
-                        Grid.Column l_total = grid.getColumn("l_total");
-                        l_total.setHeaderCaption("Total Litros");
-                        Grid.Column c_super = grid.getColumn("c_super");
-                        c_super.setHeaderCaption("Colon Super");
-                        Grid.Column c_regular = grid.getColumn("c_regular");
-                        c_regular.setHeaderCaption("Colon Regular");
-                        Grid.Column c_diesel = grid.getColumn("c_diesel");
-                        c_diesel.setHeaderCaption("Colon Diesel");
-                        Grid.Column c_total = grid.getColumn("c_total");
-                        c_total.setHeaderCaption("Colones Total");
-                        grid.setColumnOrder("p_super", "p_regular", "p_diesel", "l_super", "l_regular", "l_diesel", "l_total", "c_super", "c_regular", "c_diesel", "c_total");
-                        toolbarData.removeAllComponents();
-                        toolbarData.addComponent(grid);
-                        btnExportar2.setEnabled(true);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
+                            grid.removeAllColumns();
+                            grid.addColumn("p_super");
+                            grid.addColumn("p_regular");
+                            grid.addColumn("p_diesel");
+                            grid.addColumn("l_super");
+                            grid.addColumn("l_regular");
+                            grid.addColumn("l_diesel");
+                            grid.addColumn("c_diesel");
+                            grid.addColumn("c_super");
+                            grid.addColumn("c_regular");
+                            grid.addColumn("l_total");
+                            grid.addColumn("c_total");
+                            Grid.Column p_super = grid.getColumn("p_super");
+                            p_super.setHeaderCaption("Precio Super");
+                            Grid.Column p_regular = grid.getColumn("p_regular");
+                            p_regular.setHeaderCaption("Precio Regular");
+                            Grid.Column p_diesel = grid.getColumn("p_diesel");
+                            p_diesel.setHeaderCaption("Precio Diesel");
+                            Grid.Column l_super = grid.getColumn("l_super");
+                            l_super.setHeaderCaption("Litros Super");
+                            Grid.Column l_regular = grid.getColumn("l_regular");
+                            l_regular.setHeaderCaption("Litros Regular");
+                            Grid.Column l_diesel = grid.getColumn("l_diesel");
+                            l_diesel.setHeaderCaption("Litros Diesel");
+                            Grid.Column l_total = grid.getColumn("l_total");
+                            l_total.setHeaderCaption("Total Litros");
+                            Grid.Column c_super = grid.getColumn("c_super");
+                            c_super.setHeaderCaption("Colon Super");
+                            Grid.Column c_regular = grid.getColumn("c_regular");
+                            c_regular.setHeaderCaption("Colon Regular");
+                            Grid.Column c_diesel = grid.getColumn("c_diesel");
+                            c_diesel.setHeaderCaption("Colon Diesel");
+                            Grid.Column c_total = grid.getColumn("c_total");
+                            c_total.setHeaderCaption("Colones Total");
+                            grid.setColumnOrder("p_super", "p_regular", "p_diesel", "l_super", "l_regular", "l_diesel", "l_total", "c_super", "c_regular", "c_diesel", "c_total");
+                            toolbarData.removeAllComponents();
+                            toolbarData.addComponent(grid);
+//                            sr = GenerarExcel();
+//                            fileDownloader = new FileDownloader(sr);
+                            btnExportar2.setEnabled(true);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 } else {
                     Notification.show("ERROR:", "Debe seleccionar todos los campos necesarios.\n", Notification.Type.ERROR_MESSAGE);
@@ -321,13 +329,12 @@ public class RptMTD2 extends Panel implements View {
         btnExportar2.setCaption("Exportar a Excel");
         btnExportar2.setStyleName(ValoTheme.BUTTON_PRIMARY);
         btnExportar2.setIcon(FontAwesome.EDIT);
-        btnExportar2.setStyleName(ValoTheme.BUTTON_PRIMARY);
         btnExportar2.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
 //                getUI().getPage().reload();
 //                getUI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_INV_FIS.getViewName());
-                UI.getCurrent().getNavigator().navigateTo(DashboardViewType.RPT_MTD.getViewName());
+//                UI.getCurrent().getNavigator().navigateTo(DashboardViewType.RPT_MTD.getViewName());
 //                //                getUI().getPage().open(resource, "_blank", false);
 //                /*Devulevo una lista de string seleccionados*/
 //                String[] Seleccion;
@@ -353,6 +360,17 @@ public class RptMTD2 extends Panel implements View {
 //                }
             }
         });
+
+        downloader.addAdvancedDownloaderListener(new AdvancedDownloaderListener() {
+            @Override
+            public void beforeDownload(DownloaderEvent downloadEvent) {
+                if (sourceGeneric.size() > 0) {
+                    downloader.setFileDownloadResource(GenerarExcel());
+                }
+            }
+        });
+        downloader.extend(btnExportar2);
+
         HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnGenerar, btnExportar2});
 
         footer.setComponentAlignment(btnGenerar, Alignment.TOP_RIGHT);
@@ -381,36 +399,36 @@ public class RptMTD2 extends Panel implements View {
             public InputStream getStream() {
                 ByteArrayOutputStream stream;
                 InputStream input = null;
-                List<String> tituloscolumnas = new ArrayList<String>();
-                String[] titulos = new String[]{"Dia", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Total", "%", "Total", "%", "Total", "%", "Total Otros", "%", "Total Uno", "%", "A", "B", "C", "#1", "#2", "#3", "#4", "#5", "#6",
-                    "Totales", "Contado", "%", "Credomatic", "%", "Banco Nac", "%", "BCR", "%", "Magic SB", "%", "FM Davivienda", "%", "Versatec", "%", "Flota BCR", "%", "Flota Bac", "%", "Uno Plus", "%", "Cupon", "%", "Prepagos", "%", "TC Davivienda", "%", "Credito", "%", "Contado USD", "%",
-                    "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Sobrantes", "Faltantes", "Total", "%", "Total", "%", "Super", "%", "Regular", "%", "Diesel", "%", "Contado en USD",
-                    "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel",
-                    "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel"};
-
-                tituloscolumnas = Arrays.asList(titulos);
-                XSSFWorkbook workbook = new XSSFWorkbook();
-                /*Generar Reporte en XLS*/
-                System.out.println("ESTACION " + Estacion);
-                workbook = excel.generar(1, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION " + Estacion, "MTD", sourceGeneric, null);
-
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 try {
-                    workbook.write(bos);
-                } catch (Exception exc) {
+                    List<String> tituloscolumnas = new ArrayList<String>();
+                    String[] titulos = new String[]{"Dia", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Total", "%", "Total", "%", "Total", "%", "Total Otros", "%", "Total Uno", "%", "A", "B", "C", "#1", "#2", "#3", "#4", "#5", "#6",
+                        "Totales", "Contado", "%", "Credomatic", "%", "Banco Nac", "%", "BCR", "%", "Magic SB", "%", "FM Davivienda", "%", "Versatec", "%", "Flota BCR", "%", "Flota Bac", "%", "Uno Plus", "%", "Cupon", "%", "Prepagos", "%", "TC Davivienda", "%", "Credito", "%", "Contado USD", "%",
+                        "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Sobrantes", "Faltantes", "Total", "%", "Total", "%", "Super", "%", "Regular", "%", "Diesel", "%", "Contado en USD",
+                        "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel",
+                        "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel"};
+
+                    tituloscolumnas = Arrays.asList(titulos);
+//                XSSFWorkbook workbook = new XSSFWorkbook();
+                    /*Generar Reporte en XLS*/
+//                System.out.println("ESTACION " + Estacion);
+                    XSSFWorkbook workbook = excel.generar(1, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION " + Estacion, "MTD", sourceGeneric, null);
+
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     try {
+                        workbook.write(bos);
+                    } catch (Exception exc) {
                         bos.close();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
                     }
-                    exc.printStackTrace();
+
+                    stream = bos;
+                    input = new ByteArrayInputStream(stream.toByteArray());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-                stream = bos;
-                input = new ByteArrayInputStream(stream.toByteArray());
                 return input;
             }
         };
-        String fileName = "COCOs_MTD_" + Estacion.concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
+        String fileName = "COCOs_MTD_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
         StreamResource resource = new StreamResource(source, fileName);
         return resource;
     }

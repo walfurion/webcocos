@@ -5,6 +5,7 @@
  */
 package com.sisintegrados.generic.bean;
 
+import com.fundamental.model.Mediopago;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,11 +17,21 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class GenericMedioPago {
-    private Integer mediopagoid;
-    private String nombre;
-    
-    public GenericMedioPago(Integer mediopagoid, String nombre) {
-        this.mediopagoid = mediopagoid;
-        this.nombre = nombre;
+
+    private Integer idgeneric;
+    private Estacion estacion;
+    private Mediopago mediopago;
+    private String noboleta;
+    private String comentarios;
+    private Double monto;
+    private Double montousd;
+    public GenericMedioPago(Integer idgeneric,Estacion estacion, Mediopago mediopago, String noboleta, String comentarios, Double monto, Double montousd) {
+        this.idgeneric = idgeneric;
+        this.estacion = estacion;
+        this.mediopago = mediopago;
+        this.noboleta = noboleta;
+        this.comentarios = comentarios;
+        this.monto = monto;
+        this.montousd = montousd;
     }
 }
