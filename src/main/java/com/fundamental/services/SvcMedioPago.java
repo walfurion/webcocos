@@ -128,23 +128,23 @@ public class SvcMedioPago extends Dao {
 //        return result;
 //    }
     
-    public List<GenericMedioPago> getMedioPagoByCountry(Integer idpais) {
-        List<GenericMedioPago> result = new ArrayList();
-        try {
-            miQuery = "SELECT MEDIOPAGO_ID, NOMBRE FROM MEDIOPAGO WHERE ESTADO = 'A' AND MEDIOPAGO.PAIS_ID = " + idpais + " and " +
-                      " MEDIOPAGO.TIPO = 2   ORDER BY MEDIOPAGO_ID";
-            pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
-            while (rst.next()) {
-                result.add(new GenericMedioPago(rst.getInt(1), rst.getString(2)));
-            }
-            closePst();
-        } catch (Exception exc) {
-            exc.printStackTrace();
-        } finally {
-            closePst();
-        }
-        return result;
-    }
+//    public List<GenericMedioPago> getMedioPagoByCountry(Integer idpais) {
+//        List<GenericMedioPago> result = new ArrayList();
+//        try {
+//            miQuery = "SELECT MEDIOPAGO_ID, NOMBRE FROM MEDIOPAGO WHERE ESTADO = 'A' AND MEDIOPAGO.PAIS_ID = " + idpais + " and " +
+//                      " MEDIOPAGO.TIPO = 2   ORDER BY MEDIOPAGO_ID";
+//            pst = getConnection().prepareStatement(miQuery);
+//            ResultSet rst = pst.executeQuery();
+//            while (rst.next()) {
+//                result.add(new GenericMedioPago(rst.getInt(1), rst.getString(2)));
+//            }
+//            closePst();
+//        } catch (Exception exc) {
+//            exc.printStackTrace();
+//        } finally {
+//            closePst();
+//        }
+//        return result;
+//    }
 
 }

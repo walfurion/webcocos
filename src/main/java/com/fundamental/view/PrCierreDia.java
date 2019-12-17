@@ -19,17 +19,21 @@ import com.fundamental.model.dto.RecepcionDto;
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcDeposito;
 import com.fundamental.services.SvcEstacion;
+import com.fundamental.services.SvcMaintenance;
 import com.fundamental.services.SvcMedioPago;
+import com.fundamental.services.SvcMntEstacion;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
 
 import com.sisintegrados.generic.bean.GenericDepositoDet;
+import com.sisintegrados.generic.bean.GenericMedioPago;
 import com.sisintegrados.view.form.FormClientesCredito;
-import com.sisintegrados.view.form.FormDetalleDeposito;
+//import com.sisintegrados.view.form.FormDetalleDeposito;
 
 import com.sisintegrados.generic.bean.InventarioRecepcion;
 import com.sisintegrados.generic.bean.RecepcionInventario;
+import com.sisintegrados.generic.bean.Tarjeta;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
@@ -49,6 +53,7 @@ import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -176,9 +181,9 @@ public class PrCierreDia extends Panel implements View {
     BeanContainer<Integer, Mediopago> bcrEfectivo = new BeanContainer<Integer, Mediopago>(Mediopago.class);
     BeanContainer<Integer, InventarioRecepcion> bcrInventario = new BeanContainer<Integer, InventarioRecepcion>(InventarioRecepcion.class);
 
-    BeanContainer<Integer, GenericDepositoDet> bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
-    BeanItemContainer<GenericDepositoDet> ContDepositoDet = new BeanItemContainer<GenericDepositoDet>(GenericDepositoDet.class);
+    BeanContainer<Integer, GenericMedioPago> bcrDeposito = new BeanContainer<Integer, GenericMedioPago>(GenericMedioPago.class);
 
+//    BeanItemContainer<GenericDepositoDet> ContDepositoDet = new BeanItemContainer<GenericDepositoDet>(GenericDepositoDet.class);
     Double totalVentas = 0D, totalDinero = 0D;
     String symCurrency, symVolumen;
 
@@ -190,12 +195,16 @@ public class PrCierreDia extends Panel implements View {
     List<Precio> precios;
     List<Producto> productos;
     Acceso acceso = new Acceso();
-    FormDetalleDeposito formDetalleDeposito; //jlopez
+//    FormDetalleDeposito formDetalleDeposito; //jlopez
     Button btnDetalleDeposito;
 
     SvcDeposito daoDeposito = new SvcDeposito();
     String currencySymbol;
     Pais pais = new Pais();
+    BeanItemContainer<Estacion> ContEstacion = new BeanItemContainer<Estacion>(Estacion.class);
+    BeanItemContainer<Mediopago> ContMediosPago = new BeanItemContainer<Mediopago>(Mediopago.class);
+    SvcMntEstacion service = new SvcMntEstacion();
+    SvcMaintenance servmedio = new SvcMaintenance();
 
     public PrCierreDia() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -318,8 +327,7 @@ public class PrCierreDia extends Panel implements View {
         bcrMediospago.setBeanIdProperty("mediopagoId");
         bcrEfectivo.setBeanIdProperty("efectivoId");
         bcrInventario.setBeanIdProperty("idDto");
-
-        bcrDeposito.setBeanIdProperty("idGenerico");
+        bcrDeposito.setBeanIdProperty("idgeneric");
         tfdDriver.setValue("");
         tfdUnit.setValue("");
         tfdBill.setValue("");
@@ -340,6 +348,18 @@ public class PrCierreDia extends Panel implements View {
         bcrTurnos.removeAllItems();
         bcrTurnos.addAll(turnosTemp);
 
+
+        /*Depositos detalle*/
+        ContEstacion.removeAllItems();
+        ContMediosPago.removeAllItems();
+        ContEstacion = new BeanItemContainer<Estacion>(Estacion.class);
+        ContMediosPago = new BeanItemContainer<Mediopago>(Mediopago.class);
+        List<Estacion> contestacion = service.getAllEstaciones(true);
+        List<Mediopago> contmedios = servmedio.getAllMediosPago(true);
+        ContEstacion.addAll(contestacion);
+        ContMediosPago.addAll(contmedios);
+
+        /*FIN DEPOSITO ASG*/
         List<InventarioRecepcion> inventarioHoy = new ArrayList();
 
         if (dia != null && dia.getEstadoId() != null) {
@@ -548,10 +568,9 @@ public class PrCierreDia extends Panel implements View {
                         bcrTurnos.getItem(tid).getItemProperty("selected").setValue(Boolean.TRUE);
                     }
 
-                    bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
+//                    bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
                     //  ContDepositoDet = new BeanItemContainer<GenericDepositoDet>(GenericDepositoDet.class);
                     //  bcrDeposito.addAll(daoDeposito.getDepositoByEstacion(estacion.getEstacionId()));
-
                     //  }                    
                     //Importante
 //                    binder.bindMemberFields(this);
@@ -733,9 +752,99 @@ public class PrCierreDia extends Panel implements View {
     private void buildTableDeposito() {
         tableDeposito.setCaption("Depósito:");
         tableDeposito.setContainerDataSource(bcrDeposito);
-        tableDeposito.setVisibleColumns(new Object[]{"mediopago", "numeroboleta", "monto"});
-        tableDeposito.setColumnHeaders(new String[]{"Nombre", "Número Boleta", "Valor"});
-        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT);
+        tableDeposito.setImmediate(true);
+
+        tableDeposito.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
+                //ComboBox cmbTarjeta = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, ContCreditC);
+                ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
+                cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbEstacion.setItemCaptionPropertyId("nombre");
+                cmbEstacion.setNullSelectionAllowed(false);
+                cmbEstacion.addStyleName(ValoTheme.COMBOBOX_SMALL);
+                cmbEstacion.setPropertyDataSource(pro);
+                cmbEstacion.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbEstacion.setWidth("250px");
+                return cmbEstacion;
+            }
+        });
+
+        tableDeposito.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
+                //ComboBox cmbTarjeta = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, ContCreditC);
+                ComboBox cmbMedio = new ComboBox(null, ContMediosPago);
+                cmbMedio.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbMedio.setItemCaptionPropertyId("nombre");
+                cmbMedio.setNullSelectionAllowed(false);
+                cmbMedio.addStyleName(ValoTheme.COMBOBOX_SMALL);
+                cmbMedio.setPropertyDataSource(pro);
+                cmbMedio.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbMedio.setWidth("250px");
+                return cmbMedio;
+            }
+        });
+
+        tableDeposito.addGeneratedColumn("colboleta", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("noboleta");  //Atributo del bean
+                final TextField nfd = new TextField(pro);
+                nfd.setNullRepresentation("");
+                nfd.setWidth("85px");
+                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+                nfd.addStyleName("align-right");
+                return nfd;
+            }
+        });
+
+        tableDeposito.addGeneratedColumn("colcomentarios", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("comentarios");  //Atributo del bean
+                final TextField nfd = new TextField(pro);
+                nfd.setNullRepresentation("");
+                nfd.setWidth("85px");
+                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+                nfd.addStyleName("align-right");
+                return nfd;
+            }
+        });
+
+        tableDeposito.addGeneratedColumn("colmonto", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("monto");  //Atributo del bean
+                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
+                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
+                nfd.setValue(numberFmt.format(value));
+                nfd.setWidth("150px");
+                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+                nfd.addStyleName("align-right");
+                return nfd;
+            }
+        });
+
+        tableDeposito.addGeneratedColumn("colmontousd", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("montousd");  //Atributo del bean
+                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
+                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
+                nfd.setValue(numberFmt.format(value));
+                nfd.setWidth("150px");
+                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+                nfd.addStyleName("align-right");
+                return nfd;
+            }
+        });
+
+        tableDeposito.setVisibleColumns(new Object[]{"colestacion", "colmedio", "colboleta","colcomentarios", "monto", "montousd"});
+        tableDeposito.setColumnHeaders(new String[]{"Estacion", "Medio Pago", "No Boleta", "Comentarios", "Monto", "USD"});
+        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT,Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT);
         tableDeposito.setHeight(200f, Unit.PIXELS);
         tableDeposito.addStyleName(ValoTheme.TABLE_COMPACT);
         tableDeposito.addStyleName(ValoTheme.TABLE_SMALL);
@@ -1266,8 +1375,10 @@ public class PrCierreDia extends Panel implements View {
             bcrProducto.addAll(svcTC.getProductoByTurnoid(turnosIds));
             bcrMediospago.addAll(svcTC.getMediopagoByTurnosid(turnosIds));
             bcrEfectivo.addAll(svcTC.getEfectivoByTurnosid(turnosIds));
-            String p = new SimpleDateFormat("yyyy-MM-dd").format(dfdFecha.getValue());
-            bcrDeposito.addAll(svcDep.getDepositoByEstacion(estacion.getEstacionId().toString(), p));
+//            String p = new SimpleDateFormat("yyyy-MM-dd").format(dfdFecha.getValue());
+            if (dfdFecha.getValue() != null) {
+                bcrDeposito.addAll(svcDep.getDepositoByEstacion(estacion.getEstacionId().toString(), dfdFecha.getValue()));
+            }
         }
         svcTC.closeConnections();
         calcularSumas();
@@ -1420,19 +1531,22 @@ public class PrCierreDia extends Panel implements View {
     /*Metodo Llama Forma Detalle de depositos */// jlopez
     private void formDeposito(Integer idestacion, String simboloMoneda, Integer idpais) {
         System.out.println("ingresa a metodo formDeposito");
-        if (cbxEstacion.getValue() != null) {
-            System.out.println("dentro de for cbxestacion");
-            formDetalleDeposito = new FormDetalleDeposito(simboloMoneda, bcrDeposito, idpais, idestacion);
-            formDetalleDeposito.addCloseListener((e) -> {
-                bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
-                bcrDeposito = (BeanContainer<Integer, GenericDepositoDet>) VaadinSession.getCurrent().getAttribute("detalleDeposito");
-                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("total");
-                tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
-                tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
-            });
-            getUI().addWindow(formDetalleDeposito);
-            formDetalleDeposito.focus();
-        }
+//        if (cbxEstacion.getValue() != null) {
+////            System.out.println("dentro de for cbxestacion");
+////            formDetalleDeposito = new FormDetalleDeposito(simboloMoneda, bcrDeposito, idpais, idestacion);
+////            formDetalleDeposito.addCloseListener((e) -> {
+//////                bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
+//////                bcrDeposito = (BeanContainer<Integer, GenericDepositoDet>) VaadinSession.getCurrent().getAttribute("detalleDeposito");
+////                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("total");
+////                tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
+////                tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
+////                System.out.println("tmodouble en cierre" + tmpDouble);
+////                System.out.println("tmodouble en cierre" + tmpDoubleDolar);
+////                System.out.println("tmodoubleother en cierre" + tmpDoubleOther);
+//
+//            });
+//        getUI().addWindow(formDetalleDeposito);
+//        formDetalleDeposito.focus();
+//        }
     }
-
 }

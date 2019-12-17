@@ -10,3 +10,5 @@ rebel.xml
 *.iml
 .idea/
 
+src/main/webapp/VAADIN/widgetsets/*
+nb-configuration.xml

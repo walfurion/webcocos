@@ -22,6 +22,7 @@ import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
+import com.vaadin.demo.dashboard.view.DashboardViewType;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FileDownloader;
@@ -41,12 +42,14 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -55,6 +58,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
@@ -77,7 +82,8 @@ public class RptMTD2 extends Panel implements View {
     SvcMtd svcmtd = new SvcMtd();
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
     Button btnGenerar = new Button("Generar Reporte");
-    Button btnExportar = new Button("Exportar a Excel", FontAwesome.EDIT);
+    Button btnExportar2 = new Button("Exportar a Excel", FontAwesome.EDIT);
+//    Button btnExportar = new Button("GenerarDownload", FontAwesome.EDIT);
     Button btnSelectAll;
     Button btnUnselectAll;
     //traer estaciones con su checkbox
@@ -86,7 +92,10 @@ public class RptMTD2 extends Panel implements View {
     OptionGroup optStation = new OptionGroup();
     Grid grid;
     ExcelGenerator excel = new ExcelGenerator();
+    String Estacion = "";
 
+//    StreamResource sr = GenerarExcel();
+//    FileDownloader fileDownloader = new FileDownloader(sr);
     public RptMTD2() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
         super.addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -99,10 +108,11 @@ public class RptMTD2 extends Panel implements View {
         //Para exportar
         StreamResource sr = GenerarExcel();
         FileDownloader fileDownloader = new FileDownloader(sr);
-        fileDownloader.extend(btnExportar);
+        fileDownloader.extend(btnExportar2);
     }
 
     private Component buildForm() {
+        btnExportar2.setEnabled(false);
         return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), buildTableData(),/*buildToolbar2(),*/ buildButtons()});
     }
 
@@ -131,6 +141,8 @@ public class RptMTD2 extends Panel implements View {
         cmbPais.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
+                checkestaciones = new BeanContainer<>(GenericEstacion.class);
+                checkestaciones.setBeanIdProperty("estacionid");
                 if (cmbPais.getValue() != null) {
                     Pais pais = new Pais();
                     pais = (Pais) cmbPais.getValue();
@@ -148,8 +160,8 @@ public class RptMTD2 extends Panel implements View {
                     btnSelectAll.addClickListener(new Button.ClickListener() {
                         @Override
                         public void buttonClick(Button.ClickEvent event) {
-                            optStation.select(361);
-                            optStation.select(checkestaciones.getIdByIndex(2));
+//                            optStation.select(361);
+//                            optStation.select(checkestaciones.getIdByIndex(2));
                             for (int i = 0; i < optStation.size(); i++) {
                                 optStation.select(checkestaciones.getIdByIndex(i));
                             }
@@ -162,8 +174,8 @@ public class RptMTD2 extends Panel implements View {
                     btnUnselectAll.addClickListener(new Button.ClickListener() {
                         @Override
                         public void buttonClick(Button.ClickEvent event) {
-                            optStation.select(361);
-                            optStation.select(checkestaciones.getIdByIndex(2));
+//                            optStation.select(361);
+//                            optStation.select(checkestaciones.getIdByIndex(2));
                             for (int i = 0; i < optStation.size(); i++) {
                                 optStation.unselect(checkestaciones.getIdByIndex(i));
                             }
@@ -176,8 +188,9 @@ public class RptMTD2 extends Panel implements View {
                     Label lblestacion = new Label("Estaciones");
                     lblestacion.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
                     vl.addComponent(lblestacion);
+                    System.out.println("CHECK ESTACION " + checkestaciones.size());
                     optStation = new OptionGroup(null, checkestaciones);
-                    optStation.setMultiSelect(true);
+                    optStation.setMultiSelect(false);
                     optStation.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
                     vl.addComponent(optStation);
                     for (Integer noid : checkestaciones.getItemIds()) {
@@ -249,12 +262,14 @@ public class RptMTD2 extends Panel implements View {
             public void buttonClick(final Button.ClickEvent event) {
                 if (cmbPais.getValue() != null && cmbFechaInicio.getValue() != null && cmbFechaFin.getValue() != null && optStation.size() > 0) {
                     try {
-                        svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), "361");
+                        sourceGeneric = new BeanItemContainer<GenericMTD>(GenericMTD.class);
+                        svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), optStation.getValue().toString());
                         sourceGeneric.addAll(svcmtd.getMTD());
+                        Estacion = svcmtd.getEstacion(Integer.parseInt(optStation.getValue().toString()));
                         grid = new Grid(sourceGeneric);
 //                        grid.setCaption("Ventas Diarias e Inventario");
                         grid.setWidth("1080px");
-                        grid.setContainerDataSource(sourceGeneric);
+//                        grid.setContainerDataSource(sourceGeneric);
                         grid.removeAllColumns();
                         grid.addColumn("p_super");
                         grid.addColumn("p_regular");
@@ -292,6 +307,7 @@ public class RptMTD2 extends Panel implements View {
                         grid.setColumnOrder("p_super", "p_regular", "p_diesel", "l_super", "l_regular", "l_diesel", "l_total", "c_super", "c_regular", "c_diesel", "c_total");
                         toolbarData.removeAllComponents();
                         toolbarData.addComponent(grid);
+                        btnExportar2.setEnabled(true);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -302,24 +318,42 @@ public class RptMTD2 extends Panel implements View {
             }
         });
 
-        btnExportar.setCaption("Exportar a Excel");
-        btnExportar.setStyleName(ValoTheme.BUTTON_PRIMARY);
-        btnExportar.setIcon(FontAwesome.EDIT);
-        btnExportar.setStyleName(ValoTheme.BUTTON_PRIMARY);
-        btnExportar.addClickListener(new Button.ClickListener() {
+        btnExportar2.setCaption("Exportar a Excel");
+        btnExportar2.setStyleName(ValoTheme.BUTTON_PRIMARY);
+        btnExportar2.setIcon(FontAwesome.EDIT);
+        btnExportar2.setStyleName(ValoTheme.BUTTON_PRIMARY);
+        btnExportar2.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                /*Devulevo una lista de string seleccionados*/
-                String[] Seleccion;
-                Seleccion = getSeleccion();
-                /*Recorro la seleccion de estaciones para enviarlas al query*/
-                for (String string : Seleccion) {
-                    //*Ejemplo de query */
-                    System.out.println("Select * from estacion where estacion_id = " + string.trim());
-                }
+//                getUI().getPage().reload();
+//                getUI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_INV_FIS.getViewName());
+                UI.getCurrent().getNavigator().navigateTo(DashboardViewType.RPT_MTD.getViewName());
+//                //                getUI().getPage().open(resource, "_blank", false);
+//                /*Devulevo una lista de string seleccionados*/
+//                String[] Seleccion;
+//                Seleccion = getSeleccion();
+//                /*Recorro la seleccion de estaciones para enviarlas al query*/
+//                for (String string : Seleccion) {
+//                    try {
+//                        sourceGeneric = new BeanItemContainer<GenericMTD>(GenericMTD.class);
+//                        //*Ejemplo de query */
+//                        svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim());
+//                        sourceGeneric.addAll(svcmtd.getMTD());
+//                        Estacion = svcmtd.getEstacion(Integer.parseInt(string.trim()));
+//                        DownloadExcel();
+////                        getUI().getPage().open(file, "_self", false);
+//
+////                        GenericMTD mtd = new GenericMTD();
+////                        mtd = sourceGeneric.getIdByIndex(0);
+////                        System.out.println("LITROS SUPER " + mtd.getL_super() + " ESTACION " + Estacion);
+////                        System.out.println("Select * from estacion where estacion_id = " + string.trim());
+//                    } catch (Exception ex) {
+//                        ex.printStackTrace();
+//                    }
+//                }
             }
         });
-        HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnGenerar, btnExportar});
+        HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnGenerar, btnExportar2});
 
         footer.setComponentAlignment(btnGenerar, Alignment.TOP_RIGHT);
         footer.setWidth(
@@ -328,21 +362,37 @@ public class RptMTD2 extends Panel implements View {
     }
 
     private StreamResource GenerarExcel() {
+//        /*Devulevo una lista de string seleccionados*/
+//        String[] Seleccion;
+//        Seleccion = getSeleccion();
+//        /*Recorro la seleccion de estaciones para enviarlas al query*/
+//        for (String string : Seleccion) {
+//            try {
+//                sourceGeneric = new BeanItemContainer<GenericMTD>(GenericMTD.class);
+//                svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim());
+//                sourceGeneric.addAll(svcmtd.getMTD());
+//                Estacion = svcmtd.getEstacion(Integer.parseInt(string.trim()));
+//                System.out.println("ESTACUIB " + string.trim());
+//            } catch (Exception ex) {
+//                ex.printStackTrace();
+//            }
+//        }
         StreamResource.StreamSource source = new StreamResource.StreamSource() {
             public InputStream getStream() {
                 ByteArrayOutputStream stream;
                 InputStream input = null;
                 List<String> tituloscolumnas = new ArrayList<String>();
-                String[] titulos = new String[]{"Dia","Super","Regular","Diesel","Super","Regular","Diesel","Total","%","Super","Regular","Diesel","Total","%","Total","%","Total","%","Total","%","Total Otros","%","Total Uno","%","A","B","C","#1","#2","#3","#4","#5","#6",
-                "Totales","Contado","%","Credomatic","%","Banco Nac","%","BCR","%","Magic SB","%","FM Davivienda","%","Versatec","%","Flota BCR","%","Flota Bac","%","Uno Plus","%","Cupon","%","Prepagos","%","TC Davivienda","%","Credito","%","Contado USD","%",
-                "Super","Regular","Diesel","Total","%","Super","Regular","Diesel","Total","%","Super","Regular","Diesel","Total","%","Sobrantes","Faltantes","Total","%","Total","%","Super","%","Regular","%","Diesel","%","Contado en USD",
-                "Super","Regular","Diesel","Super","Regular","Diesel","Super","Regular","Diesel","Super","Regular","Diesel","Super","Regular","Diesel","Super","Regular","Diesel","Super","Regular","Diesel","Super","Regular","Diesel","Super","Regular","Diesel","Super","Regular","Diesel",
-                "Super","Regular","Diesel","Super","Regular","Diesel","Super","Regular","Diesel","Super","Regular","Diesel","Super","Regular","Diesel"};
-                
+                String[] titulos = new String[]{"Dia", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Total", "%", "Total", "%", "Total", "%", "Total Otros", "%", "Total Uno", "%", "A", "B", "C", "#1", "#2", "#3", "#4", "#5", "#6",
+                    "Totales", "Contado", "%", "Credomatic", "%", "Banco Nac", "%", "BCR", "%", "Magic SB", "%", "FM Davivienda", "%", "Versatec", "%", "Flota BCR", "%", "Flota Bac", "%", "Uno Plus", "%", "Cupon", "%", "Prepagos", "%", "TC Davivienda", "%", "Credito", "%", "Contado USD", "%",
+                    "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Sobrantes", "Faltantes", "Total", "%", "Total", "%", "Super", "%", "Regular", "%", "Diesel", "%", "Contado en USD",
+                    "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel",
+                    "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel"};
+
                 tituloscolumnas = Arrays.asList(titulos);
                 XSSFWorkbook workbook = new XSSFWorkbook();
                 /*Generar Reporte en XLS*/
-                workbook = excel.generar(1, tituloscolumnas.size(),tituloscolumnas, "UNO-PETROL", "ESTACION(ES) " + optStation.getValue().toString(), "MTD", sourceGeneric, null);
+                System.out.println("ESTACION " + Estacion);
+                workbook = excel.generar(1, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION " + Estacion, "MTD", sourceGeneric, null);
 
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 try {
@@ -360,7 +410,7 @@ public class RptMTD2 extends Panel implements View {
                 return input;
             }
         };
-        String fileName = "COCOs_MTDnew_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
+        String fileName = "COCOs_MTD_" + Estacion.concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
         StreamResource resource = new StreamResource(source, fileName);
         return resource;
     }

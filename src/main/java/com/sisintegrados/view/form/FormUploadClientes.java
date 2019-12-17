@@ -5,6 +5,7 @@
  */
 package com.sisintegrados.view.form;
 
+import com.fundamental.model.Cliente;
 import com.fundamental.model.Lubricanteprecio;
 import com.fundamental.model.Marca;
 import com.fundamental.model.Producto;
@@ -14,6 +15,8 @@ import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
 import com.jain.addon.resource.DefaultI18NResourceProvider;
 import com.jain.addon.resource.I18NProvider;
+import com.sisintegrados.generic.bean.Estacion;
+import com.sisintegrados.generic.bean.GenericClientes;
 import com.sisintegrados.generic.bean.GenericLubricantePrecio;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
@@ -46,6 +49,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,7 +57,7 @@ import java.util.logging.Logger;
  *
  * @author jjosu
  */
-public class FormUploadTarjetas extends Window {
+public class FormUploadClientes extends Window {
 
     I18NProvider provider = DefaultI18NResourceProvider.instance();
 //    CreateComponents components = new CreateComponents();
@@ -67,10 +71,10 @@ public class FormUploadTarjetas extends Window {
     String tipoBitacora = "precios-lubricantes";
     int newStatus = 0;
     String newStatusDesc;
-    final ExcelUploader<GenericLubricantePrecio> excelUploader = new ExcelUploader<>(GenericLubricantePrecio.class);
+    final ExcelUploader<GenericClientes> excelUploader = new ExcelUploader<>(GenericClientes.class);
     final Upload upload = new Upload();
     VerticalLayout v = new VerticalLayout();
-    BeanItemContainer<GenericLubricantePrecio> container;
+    BeanItemContainer<GenericClientes> container;
     List<Lubricanteprecio> lstAsignarTarjetas = new ArrayList<>();
     List<Pais> lstPais = new ArrayList<>();
     List<Producto> lstProducto = new ArrayList<>();
@@ -79,8 +83,6 @@ public class FormUploadTarjetas extends Window {
     Date fechaInicio = new Date();
     Date fechaFin;
     Date fechaFinN;
-    private final Pais pais;
-    private final Marca marca;
     CreateComponents components = new CreateComponents();
     Constant cons = new Constant();
     List<Lubricanteprecio> listProducts = new ArrayList();
@@ -89,9 +91,7 @@ public class FormUploadTarjetas extends Window {
     List<Pais> listCountries;
     List<Marca> listBrands = new ArrayList();
 
-    public FormUploadTarjetas(Pais pais, Marca marca) {
-        this.pais = pais;
-        this.marca = marca;
+    public FormUploadClientes() {
         setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
         addStyleName(Constant.stylePopUps);
         Responsive.makeResponsive(this);
@@ -131,92 +131,66 @@ public class FormUploadTarjetas extends Window {
         guardar = new Button("Guardar", FontAwesome.SAVE);
         guardar.addStyleName(ValoTheme.BUTTON_FRIENDLY);
         guardar.addStyleName(ValoTheme.BUTTON_SMALL);
+        guardar.setDisableOnClick(true);
         guardar.addClickListener((Button.ClickListener) event -> {
             if (container != null) {
 
                 if (validarData()) {
-
-                    listProducts = service.getLubpriceByCountryidStationid(pais.getPaisId(), marca.getIdMarca());
-                    listProductsNoPrecio = service.getProductsNotInLubsPrecio();
-   
-                    for (GenericLubricantePrecio genCard : container.getItemIds()) {
-              
-                        for (Lubricanteprecio pr : listProducts) {
-                            if (genCard.getPRODUCTO().trim().toUpperCase().equals(pr.getProducto().getNombre().trim().toUpperCase())
-                                    && genCard.getPAIS().equals(pr.getPais().getNombre())) //&& genCard.getMARCA().equals(marca.getNombre())) 
-                            {
-                                /*
-                            Si existe el producto en sistema, se procede a actualizar
-                                 */
-                                Lubricanteprecio lubPrecio = new Lubricanteprecio();
-                                lubPrecio.setLubricanteprecio(pr.getLubricanteprecio());
-                                lubPrecio.setPaisId(pais.getPaisId());
-                                lubPrecio.setProductoId(pr.getProductoId());
-                                Date date1 = null;
-                                Date date2 = null;
-                                try {
-                                    date1 = new SimpleDateFormat("mm/dd/yyyy").parse(genCard.getINICIO());
-                                    date2 = new SimpleDateFormat("mm/dd/yyyy").parse(genCard.getFIN());
-                                } catch (ParseException ex) {
-                                    Logger.getLogger(FormUploadTarjetas.class.getName()).log(Level.SEVERE, null, ex);
+                    cancelar.setEnabled(false);
+                    Map<String,Cliente> result = service.getCustomersByStationidTypeMap(null);
+                    Map<String,Pais> countries = service.getAllPaisesMap();
+                    Map<String,Estacion> stations = service.getAllEstacionesMap();
+                    
+                    Estacion estacion = null;
+                    Cliente c = null;
+                    Pais p = null;
+                    int u = 0;
+                    int i = 0;
+                    for(GenericClientes t: container.getItemIds()){
+                        estacion = stations.get(t.getEstacion());
+                        p = countries.get(t.getPais());
+                        if(estacion!=null && p!=null){
+                            c = result.get(p.getPaisId()+""+t.getCodigo_e1());
+                            if(c!=null){ 
+                                try{
+                                System.out.println(c.getEstado().equals(t.getEstado().trim())+" "+c.getNombre().equals(t.getNombre().trim()) 
+                                +" "+c.getTipo().equals(t.getTipo().trim())+" "+c.getCodigoEnvoy().equals(t.getCodigoEnvoy().trim()));
+                                if(!c.getEstado().equals(t.getEstado())  || !c.getNombre().equals(t.getNombre()) || !c.getTipo().equals(t.getTipo())
+                                        || !c.getCodigoEnvoy().equals(t.getCodigoEnvoy())){
+                                    c.setEstado(t.getEstado().equals("Activo")?"A":"I");
+                                    c.setNombre(t.getNombre());
+                                    c.setTipo(t.getTipo().equals("Prepago")?"P":"C");
+                                    c.setCodigoEnvoy(t.getCodigoEnvoy());
+                                    service.doActionCustomer(Dao.ACTION_UPDATE, c);
+                                    u = u + 1 ;                                    
+                                    System.out.println(u+" u "+c.toString());
                                 }
-                                lubPrecio.setFechaInicio(date1);
-                                lubPrecio.setFechaFin(date2);
-                                lubPrecio.setPrecio(Double.valueOf(genCard.getPRECIO()));
-                                lubPrecio.setModificadoPor(usuario.getNombre());
-                                pr.setModificadoPor(usuario.getNombre());
-                                System.out.println("fila a enviar update " + lubPrecio.toString());
-                                Lubricanteprecio p = service.doActionLubprecioCarga(Dao.ACTION_UPDATE, lubPrecio, pr);
-                                System.out.println("p " + p.toString());
-
-                            }
-
-                        }
-
-                        for (Producto prod : listProductsNoPrecio) {
-                            if (genCard.getPRODUCTO().trim().toUpperCase().equals(prod.getNombre().trim().toUpperCase())) {
-                                {
-                                    /*
-                            No existe el producto en sistema, se procede a crear
-                                     */
-                                    Lubricanteprecio lubPrecio = new Lubricanteprecio();
-                                    //lubPrecio.setLubricanteprecio(Integer.valueOf(genCard.getPRECIO()));
-                                    lubPrecio.setPaisId(pais.getPaisId());
-                                    lubPrecio.setProductoId(prod.getProductoId());
-                                    Date date1 = null;
-                                    Date date2 = null;
-                                    try {
-                                        date1 = new SimpleDateFormat("mm/dd/yyyy").parse(genCard.getINICIO());
-                                        date2 = new SimpleDateFormat("mm/dd/yyyy").parse(genCard.getFIN());
-                                        System.out.println("date1 " + date1);
-                                        System.out.println("date2 " + date2);
-                                    } catch (ParseException ex) {
-                                        Logger.getLogger(FormUploadTarjetas.class.getName()).log(Level.SEVERE, null, ex);
-                                    }
-                                    lubPrecio.setFechaInicio(date1);
-                                    lubPrecio.setFechaFin(date2);
-                                    lubPrecio.setPrecio(Double.valueOf(genCard.getPRECIO()));
-                                    //lubPrecio.setModificadoPor(usuario.getNombre());
-                                    lubPrecio.setCreadoPor(usuario.getNombre());
-                                    System.out.println("fila a enviar create " + lubPrecio.toString());
-                                    Lubricanteprecio p = service.doActionLubprecioCarga(Dao.ACTION_ADD, lubPrecio, lubPrecio);
-                                    System.out.println("p " + p.toString());
-
+                                }catch(Exception ex){
+                                    
                                 }
-
+                            }else{
+                                c = new Cliente(0, t.getCodigo_e1(), t.getNombre(),estacion.getEstacionId(),
+                                        t.getEstado().equals("Activo")?"A":"I",
+                                        usuario.getUsername(), new java.util.Date(),  t.getTipo().equals("Prepago")?"P":"C", t.getCodigoEnvoy(), "");
+                                System.out.println(c.toString());
+                                service.doActionCustomer(Dao.ACTION_ADD,c);
+                                i = i+ 1;
+                                System.out.println(i+" i "+c.toString());
                             }
                         }
-                    }
-                    components.crearNotificacion("Carga procesada exitosamente");
+                        
+                    }    
+                    components.crearNotificacion("Se actualizaron "+u+"  y se Insertaron "+i+" registros ");
                     DashboardEventBus.post(new DashboardEvent.ProfileUpdatedEvent());
                     close();
                 } else {
-                    Notification.show("Error", "Validar Datos", Notification.Type.ERROR_MESSAGE);
+                    Notification.show("Error", "Validar Datos", Notification.Type.ERROR_MESSAGE);                    
                 }
-
             } else {
                 Notification.show("Error", "Debe cargar un archivo", Notification.Type.ERROR_MESSAGE);
             }
+            guardar.setEnabled(true);                    
+            cancelar.setEnabled(true);
         });
         guardar.focus();
 
@@ -238,8 +212,9 @@ public class FormUploadTarjetas extends Window {
 
     private boolean validarData() {
         boolean val = true;
-        for (GenericLubricantePrecio genCard : container.getItemIds()) {
-            if ((genCard.getPAIS().length() < 0) || (genCard.getPAIS().length() < 0) || (genCard.getPRODUCTO().length() < 0) || (genCard.getINICIO().length() < 0) || (genCard.getFIN().length() < 0) || (genCard.getPRECIO().length() < 0)) {
+        for (GenericClientes genCard : container.getItemIds()) {
+            if ((genCard.getPais().length() < 0) || (genCard.getEstacion().length() < 0) || (genCard.getTipo().length() < 0) || (genCard.getCodigo_e1().length() < 0) 
+                    || (genCard.getCodigoEnvoy().length() < 0) || (genCard.getNombre().length() < 0)) {
                 val = false;
             }
 
@@ -249,7 +224,7 @@ public class FormUploadTarjetas extends Window {
 
     private Component buildFields() {
         HorizontalLayout regresa = (HorizontalLayout) components.createHorizontal(Constant.styleForm, "100%", true, true, false, null);
-        regresa.setCaption("Cargar Precios Lubricantes");
+        regresa.setCaption("Cargar Clientes");
         regresa.setIcon(FontAwesome.FLAG);
         FormLayout form = new FormLayout();
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
@@ -260,14 +235,15 @@ public class FormUploadTarjetas extends Window {
         hlDoc1.setHeight("55px");
         excelUploader.setFirstRow(1);
         excelUploader.addSucceededListener((event, items) -> {
+            System.out.println("items "+(GenericClientes) items.get(0));
             if (items.size() > 0) {
                 if (v.getComponentCount() > 1) {
                     v.removeComponent(grid);
                 }
-                container = new BeanItemContainer<GenericLubricantePrecio>(GenericLubricantePrecio.class);
+                container = new BeanItemContainer<GenericClientes>(GenericClientes.class);
                 container.addAll(items);
                 grid = new Grid(container);
-                grid.setColumnOrder("PAIS", "MARCA", "PRODUCTO", "INICIO", "FIN", "PRECIO", "HISTORIAL");
+                grid.setColumnOrder("pais", "estacion", "tipo", "codigo_e1", "codigoEnvoy", "estado", "nombre");
                 grid.setWidth("100%");
                 grid.addStyleName(ValoTheme.TABLE_BORDERLESS);
                 grid.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);

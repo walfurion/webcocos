@@ -29,7 +29,9 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
@@ -38,6 +40,7 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.vaadin.maddon.ListContainer;
 
@@ -74,7 +77,13 @@ public class FormDetalleLubricantes extends Window {
     String currencySymbol;
     Integer idestacion;
     Integer idpais;
-
+    int disponibilidad;
+    double diferencia;
+    Date fechaQuery;
+    
+    SvcCuadre daoDispInve = new SvcCuadre();
+    //DateField fecha = new DateField("Fecha");
+DateField dfdFecha = new DateField("Fecha:");
     int tmpInt;
     int tmpIntUno;
     int tmpIntNoUno;
@@ -82,7 +91,8 @@ public class FormDetalleLubricantes extends Window {
     Container contLubs = new ListContainer<>(GenericProduct.class, new ArrayList());
     SvcCuadre service = new SvcCuadre();
 
-    public FormDetalleLubricantes(Integer idestacion, String currencySymbol, Integer idpais, BeanContainer<Integer, DtoProducto> bcrLubs) {
+    public FormDetalleLubricantes(Integer idestacion, String currencySymbol, Integer idpais, BeanContainer<Integer, DtoProducto> bcrLubs, Date fechaQuery) {
+        this.fechaQuery = fechaQuery;
         this.idestacion = idestacion;
         this.currencySymbol = currencySymbol;
         this.idpais = idpais;
@@ -134,6 +144,17 @@ public class FormDetalleLubricantes extends Window {
         btnguardar.addStyleName(ValoTheme.BUTTON_FRIENDLY);
         btnguardar.addStyleName(ValoTheme.BUTTON_SMALL);
         btnguardar.addClickListener((Button.ClickListener) event -> {
+
+            for (Integer itemId : bcrLubs.getItemIds()) {
+                bcrLubs.getItem(itemId).getBean().getProducto().getProductoId();
+                bcrLubs.getItem(itemId).getBean().getCantidad(); //Venta
+                //fechaQuery
+                disponibilidad = daoDispInve.recuperaDisponibilidadInventario(fechaQuery,bcrLubs.getItem(itemId).getBean().getProducto().getProductoId());
+                diferencia = disponibilidad - bcrLubs.getItem(itemId).getBean().getCantidad();
+                if(diferencia < 0){  
+                    Notification.show("VENTA LUBRICANTE CON INVENTARIO NEGATIVO.\n", Notification.Type.ERROR_MESSAGE);
+                }
+            }
             if (bcrLubs.size() <= 0) {
                 bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
                 VaadinSession.getCurrent().setAttribute("detalleProducto", bcrLubs);
@@ -285,7 +306,7 @@ public class FormDetalleLubricantes extends Window {
             tmpIntUno = 0;
             tmpLubsOtros = 0;
             tmpIntNoUno = 0;
-            System.out.println("MARCA "+bcrLubs.getItem(itemId).getBean().getIdmarca());
+            System.out.println("MARCA " + bcrLubs.getItem(itemId).getBean().getIdmarca());
             if (bcrLubs.getItem(itemId).getBean().getIdmarca() == 100) {
                 tmpLubsUno = bcrLubs.getItem(itemId).getBean().getValor();
                 tmpIntUno = bcrLubs.getItem(itemId).getBean().getCantidad();
@@ -301,12 +322,13 @@ public class FormDetalleLubricantes extends Window {
         tblLubricantes.setColumnFooter("colProducto", "Total:");
         tblLubricantes.setColumnFooter("colCantidad", Integer.toString(tmpInt));
         tblLubricantes.setColumnFooter("total", currencySymbol + numberFmt.format(totalUno + totalNoUno).trim());
-        
-        System.out.println("TOTALES "+totalUno + " TOTAL NO UNO "+totalNoUno);
+
+        System.out.println("TOTALES " + totalUno + " TOTAL NO UNO " + totalNoUno);
 
         VaadinSession.getCurrent().setAttribute("detalleProducto", bcrLubs);
         VaadinSession.getCurrent().setAttribute("totalProd", tmpDouble);
         VaadinSession.getCurrent().setAttribute("totalProductoUno", totalUno);
         VaadinSession.getCurrent().setAttribute("totalProducto", totalNoUno);
+        
     }
 }

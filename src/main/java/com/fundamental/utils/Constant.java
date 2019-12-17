@@ -17,8 +17,10 @@ public class Constant {
     public static final String SEPARATOR_PARAM = "\\|\\|";
     public static final SimpleDateFormat SDF_yyyyMMdd = new SimpleDateFormat("yyyy/MM/dd");
     public static final SimpleDateFormat SDF_ddMMyyyy = new SimpleDateFormat("dd/MM/yyyy");
+    public static final SimpleDateFormat SDF_dd_MM_yyy = new SimpleDateFormat("dd-MM-yyyy");
     public static final SimpleDateFormat SDF_HHmm = new SimpleDateFormat("HH:mm");
     public static final SimpleDateFormat SDF_yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
+    public static final SimpleDateFormat SDF_ddMMyyyyS = new SimpleDateFormat("ddMMyyyy");
 
     public static final DecimalFormat decimal2D = new DecimalFormat("### ###,##0.00;-#");
     public static final DecimalFormat decFmt3 = new DecimalFormat("### ###,##0.000;-#");
