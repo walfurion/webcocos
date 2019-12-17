@@ -86,7 +86,6 @@ public class RptMTD2 extends Panel implements View {
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
     Button btnGenerar = new Button("Generar Reporte");
     Button btnExportar2 = new Button("Exportar a Excel", FontAwesome.EDIT);
-//    Button btnExportar = new Button("GenerarDownload", FontAwesome.EDIT);
     Button btnSelectAll;
     Button btnUnselectAll;
     //traer estaciones con su checkbox
@@ -96,8 +95,6 @@ public class RptMTD2 extends Panel implements View {
     Grid grid;
     ExcelGenerator excel = new ExcelGenerator();
     String Estacion = "";
-//    StreamResource sr;
-//    FileDownloader fileDownloader;
     final AdvancedFileDownloader downloader = new AdvancedFileDownloader();
 
     public RptMTD2() {
@@ -109,10 +106,6 @@ public class RptMTD2 extends Panel implements View {
         super.setContent(components.createVertical(Constant.styleTransactions, "100%", false, true, true, new Component[]{buildForm()}));
         checkestaciones.setBeanIdProperty("estacionid");
         cargaInfoSesion();
-        //Para exportar
-//        sr = GenerarExcel();
-//        fileDownloader = new FileDownloader(sr);
-//        fileDownloader.extend(btnExportar2);
     }
 
     private Component buildForm() {
@@ -192,7 +185,6 @@ public class RptMTD2 extends Panel implements View {
                     Label lblestacion = new Label("Estaciones");
                     lblestacion.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
                     vl.addComponent(lblestacion);
-                    System.out.println("CHECK ESTACION " + checkestaciones.size());
                     optStation = new OptionGroup(null, checkestaciones);
                     optStation.setMultiSelect(false);
                     optStation.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
@@ -238,7 +230,6 @@ public class RptMTD2 extends Panel implements View {
 
     private Component buildToolbar2() {
         toolbarContainerTables = new CssLayout();
-//        return toolbarContainerTables;
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarContainerTables)});
     }
 
@@ -246,7 +237,6 @@ public class RptMTD2 extends Panel implements View {
 
     private Component buildTableData() {
         toolbarData = new CssLayout();
-//        return toolbarContainerTables;
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarData)});
     }
 
@@ -272,9 +262,7 @@ public class RptMTD2 extends Panel implements View {
                             sourceGeneric.addAll(svcmtd.getMTD());
                             Estacion = svcmtd.getEstacion(Integer.parseInt(optStation.getValue().toString()));
                             grid = new Grid(sourceGeneric);
-//                        grid.setCaption("Ventas Diarias e Inventario");
                             grid.setWidth("1080px");
-//                        grid.setContainerDataSource(sourceGeneric);
                             grid.removeAllColumns();
                             grid.addColumn("p_super");
                             grid.addColumn("p_regular");
@@ -312,8 +300,6 @@ public class RptMTD2 extends Panel implements View {
                             grid.setColumnOrder("p_super", "p_regular", "p_diesel", "l_super", "l_regular", "l_diesel", "l_total", "c_super", "c_regular", "c_diesel", "c_total");
                             toolbarData.removeAllComponents();
                             toolbarData.addComponent(grid);
-//                            sr = GenerarExcel();
-//                            fileDownloader = new FileDownloader(sr);
                             btnExportar2.setEnabled(true);
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -332,32 +318,8 @@ public class RptMTD2 extends Panel implements View {
         btnExportar2.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-//                getUI().getPage().reload();
-//                getUI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_INV_FIS.getViewName());
 //                UI.getCurrent().getNavigator().navigateTo(DashboardViewType.RPT_MTD.getViewName());
 //                //                getUI().getPage().open(resource, "_blank", false);
-//                /*Devulevo una lista de string seleccionados*/
-//                String[] Seleccion;
-//                Seleccion = getSeleccion();
-//                /*Recorro la seleccion de estaciones para enviarlas al query*/
-//                for (String string : Seleccion) {
-//                    try {
-//                        sourceGeneric = new BeanItemContainer<GenericMTD>(GenericMTD.class);
-//                        //*Ejemplo de query */
-//                        svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim());
-//                        sourceGeneric.addAll(svcmtd.getMTD());
-//                        Estacion = svcmtd.getEstacion(Integer.parseInt(string.trim()));
-//                        DownloadExcel();
-////                        getUI().getPage().open(file, "_self", false);
-//
-////                        GenericMTD mtd = new GenericMTD();
-////                        mtd = sourceGeneric.getIdByIndex(0);
-////                        System.out.println("LITROS SUPER " + mtd.getL_super() + " ESTACION " + Estacion);
-////                        System.out.println("Select * from estacion where estacion_id = " + string.trim());
-//                    } catch (Exception ex) {
-//                        ex.printStackTrace();
-//                    }
-//                }
             }
         });
 
@@ -365,6 +327,7 @@ public class RptMTD2 extends Panel implements View {
             @Override
             public void beforeDownload(DownloaderEvent downloadEvent) {
                 if (sourceGeneric.size() > 0) {
+                    System.out.println("IMP "+Estacion);
                     downloader.setFileDownloadResource(GenerarExcel());
                 }
             }
