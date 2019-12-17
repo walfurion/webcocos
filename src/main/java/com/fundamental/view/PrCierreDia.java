@@ -25,6 +25,7 @@ import com.fundamental.services.SvcMntEstacion;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.generic.bean.GenericBeanMedioPago;
 
 import com.sisintegrados.generic.bean.GenericDepositoDet;
 import com.sisintegrados.generic.bean.GenericMedioPago;
@@ -202,9 +203,7 @@ public class PrCierreDia extends Panel implements View {
     String currencySymbol;
     Pais pais = new Pais();
     BeanItemContainer<Estacion> ContEstacion = new BeanItemContainer<Estacion>(Estacion.class);
-    BeanItemContainer<Mediopago> ContMediosPago = new BeanItemContainer<Mediopago>(Mediopago.class);
-    SvcMntEstacion service = new SvcMntEstacion();
-    SvcMaintenance servmedio = new SvcMaintenance();
+    BeanItemContainer<GenericBeanMedioPago> ContMediosPago = new BeanItemContainer<GenericBeanMedioPago>(GenericBeanMedioPago.class);
 
     public PrCierreDia() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -353,9 +352,9 @@ public class PrCierreDia extends Panel implements View {
         ContEstacion.removeAllItems();
         ContMediosPago.removeAllItems();
         ContEstacion = new BeanItemContainer<Estacion>(Estacion.class);
-        ContMediosPago = new BeanItemContainer<Mediopago>(Mediopago.class);
-        List<Estacion> contestacion = service.getAllEstaciones(true);
-        List<Mediopago> contmedios = servmedio.getAllMediosPago(true);
+        ContMediosPago = new BeanItemContainer<GenericBeanMedioPago>(GenericBeanMedioPago.class);
+        List<Estacion> contestacion = daoDeposito.getAllEstaciones(true);
+        List<GenericBeanMedioPago> contmedios = daoDeposito.getAllMediosPago(true);
         ContEstacion.addAll(contestacion);
         ContMediosPago.addAll(contmedios);
 
@@ -750,7 +749,7 @@ public class PrCierreDia extends Panel implements View {
     }
 
     private void buildTableDeposito() {
-        tableDeposito.setCaption("Depósito:");
+        tableDeposito.setCaption("Detalle Depósito:");
         tableDeposito.setContainerDataSource(bcrDeposito);
         tableDeposito.setImmediate(true);
 
@@ -760,10 +759,11 @@ public class PrCierreDia extends Panel implements View {
                 Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
                 //ComboBox cmbTarjeta = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, ContCreditC);
                 ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
+                cmbEstacion.setReadOnly(true);
                 cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
                 cmbEstacion.setItemCaptionPropertyId("nombre");
                 cmbEstacion.setNullSelectionAllowed(false);
-                cmbEstacion.addStyleName(ValoTheme.COMBOBOX_SMALL);
+                cmbEstacion.addStyleName(ValoTheme.BUTTON_TINY);
                 cmbEstacion.setPropertyDataSource(pro);
                 cmbEstacion.setFilteringMode(FilteringMode.CONTAINS);
 //                cmbEstacion.setWidth("250px");
@@ -775,42 +775,16 @@ public class PrCierreDia extends Panel implements View {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
-                //ComboBox cmbTarjeta = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, ContCreditC);
                 ComboBox cmbMedio = new ComboBox(null, ContMediosPago);
+                cmbMedio.setReadOnly(true);
                 cmbMedio.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
                 cmbMedio.setItemCaptionPropertyId("nombre");
                 cmbMedio.setNullSelectionAllowed(false);
-                cmbMedio.addStyleName(ValoTheme.COMBOBOX_SMALL);
+                cmbMedio.addStyleName(ValoTheme.COMBOBOX_TINY);
                 cmbMedio.setPropertyDataSource(pro);
                 cmbMedio.setFilteringMode(FilteringMode.CONTAINS);
 //                cmbMedio.setWidth("250px");
                 return cmbMedio;
-            }
-        });
-
-        tableDeposito.addGeneratedColumn("colboleta", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("noboleta");  //Atributo del bean
-                final TextField nfd = new TextField(pro);
-                nfd.setNullRepresentation("");
-                nfd.setWidth("85px");
-                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
-                nfd.addStyleName("align-right");
-                return nfd;
-            }
-        });
-
-        tableDeposito.addGeneratedColumn("colcomentarios", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("comentarios");  //Atributo del bean
-                final TextField nfd = new TextField(pro);
-                nfd.setNullRepresentation("");
-                nfd.setWidth("85px");
-                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
-                nfd.addStyleName("align-right");
-                return nfd;
             }
         });
 
@@ -819,10 +793,11 @@ public class PrCierreDia extends Panel implements View {
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("monto");  //Atributo del bean
                 final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
+                nfd.setReadOnly(true);
                 Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
                 nfd.setValue(numberFmt.format(value));
                 nfd.setWidth("150px");
-                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+                nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
                 nfd.addStyleName("align-right");
                 return nfd;
             }
@@ -833,18 +808,19 @@ public class PrCierreDia extends Panel implements View {
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("montousd");  //Atributo del bean
                 final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
+                nfd.setReadOnly(true);
                 Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
                 nfd.setValue(numberFmt.format(value));
                 nfd.setWidth("150px");
-                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+                nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
                 nfd.addStyleName("align-right");
                 return nfd;
             }
         });
 
-        tableDeposito.setVisibleColumns(new Object[]{"colestacion", "colmedio", "colboleta","colcomentarios", "monto", "montousd"});
-        tableDeposito.setColumnHeaders(new String[]{"Estacion", "Medio Pago", "No Boleta", "Comentarios", "Monto", "USD"});
-        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT,Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT);
+        tableDeposito.setVisibleColumns(new Object[]{"colmedio", "noboleta","comentarios", "monto", "montousd"});
+        tableDeposito.setColumnHeaders(new String[]{"Medio Pago", "No Boleta", "Comentarios", "Monto", "USD"});
+        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT,Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
         tableDeposito.setHeight(200f, Unit.PIXELS);
         tableDeposito.addStyleName(ValoTheme.TABLE_COMPACT);
         tableDeposito.addStyleName(ValoTheme.TABLE_SMALL);
