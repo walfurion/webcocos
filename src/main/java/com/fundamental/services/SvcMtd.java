@@ -213,6 +213,26 @@ public class SvcMtd extends Dao {
         return result;
     }
 
+    public String getEstacion(Integer idestacion) {
+        String result = "";
+        query = "SELECT NOMBRE FROM ESTACION WHERE ESTACION_ID =" + idestacion;
+        try {
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            while (rst.next()) {
+                result = rst.getString(1);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
     public void generar_data(Date fechaini, Date fechafin, String idestacion) throws SQLException {
         String query = "{call REPORT_MTD2 (?,?,?)}";
         CallableStatement cst = getConnection().prepareCall(query);

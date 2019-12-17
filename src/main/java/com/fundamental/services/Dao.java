@@ -32,7 +32,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.InitialContext;
@@ -337,6 +339,29 @@ public class Dao {
         }
         return result;
     }
+    
+    public HashMap<String,Pais> getAllPaisesMap() {
+        HashMap<String,Pais> result = new HashMap<String,Pais>();
+        miQuery = "SELECT pais_id, nombre, codigo, moneda_simbolo, estado, vol_simbolo "
+                + "FROM pais";
+        ResultSet rst = null;
+        try {
+            rst = getConnection().prepareStatement(miQuery).executeQuery();
+            while (rst.next()) {
+                result.put(rst.getString(2),new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5), null));
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
 
     public List<Estacion> getStationsByCountry(Integer paisId) {
         List<Estacion> result = new ArrayList();
@@ -348,6 +373,32 @@ public class Dao {
             rst = getConnection().prepareStatement(miQuery).executeQuery();
             while (rst.next()) {
                 result.add(new Estacion(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5), rst.getString(6)));
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+    
+    
+
+
+    public Map<String,Estacion> getAllEstacionesMap() {
+        Map<String,Estacion> result = new HashMap<String, Estacion>();
+        ResultSet rst = null;
+        try {
+            miQuery = "SELECT estacion_id, nombre, codigo, pais_id, estado, fact_electronica "
+                    + "FROM estacion ";
+            rst = getConnection().prepareStatement(miQuery).executeQuery();
+            while (rst.next()) {
+                result.put(rst.getString(2),new Estacion(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5), rst.getString(6)));
             }
         } catch (Exception exc) {
             exc.printStackTrace();

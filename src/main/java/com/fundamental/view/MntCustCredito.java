@@ -10,6 +10,11 @@ import com.fundamental.model.dto.DtoGenericBean;
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcConfBombaEstacion;
 import com.fundamental.services.SvcGeneral;
+import com.fundamental.utils.Constant;
+import com.sisintegrados.view.form.FormUploadClientes;
+import com.vaadin.addon.tableexport.DefaultTableHolder;
+import com.vaadin.addon.tableexport.ExcelExport;
+import com.vaadin.addon.tableexport.TableHolder;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Item;
@@ -47,6 +52,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +66,7 @@ import org.vaadin.maddon.ListContainer;
  * @author Henry Barrientos
  */
 public class MntCustCredito extends Panel implements View {
-    Button btnSave, btnAdd, btnFilterClear;
+    Button btnSave, btnAdd, btnFilterClear, btnExcel, btnCarga;
     Acceso acceso = new Acceso();
     ComboBox cbxCountry, cbxStation, cbxStatus, cbxType;
     Table tblCustomer;
@@ -81,6 +87,8 @@ public class MntCustCredito extends Panel implements View {
     private final VerticalLayout vlRoot;
     private Utils utils = new Utils();
     private Usuario user;
+    
+    FormUploadClientes formUploadClientes;
 
     public MntCustCredito() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -117,21 +125,23 @@ public class MntCustCredito extends Panel implements View {
         vlLeft.setComponentAlignment(btnAdd, Alignment.MIDDLE_CENTER);
         Responsive.makeResponsive(vlLeft);
 
-        VerticalLayout vlRight = new VerticalLayout(cbxCountry, cbxStation, tfdName, cbxType, tfdCode, tfdCodigoEnvoy, tfdCedulaJuridica, cbxStatus, btnSave);
+        VerticalLayout vlRight = new VerticalLayout(cbxCountry, cbxStation, tfdName, cbxType, tfdCode, tfdCodigoEnvoy, tfdCedulaJuridica, cbxStatus, btnSave,btnExcel,btnCarga);
         vlRight.setSpacing(true);
         vlRight.setSizeUndefined();
         vlRight.setId("vlRight");
         vlRight.setComponentAlignment(btnSave, Alignment.MIDDLE_CENTER);
+        vlRight.setComponentAlignment(btnExcel, Alignment.MIDDLE_CENTER);
+        vlRight.setComponentAlignment(btnCarga, Alignment.MIDDLE_CENTER);
         Responsive.makeResponsive(vlRight);
 
-        VerticalLayout vlUpload = new VerticalLayout(upload);
-        vlUpload.setSpacing(true);
-        vlUpload.setSizeUndefined();
-        vlUpload.setId("vlUpload");
-        vlUpload.setComponentAlignment(upload, Alignment.MIDDLE_CENTER);
-        Responsive.makeResponsive(vlUpload);
+//        VerticalLayout vlUpload = new VerticalLayout(upload);
+//        vlUpload.setSpacing(true);
+//        vlUpload.setSizeUndefined();
+//        vlUpload.setId("vlUpload");
+//        vlUpload.setComponentAlignment(upload, Alignment.MIDDLE_CENTER);
+//        Responsive.makeResponsive(vlUpload);
 
-        CssLayout cltTables = new CssLayout(utils.vlContainer(vlRight), utils.vlContainer(vlLeft), utils.vlContainer(vlUpload));
+        CssLayout cltTables = new CssLayout(utils.vlContainer(vlRight), utils.vlContainer(vlLeft));
         cltTables.setId("cltTables");
         cltTables.setSizeUndefined();
         Responsive.makeResponsive(cltTables);
@@ -151,8 +161,8 @@ public class MntCustCredito extends Panel implements View {
         bcrCustomer.setBeanIdProperty("clienteId");
         SvcGeneral service = new SvcGeneral();
         listCountries = service.getAllPaises();
-        bcrCustomer.addAll(service.getCustomersByStationidType("C")); //Credito
-        bcrCustomer.addAll(service.getCustomersByStationidType("P")); //Prepago
+        bcrCustomer.addAll(service.getCustomersByStationidType(null)); //todos
+//        bcrCustomer.addAll(service.getCustomersByStationidType("P")); //Prepago
         service.closeConnections();
     }
 
@@ -198,13 +208,15 @@ public class MntCustCredito extends Panel implements View {
                         return filterByProperty("paisNombre", item, event.getText())
                                 || filterByProperty("estacionNombre", item, event.getText())
                                 || filterByProperty("codigo", item, event.getText())
-                                || filterByProperty("nombre", item, event.getText());
+                                || filterByProperty("nombre", item, event.getText())
+                                || filterByProperty("estado", item, "INACTIVO".equals(event.getText().toUpperCase())?"I":("ACTIVO".equals(event.getText().toUpperCase())?"A":event.getText())) ;
                     }
                     @Override
                     public boolean appliesToProperty(final Object propertyId) {
                         return propertyId.equals("paisNombre")
                                 || propertyId.equals("estacionNombre")
                                 || propertyId.equals("codigo")
+                                || propertyId.equals("estado")
                                 || propertyId.equals("nombre");
                     }
                 });
@@ -238,15 +250,7 @@ public class MntCustCredito extends Panel implements View {
         tblCustomer.addStyleName(ValoTheme.TABLE_SMALL);
         tblCustomer.setSizeUndefined();
         tblCustomer.setHeight("475px");
-        tblCustomer.addGeneratedColumn("colType", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Label result = new Label(bcrCustomer.getItem(itemId).getBean().getTipo().equals("P") ? "Prepago" : "Crédito");
-                result.setWidth("75px");
-                return result;
-            }
-        });
-        tblCustomer.setVisibleColumns(new Object[]{"paisNombre", "estacionNombre", "colType", "codigo", "codigoEnvoy", "estado", "nombre"});
+        tblCustomer.setVisibleColumns(new Object[]{"paisNombre", "estacionNombre", "tipo", "codigo", "codigoEnvoy", "estado", "nombre"});
         tblCustomer.setColumnHeaders(new String[]{"Pais", "Estacion", "Tipo", "Código E1", "Código envoy", "Estado", "Nombre"});
         tblCustomer.setColumnAlignment("codigo", Table.Align.RIGHT);
         tblCustomer.setColumnAlignment("estado", Table.Align.CENTER);
@@ -274,13 +278,13 @@ public class MntCustCredito extends Panel implements View {
                         }
                     }
                     for (DtoGenericBean dgb : listStatus) {
-                        if (dgb.getStringId().equals(cliente.getEstado())) {
+                        if (dgb.getStringId().equals("Activo".equals(cliente.getEstado())?"A":"I")) {
                             cbxStatus.setValue(dgb);
                             break;
                         }
                     }
                     for (DtoGenericBean dgb : listType) {
-                        if (dgb.getStringId().equals(cliente.getTipo())) {
+                        if (dgb.getStringId().equals("Prepago".equals(cliente.getTipo())?"P":"C")) {
                             cbxType.setValue(dgb);
                             break;
                         }
@@ -343,6 +347,7 @@ public class MntCustCredito extends Panel implements View {
         btnSave.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
+                int custId = (action.equals(Dao.ACTION_ADD)) ? 0 : Integer.parseInt(tblCustomer.getValue().toString());
                 if (!cbxCountry.isValid() || !cbxStation.isValid() 
                         || !tfdCode.isValid() || tfdCode.getValue().trim().isEmpty()
                         || !tfdName.isValid() || tfdName.getValue().trim().isEmpty()
@@ -355,16 +360,16 @@ public class MntCustCredito extends Panel implements View {
                 Cliente cliente;
                 for (Integer itemId : bcrCustomer.getItemIds()) {
                     cliente = bcrCustomer.getItem(itemId).getBean();
-                    if (cliente.getPaisId()==((Pais)cbxCountry.getValue()).getPaisId() && cliente.getCodigo().equals(tfdCode.getValue().trim()) ) {
+                    if (custId!=cliente.getClienteId() && cliente.getPaisId()==((Pais)cbxCountry.getValue()).getPaisId() && cliente.getCodigo().equals(tfdCode.getValue().trim()) ) {
                         Notification.show(String.format("Para el país %s ya existe el código %s.", ((Pais)cbxCountry.getValue()).getNombre(), tfdCode.getValue().trim()), 
                                 Notification.Type.ERROR_MESSAGE);
                         return;
                     }
                 }
 
-                int custId = (action.equals(Dao.ACTION_ADD)) ? 0 : Integer.parseInt(tblCustomer.getValue().toString());
+                
                 tmpString = ((DtoGenericBean)cbxType.getValue()).getStringId();
-                cliente = new Cliente(custId, tfdCode.getValue(), tfdName.getValue(), ((Estacion) cbxStation.getValue()).getEstacionId(), "A", user.getUsername(), new java.util.Date(), tmpString, tfdCodigoEnvoy.getValue(), tfdCedulaJuridica.getValue());
+                cliente = new Cliente(custId, tfdCode.getValue(), tfdName.getValue(), ((Estacion) cbxStation.getValue()).getEstacionId(), ((DtoGenericBean) cbxStatus.getValue()).getStringId(), user.getUsername(), new java.util.Date(), tmpString, tfdCodigoEnvoy.getValue(), tfdCedulaJuridica.getValue());
                 SvcGeneral service = new SvcGeneral();
                 if (action.equals(Dao.ACTION_ADD) && service.existeCodEnvoy(cliente.getCodigoEnvoy())) {
                     Notification.show("El código ENVOY ingresado ya fue utilizado en otro cliente.");
@@ -379,6 +384,31 @@ public class MntCustCredito extends Panel implements View {
                 } else {
                     Notification.show("Ocurrió un error al ejecutar la acción. \n" + cliente.getTipo(), Notification.Type.ERROR_MESSAGE);
                 }
+            }
+        });
+        
+        btnExcel = utils.buildButton("Exportar", FontAwesome.TABLE, ValoTheme.BUTTON_FRIENDLY);
+        btnExcel.setDescription("Exportar a Excel");
+        btnExcel.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+                if (tblCustomer.isVisible()) {
+                    generaExcel().export();
+                }
+            }
+        });
+        
+        btnCarga = utils.buildButton("Cargar", FontAwesome.UPLOAD, ValoTheme.BUTTON_FRIENDLY);
+        btnCarga.setDescription("Cargar desde Excel");
+        btnCarga.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+                formUploadClientes = new FormUploadClientes();
+                formUploadClientes.addCloseListener((e) -> {
+                    UI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_CUST_CREDITO.getViewName());
+                });
+                getUI().addWindow(formUploadClientes);
+                formUploadClientes.focus();
             }
         });
     }
@@ -461,4 +491,12 @@ public class MntCustCredito extends Panel implements View {
         btnSave.setEnabled(acceso.isCambiar());
     }
 
+     public ExcelExport generaExcel() {
+        TableHolder tableHolder = new DefaultTableHolder(tblCustomer);
+        ExcelExport excelExport = new ExcelExport(tableHolder);
+        excelExport.excludeCollapsedColumns();
+        excelExport.setReportTitle("Clientes");
+        excelExport.setExportFileName("Clientes-"+Constant.SDF_yyyyMMddHHmmss.format(new Date()) + ".xls");
+        return excelExport;
+    }
 }

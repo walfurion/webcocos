@@ -14,7 +14,7 @@ public class Cliente {
     private Date creadoEl;
     //
     private int paisId;
-    private String paisNombre, estacionNombre;
+    private String paisNombre, estacionNombre;    
 
     public Cliente(int clienteId, String codigo, String nombre, int estacionId, String estado, String creadoPor, Date creadoEl, String tipo, String codigoEnvoy, String cedulaJuridica) {
         this.clienteId = clienteId;
@@ -133,4 +133,10 @@ public class Cliente {
         this.cedulaJuridica = cedulaJuridica;
     }
 
+    @Override
+    public String toString() {
+        return "Cliente{" + "clienteId=" + clienteId + ", codigo=" + codigo + ", nombre=" + nombre + ", estacionId=" + estacionId + ", estado=" + estado + ", creadoPor=" + creadoPor + ", tipo=" + tipo + ", codigoEnvoy=" + codigoEnvoy + ", cedulaJuridica=" + cedulaJuridica + ", creadoEl=" + creadoEl + ", paisId=" + paisId + ", paisNombre=" + paisNombre + ", estacionNombre=" + estacionNombre + '}';
+    }
+    
+    
 }

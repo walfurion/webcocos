@@ -329,5 +329,6 @@ DateField dfdFecha = new DateField("Fecha:");
         VaadinSession.getCurrent().setAttribute("totalProd", tmpDouble);
         VaadinSession.getCurrent().setAttribute("totalProductoUno", totalUno);
         VaadinSession.getCurrent().setAttribute("totalProducto", totalNoUno);
+        
     }
 }

@@ -267,18 +267,20 @@ public class FormDetalleDeposito extends Window {
         tmpDouble = 0;
         tmpDoubleDolar = 0;
         tmpDoubleOther = 0;
+        Double constanteDolar = 560.00;
         for (Integer itemId : bcrDeposito.getItemIds()) {
             tmpDouble += bcrDeposito.getItem(itemId).getBean().getMonto();
-            if (bcrDeposito.getItem(itemId).getBean().getMediopago().getNombre().contains("Efectivo USD")) {
+            if (bcrDeposito.getItem(itemId).getBean().getMediopago().getNombre().contains("Efectivo USD") || bcrDeposito.getItem(itemId).getBean().getMediopago().getNombre().contains("EFECTIVO USD")) {
                 tmpDoubleDolar += bcrDeposito.getItem(itemId).getBean().getMonto();
             } else {
                 tmpDoubleOther += bcrDeposito.getItem(itemId).getBean().getMonto();
             }
-         }
+        }
         
         System.out.println("total dolar  " + tmpDoubleDolar);
         System.out.println("total otros  " + tmpDoubleOther);
-        tmpDouble = (tmpDoubleDolar * 560) + tmpDoubleOther;
+        tmpDouble = (tmpDoubleDolar * constanteDolar) + tmpDoubleOther;
+        System.out.println("tmpDouble total " + tmpDouble);
         
         tblDeposito.setFooterVisible(true);
         tblDeposito.setColumnFooter("colMedioPago", "Total:");
@@ -288,5 +290,6 @@ public class FormDetalleDeposito extends Window {
         VaadinSession.getCurrent().setAttribute("totalDolar", tmpDoubleDolar);
         VaadinSession.getCurrent().setAttribute("totalOtro", tmpDoubleOther);
         VaadinSession.getCurrent().setAttribute("total", tmpDouble);
+        
     }
 }

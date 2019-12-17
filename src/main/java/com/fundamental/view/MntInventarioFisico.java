@@ -343,7 +343,7 @@ public class MntInventarioFisico extends Panel implements View {
                 comInv.setFecha(cmbFecha.getValue());                
                 comInv.setCreado_por(usuario.getUsername());
                 SvcInventarioFisico service = new SvcInventarioFisico();
-//                service.insertCompra(comInv);
+                service.insertCompra(comInv);
 //                service.insertVenta(123, 188, 150.00, cmbFecha.getValue());
                 service.closeConnections();
                 if (comInv.getProducto_id()>0) {
