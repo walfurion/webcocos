@@ -184,7 +184,42 @@ public class SvcComVenLubricantes extends Dao{
             }
         }
         return result;
-    }  
+    }
+    
+    public boolean reversarVenta(int productoId, int paisId, Double venta, Date fecha) {
+        boolean result = true;
+        ResultSet rst = null;  
+        Calendar ayer = Calendar.getInstance();
+        ayer.setTime(fecha);
+        ayer.add(Calendar.DATE, -1);
+        try {
+            Date fec = fechaMax(productoId,fecha,paisId);
+            int idMarca = recuperaMarca(productoId);
+            Double valFinalAnt = valorFinal(paisId, idMarca, ayer.getTime(),productoId);
+            Double compra = compra(paisId, idMarca, productoId, fecha);
+            Double valInicial = valorInicial(paisId, idMarca, productoId, fecha);                
+            miQuery = "UPDATE COMPRA_VENTA_LUBRICANTE "
+                + "SET VENTA=?, INV_FINAL=?, MODIFICADO_EL=SYSDATE "
+                + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy')";
+            pst = getConnection().prepareStatement(miQuery);
+            pst.setDouble(1, venta);
+            pst.setDouble(2, valInicial + compra + venta);
+            pst.setInt(3,productoId);
+            pst.setString(4, Constant.SDF_ddMMyyyy.format(fec));
+            pst.executeUpdate();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+            return false;
+        } finally {
+
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
     
     public int countLub(int idProducto, Date fecha, int idPais) {
         int result = 0;
