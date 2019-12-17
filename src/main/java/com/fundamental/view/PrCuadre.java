@@ -1196,8 +1196,7 @@ public class PrCuadre extends Panel implements View {
         if (cbxEmpleado.getValue() != null) {
             formProductos = new FormDetalleLubricantes(idestacion, simboloMoneda, idpais, bcrLubs);
             formProductos.addCloseListener((e) -> {
-                bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class
-                );
+                bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
                 bcrLubs = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detalleProducto");
                 tmpDoubleProdUno = (Double) VaadinSession.getCurrent().getAttribute("totalProductoUno");
                 tmpDoubleProdNoUno = (Double) VaadinSession.getCurrent().getAttribute("totalProducto");

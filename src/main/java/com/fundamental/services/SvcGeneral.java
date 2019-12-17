@@ -9,6 +9,7 @@ import com.fundamental.model.Marca;
 import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Producto;
 import com.fundamental.model.dto.DtoGenericBean;
+import com.fundamental.utils.Constant;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Date;
@@ -575,6 +576,7 @@ public class SvcGeneral extends Dao {
 
     public Lubricanteprecio doActionLubprecioCarga(String action, Lubricanteprecio lub, Lubricanteprecio lubAnterior) {
         Lubricanteprecio result = new Lubricanteprecio();
+        System.out.println("fechhhhhhhhhhhhha " + lub.getFechaFin()+ " " + lub.getFechaInicio());
         try {
             getConnection().setAutoCommit(false);
             if (action.equals(Dao.ACTION_ADD)) {
@@ -586,28 +588,29 @@ public class SvcGeneral extends Dao {
                 lub.setLubricanteprecio(lubprecioId);
                 closePst();
                 query = "INSERT INTO lubricanteprecio (lubricanteprecio, pais_id, producto_id, fecha_inicio, fecha_fin, precio, creado_por, creado_el) "
-                        + "VALUES (" + lubprecioId + ",?, ?, ?, ?, ?, ?, sysdate)";
+                        + "VALUES (" + lubprecioId + ",?, ?, to_date(?,'dd/mm/yyyy'), to_date(?,'dd/mm/yyyy'), ?, ?, sysdate)";
                 System.out.println("doActionLubprecio " + query + " " + lub.toString());
+                
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, lub.getPaisId());
                 pst.setObject(2, lub.getProductoId());
-                pst.setObject(3, new java.sql.Date(lub.getFechaInicio().getTime()));
-                pst.setObject(4, new java.sql.Date(lub.getFechaFin().getTime()));
+                pst.setString(3, Constant.SDF_ddMMyyyy.format(lub.getFechaInicio()));
+                pst.setString(4, Constant.SDF_ddMMyyyy.format(lub.getFechaFin()));
                 pst.setObject(5, lub.getPrecio());
                 pst.setObject(6, lub.getCreadoPor());
                 //pst.setObject(7, lub.getLubricanteprecio());
                 pst.executeUpdate();
             } else if (action.equals(Dao.ACTION_UPDATE)) {
                 query = "UPDATE lubricanteprecio "
-                        + "SET pais_id = ?, producto_id = ?, fecha_inicio = ?, fecha_fin = ?, precio = ?, modificado_por = ?, modificado_el = SYSDATE "
+                        + "SET pais_id = ?, producto_id = ?, fecha_inicio = to_date(?,'dd/mm/yyyy'), fecha_fin = to_date(?,'dd/mm/yyyy'), precio = ?, modificado_por = ?, modificado_el = SYSDATE "
                         + "WHERE lubricanteprecio = ? ";
                 System.out.println("query update " + query);
                 System.out.println("lub para update " + lub.toString());
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, lub.getPaisId());
                 pst.setObject(2, lub.getProductoId());
-                pst.setObject(3, new java.sql.Date(lub.getFechaInicio().getTime()));
-                pst.setObject(4, new java.sql.Date(lub.getFechaFin().getTime()));
+                pst.setString(3, Constant.SDF_ddMMyyyy.format(lub.getFechaInicio()));
+                pst.setString(4, Constant.SDF_ddMMyyyy.format(lub.getFechaFin()));
                 pst.setObject(5, lub.getPrecio());
                 pst.setObject(6, lub.getModificadoPor());
                 pst.setObject(7, lub.getLubricanteprecio());
