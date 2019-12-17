@@ -138,16 +138,13 @@ public class FormUploadTarjetas extends Window {
 
                     listProducts = service.getLubpriceByCountryidStationid(pais.getPaisId(), marca.getIdMarca());
                     listProductsNoPrecio = service.getProductsNotInLubsPrecio();
-                    System.out.println("tamaño de lista ListProducts ---- " + listProducts.size());
-                    System.out.println("tamaño de lista productos sin precio ---- " + listProductsNoPrecio.size());
+   
                     for (GenericLubricantePrecio genCard : container.getItemIds()) {
-                        System.out.println("genCard ---------- " + genCard.toString());
-                        System.out.println("genCard.getPRODUCTO() " + genCard.getPRODUCTO());
+              
                         for (Lubricanteprecio pr : listProducts) {
                             if (genCard.getPRODUCTO().trim().toUpperCase().equals(pr.getProducto().getNombre().trim().toUpperCase())
-                                    && genCard.getPAIS().equals(pr.getPais().getNombre()))
-                                    //&& genCard.getMARCA().equals(marca.getNombre())) 
-                                    {
+                                    && genCard.getPAIS().equals(pr.getPais().getNombre())) //&& genCard.getMARCA().equals(marca.getNombre())) 
+                            {
                                 /*
                             Si existe el producto en sistema, se procede a actualizar
                                  */
@@ -160,8 +157,6 @@ public class FormUploadTarjetas extends Window {
                                 try {
                                     date1 = new SimpleDateFormat("mm/dd/yyyy").parse(genCard.getINICIO());
                                     date2 = new SimpleDateFormat("mm/dd/yyyy").parse(genCard.getFIN());
-                                    System.out.println("date1 " + date1);
-                                    System.out.println("date2 " + date2);
                                 } catch (ParseException ex) {
                                     Logger.getLogger(FormUploadTarjetas.class.getName()).log(Level.SEVERE, null, ex);
                                 }
