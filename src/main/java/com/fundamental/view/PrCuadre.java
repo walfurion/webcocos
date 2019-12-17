@@ -1120,6 +1120,7 @@ public class PrCuadre extends Panel implements View {
                                                 bcrLubs.getItem(itemId).getBean().getCantidad(); //Venta
                                                 dfdFecha.getValue();
                                                 pais.getPaisId();
+                                                daoVentaLubs.reversarVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), pais.getPaisId(), Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), dfdFecha.getValue());
                                                 daoVentaLubs.insertVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), pais.getPaisId(), Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), dfdFecha.getValue());
 //                                               
                                             

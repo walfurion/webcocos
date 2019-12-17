@@ -201,6 +201,7 @@ public class SvcComVenLubricantes extends Dao{
             miQuery = "UPDATE COMPRA_VENTA_LUBRICANTE "
                 + "SET VENTA=0, INV_FINAL=?, MODIFICADO_EL=SYSDATE "
                 + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy')";
+            System.out.println("PRUEBA MERY " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
             pst.setDouble(1, valInicial + compra + venta);
             pst.setInt(2,productoId);
