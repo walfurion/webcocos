@@ -11,10 +11,12 @@ import com.fundamental.model.Mediopago;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoProducto;
+import com.fundamental.services.SvcComVenLubricantes;
 import com.fundamental.services.SvcCuadre;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
 import com.sisintegrados.generic.bean.GenericProduct;
+import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
@@ -151,6 +153,8 @@ DateField dfdFecha = new DateField("Fecha:");
                 //fechaQuery
                 disponibilidad = daoDispInve.recuperaDisponibilidadInventario(fechaQuery,bcrLubs.getItem(itemId).getBean().getProducto().getProductoId());
                 diferencia = disponibilidad - bcrLubs.getItem(itemId).getBean().getCantidad();
+                SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();
+                daoVentaLubs.insertVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), fechaQuery);
                 if(diferencia < 0){  
                     Notification.show("VENTA LUBRICANTE CON INVENTARIO NEGATIVO.\n", Notification.Type.ERROR_MESSAGE);
                 }
@@ -274,7 +278,11 @@ DateField dfdFecha = new DateField("Fecha:");
                         List<DtoProducto> tempList = new ArrayList();
                         for (DtoProducto deo : listLubs) {
                             if (deo.getProductoId() != itemId) {
+                                SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();
                                 tempList.add(deo);
+                                if (idpais != null) {
+                                    daoVentaLubs.reversarVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), fechaQuery);
+                                }                                
                             }
                         }
                         listLubs = tempList;
