@@ -1115,7 +1115,9 @@ public class PrCuadre extends Panel implements View {
                                         Pais pais = new Pais();
                                         pais = (Pais) cbxPais.getValue();
                                         if (pais != null) {
+                                            System.out.println("antes del for");
                                             for (Integer itemId : bcrLubs.getItemIds()) {
+                                                System.out.println("entra al for bcrlubs ");
                                                 bcrLubs.getItem(itemId).getBean().getProducto().getProductoId();
                                                 bcrLubs.getItem(itemId).getBean().getCantidad(); //Venta
                                                 dfdFecha.getValue();
