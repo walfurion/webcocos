@@ -751,12 +751,15 @@ public class PrCierreDia extends Panel implements View {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("inicialDto");  //Atributo del bean
+                Property inicial = source.getItem(itemId).getItemProperty("inicialDto");
                 TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
                 tfdValue.setNullRepresentation("0.00");
                 tfdValue.setWidth("85px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
-                tfdValue.setEnabled(inventarioAyer.isEmpty());
+                if (inicial.getValue() != null) {
+                    tfdValue.setReadOnly(true);
+                }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
