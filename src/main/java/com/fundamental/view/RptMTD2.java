@@ -17,6 +17,7 @@ import com.fundamental.utils.AdvancedFileDownloader.DownloaderEvent;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
 import com.fundamental.utils.ExcelGenerator;
+import com.fundamental.utils.Zip;
 import com.sisintegrados.generic.bean.GenericEstacion;
 import com.sisintegrados.generic.bean.GenericMTD;
 import com.sisintegrados.generic.bean.Pais;
@@ -61,6 +62,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -96,6 +99,9 @@ public class RptMTD2 extends Panel implements View {
     ExcelGenerator excel = new ExcelGenerator();
     String Estacion = "";
     final AdvancedFileDownloader downloader = new AdvancedFileDownloader();
+    final AtomicBoolean makeZip = new AtomicBoolean(false);
+    final AtomicReference<Object> name = new AtomicReference<Object>();
+
 
     public RptMTD2() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
@@ -186,7 +192,7 @@ public class RptMTD2 extends Panel implements View {
                     lblestacion.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
                     vl.addComponent(lblestacion);
                     optStation = new OptionGroup(null, checkestaciones);
-                    optStation.setMultiSelect(false);
+                    optStation.setMultiSelect(true);
                     optStation.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
                     vl.addComponent(optStation);
                     for (Integer noid : checkestaciones.getItemIds()) {
@@ -258,9 +264,22 @@ public class RptMTD2 extends Panel implements View {
                     if (optStation.getValue() != null) {
                         try {
                             sourceGeneric = new BeanItemContainer<GenericMTD>(GenericMTD.class);
-                            svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), optStation.getValue().toString());
-                            sourceGeneric.addAll(svcmtd.getMTD());
-                            Estacion = svcmtd.getEstacion(Integer.parseInt(optStation.getValue().toString()));
+                            String[] Seleccion;
+                            Seleccion = getSeleccion();                           
+                            for (String string : Seleccion) {
+                                svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim());
+                                sourceGeneric.addAll(svcmtd.getMTD());
+                                Estacion = svcmtd.getEstacion(Integer.parseInt(string.trim()));
+                            }
+                            System.out.println("seleccion "+Seleccion.length);
+                            if(Seleccion.length>1){
+                                name.set("Estaciones_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".zip"));
+                                makeZip.set(true);
+                            }else{
+                                name.set("COCOs_MTD_"+Estacion.concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx"));
+                                makeZip.set(false);
+                            }
+                            
                             grid = new Grid(sourceGeneric);
                             grid.setWidth("1080px");
                             grid.removeAllColumns();
@@ -343,56 +362,69 @@ public class RptMTD2 extends Panel implements View {
     }
 
     private StreamResource GenerarExcel() {
-//        /*Devulevo una lista de string seleccionados*/
-//        String[] Seleccion;
-//        Seleccion = getSeleccion();
-//        /*Recorro la seleccion de estaciones para enviarlas al query*/
-//        for (String string : Seleccion) {
-//            try {
-//                sourceGeneric = new BeanItemContainer<GenericMTD>(GenericMTD.class);
-//                svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim());
-//                sourceGeneric.addAll(svcmtd.getMTD());
-//                Estacion = svcmtd.getEstacion(Integer.parseInt(string.trim()));
-//                System.out.println("ESTACUIB " + string.trim());
-//            } catch (Exception ex) {
-//                ex.printStackTrace();
-//            }
-//        }
+        /*Devulevo una lista de string seleccionados*/
+        
         StreamResource.StreamSource source = new StreamResource.StreamSource() {
             public InputStream getStream() {
-                ByteArrayOutputStream stream;
+                ByteArrayOutputStream stream = null;
                 InputStream input = null;
                 try {
-                    List<String> tituloscolumnas = new ArrayList<String>();
-                    String[] titulos = new String[]{"Dia", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Total", "%", "Total", "%", "Total", "%", "Total Otros", "%", "Total Uno", "%", "A", "B", "C", "#1", "#2", "#3", "#4", "#5", "#6",
-                        "Totales", "Contado", "%", "Credomatic", "%", "Banco Nac", "%", "BCR", "%", "Magic SB", "%", "FM Davivienda", "%", "Versatec", "%", "Flota BCR", "%", "Flota Bac", "%", "Uno Plus", "%", "Cupon", "%", "Prepagos", "%", "TC Davivienda", "%", "Credito", "%", "Contado USD", "%",
-                        "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Sobrantes", "Faltantes", "Total", "%", "Total", "%", "Super", "%", "Regular", "%", "Diesel", "%", "Contado en USD",
-                        "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel",
-                        "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel"};
+                    
+                    String[] Seleccion;
+                    Seleccion = getSeleccion();
+                    /*Recorro la seleccion de estaciones para enviarlas al query*/
+                    List<Object[]> files = new ArrayList<>();                    
+                    for (String string : Seleccion) {
+                        try {
+                            Object[] f = new Object[2];
+                            sourceGeneric = new BeanItemContainer<GenericMTD>(GenericMTD.class);
+                            svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim());
+                            sourceGeneric.addAll(svcmtd.getMTD());
+                            Estacion = svcmtd.getEstacion(Integer.parseInt(string.trim()));
+                            
+                            List<String> tituloscolumnas = new ArrayList<String>();
+                            String[] titulos = new String[]{"Dia", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Total", "%", "Total", "%", "Total", "%", "Total Otros", "%", "Total Uno", "%", "A", "B", "C", "#1", "#2", "#3", "#4", "#5", "#6",
+                                "Totales", "Contado", "%", "Credomatic", "%", "Banco Nac", "%", "BCR", "%", "Magic SB", "%", "FM Davivienda", "%", "Versatec", "%", "Flota BCR", "%", "Flota Bac", "%", "Uno Plus", "%", "Cupon", "%", "Prepagos", "%", "TC Davivienda", "%", "Credito", "%", "Contado USD", "%",
+                                "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Super", "Regular", "Diesel", "Total", "%", "Sobrantes", "Faltantes", "Total", "%", "Total", "%", "Super", "%", "Regular", "%", "Diesel", "%", "Contado en USD",
+                                "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel",
+                                "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel", "Super", "Regular", "Diesel"};
 
-                    tituloscolumnas = Arrays.asList(titulos);
-//                XSSFWorkbook workbook = new XSSFWorkbook();
-                    /*Generar Reporte en XLS*/
-//                System.out.println("ESTACION " + Estacion);
-                    XSSFWorkbook workbook = excel.generar(1, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION " + Estacion, "MTD", sourceGeneric, null);
+                            tituloscolumnas = Arrays.asList(titulos);
 
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    try {
-                        workbook.write(bos);
-                    } catch (Exception exc) {
-                        bos.close();
+        //                XSSFWorkbook workbook = new XSSFWorkbook();
+                            /*Generar Reporte en XLS*/
+        //                System.out.println("ESTACION " + Estacion);
+                            XSSFWorkbook workbook = excel.generar(1, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION " + Estacion, "MTD", sourceGeneric, null);
+
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                            try {
+                                workbook.write(bos);
+                            } catch (Exception exc) {
+                                bos.close();
+                            }
+                            String nameFile = "COCOs_MTD_"+Estacion.concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
+                            f[0] = nameFile;
+                            f[1] = bos;
+                            files.add(f);
+                            
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }  
+                    if(makeZip.get()){
+                        Zip zip = new Zip();
+                        input  = zip.makeZip("Estaciones", files);
+                    }else{
+                        stream = (ByteArrayOutputStream) files.get(0)[1];
+                        input = new ByteArrayInputStream(stream.toByteArray());
                     }
-
-                    stream = bos;
-                    input = new ByteArrayInputStream(stream.toByteArray());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
                 return input;
             }
         };
-        String fileName = "COCOs_MTD_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
-        StreamResource resource = new StreamResource(source, fileName);
+        StreamResource resource = new StreamResource(source, (String) name.get());
         return resource;
     }
 
