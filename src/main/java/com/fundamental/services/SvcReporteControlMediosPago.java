@@ -102,5 +102,25 @@ public class SvcReporteControlMediosPago extends Dao {
         cst.setString(4, paisid);
         cst.execute();
     }
+    
+    public String getPaisId(Integer idestacion) {
+        String result = "";
+        query = "SELECT PAIS_ID FROM ESTACION WHERE ESTACION_ID = " + idestacion;
+        try {
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            while (rst.next()) {
+                result = rst.getString(1);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
 
 }

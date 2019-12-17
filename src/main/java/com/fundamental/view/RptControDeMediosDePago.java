@@ -59,6 +59,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import com.sisintegrados.generic.bean.Estacion;
+import com.vaadin.demo.dashboard.view.DashboardViewType;
+import com.vaadin.ui.UI;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -93,6 +96,7 @@ public class RptControDeMediosDePago extends Panel implements View {
     OptionGroup optStation = new OptionGroup();
     Grid grid;
     ExcelGeneratorCrlMediosPago excel = new ExcelGeneratorCrlMediosPago();
+    String Estacion = "";
 
     public RptControDeMediosDePago() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
@@ -111,6 +115,7 @@ public class RptControDeMediosDePago extends Panel implements View {
     }
 
     private Component buildForm() {
+        btnExportar.setEnabled(false);
         return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), buildTableData(),/*buildToolbar2(),*/ buildButtons()});
     }
 
@@ -139,6 +144,8 @@ public class RptControDeMediosDePago extends Panel implements View {
         cmbPais.addListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
+                checkestacionesm = new BeanContainer<>(GenericEstacion.class);
+                checkestacionesm.setBeanIdProperty("estacionid");
                 if (cmbPais.getValue() != null) {
                     Pais pais = new Pais();
                     pais = (Pais) cmbPais.getValue();
@@ -185,7 +192,7 @@ public class RptControDeMediosDePago extends Panel implements View {
                     lblestacion.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
                     vl.addComponent(lblestacion);
                     optStation = new OptionGroup(null, checkestacionesm);
-                    optStation.setMultiSelect(true);
+                    optStation.setMultiSelect(false);
                     optStation.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
                     vl.addComponent(optStation);
                     for (Integer noid : checkestacionesm.getItemIds()) {
@@ -257,8 +264,10 @@ public class RptControDeMediosDePago extends Panel implements View {
             public void buttonClick(final Button.ClickEvent event) {
                 if (cmbPais.getValue() != null && cmbFechaInicio.getValue() != null && cmbFechaFin.getValue() != null && optStation.size() > 0) {
                     try {
-                        SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), "361", "188");
-
+                        sourceGeneric = new BeanItemContainer<GenericRprControlMediosPago>(GenericRprControlMediosPago.class);
+                        int idEstacion = Integer.parseInt(optStation.getValue().toString());
+                        String paisId = SvcReporteControlMediosPago.getPaisId(idEstacion);
+                        SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), String.valueOf(idEstacion), paisId);
                         sourceGeneric.addAll(SvcReporteControlMediosPago.getCtlMediosPago());
                         grid = new Grid(sourceGeneric);
                         grid.setCaption("Control de medios de pago");
@@ -286,7 +295,7 @@ public class RptControDeMediosDePago extends Panel implements View {
                         grid.setColumnOrder("fecha", "lote", "monto_bruto", "comision", "monto_neto", "comentarios");
                         toolbarData.removeAllComponents();
                         toolbarData.addComponent(grid);
-//                   
+                        btnExportar.setEnabled(true);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -304,14 +313,15 @@ public class RptControDeMediosDePago extends Panel implements View {
         btnExportar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                /*Devulevo una lista de string seleccionados*/
-                String[] Seleccion;
-                Seleccion = getSeleccion();
-                /*Recorro la seleccion de estaciones para enviarlas al query*/
-                for (String string : Seleccion) {
-                    //*Ejemplo de query */
-                    System.out.println("Select * from estacion where estacion_id = " + string.trim());
-                }
+                UI.getCurrent().getNavigator().navigateTo(DashboardViewType.RPT_CONTROLMEDIOPAGO.getViewName());
+                //            /*Devulevo una lista de string seleccionados*/
+                //          String[] Seleccion;
+                //        Seleccion = getSeleccion();
+                //      /*Recorro la seleccion de estaciones para enviarlas al query*/
+                //    for (String string : Seleccion) {
+                //      //*Ejemplo de query */
+                //    System.out.println("Select * from estacion where estacion_id = " + string.trim());
+                // }
             }
         });
 
@@ -342,12 +352,9 @@ public class RptControDeMediosDePago extends Panel implements View {
                 tituloshoja.add("TC FLOTA BAC");
                 tituloshoja.add("UNO PLUS");
                 tituloshoja.add("TC DAVIVIENDA");
-                
-                tituloscolumnas = Arrays.asList(titulos);
-                
-                
 
-                
+                tituloscolumnas = Arrays.asList(titulos);
+
                 XSSFWorkbook workbook = new XSSFWorkbook();
                 /*Generar Reporte en XLS*/
                 workbook = excel.generar(10, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION(ES) " + optStation.getValue().toString(), "Flota BAC", sourceGeneric, tituloshoja);
@@ -372,7 +379,7 @@ public class RptControDeMediosDePago extends Panel implements View {
         StreamResource resource = new StreamResource(source, fileName);
         return resource;
     }
-    
+
     private String[] getSeleccion() {
         String[] result;
         String valor = String.valueOf(optStation.getValue());
