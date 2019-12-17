@@ -389,6 +389,7 @@ public class MntInventarioFisico extends Panel implements View {
                     comInv.setUnidad_fis_tienda(lub.getUnidad_fis_tienda());
                     comInv.setUnidad_fis_bodega(lub.getUnidad_fis_bodega());
                     comInv.setUnidad_fis_pista(lub.getUnidad_fis_pista());
+                    comInv.setDiferencia_inv(lub.getDiferencia_inv());
                     comInv.setTotal_unidad_fisica(lub.getTotal_unidad_fisica());
                     comInv.setComentario(lub.getComentario());                    
                     service.insertCompra(comInv);

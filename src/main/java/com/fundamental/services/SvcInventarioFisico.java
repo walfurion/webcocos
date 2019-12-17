@@ -34,7 +34,8 @@ public class SvcInventarioFisico extends Dao {
                     "(select INV_FINAL from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as invFin, " +
                     "(select UNIDAD_FIS_TIENDA from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as uniTienda, " +
                     "(select UNIDAD_FIS_BODEGA from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as uniBodega, " +
-                    "(select UNIDAD_FIS_PISTA from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as uniPista, " +
+                    "(select UNIDAD_FIS_PISTA from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as uniPista, "
+                    + "(select TOTAL_UNIDAD_FISICA from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('31/10/2019','dd/mm/yyyy')) as totalFis, " +
                     "(select DIFERENCIA_INV from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as difInv, " +
                     "(select COMENTARIO from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as Comentario "
                     + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p, LUBRICANTEPRECIO lp "
@@ -48,16 +49,13 @@ public class SvcInventarioFisico extends Dao {
             ResultSet rst = pst.executeQuery();
             ComInventarioFisico inv;
             while (rst.next()) {
-                System.out.println("tienda "+rst.getDouble(8));
-                System.out.println("pista "+rst.getDouble(10));
-                System.out.println("diferencia "+rst.getDouble(11));
-                System.out.println("inv inicial "+rst.getDouble(5));
                 inv = new ComInventarioFisico(rst.getInt(7), rst.getInt(1), rst.getDouble(5),rst.getString(2), rst.getString(3), rst.getDouble(4));
-                inv.setUnidad_fis_tienda(rst.getDouble(8));
-                inv.setUnidad_fis_bodega(rst.getDouble(9));
-                inv.setUnidad_fis_pista(rst.getDouble(10));
-                inv.setDiferencia_inv(rst.getDouble(11));
-                inv.setComentario(rst.getString(12));
+                inv.setUnidad_fis_tienda(rst.getDouble(9));
+                inv.setUnidad_fis_bodega(rst.getDouble(10));
+                inv.setUnidad_fis_pista(rst.getDouble(11));
+                inv.setTotal_unidad_fisica(rst.getDouble(9)+rst.getDouble(10)+rst.getDouble(11));
+                inv.setDiferencia_inv(rst.getDouble(5)-inv.getTotal_unidad_fisica());
+                inv.setComentario(rst.getString(14));
                 result.add(inv);
             }
         } catch (Exception exc) {
@@ -86,9 +84,9 @@ public class SvcInventarioFisico extends Dao {
                 pst.setDouble(5, lub.getTotal_unidad_fisica());
                 pst.setDouble(6, lub.getDiferencia_inv());
                 pst.setString(7, lub.getComentario());
-                pst.setString(7, lub.getModificado_por());
-                pst.setInt(8, lub.getProducto_id());
-                pst.setString(9,Constant.SDF_ddMMyyyy.format(lub.getFecha()));
+                pst.setString(8, lub.getModificado_por());
+                pst.setInt(9, lub.getProducto_id());
+                pst.setString(10,Constant.SDF_ddMMyyyy.format(lub.getFecha()));
                 pst.executeUpdate();
                 result = lub;
             }else{
