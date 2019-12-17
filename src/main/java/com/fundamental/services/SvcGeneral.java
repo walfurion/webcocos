@@ -30,10 +30,12 @@ public class SvcGeneral extends Dao {
             String type) {
         List<Cliente> result = new ArrayList();
         try {
-            query = "SELECT c.cliente_id, c.codigo, c.nombre, c.estacion_id, c.estado, c.creado_por, c.creado_el, c.tipo, c.codigo_envoy, c.cedula_juridica, e.nombre, p.pais_id, p.nombre "
+            query = "SELECT c.cliente_id, c.codigo, c.nombre, c.estacion_id,  decode(c.estado,'A','Activo','Inactivo'), c.creado_por, c.creado_el, decode(c.tipo,'P','Prepago','Crédito'), c.codigo_envoy, c.cedula_juridica, e.nombre, p.pais_id, p.nombre "
                     + "FROM cliente c, estacion e, pais p "
-                    + "WHERE c.estacion_id = e.estacion_id AND e.pais_id = p.pais_id " //c.estacion_id = "+estacionId+" AND "
-                    + "AND c.tipo = '" + type + "'";
+                    + "WHERE c.estacion_id = e.estacion_id AND e.pais_id = p.pais_id "; //c.estacion_id = "+estacionId+" AND "
+                    if(type!=null && "".equals(type.trim())){
+                        query = query + " AND c.tipo = '" + type + "'";
+                    }
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Cliente cliente;
@@ -43,6 +45,34 @@ public class SvcGeneral extends Dao {
                 cliente.setPaisId(rst.getInt(12));
                 cliente.setPaisNombre(rst.getString(13));
                 result.add(cliente);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
+    
+    public Map<String,Cliente> getCustomersByStationidTypeMap(//Integer estacionId, 
+            String type) {
+        Map<String,Cliente> result = new HashMap<String,Cliente>();
+        try {
+            query = "SELECT c.cliente_id, c.codigo, c.nombre, c.estacion_id,  decode(c.estado,'A','Activo','Inactivo'), c.creado_por, c.creado_el, decode(c.tipo,'P','Prepago','Crédito'), c.codigo_envoy, c.cedula_juridica, e.nombre, p.pais_id, p.nombre "
+                    + "FROM cliente c, estacion e, pais p "
+                    + "WHERE c.estacion_id = e.estacion_id AND e.pais_id = p.pais_id "; //c.estacion_id = "+estacionId+" AND "
+                    if(type!=null && "".equals(type.trim())){
+                        query = query + " AND c.tipo = '" + type + "'";
+                    }
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            Cliente cliente;
+            while (rst.next()) {
+                cliente = new Cliente(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5), rst.getString(6), null, rst.getString(8), rst.getString(9), rst.getString(10));
+                cliente.setEstacionNombre(rst.getString(11));
+                cliente.setPaisId(rst.getInt(12));
+                cliente.setPaisNombre(rst.getString(13));
+                result.put(cliente.getPaisId()+""+cliente.getCodigo(),cliente);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -70,16 +100,18 @@ public class SvcGeneral extends Dao {
                 result = true;
             } else if (action.equals(Dao.ACTION_UPDATE)) {
                 query = "UPDATE cliente "
-                        + "SET codigo = ?, nombre = ?, estacion_id = ?, modificado_por = ?, codigo_envoy = ?, cedula_juridica = ?, modificado_el = SYSDATE "
-                        + "WHERE cliente_id = ?";
+                        + "SET codigo = ?, nombre = ?, estacion_id = ?, modificado_por = ?, codigo_envoy = ?, cedula_juridica = ?, modificado_el = SYSDATE , estado = ? "
+                        + " WHERE cliente_id = ? ";
                 pst = getConnection().prepareStatement(query);
                 pst.setString(1, cliente.getCodigo());
                 pst.setString(2, cliente.getNombre());
                 pst.setInt(3, cliente.getEstacionId());
                 pst.setString(4, cliente.getCreadoPor());
-                pst.setInt(5, cliente.getClienteId());
-                pst.setString(6, cliente.getCodigoEnvoy());
-                pst.setString(7, cliente.getCedulaJuridica());
+                pst.setString(5, cliente.getCodigoEnvoy());
+                pst.setString(6, cliente.getCedulaJuridica());
+                System.out.println("estado "+cliente.getEstado());
+                pst.setString(7, cliente.getEstado());                
+                pst.setInt(8, cliente.getClienteId());
                 pst.executeUpdate();
                 result = true;
             }

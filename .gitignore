@@ -10,3 +10,13 @@ rebel.xml
 *.iml
 .idea/
 
+src/main/webapp/VAADIN/widgetsets/com.vaadin.demo.dashboard.DashboardWidgetSet/5DEDD68D9D49085BF77EF64FF2C3D67B.cache.js
+src/main/webapp/VAADIN/widgetsets/com.vaadin.demo.dashboard.DashboardWidgetSet/C81F8CA7CA7012F31BDE883DF6C99E61.cache.svg
+src/main/webapp/VAADIN/widgetsets/com.vaadin.demo.dashboard.DashboardWidgetSet/com.vaadin.demo.dashboard.DashboardWidgetSet.devmode.js
+src/main/webapp/VAADIN/widgetsets/com.vaadin.demo.dashboard.DashboardWidgetSet/com.vaadin.demo.dashboard.DashboardWidgetSet.nocache.js
+src/main/webapp/VAADIN/widgetsets/com.vaadin.demo.dashboard.DashboardWidgetSet/compilation-mappings.txt
+src/main/webapp/VAADIN/widgetsets/com.vaadin.demo.dashboard.DashboardWidgetSet/deferredjs/5DEDD68D9D49085BF77EF64FF2C3D67B/1.cache.js
+src/main/webapp/VAADIN/widgetsets/com.vaadin.demo.dashboard.DashboardWidgetSet/deferredjs/5DEDD68D9D49085BF77EF64FF2C3D67B/2.cache.js
+src/main/webapp/VAADIN/widgetsets/com.vaadin.demo.dashboard.DashboardWidgetSet/deferredjs/5DEDD68D9D49085BF77EF64FF2C3D67B/3.cache.js
+src/main/webapp/VAADIN/widgetsets/WEB-INF/deploy/com.vaadin.demo.dashboard.DashboardWidgetSet/rpcPolicyManifest/manifest.txt
+nb-configuration.xml
