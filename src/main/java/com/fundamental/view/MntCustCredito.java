@@ -496,7 +496,7 @@ public class MntCustCredito extends Panel implements View {
         ExcelExport excelExport = new ExcelExport(tableHolder);
         excelExport.excludeCollapsedColumns();
         excelExport.setReportTitle("Clientes");
-        excelExport.setExportFileName("Clientes-"+Constant.SDF_yyyyMMddHHmmss.format(new Date()) + ".xls");
+        excelExport.setExportFileName("Clientes-"+Constant.SDF_ddMMyyyyS.format(new Date()) + ".xls");
         return excelExport;
     }
 }
