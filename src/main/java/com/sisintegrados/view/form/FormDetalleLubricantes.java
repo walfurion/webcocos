@@ -274,15 +274,13 @@ DateField dfdFecha = new DateField("Fecha:");
                 btnDelete.addClickListener(new Button.ClickListener() {
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
+                        SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();
+                        daoVentaLubs.reversarVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), fechaQuery);
                         bcrLubs.removeItem(itemId);
                         List<DtoProducto> tempList = new ArrayList();
                         for (DtoProducto deo : listLubs) {
                             if (deo.getProductoId() != itemId) {
-                                SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();
-                                tempList.add(deo);
-                                if (idpais != null) {
-                                    daoVentaLubs.reversarVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), fechaQuery);
-                                }                                
+                                tempList.add(deo);                               
                             }
                         }
                         listLubs = tempList;

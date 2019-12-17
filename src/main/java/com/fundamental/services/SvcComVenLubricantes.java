@@ -203,7 +203,7 @@ public class SvcComVenLubricantes extends Dao{
                 + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy')";
             System.out.println("PRUEBA MERY " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
-            pst.setDouble(1, valInicial + compra + venta);
+            pst.setDouble(1, valFinalAnt + compra + venta);
             pst.setInt(2,productoId);
             pst.setString(3, Constant.SDF_ddMMyyyy.format(fec));
             pst.executeUpdate();
@@ -266,6 +266,7 @@ public class SvcComVenLubricantes extends Dao{
         }
         return result;
     }
+    
     
     private Double valorFinal(int countryId, int brandId, Date fecha, int productId){        
         ResultSet rst = null;
