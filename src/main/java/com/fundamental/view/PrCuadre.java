@@ -1121,6 +1121,8 @@ public class PrCuadre extends Panel implements View {
                                                 dfdFecha.getValue();
                                                 pais.getPaisId();
                                                 daoVentaLubs.insertVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), pais.getPaisId(), Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), dfdFecha.getValue());
+//                                               
+                                            
                                             }
                                         }
                                     } catch (SQLException ex) {
@@ -1194,7 +1196,7 @@ public class PrCuadre extends Panel implements View {
     /*Metodo Llama Forma Detalle Productos (Lubricantes) *///JJ
     private void formDetalleProd(Integer idestacion, String simboloMoneda, Integer idpais) {
         if (cbxEmpleado.getValue() != null) {
-            formProductos = new FormDetalleLubricantes(idestacion, simboloMoneda, idpais, bcrLubs);
+            formProductos = new FormDetalleLubricantes(idestacion, simboloMoneda, idpais, bcrLubs, dfdFecha.getValue());
             formProductos.addCloseListener((e) -> {
                 bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class
                 );

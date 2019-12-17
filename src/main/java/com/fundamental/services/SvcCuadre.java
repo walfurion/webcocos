@@ -254,5 +254,32 @@ public class SvcCuadre extends Dao {
         }
         return result;
     }
-
+    
+    public int recuperaDisponibilidadInventario(Date fecha, int productoId){        
+        ResultSet rst = null;
+        int valor = 0;
+        String fecha1 = Constant.SDF_ddMMyyyy.format(fecha);
+        String fecha2 = Constant.SDF_ddMMyyyy.format(fecha);
+        fecha1 = fecha2.substring(3,5);
+        fecha2 = fecha2.substring(6);
+            try{        
+                query = " select inv_final DISPONIBILIDAD\n" 
+                + " from compra_venta_lubricante\n" 
+                + " where compra_id =(\n" 
+                + " select max(compra_id) PRODUCTO\n" 
+                + " from compra_venta_lubricante \n" 
+                + " where to_char(fecha,'mm') = '"+fecha1+"'\n" 
+                + " and to_char(fecha,'yyyy') = '"+fecha2+"'\n" 
+                + " and producto_id = "+productoId+") "; 
+                System.out.println("query " + query);
+                pst = getConnection().prepareStatement(query);
+                rst = pst.executeQuery();            
+                while (rst.next()) {         
+                    valor = rst.getInt(1);
+                }
+            }catch(Exception exc){
+                exc.printStackTrace();
+            }
+        return valor;
+    }
 }
