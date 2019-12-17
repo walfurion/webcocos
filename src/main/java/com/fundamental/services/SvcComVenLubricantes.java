@@ -199,13 +199,12 @@ public class SvcComVenLubricantes extends Dao{
             Double compra = compra(paisId, idMarca, productoId, fecha);
             Double valInicial = valorInicial(paisId, idMarca, productoId, fecha);                
             miQuery = "UPDATE COMPRA_VENTA_LUBRICANTE "
-                + "SET VENTA=?, INV_FINAL=?, MODIFICADO_EL=SYSDATE "
+                + "SET VENTA=0, INV_FINAL=?, MODIFICADO_EL=SYSDATE "
                 + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy')";
             pst = getConnection().prepareStatement(miQuery);
-            pst.setDouble(1, venta);
-            pst.setDouble(2, valInicial + compra + venta);
-            pst.setInt(3,productoId);
-            pst.setString(4, Constant.SDF_ddMMyyyy.format(fec));
+            pst.setDouble(1, valInicial + compra + venta);
+            pst.setInt(2,productoId);
+            pst.setString(3, Constant.SDF_ddMMyyyy.format(fec));
             pst.executeUpdate();
         } catch (Exception exc) {
             exc.printStackTrace();
