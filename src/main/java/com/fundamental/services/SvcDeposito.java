@@ -7,6 +7,7 @@ package com.fundamental.services;
 
 import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Estacion;
+import com.sisintegrados.generic.bean.GenericBeanMedioPago;
 import com.sisintegrados.generic.bean.GenericDepositoDet;
 import com.sisintegrados.generic.bean.GenericMedioPago;
 import java.sql.ResultSet;
@@ -51,13 +52,8 @@ public class SvcDeposito extends Dao {
 //    }
     public List<GenericMedioPago> getDepositoByEstacion(String idestacion, Date date) {
         List<GenericMedioPago> result = new ArrayList();
-        //result = null;
 
         try {
-//            miQuery = "select IDDEPOSITODET, MEDIOPAGO_ID, MONTO, COMENTARIOS, NOBOLETA "
-//                    + " FROM DEPOSITO_DET "
-//                    + " WHERE ESTACION_ID = " + idestacion + " and to_char(FECHA, 'YYYY-MM-DD') = '" + date + "'";
-
             miQuery = "SELECT A.IDDEPOSITODET, A.MONTO, A.COMENTARIOS, A.NOBOLETA,\n"
                     + "        B.ESTACION_ID,B.NOMBRE,\n"
                     + "        C.MEDIOPAGO_ID,C.NOMBRE,A.MONTOUSD\n"
@@ -67,7 +63,6 @@ public class SvcDeposito extends Dao {
                     + "                    WHERE A.ESTACION_ID = B.ESTACION_ID\n"
                     + "                    AND A.MEDIOPAGO_ID = C.MEDIOPAGO_ID \n"
                     + "                    AND A.ESTACION_ID = ? and A.fecha = ?";
-//            System.out.println("MiQuery getDepositoByEstacion    " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
 
             java.sql.Date sqlDateIni = new java.sql.Date(date.getTime());
@@ -78,9 +73,7 @@ public class SvcDeposito extends Dao {
             ResultSet rst = pst.executeQuery();
 
             while (rst.next()) {
-                result.add(new GenericMedioPago(rst.getInt(1), new Estacion(rst.getInt(5), rst.getString(6)), new Mediopago(rst.getInt(7), rst.getString(8)), rst.getString(4), rst.getString(3), rst.getDouble(2), rst.getDouble(9)));
-//                mp.setMediopagoid(rst.getInt(2));
-//                result.add(new GenericDepositoDet(rst.getInt(1), mp, rst.getDouble(3), rst.getString(4), rst.getString(5)));
+                result.add(new GenericMedioPago(rst.getInt(1), new Estacion(rst.getInt(5), rst.getString(6)), new GenericBeanMedioPago(rst.getInt(7), rst.getString(8)), rst.getString(4), rst.getString(3), rst.getDouble(2), rst.getDouble(9)));
             }
             closePst();
         } catch (Exception exc) {
@@ -141,7 +134,6 @@ public class SvcDeposito extends Dao {
 //        }
 //        return result;
 //    }
-    
     public List<Estacion> getAllEstaciones(boolean includeInactive) {
         List<Estacion> result = new ArrayList();
         //String statusName;
@@ -149,7 +141,7 @@ public class SvcDeposito extends Dao {
         try {
             miQuery = (includeInactive) ? "" : " AND e.estado = 'A' ";
             miQuery = "SELECT e.estacion_id, e.nombre "
-                     + "FROM estacion e, pais p "
+                    + "FROM estacion e, pais p "
                     + "WHERE e.pais_id = p.pais_id "
                     + miQuery
                     + " ORDER BY p.nombre ";
@@ -172,9 +164,9 @@ public class SvcDeposito extends Dao {
         }
         return result;
     }
-    
-    public List<Mediopago> getAllMediosPago(boolean includeInactives) {
-        List<Mediopago> result = new ArrayList();
+
+    public List<GenericBeanMedioPago> getAllMediosPago(boolean includeInactives) {
+        List<GenericBeanMedioPago> result = new ArrayList();
         try {
             String query = (includeInactives) ? "" : " AND m.estado = 'A' ";
             query = "SELECT m.mediopago_id, m.nombre "
@@ -184,9 +176,9 @@ public class SvcDeposito extends Dao {
                     + " ORDER BY m.nombre";
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
-            Mediopago mediopago;
+            GenericBeanMedioPago mediopago;
             while (rst.next()) {
-                mediopago = new Mediopago(rst.getInt(1), rst.getString(2));
+                mediopago = new GenericBeanMedioPago(rst.getInt(1), rst.getString(2));
                 result.add(mediopago);
             }
         } catch (Exception exc) {

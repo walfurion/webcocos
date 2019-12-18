@@ -20,12 +20,12 @@ public class GenericMedioPago {
 
     private Integer idgeneric;
     private Estacion estacion;
-    private Mediopago mediopago;
+    private GenericBeanMedioPago mediopago;
     private String noboleta;
     private String comentarios;
     private Double monto;
     private Double montousd;
-    public GenericMedioPago(Integer idgeneric,Estacion estacion, Mediopago mediopago, String noboleta, String comentarios, Double monto, Double montousd) {
+    public GenericMedioPago(Integer idgeneric,Estacion estacion, GenericBeanMedioPago mediopago, String noboleta, String comentarios, Double monto, Double montousd) {
         this.idgeneric = idgeneric;
         this.estacion = estacion;
         this.mediopago = mediopago;
