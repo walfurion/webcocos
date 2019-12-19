@@ -357,7 +357,7 @@ public class MntInventarioFisico extends Panel implements View {
             }
         }); 
         tblProduct.setVisibleColumns(new Object[]{"numero","productoNombre", "presentacion",  "precio", "inv_final", "uniFisTienda", "uniFisBodega", "uniFisPista","totalInvUniFis","difInvFinal","colComentario"});
-        tblProduct.setColumnHeaders(new String[]{"#","Descripcion", "Presentacion", "Precio de venta", "Inventario final", "Unidades fisicas en tienda", "Unidades fisicas en Bodega", "Unidades fisicas en Pista","Total unidades fisicas","Diferencia inv. final en mov. vrs toma","Comentarios"});
+        tblProduct.setColumnHeaders(new String[]{"#","Descripcion", "Presentacion", "Precio de venta", "Inventario final", "Unidades fisicas /n en tienda", "Unidades fisicas en Bodega", "Unidades fisicas en Pista","Total unidades fisicas","Diferencia inv. final en mov. vrs toma","Comentarios"});
 //        tblProduct.setColumnAlignments(new Table.Align[]{Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT});
         return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tblProduct)});
     }
@@ -391,8 +391,15 @@ public class MntInventarioFisico extends Panel implements View {
                     comInv.setUnidad_fis_pista(lub.getUnidad_fis_pista());
                     comInv.setDiferencia_inv(lub.getDiferencia_inv());
                     comInv.setTotal_unidad_fisica(lub.getTotal_unidad_fisica());
-                    comInv.setComentario(lub.getComentario());                    
-                    service.insertCompra(comInv);
+                    comInv.setComentario(lub.getComentario());
+                    System.out.println("total unidad fisica "+comInv.getDiferencia_inv());
+                    if (comInv.getDiferencia_inv()>=0.0) {
+                        service.insertCompra(comInv);
+                    } else {
+                        Notification.show("El valor final no puede ser negativo. \n", Notification.Type.ERROR_MESSAGE);
+                        return;
+                    }
+                    
                 }
 //                for (Integer pid : contLub.getItemIds()) {
 //                    inv = contLub.getItem(pid).getBean();

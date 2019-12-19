@@ -14,14 +14,19 @@ import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoArqueo;
 import com.fundamental.services.Dao;
+import com.fundamental.services.SvcDetalleTcClientes;
 import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
-import com.fundamental.utils.Constant;
 import com.sisintegrados.generic.bean.ArqueoTC;
+import com.sisintegrados.generic.bean.GenericBeanMedioPago;
+import com.sisintegrados.generic.bean.GenericDetalleFM;
+import com.sisintegrados.generic.bean.GenericLote;
+import com.sisintegrados.view.form.FormDetalleCliDavivienda;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import com.vaadin.demo.dashboard.view.DashboardViewType;
 import com.vaadin.navigator.View;
@@ -33,6 +38,7 @@ import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -45,6 +51,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.Align;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -57,6 +64,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import org.vaadin.addons.stackpanel.StackPanel;
 import org.vaadin.maddon.ListContainer;
 
 /**
@@ -139,18 +147,27 @@ public class PrTurnoCierre extends Panel implements View {
         }
     };
 
-    Table tableTarjeta = new Table() {
+    /*Detalle TC *///ASG
+    Table tableFMDavivienda = new Table() {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
-            if (colId.equals("value")) {
+            if (colId.equals("venta")) {
                 return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
             }
             return super.formatPropertyValue(rowId, colId, property);
         }
     };
-
+    Table tableFMScott = new Table() {
+        @Override
+        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
+            if (colId.equals("venta")) {
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
+            }
+            return super.formatPropertyValue(rowId, colId, property);
+        }
+    };
+    /*Fin Detalle ASG*/
     BeanContainer<Integer, Arqueocaja> bcrArqueocaja = new BeanContainer<Integer, Arqueocaja>(Arqueocaja.class);
-    ;
     BeanContainer<Integer, Bomba> bcrBombas = new BeanContainer<Integer, Bomba>(Bomba.class);
     BeanContainer<Integer, DtoArqueo> bcrVentas = new BeanContainer<Integer, DtoArqueo>(DtoArqueo.class);
     BeanContainer<Integer, Producto> bcrProducto = new BeanContainer<Integer, Producto>(Producto.class);
@@ -158,6 +175,19 @@ public class PrTurnoCierre extends Panel implements View {
     BeanContainer<Integer, Mediopago> bcrEfectivo = new BeanContainer<Integer, Mediopago>(Mediopago.class);
     BeanContainer<Integer, ArqueoTC> bcrTarjeta = new BeanContainer<Integer, ArqueoTC>(ArqueoTC.class);
 
+    /*Detalle TC ASG*/
+    SvcDetalleTcClientes dao = new SvcDetalleTcClientes();
+    HorizontalLayout hltables = new HorizontalLayout();
+    BeanItemContainer<Estacion> ContEstacion = new BeanItemContainer<Estacion>(Estacion.class);
+    BeanItemContainer<GenericBeanMedioPago> ContMediosPago = new BeanItemContainer<GenericBeanMedioPago>(GenericBeanMedioPago.class);
+    BeanItemContainer<GenericLote> ContLote = new BeanItemContainer<GenericLote>(GenericLote.class);
+    BeanItemContainer<GenericLote> ContLoteScott = new BeanItemContainer<GenericLote>(GenericLote.class);
+    BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
+    BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
+
+    FormDetalleCliDavivienda formDetalleCliDavivienda;
+
+    /*FIN DETALLE ASG*/
     Double totalVentas = 0D, totalDinero = 0D;
     String symCurrency, symVolumen;
 
@@ -167,6 +197,16 @@ public class PrTurnoCierre extends Panel implements View {
     List<Producto> productos;
     List<Bomba> allBombas;
     Acceso acceso = new Acceso();
+    Panel panelDetalles = new Panel();
+    Panel panelTableDetalles = new Panel();
+    Button btnbac;
+    Button btnbanknac;
+    Button btnbcr;
+    Button btncredomatic;
+    Button btndavivienda;
+    Button btnfmdavivienda;
+    Button btndmscottia;
+
     public PrTurnoCierre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
@@ -183,30 +223,30 @@ public class PrTurnoCierre extends Panel implements View {
         root.addComponent(utils.buildHeader("Cierre de turno", true, true));
         root.addComponent(utils.buildSeparator());
         getAllData();
-//***
+
         buildTableCuadre();
         buildTableBombas();
         buildTableVentas();
 
-//        buildTableArqueo();
         buildTableProductos();
         buildTableMediosPago();
         buildTableEfectivo();
-        buildTableTarjeta();
+
+        /*Tablas para detalles de tarjetas de credito*/ //ASG
+        buildTableFMDavivienda();
+        buildTableFMScottia();
+        /*FIN ASG*/
         buildFilters();
         buildButtons();
 
         HorizontalLayout hlContent = new HorizontalLayout();
         Responsive.makeResponsive(hlContent);
         hlContent.setHeight("60%");
-//        hlContent.addComponents(tableArqueo);
 
         HorizontalLayout hlContent2 = new HorizontalLayout();
         hlContent2.setMargin(new MarginInfo(false, true));
         Responsive.makeResponsive(hlContent2);
         hlContent2.setHeight("60%");
-//        hlContent2.addComponents(tableProductos);
-//        hlContent2.addComponents(tableMediosPago);
 
         HorizontalLayout hlContent4 = new HorizontalLayout();
         hlContent4.setMargin(false);
@@ -216,13 +256,6 @@ public class PrTurnoCierre extends Panel implements View {
         hlContent4.addComponents(buildDetalleMontos(), btnGuardar);
         hlContent4.setComponentAlignment(btnGuardar, Alignment.BOTTOM_LEFT);
 
-//        VerticalLayout vlLabels = new VerticalLayout(lblTotalVentas, lblTotalDinero, lblDiferencia);
-//        vlLabels.setComponentAlignment(lblTotalVentas, Alignment.MIDDLE_RIGHT);
-//        vlLabels.setComponentAlignment(lblTotalDinero, Alignment.MIDDLE_RIGHT);
-//        vlLabels.setComponentAlignment(lblDiferencia, Alignment.MIDDLE_RIGHT);
-//        Responsive.makeResponsive(vlLabels);
-//        vlLabels.setSizeUndefined();
-//        hlContent4.addComponent(vlLabels, 0);
         CssLayout cltInfo = new CssLayout();
         cltInfo.setSizeUndefined();
         cltInfo.setWidth(100f, Unit.PERCENTAGE);
@@ -233,6 +266,25 @@ public class PrTurnoCierre extends Panel implements View {
         hlCombos.setSizeUndefined();
         CssLayout cltCombo = new CssLayout(utils.vlContainer(cbxPais), utils.vlContainer(cbxEstacion), utils.vlContainer(dfdFecha), utils.vlContainer(cbxTurno));
         hlCombos.addComponents(cltCombo);
+
+        /*ASG detalle*/
+        VerticalLayout vldetalles = new VerticalLayout();
+        HorizontalLayout hldetalles = new HorizontalLayout();
+        vldetalles.setSpacing(true);
+        panelDetalles = new SectionPanelButtons("Detalles Tarjetas");
+        panelDetalles.setIcon(FontAwesome.ADJUST);
+        panelDetalles.setSizeFull();
+        StackPanel.extend(panelDetalles)
+                .close();
+        panelTableDetalles = new SectionPanelTablesDet("Tablas Detalles Tarjetas");
+        panelTableDetalles.setIcon(FontAwesome.ADJUST);
+        panelTableDetalles.setSizeFull();
+        StackPanel.extend(panelTableDetalles);
+        hldetalles.addComponent(panelDetalles);
+        vldetalles.addComponent(hldetalles);
+        vldetalles.addComponent(panelTableDetalles);
+        vldetalles.addComponent(hlCombos);
+        /*FIN ASG*/
 
         HorizontalLayout hlBtnsSel = new HorizontalLayout();
         hlBtnsSel.setMargin(false);
@@ -250,26 +302,112 @@ public class PrTurnoCierre extends Panel implements View {
         Responsive.makeResponsive(content);
         content.addComponents(
                 utils.vlContainer(vlTableButtons), utils.vlContainer(tableBombas), utils.vlContainer(tableVentas), utils.vlContainer(tableProductos),
-                utils.vlContainer(tableMediosPago), utils.vlContainer(tableEfectivo), utils.vlContainer(tableTarjeta) //                hlContent, hlContent2, //hlContent5, 
+                utils.vlContainer(tableMediosPago), utils.vlContainer(tableEfectivo) /*,utils.vlContainer(tableTarjeta) ACA PODRIA PINTAR TABLA*/ //                hlContent, hlContent2, //hlContent5, 
                 //                hlContent3, 
                 ,
                  utils.vlContainer(hlContent4)
         );
 
-        root.addComponents(cltInfo, hlCombos, content);
+        root.addComponents(cltInfo, vldetalles/*hlCombos*/, content);
         root.setExpandRatio(content, 1);
 
-//        CssLayout sparks = new CssLayout();
-//        sparks.addStyleName("sparks");
-//        sparks.setWidth("100%");
-//        Responsive.makeResponsive(sparks);
-//        
-//        tableArqueo.setSizeUndefined();
-//        tableProductos.setSizeUndefined();
-//        
-//        sparks.addComponents(tableArqueo, tableProductos, txtaComment, btnGuardar);
-//        root.addComponents(sparks);
-//        root.setExpandRatio(sparks, 1);
+    }
+
+    public class SectionPanelButtons extends Panel {
+
+        public SectionPanelButtons(String caption) {
+            btnbac = new Button("BAC", FontAwesome.PLUS);
+            btnbac.addStyleName(ValoTheme.BUTTON_PRIMARY);
+            btnbac.addStyleName(ValoTheme.BUTTON_SMALL);
+            btnbac.addClickListener((final Button.ClickEvent event) -> {
+//            FormDetalleVenta2.open();
+            });
+
+            btnbanknac = new Button("BANCO NACIONAL", FontAwesome.PLUS);
+            btnbanknac.addStyleName(ValoTheme.BUTTON_PRIMARY);
+            btnbanknac.addStyleName(ValoTheme.BUTTON_SMALL);
+            btnbanknac.addClickListener((final Button.ClickEvent event) -> {
+//            FormDetalleVenta2.open();
+            });
+
+            btnbcr = new Button("BCR", FontAwesome.PLUS);
+            btnbcr.addStyleName(ValoTheme.BUTTON_PRIMARY);
+            btnbcr.addStyleName(ValoTheme.BUTTON_SMALL);
+            btnbcr.addClickListener((final Button.ClickEvent event) -> {
+//            FormDetalleVenta2.open();
+            });
+
+            btncredomatic = new Button("CREDOMATIC", FontAwesome.PLUS);
+            btncredomatic.addStyleName(ValoTheme.BUTTON_PRIMARY);
+            btncredomatic.addStyleName(ValoTheme.BUTTON_SMALL);
+            btncredomatic.addClickListener((final Button.ClickEvent event) -> {
+//            FormDetalleVenta2.open();
+            });
+
+            btndavivienda = new Button("DAVIVIENDA", FontAwesome.PLUS);
+            btndavivienda.addStyleName(ValoTheme.BUTTON_PRIMARY);
+            btndavivienda.addStyleName(ValoTheme.BUTTON_SMALL);
+            btndavivienda.addClickListener((final Button.ClickEvent event) -> {
+//            FormDetalleVenta2.open();
+            });
+
+            btnfmdavivienda = new Button("FM DAVIVIENDA", FontAwesome.PLUS);
+            btnfmdavivienda.addStyleName(ValoTheme.BUTTON_PRIMARY);
+            btnfmdavivienda.addStyleName(ValoTheme.BUTTON_SMALL);
+            btnfmdavivienda.addClickListener(clickEvent -> formDetalleCliDavivienda(estacion.getEstacionId(), " MONEDA ", pais.getPaisId()));
+
+            btndmscottia = new Button("FM SCOTTIA", FontAwesome.PLUS);
+            btndmscottia.addStyleName(ValoTheme.BUTTON_PRIMARY);
+            btndmscottia.addStyleName(ValoTheme.BUTTON_SMALL);
+            btndmscottia.addClickListener((final Button.ClickEvent event) -> {
+//            FormDetalleVenta2.open();
+            });
+
+            setCaption(caption);
+            setContent(new HorizontalLayout() {
+                {
+                    setSizeFull();
+                    setMargin(true);
+                    setSpacing(true);
+                    setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
+                    addComponents(btnbac, btnbanknac, btnbcr, btncredomatic, btndavivienda, btnfmdavivienda, btndmscottia);
+                }
+            });
+        }
+    }
+
+    public class SectionPanelTablesDet extends Panel {
+
+        public SectionPanelTablesDet(String caption) {
+            setCaption(caption);
+            hltables.setSizeFull();
+            hltables.setMargin(true);
+            hltables.setSpacing(true);
+            hltables.setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
+            setContent(hltables);
+        }
+    }
+
+    /*Metodo Llama Forma Clientes Prepago*///ASG
+    private void formDetalleCliDavivienda(Integer idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxTurno.getValue() != null) {
+            formDetalleCliDavivienda = new FormDetalleCliDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavi,dfdFecha.getValue());
+            formDetalleCliDavivienda.addCloseListener((e) -> {
+//                bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class
+//                );
+//                bcrPrepaid = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detallePrepago");
+//                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("totalPrepago");
+//                for (Integer itemId : bcrMediopago.getItemIds()) {
+//                    if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_VENTA_PREPAGO) {
+//                        bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDouble);
+////                        bcrMediopago.getItem(itemId).getItemProperty("value").setReadOnly(true);
+//                        break;
+//                    }
+//                }
+            });
+            getUI().addWindow(formDetalleCliDavivienda);
+            formDetalleCliDavivienda.focus();
+        }
     }
 
     public void getAllData() {
@@ -281,6 +419,11 @@ public class PrTurnoCierre extends Panel implements View {
         bcrEfectivo.setBeanIdProperty("efectivoId");
         bcrTarjeta.setBeanIdProperty("id");
 
+        /*ASG Detalle Cliente Tarjetas*/
+        bcrDetalleCliDavi.setBeanIdProperty("iddet");
+        bcrDetalleCliScott.setBeanIdProperty("iddet");
+
+        /*FIN ASG*/
         SvcTurnoCierre service = new SvcTurnoCierre();
 
         pais = (user.getPaisLogin() != null)
@@ -379,7 +522,6 @@ public class PrTurnoCierre extends Panel implements View {
                 turno = service.getTurnoActivoByEstacionid(estacion.getEstacionId());
 //            turno = (turno.getEstadoId() == null) ? ultimoTurno : turno;
                 service.closeConnections();
-//determinarPermisos();
             }
         });
 
@@ -405,6 +547,24 @@ public class PrTurnoCierre extends Panel implements View {
                     bcrVentas.removeAllItems();
                     bcrProducto.removeAllItems();
                     bcrMediospago.removeAllItems();
+
+                    /*DETALLLE CLIENTES TC ASG*/
+                    bcrDetalleCliDavi.removeAllItems();
+                    bcrDetalleCliScott.removeAllItems();
+                    if (cbxPais.getValue() != null) {
+                        ContEstacion.addAll(dao.getAllEstaciones(true, pais.getPaisId()));
+                        ContMediosPago.addAll(dao.getAllMediosPago(true, pais.getPaisId()));
+                    }
+                    if (cbxEstacion.getValue() != null) {
+                        Estacion esta = new Estacion();
+                        esta = (Estacion) cbxEstacion.getValue();
+                        //FM Davivienda  115
+                        //FM Scottia 116
+                        ContLote.addAll(dao.getAllLotesbyMedioPago(115, esta.getEstacionId(), dfdFecha.getValue()));
+                        ContLoteScott.addAll(dao.getAllLotesbyMedioPago(116, esta.getEstacionId(), dfdFecha.getValue()));
+                    }
+                    /*FIN ASG*/
+
                     bcrEfectivo.removeAllItems();
                     bcrTarjeta.removeAllItems();
                     calcularSumas();
@@ -414,15 +574,8 @@ public class PrTurnoCierre extends Panel implements View {
                         int lastIndex = listTurno.size() - 1;
                         turno = (Turno) ((ArrayList) contTurnos.getItemIds()).get(lastIndex);
                         cbxTurno.setValue(turno);
-//                        actionComboboxTurno();
-//                        for (Integer ac : bcrArqueocaja.getItemIds()) {
-//                            if (bcrArqueocaja.getItem(ac).getBean().getArqueocajaId() == null) {
-//                                cbxArqueos.setValue(ac);
-//                            }
-//                        }
                         actionComboboxTurno();
                     }
-                    determinarPermisos();
                     buildLabelInfo();
                 }
             }
@@ -454,36 +607,6 @@ public class PrTurnoCierre extends Panel implements View {
                 bcrArqueocaja.getItem(tid).getItemProperty("selected").setValue(Boolean.TRUE);
             }
         }
-    }
-
-    private void determinarPermisos() {
-//        boolean explorar = false, editar = false, cerrarTurno = false;
-//        if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
-//                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
-//            explorar = true;
-//        } else if (dia.getEstadoId() == null && (turno == null || turno.getEstadoId() == null) && dia.getFecha() != null && ultimoDia.getFecha() != null
-//                && dia.getFecha().before(ultimoDia.getFecha())) {
-//            explorar = true;
-//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR)
-//                && dia.getEstadoId() != null && dia.getEstadoId() == 2
-//                && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
-//            explorar = true;
-//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR)
-//                && dia.getEstadoId() != null && dia.getEstadoId() == 1
-//                && turno.getEstadoId() != null && turno.getEstadoId() == 2) {
-//            explorar = true;
-//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR)
-//                && dia.getEstadoId() != null && dia.getEstadoId() == 1
-//                && turno.getEstadoId() != null && turno.getEstadoId() == 1) {
-//            explorar = false;
-//            editar = cerrarTurno = true;
-//        } else if (user.isAdministrativo() || user.isGerente()) {
-//            explorar = true;
-//        }
-//
-//        dfdFecha.setEnabled(explorar);   //habilitado
-//        cbxTurno.setEnabled(explorar);    //habilitado
-//        btnGuardar.setEnabled(cerrarTurno);    //habilitado (cerrado)
     }
 
     private void buildButtons() {
@@ -631,6 +754,19 @@ public class PrTurnoCierre extends Panel implements View {
                             bcrMediospago.addAll(svcTC.getMediopagoByArqueoid(arqueosIds));
                             bcrEfectivo.addAll(svcTC.getEfectivoByArqueoid(arqueosIds));
                             bcrTarjeta.addAll(svcTC.getArqueoTC(arqueosIds));
+
+                            /*DETALLE CLIENTE TC  ASG*/
+                            if (cbxEstacion.getValue() != null) {
+                                Estacion est = new Estacion();
+                                est = (Estacion) cbxEstacion.getValue();
+                                bcrDetalleCliDavi.addAll(dao.getDetalleByMedioPago(est.getEstacionId(), dfdFecha.getValue(), 115));
+                                bcrDetalleCliScott.addAll(dao.getDetalleByMedioPago(est.getEstacionId(), dfdFecha.getValue(), 116));
+                                hltables.removeComponent(tableFMDavivienda);
+                                hltables.removeComponent(tableFMScott);
+                                hltables.addComponent(tableFMDavivienda);
+                                hltables.addComponent(tableFMScott);
+                            }
+                            /*FIN ASG */
                         }
                         svcTC.closeConnections();
                         calcularSumas();
@@ -691,11 +827,6 @@ public class PrTurnoCierre extends Panel implements View {
         tableEfectivo.setFooterVisible(true);
         tableEfectivo.setColumnFooter("nombre", "Total:");
         tableEfectivo.setColumnFooter("value", symCurrency + numberFmt.format(tpEfectivo));
-
-        tableTarjeta.setFooterVisible(true);
-        tableTarjeta.setColumnFooter("nombre", "Total:");
-        tableTarjeta.setColumnFooter("value", symCurrency + numberFmt.format(tpTarjeta));
-
     }
 
     private void buildTableBombas() {
@@ -750,14 +881,164 @@ public class PrTurnoCierre extends Panel implements View {
         tableEfectivo.addStyleName(ValoTheme.TABLE_SMALL);
     }
 
-    private void buildTableTarjeta() {
-        tableTarjeta.setCaption("Tarjeta:");
-        tableTarjeta.setContainerDataSource(bcrTarjeta);
-        tableTarjeta.setVisibleColumns(new Object[]{"nombre", "lote", "value"});
-        tableTarjeta.setColumnHeaders(new String[]{"Nombre", "Lote", "Monto"});
-        tableTarjeta.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT);
-        tableTarjeta.setHeight(300f, Unit.PIXELS);
-        tableTarjeta.addStyleName(ValoTheme.TABLE_SMALL);
+    private void buildTableFMDavivienda() {
+        tableFMDavivienda.setCaption("Detalle Clientes FM Davivienda:");
+        tableFMDavivienda.setContainerDataSource(bcrDetalleCliDavi);
+        tableFMDavivienda.setImmediate(true);
+
+        tableFMDavivienda.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
+                ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
+                cmbEstacion.setReadOnly(true);
+                cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbEstacion.setItemCaptionPropertyId("nombre");
+                cmbEstacion.setNullSelectionAllowed(false);
+                cmbEstacion.addStyleName(ValoTheme.BUTTON_TINY);
+                cmbEstacion.setPropertyDataSource(pro);
+                cmbEstacion.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbEstacion.setWidth("250px");
+                return cmbEstacion;
+            }
+        });
+
+        tableFMDavivienda.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
+                ComboBox cmbMedio = new ComboBox(null, ContMediosPago);
+                cmbMedio.setReadOnly(true);
+                cmbMedio.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbMedio.setItemCaptionPropertyId("nombre");
+                cmbMedio.setNullSelectionAllowed(false);
+                cmbMedio.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbMedio.setPropertyDataSource(pro);
+                cmbMedio.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbMedio.setWidth("125px");
+                return cmbMedio;
+            }
+        });
+
+        tableFMDavivienda.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
+                ComboBox cmbLote = new ComboBox(null, ContLote);
+                cmbLote.setReadOnly(true);
+                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbLote.setItemCaptionPropertyId("lote");
+                cmbLote.setNullSelectionAllowed(false);
+                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbLote.setPropertyDataSource(pro);
+                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
+                cmbLote.setWidth("85px");
+                return cmbLote;
+            }
+        });
+
+//        tableFMDavivienda.addGeneratedColumn("colventa", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("venta");  //Atributo del bean
+//                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
+//                nfd.setReadOnly(true);
+//                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
+//                nfd.setValue(numberFmt.format(value));
+//                nfd.setWidth("150px");
+//                nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
+//                nfd.addStyleName("align-right");
+//                return nfd;
+//            }
+//        });
+//        tableFMDavivienda.setVisibleColumns(new Object[]{"colestacion", "colmedio", "collote", "cliente", "venta", "comentario"});
+//        tableFMDavivienda.setColumnHeaders(new String[]{"Estacion", "Medio Pago", "Lote", "Cliente", "Venta", "Comentarios"});
+        tableFMDavivienda.setVisibleColumns(new Object[]{"collote", "cliente", "venta", "comentario"});
+        tableFMDavivienda.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios"});
+        tableFMDavivienda.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableFMDavivienda.setHeight(200f, Unit.PIXELS);
+        tableFMDavivienda.addStyleName(ValoTheme.TABLE_COMPACT);
+        tableFMDavivienda.addStyleName(ValoTheme.TABLE_SMALL);
+    }
+
+    private void buildTableFMScottia() {
+        tableFMScott.setCaption("Detalle Clientes FM Scottia:");
+        tableFMScott.setContainerDataSource(bcrDetalleCliScott);
+        tableFMScott.setImmediate(true);
+
+        tableFMScott.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
+                ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
+                cmbEstacion.setReadOnly(true);
+                cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbEstacion.setItemCaptionPropertyId("nombre");
+                cmbEstacion.setNullSelectionAllowed(false);
+                cmbEstacion.addStyleName(ValoTheme.BUTTON_TINY);
+                cmbEstacion.setPropertyDataSource(pro);
+                cmbEstacion.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbEstacion.setWidth("250px");
+                return cmbEstacion;
+            }
+        });
+
+        tableFMScott.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
+                ComboBox cmbMedio = new ComboBox(null, ContMediosPago);
+                cmbMedio.setReadOnly(true);
+                cmbMedio.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbMedio.setItemCaptionPropertyId("nombre");
+                cmbMedio.setNullSelectionAllowed(false);
+                cmbMedio.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbMedio.setPropertyDataSource(pro);
+                cmbMedio.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbMedio.setWidth("125px");
+                return cmbMedio;
+            }
+        });
+
+        tableFMScott.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
+                ComboBox cmbLote = new ComboBox(null, ContLoteScott);
+                cmbLote.setReadOnly(true);
+                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbLote.setItemCaptionPropertyId("lote");
+                cmbLote.setNullSelectionAllowed(false);
+                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbLote.setPropertyDataSource(pro);
+                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
+                cmbLote.setWidth("85px");
+                return cmbLote;
+            }
+        });
+
+//        tableFMDavivienda.addGeneratedColumn("colventa", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("venta");  //Atributo del bean
+//                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
+//                nfd.setReadOnly(true);
+//                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
+//                nfd.setValue(numberFmt.format(value));
+//                nfd.setWidth("150px");
+//                nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
+//                nfd.addStyleName("align-right");
+//                return nfd;
+//            }
+//        });
+//        tableFMDavivienda.setVisibleColumns(new Object[]{"colestacion", "colmedio", "collote", "cliente", "venta", "comentario"});
+//        tableFMDavivienda.setColumnHeaders(new String[]{"Estacion", "Medio Pago", "Lote", "Cliente", "Venta", "Comentarios"});
+        tableFMScott.setVisibleColumns(new Object[]{"collote", "cliente", "venta", "comentario"});
+        tableFMScott.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios"});
+        tableFMScott.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableFMScott.setHeight(200f, Unit.PIXELS);
+        tableFMScott.addStyleName(ValoTheme.TABLE_COMPACT);
+        tableFMScott.addStyleName(ValoTheme.TABLE_SMALL);
     }
 
     private HorizontalLayout buildDetalleMontos() {

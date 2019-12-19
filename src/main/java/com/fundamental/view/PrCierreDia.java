@@ -12,34 +12,26 @@ import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoArqueo;
 
-import com.fundamental.model.dto.DtoProducto;
-import com.fundamental.model.dto.InventarioDto;
-import com.fundamental.model.dto.RecepcionDto;
 
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcDeposito;
 import com.fundamental.services.SvcEstacion;
-import com.fundamental.services.SvcMaintenance;
-import com.fundamental.services.SvcMedioPago;
-import com.fundamental.services.SvcMntEstacion;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
-import com.fundamental.utils.Constant;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
 
-import com.sisintegrados.generic.bean.GenericDepositoDet;
 import com.sisintegrados.generic.bean.GenericMedioPago;
-import com.sisintegrados.view.form.FormClientesCredito;
 //import com.sisintegrados.view.form.FormDetalleDeposito;
 
 import com.sisintegrados.generic.bean.InventarioRecepcion;
 import com.sisintegrados.generic.bean.RecepcionInventario;
+
 import com.sisintegrados.generic.bean.Tarjeta;
 import com.sisintegrados.view.form.FormDetalleDeposito;
 
+
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
@@ -74,7 +66,6 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -111,17 +102,12 @@ public class PrCierreDia extends Panel implements View {
     double tmpDouble;
     double tmpDoubleDolar;
     double tmpDoubleOther;
+
     double totalEfectivo;
     double totalDepositos;
-//    {
-//        @Override
-//        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
-//            if (colId.equals("diferencia")) {
-//                return numberFmt.format(property.getValue());
-//            }
-//            return super.formatPropertyValue(rowId, colId, property);
-//        }
-//    };
+
+    
+
     Table tableVentas = new Table() {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
@@ -228,7 +214,7 @@ public class PrCierreDia extends Panel implements View {
 //***
         buildControls();
         buildTableCuadre();
-        buildTableBombas();
+//        buildTableBombas();
         buildTableVentas();
 
 //        buildTableArqueo();
@@ -411,7 +397,8 @@ public class PrCierreDia extends Panel implements View {
             if (dia != null && dia.getEstadoId() != null && dia.getEstadoId() == 2) { //cerrado
                 List<RecepcionInventario> listRec = service.getRecepcion(estacion.getPaisId(), estacion.getEstacionId(), dfdFecha.getValue());
                 if (!listRec.isEmpty()) {
-                    bcrRecepcion.addAll(listRec);
+                    bcrRecepcion.removeAllItems();
+                    bcrRecepcion.addAll(listRec);     
                     recepcion = bcrRecepcion.getItem(bcrRecepcion.getItemIds().get(0)).getBean();
                     tfdDriver.setValue(recepcion.getPiloto());
                     tfdUnit.setValue(recepcion.getUnidad());
@@ -505,7 +492,6 @@ public class PrCierreDia extends Panel implements View {
                 pais = new Pais();
                 pais = (Pais) cbxPais.getValue();
                 SvcEstacion svcEstacion = new SvcEstacion();
-//                List<Estacion> estaciones = svcEstacion.getStationsByCountry(pais.getPaisId());
                 Container estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));
                 svcEstacion.closeConnections();
                 cbxEstacion.setContainerDataSource(estacionContainer);
@@ -539,7 +525,6 @@ public class PrCierreDia extends Panel implements View {
                 dia = service.getDiaActivoByEstacionid(estacion.getEstacionId());
 //            dia = (dia.getEstadoId() == null) ? ultimoDia : dia;
                 service.closeConnections();
-                determinarPermisos();
                 calculosInventario();
             }
         });
@@ -580,51 +565,13 @@ public class PrCierreDia extends Panel implements View {
 //                    
 //                    recepcion = bcrRecepcion.getItem(dfdFecha.getValue()).getBean();
 //                    binder.setItemDataSource(recepcion);
-                    determinarPermisos();
                     calcularSumas();
                     printDataLabel();
 
                 }
-//determinarPermisos();
             }
         });
         dfdFecha.setValue(dia.getFecha());
-    }
-
-    private void determinarPermisos() {
-//        Calendar udMenosUno = null;
-//        if (ultimoDia.getFecha()!=null) {
-//            udMenosUno = Calendar.getInstance();
-//            udMenosUno.setTime(ultimoDia.getFecha());
-//            udMenosUno.add(Calendar.DATE, -1);
-//        }
-//       
-//        boolean explorar = false, editar = false, cerrarDia = false;
-//        if (dia.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
-//                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
-//            explorar = true;
-//        } else if (dia.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
-//                && dia.getFecha().before(ultimoDia.getFecha())) {
-//            explorar = true;
-//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
-//                && dia.getEstadoId()!=null && dia.getEstadoId()== 2) {
-//            explorar = true;
-//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
-//                && dia.getEstadoId()!=null && dia.getEstadoId()== 1) {    //dia abierto
-//            editar = cerrarDia = true;
-//explorar = true;
-//        } else if ( (user.isAdministrativo() || user.isGerente()) 
-//                && dia.getFecha()!=null && ultimoDia.getFecha()!=null && udMenosUno!=null && ultimoDia.getEstadoId()==1 && udMenosUno.getTime().equals(dia.getFecha()) ) {
-//            explorar = cerrarDia = true;
-//        } else if ( (user.isAdministrativo() || user.isGerente()) 
-//                && dia.getFecha()!=null && ultimoDia.getFecha()!=null && ultimoDia.getEstadoId()==2 && ultimoDia.getFecha().equals(dia.getFecha()) ) {
-//            explorar = cerrarDia = true;
-//        } else if (user.isAdministrativo() || user.isGerente()) {
-//            explorar = true;
-//        }
-//
-//        dfdFecha.setEnabled(explorar);   //habilitado
-//        btnGuardar.setEnabled(cerrarDia);    //habilitado (cerrado)
     }
 
     private void buildTableCuadre() {
@@ -701,13 +648,6 @@ public class PrCierreDia extends Panel implements View {
 
     }
 
-    private void buildTableBombas() {
-//        tableBombas = utils.buildTable("Bombas:", 100f, 100f, bcrBombas,
-//                new String[]{"nombre"},
-//                new String[]{"Nombre"});
-//        tableBombas.setSizeUndefined();
-//        tableBombas.setHeight(200f, Unit.PIXELS);
-    }
 
     private void buildTableVentas() {
         tableVentas.setCaption("Ventas:");
@@ -762,7 +702,6 @@ public class PrCierreDia extends Panel implements View {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
-                //ComboBox cmbTarjeta = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, ContCreditC);
                 ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
                 cmbEstacion.setReadOnly(true);
                 cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);

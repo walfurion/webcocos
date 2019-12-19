@@ -1004,4 +1004,22 @@ public class SvcTurno extends Dao {
         }
         return id;
     }
+    public int countTurnOpen(int idEstacion) {
+        int result = 0;
+        try {
+            miQuery = "SELECT count(*) FROM dia "
+                    + "WHERE estado_id =1 AND estacion_id = "+idEstacion;
+            System.out.println("mi ueryryry "+miQuery);
+            pst = getConnection().prepareStatement(miQuery);
+            ResultSet rst = pst.executeQuery();
+            if (rst.next()) {
+                result = rst.getInt(1);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            closePst();
+        }
+        return result;
+    }
 }

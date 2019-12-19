@@ -8,7 +8,7 @@
 @import "views/reports";
 
 // Optimize the CSS output
-$v-included-components: remove($v-included-components, accordion);
+/*$v-included-components: remove($v-included-components, accordion);*/
 $v-included-components: remove($v-included-components, colorpicker);
 /*$v-included-components: remove($v-included-components, grid);*/
 $v-included-components: remove($v-included-components, popupview);

@@ -280,6 +280,8 @@ public class RptMTD2 extends Panel implements View {
                                 makeZip.set(false);
                             }
                             
+                            System.out.println("nombre "+name.get()+" "+makeZip.get());
+                            
                             grid = new Grid(sourceGeneric);
                             grid.setWidth("1080px");
                             grid.removeAllColumns();
@@ -321,6 +323,7 @@ public class RptMTD2 extends Panel implements View {
                             toolbarData.addComponent(grid);
                             btnExportar2.setEnabled(true);
                         } catch (Exception ex) {
+                            System.out.println("error "+ex.getMessage());
                             ex.printStackTrace();
                         }
                     }
