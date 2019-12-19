@@ -141,7 +141,6 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     private Component buildMenuItems() {
-        System.out.println("builMenuItems");
         CssLayout menuItemsLayout = new CssLayout();
         menuItemsLayout.addStyleName("valo-menuitems");
 

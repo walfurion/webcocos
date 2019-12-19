@@ -291,6 +291,8 @@ public class SvcComVenLubricantes extends Dao{
                 }
             }catch(Exception exc){
                 exc.printStackTrace();
+            }finally {
+                closePst();
             }
         return valor;
     }
@@ -341,6 +343,8 @@ public class SvcComVenLubricantes extends Dao{
                 }
             }catch(Exception exc){
                 exc.printStackTrace();
+            }finally {
+                closePst();
             }
         return valor;
     }
@@ -387,6 +391,8 @@ public class SvcComVenLubricantes extends Dao{
                 }
             }catch(Exception exc){
                 exc.printStackTrace();
+            }finally {
+                closePst();
             }
         return valor;
     }

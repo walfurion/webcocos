@@ -12,33 +12,26 @@ import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoArqueo;
 
-import com.fundamental.model.dto.DtoProducto;
-import com.fundamental.model.dto.InventarioDto;
-import com.fundamental.model.dto.RecepcionDto;
 
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcDeposito;
 import com.fundamental.services.SvcEstacion;
-import com.fundamental.services.SvcMaintenance;
-import com.fundamental.services.SvcMedioPago;
-import com.fundamental.services.SvcMntEstacion;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
-import com.fundamental.utils.Constant;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
 
-import com.sisintegrados.generic.bean.GenericDepositoDet;
 import com.sisintegrados.generic.bean.GenericMedioPago;
-import com.sisintegrados.view.form.FormClientesCredito;
 //import com.sisintegrados.view.form.FormDetalleDeposito;
 
 import com.sisintegrados.generic.bean.InventarioRecepcion;
 import com.sisintegrados.generic.bean.RecepcionInventario;
+
 import com.sisintegrados.generic.bean.Tarjeta;
+import com.sisintegrados.view.form.FormDetalleDeposito;
+
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
@@ -73,7 +66,6 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -110,15 +102,12 @@ public class PrCierreDia extends Panel implements View {
     double tmpDouble;
     double tmpDoubleDolar;
     double tmpDoubleOther;
-//    {
-//        @Override
-//        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
-//            if (colId.equals("diferencia")) {
-//                return numberFmt.format(property.getValue());
-//            }
-//            return super.formatPropertyValue(rowId, colId, property);
-//        }
-//    };
+
+    double totalEfectivo;
+    double totalDepositos;
+
+    
+
     Table tableVentas = new Table() {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
@@ -196,7 +185,7 @@ public class PrCierreDia extends Panel implements View {
     List<Precio> precios;
     List<Producto> productos;
     Acceso acceso = new Acceso();
-//    FormDetalleDeposito formDetalleDeposito; //jlopez
+    FormDetalleDeposito formDetalleDeposito; //jlopez
     Button btnDetalleDeposito;
 
     SvcDeposito daoDeposito = new SvcDeposito();
@@ -225,7 +214,7 @@ public class PrCierreDia extends Panel implements View {
 //***
         buildControls();
         buildTableCuadre();
-        buildTableBombas();
+//        buildTableBombas();
         buildTableVentas();
 
 //        buildTableArqueo();
@@ -503,7 +492,6 @@ public class PrCierreDia extends Panel implements View {
                 pais = new Pais();
                 pais = (Pais) cbxPais.getValue();
                 SvcEstacion svcEstacion = new SvcEstacion();
-//                List<Estacion> estaciones = svcEstacion.getStationsByCountry(pais.getPaisId());
                 Container estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));
                 svcEstacion.closeConnections();
                 cbxEstacion.setContainerDataSource(estacionContainer);
@@ -537,7 +525,6 @@ public class PrCierreDia extends Panel implements View {
                 dia = service.getDiaActivoByEstacionid(estacion.getEstacionId());
 //            dia = (dia.getEstadoId() == null) ? ultimoDia : dia;
                 service.closeConnections();
-                determinarPermisos();
                 calculosInventario();
             }
         });
@@ -578,51 +565,13 @@ public class PrCierreDia extends Panel implements View {
 //                    
 //                    recepcion = bcrRecepcion.getItem(dfdFecha.getValue()).getBean();
 //                    binder.setItemDataSource(recepcion);
-                    determinarPermisos();
                     calcularSumas();
                     printDataLabel();
 
                 }
-//determinarPermisos();
             }
         });
         dfdFecha.setValue(dia.getFecha());
-    }
-
-    private void determinarPermisos() {
-//        Calendar udMenosUno = null;
-//        if (ultimoDia.getFecha()!=null) {
-//            udMenosUno = Calendar.getInstance();
-//            udMenosUno.setTime(ultimoDia.getFecha());
-//            udMenosUno.add(Calendar.DATE, -1);
-//        }
-//       
-//        boolean explorar = false, editar = false, cerrarDia = false;
-//        if (dia.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
-//                && (dia.getFecha().equals(ultimoDia.getFecha()) || dia.getFecha().after(ultimoDia.getFecha()))) {
-//            explorar = true;
-//        } else if (dia.getEstadoId() == null && dia.getFecha() != null && ultimoDia.getFecha() != null
-//                && dia.getFecha().before(ultimoDia.getFecha())) {
-//            explorar = true;
-//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
-//                && dia.getEstadoId()!=null && dia.getEstadoId()== 2) {
-//            explorar = true;
-//        } else if (user.getRolLogin().equals(Constant.ROL_LOGIN_SUPERVISOR) 
-//                && dia.getEstadoId()!=null && dia.getEstadoId()== 1) {    //dia abierto
-//            editar = cerrarDia = true;
-//explorar = true;
-//        } else if ( (user.isAdministrativo() || user.isGerente()) 
-//                && dia.getFecha()!=null && ultimoDia.getFecha()!=null && udMenosUno!=null && ultimoDia.getEstadoId()==1 && udMenosUno.getTime().equals(dia.getFecha()) ) {
-//            explorar = cerrarDia = true;
-//        } else if ( (user.isAdministrativo() || user.isGerente()) 
-//                && dia.getFecha()!=null && ultimoDia.getFecha()!=null && ultimoDia.getEstadoId()==2 && ultimoDia.getFecha().equals(dia.getFecha()) ) {
-//            explorar = cerrarDia = true;
-//        } else if (user.isAdministrativo() || user.isGerente()) {
-//            explorar = true;
-//        }
-//
-//        dfdFecha.setEnabled(explorar);   //habilitado
-//        btnGuardar.setEnabled(cerrarDia);    //habilitado (cerrado)
     }
 
     private void buildTableCuadre() {
@@ -673,7 +622,7 @@ public class PrCierreDia extends Panel implements View {
         }
 
         for (Integer id : bcrDeposito.getItemIds()) {
-            totalDinero += bcrDeposito.getItem(id).getBean().getMonto();
+            //totalDinero += bcrDeposito.getItem(id).getBean().getMonto();
             tpDeposito += bcrDeposito.getItem(id).getBean().getMonto();
         }
 
@@ -694,16 +643,11 @@ public class PrCierreDia extends Panel implements View {
         tableDeposito.setFooterVisible(true);
         tableDeposito.setColumnFooter("mediopago", "Total:");
         tableDeposito.setColumnFooter("monto", symCurrency + numberFmt.format(tpDeposito));
+        totalEfectivo = tpEfectivo;
+        totalDepositos = tpDeposito;
 
     }
 
-    private void buildTableBombas() {
-//        tableBombas = utils.buildTable("Bombas:", 100f, 100f, bcrBombas,
-//                new String[]{"nombre"},
-//                new String[]{"Nombre"});
-//        tableBombas.setSizeUndefined();
-//        tableBombas.setHeight(200f, Unit.PIXELS);
-    }
 
     private void buildTableVentas() {
         tableVentas.setCaption("Ventas:");
@@ -758,7 +702,6 @@ public class PrCierreDia extends Panel implements View {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
-                //ComboBox cmbTarjeta = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, ContCreditC);
                 ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
                 cmbEstacion.setReadOnly(true);
                 cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
@@ -819,9 +762,9 @@ public class PrCierreDia extends Panel implements View {
             }
         });
 
-        tableDeposito.setVisibleColumns(new Object[]{"colmedio", "noboleta","comentarios", "monto", "montousd"});
+        tableDeposito.setVisibleColumns(new Object[]{"colmedio", "noboleta", "comentarios", "monto", "montousd"});
         tableDeposito.setColumnHeaders(new String[]{"Medio Pago", "No Boleta", "Comentarios", "Monto", "USD"});
-        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT,Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
         tableDeposito.setHeight(200f, Unit.PIXELS);
         tableDeposito.addStyleName(ValoTheme.TABLE_COMPACT);
         tableDeposito.addStyleName(ValoTheme.TABLE_SMALL);
@@ -1153,7 +1096,7 @@ public class PrCierreDia extends Panel implements View {
         btnDetalleDeposito = new Button("Detalle Efectivo", FontAwesome.PLUS);
         btnDetalleDeposito.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnDetalleDeposito.addStyleName(ValoTheme.BUTTON_SMALL);
-        btnDetalleDeposito.addClickListener(clickEvent -> formDeposito(estacion.getEstacionId(), currencySymbol, pais.getPaisId()));
+        btnDetalleDeposito.addClickListener(clickEvent -> formDeposito(estacion.getEstacionId(), currencySymbol, pais.getPaisId(), dfdFecha.getValue()));
 
         btnAll.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         btnAll.addStyleName(ValoTheme.BUTTON_LINK);
@@ -1185,6 +1128,11 @@ public class PrCierreDia extends Panel implements View {
         btnGuardar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(final Button.ClickEvent event) {
+
+                if (totalEfectivo != totalDepositos) {
+                    Notification.show("ERROR:", "El detalle de efectivo no coincide con el registro de Depósitos", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
 
                 for (Integer itemId : bcrInventario.getItemIds()) {
                     if (bcrInventario.getItem(itemId).getBean().getComprasDto() > 0
@@ -1506,24 +1454,24 @@ public class PrCierreDia extends Panel implements View {
     }
 
     /*Metodo Llama Forma Detalle de depositos */// jlopez
-    private void formDeposito(Integer idestacion, String simboloMoneda, Integer idpais) {
+    private void formDeposito(Integer idestacion, String simboloMoneda, Integer idpais, Date fechaCierre) {
         System.out.println("ingresa a metodo formDeposito");
-//        if (cbxEstacion.getValue() != null) {
-////            System.out.println("dentro de for cbxestacion");
-////            formDetalleDeposito = new FormDetalleDeposito(simboloMoneda, bcrDeposito, idpais, idestacion);
-////            formDetalleDeposito.addCloseListener((e) -> {
-//////                bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
-//////                bcrDeposito = (BeanContainer<Integer, GenericDepositoDet>) VaadinSession.getCurrent().getAttribute("detalleDeposito");
-////                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("total");
-////                tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
-////                tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
-////                System.out.println("tmodouble en cierre" + tmpDouble);
-////                System.out.println("tmodouble en cierre" + tmpDoubleDolar);
-////                System.out.println("tmodoubleother en cierre" + tmpDoubleOther);
-//
-//            });
-//        getUI().addWindow(formDetalleDeposito);
-//        formDetalleDeposito.focus();
-//        }
+        if (cbxEstacion.getValue() != null) {
+            System.out.println("dentro de for cbxestacion");
+            formDetalleDeposito = new FormDetalleDeposito(simboloMoneda, bcrDeposito, idpais, idestacion, fechaCierre);
+            formDetalleDeposito.addCloseListener((e) -> {
+                bcrDeposito = new BeanContainer<Integer, GenericMedioPago>(GenericMedioPago.class);
+                bcrDeposito = (BeanContainer<Integer, GenericMedioPago>) VaadinSession.getCurrent().getAttribute("detalleDeposito");
+                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("total");
+                tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
+                tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
+                System.out.println("tmodouble en cierre" + tmpDouble);
+                System.out.println("tmodouble en cierre" + tmpDoubleDolar);
+                System.out.println("tmodoubleother en cierre" + tmpDoubleOther);
+
+            });
+            getUI().addWindow(formDetalleDeposito);
+            formDetalleDeposito.focus();
+        }
     }
 }

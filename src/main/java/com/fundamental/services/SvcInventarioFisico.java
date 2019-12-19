@@ -8,6 +8,7 @@ package com.fundamental.services;
 import com.fundamental.utils.Constant;
 import com.sisintegrados.generic.bean.ComInventarioFisico;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -146,7 +147,7 @@ public class SvcInventarioFisico extends Dao {
         return result;
     }
     
-    private int recuperaFecha(int paisId,int marcaId,int productId, Date fecha){
+    private int recuperaFecha(int paisId,int marcaId,int productId, Date fecha) throws SQLException{
         ResultSet rst = null;
         int valor = 0;
             try{        
@@ -166,6 +167,9 @@ public class SvcInventarioFisico extends Dao {
                 }
             }catch(Exception exc){
                 exc.printStackTrace();
+            }finally{
+                closePst();
+                pst.close();
             }
         return valor;
     }

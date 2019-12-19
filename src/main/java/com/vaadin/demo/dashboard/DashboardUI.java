@@ -23,6 +23,8 @@ import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
 
 @Theme("dashboard")
 @Widgetset("com.vaadin.demo.dashboard.DashboardWidgetSet")
@@ -42,6 +44,11 @@ public final class DashboardUI extends UI {
     @Override
     protected void init(final VaadinRequest request) {
         setLocale(Locale.US);
+        LogManager.getLogManager().getLogger("com.vaadin").setLevel(Level.OFF);
+        LogManager.getLogManager().getLogger("org.apache").setLevel(Level.OFF);
+        LogManager.getLogManager().getLogger("org.apache").setLevel(Level.SEVERE);
+        LogManager.getLogManager().getLogger("com.vaadin").setLevel(Level.SEVERE);
+        LogManager.getLogManager().getLogger("com.vaadin").setLevel(Level.WARNING);
 
         DashboardEventBus.register(this);
         Responsive.makeResponsive(this);
