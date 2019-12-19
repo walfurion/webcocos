@@ -190,6 +190,7 @@ public class PrTurnoCierre extends Panel implements View {
     /*FIN DETALLE ASG*/
     Double totalVentas = 0D, totalDinero = 0D;
     String symCurrency, symVolumen;
+    String currencySymbol;
 
     Utils utils = new Utils();
     Usuario user;
@@ -354,7 +355,7 @@ public class PrTurnoCierre extends Panel implements View {
             btnfmdavivienda = new Button("FM DAVIVIENDA", FontAwesome.PLUS);
             btnfmdavivienda.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btnfmdavivienda.addStyleName(ValoTheme.BUTTON_SMALL);
-            btnfmdavivienda.addClickListener(clickEvent -> formDetalleCliDavivienda(estacion.getEstacionId(), " MONEDA ", pais.getPaisId()));
+            btnfmdavivienda.addClickListener(clickEvent -> formDetalleCliDavivienda(estacion.getEstacionId(), symCurrency, pais.getPaisId()));
 
             btndmscottia = new Button("FM SCOTTIA", FontAwesome.PLUS);
             btndmscottia.addStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -391,8 +392,9 @@ public class PrTurnoCierre extends Panel implements View {
     /*Metodo Llama Forma Clientes Prepago*///ASG
     private void formDetalleCliDavivienda(Integer idestacion, String simboloMoneda, Integer idpais) {
         if (cbxTurno.getValue() != null) {
-            formDetalleCliDavivienda = new FormDetalleCliDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavi,dfdFecha.getValue());
+            formDetalleCliDavivienda = new FormDetalleCliDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavi, dfdFecha.getValue());
             formDetalleCliDavivienda.addCloseListener((e) -> {
+                updateTableFooterDetaCli();
 //                bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class
 //                );
 //                bcrPrepaid = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detallePrepago");
@@ -408,6 +410,16 @@ public class PrTurnoCierre extends Panel implements View {
             getUI().addWindow(formDetalleCliDavivienda);
             formDetalleCliDavivienda.focus();
         }
+    }
+
+    public void updateTableFooterDetaCli() {
+        Double tmpDouble = 0.00;
+        for (Integer itemId : bcrDetalleCliDavi.getItemIds()) {
+            tmpDouble += bcrDetalleCliDavi.getItem(itemId).getBean().getVenta();
+        }
+        tableFMDavivienda.setFooterVisible(true);
+        tableFMDavivienda.setColumnFooter("colcomentario", "Total:");
+        tableFMDavivienda.setColumnFooter("colcomentario", symCurrency + numberFmt.format(tmpDouble).trim());
     }
 
     public void getAllData() {
@@ -495,6 +507,7 @@ public class PrTurnoCierre extends Panel implements View {
                 contTurnos = new ListContainer<Turno>(Turno.class, new ArrayList());
                 cbxTurno.setContainerDataSource(contTurnos);
                 cbxTurno.setValue(null);
+                currencySymbol = pais.getMonedaSimbolo() + " ";
             }
         });
 
