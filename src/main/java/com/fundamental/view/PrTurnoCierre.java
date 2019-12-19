@@ -23,6 +23,7 @@ import com.sisintegrados.generic.bean.GenericBeanMedioPago;
 import com.sisintegrados.generic.bean.GenericDetalleFM;
 import com.sisintegrados.generic.bean.GenericLote;
 import com.sisintegrados.view.form.FormDetalleCliDavivienda;
+import com.sisintegrados.view.form.FormDetalleCliScottia;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -57,6 +58,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -185,7 +187,12 @@ public class PrTurnoCierre extends Panel implements View {
     BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
     BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
 
+    /*Popups Detalle Clientes TC ASG*/
     FormDetalleCliDavivienda formDetalleCliDavivienda;
+    FormDetalleCliScottia formDetalleCliScottia;
+    //Totales Para Detalles de TC
+    Double totFMDavi = 0D;
+    Double totFMScott = 0D;
 
     /*FIN DETALLE ASG*/
     Double totalVentas = 0D, totalDinero = 0D;
@@ -355,15 +362,12 @@ public class PrTurnoCierre extends Panel implements View {
             btnfmdavivienda = new Button("FM DAVIVIENDA", FontAwesome.PLUS);
             btnfmdavivienda.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btnfmdavivienda.addStyleName(ValoTheme.BUTTON_SMALL);
-            btnfmdavivienda.addClickListener(clickEvent -> formDetalleCliDavivienda(estacion.getEstacionId(), symCurrency, pais.getPaisId()));
+            btnfmdavivienda.addClickListener(clickEvent -> formDetalleCliDavivienda(estacion, symCurrency, pais.getPaisId()));
 
             btndmscottia = new Button("FM SCOTTIA", FontAwesome.PLUS);
             btndmscottia.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btndmscottia.addStyleName(ValoTheme.BUTTON_SMALL);
-            btndmscottia.addClickListener((final Button.ClickEvent event) -> {
-                updateTableFooterDetaCli();
-            });
-
+            btndmscottia.addClickListener(clickEvent -> formDetalleCliScottia(estacion, symCurrency, pais.getPaisId()));
             setCaption(caption);
             setContent(new HorizontalLayout() {
                 {
@@ -390,40 +394,64 @@ public class PrTurnoCierre extends Panel implements View {
     }
 
     /*Metodo Llama Forma Clientes Prepago*///ASG
-    private void formDetalleCliDavivienda(Integer idestacion, String simboloMoneda, Integer idpais) {
+    private void formDetalleCliDavivienda(Estacion idestacion, String simboloMoneda, Integer idpais) {
         if (cbxTurno.getValue() != null) {
             formDetalleCliDavivienda = new FormDetalleCliDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavi, turno);
             formDetalleCliDavivienda.addCloseListener((e) -> {
-                updateTableFooterDetaCli();
-//                bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class
-//                );
-//                bcrPrepaid = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detallePrepago");
-//                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("totalPrepago");
-//                for (Integer itemId : bcrMediopago.getItemIds()) {
-//                    if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_VENTA_PREPAGO) {
-//                        bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDouble);
-////                        bcrMediopago.getItem(itemId).getItemProperty("value").setReadOnly(true);
-//                        break;
-//                    }
-//                }
+                updateTableFooterDetaCliFm();
             });
             getUI().addWindow(formDetalleCliDavivienda);
             formDetalleCliDavivienda.focus();
         }
     }
 
-    public void updateTableFooterDetaCli() {
-        System.out.println("Entro Update Footer");
-        Double tmpDouble = 0.00;
-        for (Integer itemId : bcrDetalleCliDavi.getItemIds()) {
-            tmpDouble += bcrDetalleCliDavi.getItem(itemId).getBean().getVenta();
+    private void formDetalleCliScottia(Estacion idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxTurno.getValue() != null) {
+            formDetalleCliScottia = new FormDetalleCliScottia(idestacion, simboloMoneda, idpais, bcrDetalleCliScott, turno);
+            formDetalleCliScottia.addCloseListener((e) -> {
+                updateTableFooterDetaCliFm();
+            });
+            getUI().addWindow(formDetalleCliScottia);
+            formDetalleCliScottia.focus();
         }
-        System.out.println("Double " + tmpDouble);
-        tableFMDavivienda.setFooterVisible(true);
-        tableFMDavivienda.setColumnFooter("colcomentario", "Total:");
-        tableFMDavivienda.setColumnFooter("colcomentario", symCurrency + numberFmt.format(tmpDouble).trim());
     }
 
+    /*ASG DETALLE CLIENTES*/
+    public void updateTableFooterDetaCliFm() {
+        totFMDavi = 0D;
+        totFMScott = 0D;
+
+        /*Footer para FM Davivienda*/
+        for (Integer itemId : bcrDetalleCliDavi.getItemIds()) {
+            totFMDavi += bcrDetalleCliDavi.getItem(itemId).getBean().getVenta();
+        }
+        tableFMDavivienda.setFooterVisible(true);
+        tableFMDavivienda.setColumnFooter("comentario", "Total:");
+        tableFMDavivienda.setColumnFooter("comentario", symCurrency + numberFmt.format(totFMDavi).trim());
+
+        /*Footer para FM Scottia*/
+        for (Integer itemId : bcrDetalleCliScott.getItemIds()) {
+            totFMScott += bcrDetalleCliScott.getItem(itemId).getBean().getVenta();
+        }
+        tableFMScott.setFooterVisible(true);
+        tableFMScott.setColumnFooter("comentario", "Total:");
+        tableFMScott.setColumnFooter("comentario", symCurrency + numberFmt.format(totFMScott).trim());
+    }
+
+    public boolean validaTotalMedioPago(Integer mediopagoid, Double total) {
+        boolean result = true;
+        /*Valida los totales en medios pago*/
+        for (Integer itemId : bcrMediospago.getItemIds()) {
+            if (bcrMediospago.getItem(itemId).getBean().getMediopagoId() == mediopagoid) {
+                if (Math.abs(total - bcrMediospago.getItem(itemId).getBean().getValue()) > 0.009) {
+                    result = false;
+                }
+            }
+        }
+        return result;
+    }
+
+    /*ASG FIN*/
     public void getAllData() {
         bcrArqueocaja.setBeanIdProperty("arqueocajaId");
         bcrBombas.setBeanIdProperty("id");
@@ -622,6 +650,7 @@ public class PrTurnoCierre extends Panel implements View {
             hltables.removeComponent(tableFMScott);
             hltables.addComponent(tableFMDavivienda);
             hltables.addComponent(tableFMScott);
+            updateTableFooterDetaCliFm();
         }
     }
 
@@ -671,6 +700,16 @@ public class PrTurnoCierre extends Panel implements View {
         btnGuardar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(final Button.ClickEvent event) {
+                /*ASG DESCUADRE EN MEDIOS NO CERRAR*/
+                if (!validaTotalMedioPago(115, totFMDavi)) {
+                    Notification.show("AVISO:", "Se encontraron diferencias en detalle de clientes FM Davivienda!!", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
+                if (!validaTotalMedioPago(116, totFMScott)) {
+                    Notification.show("AVISO:", "Se encontraron diferencias en detalle de clientes FM Scottia!!", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
+                /*FIN DESCUADRE ASG*/
                 if (bcrArqueocaja.getItemIds().isEmpty()) {
                     Notification.show("AVISO:", "NO existen cuadres qué procesar.", Notification.Type.WARNING_MESSAGE);
                     return;
@@ -710,6 +749,15 @@ public class PrTurnoCierre extends Panel implements View {
                                 turno = svcTC.doActionTurno(Dao.ACTION_UPDATE, turno);
                                 svcTC.closeConnections();
                                 if (turno.getTurnoId() != null) {
+                                    //*Registro detalle de clientes*// ASG
+                                    try {
+                                        dao.CreaClienteFMDavivienda(turno.getTurnoId(), 115, bcrDetalleCliDavi); //FM Davivienda
+                                        dao.CreaClienteFMScott(turno.getTurnoId(), 116, bcrDetalleCliScott); //FM Scottia
+                                    } catch (SQLException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                    /*fin registro detalle*/
+
                                     Notification.show("El turno se ha cerrado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                                     UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_TURN_CLOSE.getViewName());
                                 } else {
@@ -970,7 +1018,7 @@ public class PrTurnoCierre extends Panel implements View {
 //        tableFMDavivienda.setVisibleColumns(new Object[]{"colestacion", "colmedio", "collote", "cliente", "venta", "comentario"});
 //        tableFMDavivienda.setColumnHeaders(new String[]{"Estacion", "Medio Pago", "Lote", "Cliente", "Venta", "Comentarios"});
         tableFMDavivienda.setVisibleColumns(new Object[]{"collote", "cliente", "venta", "comentario"});
-        tableFMDavivienda.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios"});
+        tableFMDavivienda.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
         tableFMDavivienda.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
         tableFMDavivienda.setHeight(200f, Unit.PIXELS);
         tableFMDavivienda.addStyleName(ValoTheme.TABLE_COMPACT);
@@ -1050,7 +1098,7 @@ public class PrTurnoCierre extends Panel implements View {
 //        tableFMDavivienda.setVisibleColumns(new Object[]{"colestacion", "colmedio", "collote", "cliente", "venta", "comentario"});
 //        tableFMDavivienda.setColumnHeaders(new String[]{"Estacion", "Medio Pago", "Lote", "Cliente", "Venta", "Comentarios"});
         tableFMScott.setVisibleColumns(new Object[]{"collote", "cliente", "venta", "comentario"});
-        tableFMScott.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios"});
+        tableFMScott.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
         tableFMScott.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
         tableFMScott.setHeight(200f, Unit.PIXELS);
         tableFMScott.addStyleName(ValoTheme.TABLE_COMPACT);

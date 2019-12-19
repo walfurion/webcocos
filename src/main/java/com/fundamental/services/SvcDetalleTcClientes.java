@@ -9,7 +9,10 @@ import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
 import com.sisintegrados.generic.bean.GenericDetalleFM;
 import com.sisintegrados.generic.bean.GenericLote;
+import com.vaadin.data.util.BeanContainer;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +24,89 @@ import java.util.List;
 public class SvcDetalleTcClientes extends Dao {
 
     private String query;
+
+    public boolean CreaClienteFMDavivienda(Integer turnoid,Integer mediopagoid,BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi) throws SQLException {
+        boolean result = false;
+        PreparedStatement pst = null;
+
+        /*Elimina antes de volver asignar*/
+        try {
+            query = "DELETE FROM TARJETA_DETALLE_FM WHERE IDMEDIOPAGO = " + mediopagoid + " AND TURNOID = "+turnoid;
+            pst = getConnection().prepareStatement(query);
+            pst.executeUpdate();
+            closePst();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        /*Asigna detalle clientes tc al turno*/
+        try {
+            query = "INSERT INTO TARJETA_DETALLE_FM (IDDET,IDESTACION, IDMEDIOPAGO, TURNOID, LOTE,CLIENTE,VENTA,COMENTARIO) "
+                    + "VALUES (SQ_TC_DETALLE_FM.nextval,?,?,?,?,?,?,?)";
+
+            for (Integer itemId : bcrDetalleCliDavi.getItemIds()) {
+                pst = getConnection().prepareStatement(query);
+                pst.setInt(1, bcrDetalleCliDavi.getItem(itemId).getBean().getEstacion().getEstacionId());
+                pst.setInt(2, bcrDetalleCliDavi.getItem(itemId).getBean().getMediopago().getMediopagoid());
+                pst.setInt(3, turnoid);
+                pst.setInt(4, bcrDetalleCliDavi.getItem(itemId).getBean().getGenlote().getIdlote());
+                pst.setString(5, bcrDetalleCliDavi.getItem(itemId).getBean().getCliente());
+                pst.setDouble(6, bcrDetalleCliDavi.getItem(itemId).getBean().getVenta());
+                pst.setString(7, bcrDetalleCliDavi.getItem(itemId).getBean().getComentario());
+                pst.executeUpdate();
+                closePst();
+            }
+            result = true;
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+        }
+        return result;
+    }
+    public boolean CreaClienteFMScott(Integer turnoid,Integer mediopagoid,BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott) throws SQLException {
+        boolean result = false;
+        PreparedStatement pst = null;
+
+        /*Elimina antes de volver asignar*/
+        try {
+            query = "DELETE FROM TARJETA_DETALLE_FM WHERE IDMEDIOPAGO = " + mediopagoid + " AND TURNOID = "+turnoid;
+            pst = getConnection().prepareStatement(query);
+            pst.executeUpdate();
+            closePst();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        /*Asigna detalle clientes tc al turno*/
+        try {
+            query = "INSERT INTO TARJETA_DETALLE_FM (IDDET,IDESTACION, IDMEDIOPAGO, TURNOID, LOTE,CLIENTE,VENTA,COMENTARIO) "
+                    + "VALUES (SQ_TC_DETALLE_FM.nextval,?,?,?,?,?,?,?)";
+
+            for (Integer itemId : bcrDetalleCliScott.getItemIds()) {
+                pst = getConnection().prepareStatement(query);
+                pst.setInt(1, bcrDetalleCliScott.getItem(itemId).getBean().getEstacion().getEstacionId());
+                pst.setInt(2, bcrDetalleCliScott.getItem(itemId).getBean().getMediopago().getMediopagoid());
+                pst.setInt(3, turnoid);
+                pst.setInt(4, bcrDetalleCliScott.getItem(itemId).getBean().getGenlote().getIdlote());
+                pst.setString(5, bcrDetalleCliScott.getItem(itemId).getBean().getCliente());
+                pst.setDouble(6, bcrDetalleCliScott.getItem(itemId).getBean().getVenta());
+                pst.setString(7, bcrDetalleCliScott.getItem(itemId).getBean().getComentario());
+                pst.executeUpdate();
+                closePst();
+            }
+            result = true;
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+        }
+        return result;
+    }
 
     public List<GenericDetalleFM> getDetalleByMedioPago(Integer estacionid, Integer turnoid, Integer mediopagoid) {
         List<GenericDetalleFM> result = new ArrayList();
