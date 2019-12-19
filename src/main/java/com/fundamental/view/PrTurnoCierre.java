@@ -361,7 +361,7 @@ public class PrTurnoCierre extends Panel implements View {
             btndmscottia.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btndmscottia.addStyleName(ValoTheme.BUTTON_SMALL);
             btndmscottia.addClickListener((final Button.ClickEvent event) -> {
-//            FormDetalleVenta2.open();
+                updateTableFooterDetaCli();
             });
 
             setCaption(caption);
@@ -392,7 +392,7 @@ public class PrTurnoCierre extends Panel implements View {
     /*Metodo Llama Forma Clientes Prepago*///ASG
     private void formDetalleCliDavivienda(Integer idestacion, String simboloMoneda, Integer idpais) {
         if (cbxTurno.getValue() != null) {
-            formDetalleCliDavivienda = new FormDetalleCliDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavi, dfdFecha.getValue());
+            formDetalleCliDavivienda = new FormDetalleCliDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavi, turno);
             formDetalleCliDavivienda.addCloseListener((e) -> {
                 updateTableFooterDetaCli();
 //                bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class
@@ -413,10 +413,12 @@ public class PrTurnoCierre extends Panel implements View {
     }
 
     public void updateTableFooterDetaCli() {
+        System.out.println("Entro Update Footer");
         Double tmpDouble = 0.00;
         for (Integer itemId : bcrDetalleCliDavi.getItemIds()) {
             tmpDouble += bcrDetalleCliDavi.getItem(itemId).getBean().getVenta();
         }
+        System.out.println("Double " + tmpDouble);
         tableFMDavivienda.setFooterVisible(true);
         tableFMDavivienda.setColumnFooter("colcomentario", "Total:");
         tableFMDavivienda.setColumnFooter("colcomentario", symCurrency + numberFmt.format(tmpDouble).trim());
@@ -508,6 +510,7 @@ public class PrTurnoCierre extends Panel implements View {
                 cbxTurno.setContainerDataSource(contTurnos);
                 cbxTurno.setValue(null);
                 currencySymbol = pais.getMonedaSimbolo() + " ";
+                symCurrency = currencySymbol;
             }
         });
 
@@ -560,26 +563,13 @@ public class PrTurnoCierre extends Panel implements View {
                     bcrVentas.removeAllItems();
                     bcrProducto.removeAllItems();
                     bcrMediospago.removeAllItems();
-
-                    /*DETALLLE CLIENTES TC ASG*/
-                    bcrDetalleCliDavi.removeAllItems();
-                    bcrDetalleCliScott.removeAllItems();
-                    if (cbxPais.getValue() != null) {
-                        ContEstacion.addAll(dao.getAllEstaciones(true, pais.getPaisId()));
-                        ContMediosPago.addAll(dao.getAllMediosPago(true, pais.getPaisId()));
-                    }
-                    if (cbxEstacion.getValue() != null) {
-                        Estacion esta = new Estacion();
-                        esta = (Estacion) cbxEstacion.getValue();
-                        //FM Davivienda  115
-                        //FM Scottia 116
-                        ContLote.addAll(dao.getAllLotesbyMedioPago(115, esta.getEstacionId(), dfdFecha.getValue()));
-                        ContLoteScott.addAll(dao.getAllLotesbyMedioPago(116, esta.getEstacionId(), dfdFecha.getValue()));
-                    }
-                    /*FIN ASG*/
-
                     bcrEfectivo.removeAllItems();
                     bcrTarjeta.removeAllItems();
+
+                    /*ASG DETALLE CLIENTES TC*/
+                    bcrDetalleCliDavi.removeAllItems();
+                    bcrDetalleCliScott.removeAllItems();
+                    /*FIN ASG*/
                     calcularSumas();
 
                     turno = new Turno();
@@ -605,11 +595,37 @@ public class PrTurnoCierre extends Panel implements View {
             public void valueChange(Property.ValueChangeEvent event) {
                 turno = (Turno) cbxTurno.getValue();
                 actionComboboxTurno();
+                changeTurno();
             }
         });
         cbxTurno.setValue(turno);
     }
 
+    /*DETALLLE CLIENTES TC ASG*/
+    private void changeTurno() {
+        if (turno != null) {
+            bcrDetalleCliDavi.removeAllItems();
+            bcrDetalleCliScott.removeAllItems();
+            ContEstacion.addAll(dao.getAllEstaciones(true, pais.getPaisId()));
+            ContMediosPago.addAll(dao.getAllMediosPago(true, pais.getPaisId()));
+            //FM Davivienda  115
+            //FM Scottia 116
+            ContLote.addAll(dao.getAllLotesbyMedioPago(115, turno.getTurnoId()));
+            ContLoteScott.addAll(dao.getAllLotesbyMedioPago(116, turno.getTurnoId()));
+
+            Estacion est = new Estacion();
+            est = (Estacion) cbxEstacion.getValue();
+            bcrDetalleCliDavi.addAll(dao.getDetalleByMedioPago(est.getEstacionId(), turno.getTurnoId(), 115));
+            bcrDetalleCliScott.addAll(dao.getDetalleByMedioPago(est.getEstacionId(), turno.getTurnoId(), 116));
+
+            hltables.removeComponent(tableFMDavivienda);
+            hltables.removeComponent(tableFMScott);
+            hltables.addComponent(tableFMDavivienda);
+            hltables.addComponent(tableFMScott);
+        }
+    }
+
+    /*FIN ASG*/
     private void actionComboboxTurno() {
         if (turno != null) {
             bcrArqueocaja.removeAllItems();
@@ -767,19 +783,6 @@ public class PrTurnoCierre extends Panel implements View {
                             bcrMediospago.addAll(svcTC.getMediopagoByArqueoid(arqueosIds));
                             bcrEfectivo.addAll(svcTC.getEfectivoByArqueoid(arqueosIds));
                             bcrTarjeta.addAll(svcTC.getArqueoTC(arqueosIds));
-
-                            /*DETALLE CLIENTE TC  ASG*/
-                            if (cbxEstacion.getValue() != null) {
-                                Estacion est = new Estacion();
-                                est = (Estacion) cbxEstacion.getValue();
-                                bcrDetalleCliDavi.addAll(dao.getDetalleByMedioPago(est.getEstacionId(), dfdFecha.getValue(), 115));
-                                bcrDetalleCliScott.addAll(dao.getDetalleByMedioPago(est.getEstacionId(), dfdFecha.getValue(), 116));
-                                hltables.removeComponent(tableFMDavivienda);
-                                hltables.removeComponent(tableFMScott);
-                                hltables.addComponent(tableFMDavivienda);
-                                hltables.addComponent(tableFMScott);
-                            }
-                            /*FIN ASG */
                         }
                         svcTC.closeConnections();
                         calcularSumas();

@@ -32,7 +32,6 @@ public class SvcUsuario extends Dao {
                     + "FROM usuario u "
                     + "WHERE u.estado = 'A' AND u.clave = ? "
                     + query;
-            System.out.println("getUserByUserPass "+query);
             pst = getConnection().prepareStatement(query);
             pst.setString(1, password);
 //            pst.setString(1, username);

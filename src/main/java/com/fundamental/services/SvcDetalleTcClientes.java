@@ -22,7 +22,7 @@ public class SvcDetalleTcClientes extends Dao {
 
     private String query;
 
-    public List<GenericDetalleFM> getDetalleByMedioPago(Integer idestacion, Date date, Integer mediopagoid) {
+    public List<GenericDetalleFM> getDetalleByMedioPago(Integer estacionid, Integer turnoid, Integer mediopagoid) {
         List<GenericDetalleFM> result = new ArrayList();
 
         try {
@@ -32,26 +32,20 @@ public class SvcDetalleTcClientes extends Dao {
                     + "       D.LOTE_ID,D.LOTE\n"
                     + "  FROM TARJETA_DETALLE_FM  A, ESTACION B, MEDIOPAGO C,\n"
                     + "       (SELECT x.LOTE LOTE_ID, x.lote FROM arqueocaja_tc x, mediopago y WHERE x.TARJETA_ID = y.MEDIOPAGO_ID AND x.tarjeta_id = ? AND x.arqueocaja_id IN\n"
-                    + "                          (SELECT arqueocaja_id FROM arqueocaja WHERE turno_id IN \n"
-                    + "                                      (SELECT turno_id FROM turno WHERE estacion_id = ? AND fecha =  ?))\n"
+                    + "                          (SELECT arqueocaja_id FROM arqueocaja WHERE turno_id = ?)\n"
                     + "         GROUP BY x.tarjeta_id, y.NOMBRE, x.lote) D\n"
                     + " WHERE     A.IDESTACION = B.ESTACION_ID\n"
                     + "       AND A.IDMEDIOPAGO = C.MEDIOPAGO_ID\n"
                     + "       AND A.LOTE = D.LOTE_ID\n"
-                    + "       AND C.MEDIOPAGO_ID = ?"
                     + "       AND A.IDESTACION = ?\n"
-                    + "       AND A.fecha = ?";
+                    + "       AND A.turnoid = ?";
             pst = getConnection().prepareStatement(query);
-
-            java.sql.Date sqlDateIni = new java.sql.Date(date.getTime());
 
             /*Envio parametros necesarios*/
             pst.setInt(1, mediopagoid);
-            pst.setInt(2, idestacion);
-            pst.setDate(3, sqlDateIni);
-            pst.setInt(4, mediopagoid);
-            pst.setInt(5, idestacion);
-            pst.setDate(6, sqlDateIni);
+            pst.setInt(2, turnoid);
+            pst.setInt(3, estacionid);
+            pst.setInt(4, turnoid);
             ResultSet rst = pst.executeQuery();
 
             while (rst.next()) {
@@ -69,7 +63,7 @@ public class SvcDetalleTcClientes extends Dao {
         return result;
     }
 
-    public List<Estacion> getAllEstaciones(boolean includeInactive,Integer paisid) {
+    public List<Estacion> getAllEstaciones(boolean includeInactive, Integer paisid) {
         List<Estacion> result = new ArrayList();
         //String statusName;
         ResultSet rst = null;
@@ -78,7 +72,7 @@ public class SvcDetalleTcClientes extends Dao {
             query = "SELECT e.estacion_id, e.nombre "
                     + "FROM estacion e, pais p "
                     + "WHERE e.pais_id = p.pais_id "
-                    + "AND e.pais_id = "+paisid
+                    + "AND e.pais_id = " + paisid
                     + query
                     + " ORDER BY p.nombre ";
             pst = getConnection().prepareStatement(query);
@@ -101,33 +95,27 @@ public class SvcDetalleTcClientes extends Dao {
         return result;
     }
 
-    public List<GenericLote> getAllLotesbyMedioPago(Integer mediopagoid, Integer estacionid, Date date) {
+    public List<GenericLote> getAllLotesbyMedioPago(Integer mediopagoid, Integer turnoid) {
         List<GenericLote> result = new ArrayList();
         //String statusName;
         ResultSet rst = null;
         try {
-            query = "  SELECT a.LOTE LOTE_ID, a.lote\n"
-                    + "    FROM arqueocaja_tc a, mediopago b\n"
+            query = "SELECT a.LOTE LOTE_ID, a.lote\n"
+                    + "   FROM arqueocaja_tc a, mediopago b\n"
                     + "   WHERE     a.TARJETA_ID = b.MEDIOPAGO_ID\n"
                     + "         AND a.tarjeta_id = ?\n"
                     + "         AND a.arqueocaja_id IN\n"
                     + "                 (SELECT arqueocaja_id\n"
                     + "                    FROM arqueocaja\n"
-                    + "                   WHERE turno_id IN\n"
-                    + "                             (SELECT turno_id\n"
-                    + "                                FROM turno\n"
-                    + "                               WHERE     estacion_id = ?\n"
-                    + "                                     AND fecha = ?))\n"
+                    + "                   WHERE turno_id = ?)\n"
                     + "GROUP BY a.tarjeta_id, b.NOMBRE, a.lote";
 
             pst = getConnection().prepareStatement(query);
 
-            java.sql.Date sqlDateIni = new java.sql.Date(date.getTime());
 
             /*Envio parametros necesarios*/
             pst.setInt(1, mediopagoid);
-            pst.setInt(2, estacionid);
-            pst.setDate(3, sqlDateIni);
+            pst.setInt(2, turnoid);
 
             rst = pst.executeQuery();
 
@@ -149,14 +137,14 @@ public class SvcDetalleTcClientes extends Dao {
         return result;
     }
 
-    public List<GenericBeanMedioPago> getAllMediosPago(boolean includeInactives,Integer paisid) {
+    public List<GenericBeanMedioPago> getAllMediosPago(boolean includeInactives, Integer paisid) {
         List<GenericBeanMedioPago> result = new ArrayList();
         try {
             query = (includeInactives) ? "" : " AND m.estado = 'A' ";
             query = "SELECT m.mediopago_id, m.nombre "
                     + "FROM mediopago m, pais p "
                     + "WHERE m.pais_id = p.pais_id "
-                    + " AND m.pais_id = "+paisid
+                    + " AND m.pais_id = " + paisid
                     + query
                     + " ORDER BY m.nombre";
             pst = getConnection().prepareStatement(query);

@@ -219,16 +219,13 @@ public class LoginView extends VerticalLayout {
 
                 if (validData) {
                     SvcUsuario svcUsuario = new SvcUsuario();
-//                    Integer estacionId = (cbEstacion.getValue() != null) ? ((Estacion) cbEstacion.getValue()).getEstacionId() : 0;
-                    System.out.println("valida data");
                     Usuario user = svcUsuario.getUserByUserPass(usuario, password.getValue());
                     Dao servicio = new Dao();
                     List<Acceso> misAccessos = servicio.getAccesosByUsuarioid(user.getUsuarioId(), user.isSysadmin());
                      svcUsuario.closeConnections();
-                     System.out.println("misAccessos ");
 //                    user.getRoles().get(0).setAccesos(misAccessos);
                     for(Acceso a:misAccessos){
-                        System.out.println("LoginView "+a.getTitulo()+" "+a.isVer()+" "+a.isAgregar()+" "+a.isCambiar()+" "+a.isEliminar());
+//                        System.out.println("LoginView "+a.getTitulo()+" "+a.isVer()+" "+a.isAgregar()+" "+a.isCambiar()+" "+a.isEliminar());
                     }
                    
                     if (user.getUsuarioId() != null && user.getUsuarioId() > 0) {

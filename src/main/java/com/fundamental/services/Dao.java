@@ -905,7 +905,6 @@ public class Dao {
                     + ") tabl "
                     + "GROUP BY tabl.arqueocaja_id "
                     + "ORDER BY tabl.arqueocaja_id";
-            System.out.println("mi query " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             while (rst.next()) {
@@ -1218,7 +1217,6 @@ public class Dao {
                     + "FROM acceso a " + isNotSysadmin
                     + " CONNECT BY PRIOR a.acceso_id = a.padre "
                     + " ORDER BY NVL(a.padre, 0), a.orden";
-            System.out.println("valida user = " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             Acceso access;
@@ -1704,7 +1702,6 @@ public class Dao {
         List<Producto> result = new ArrayList();
         try {
             miQuery = "select PRODUCTO_ID,NOMBRE,CODIGO from PRODUCTO where TIPO_ID=2 and ESTADO='A' AND ID_MARCA=100";
-            System.out.println("mi query " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
             ResultSet rst = pst.executeQuery();
             Producto pro;

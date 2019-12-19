@@ -5,6 +5,7 @@
  */
 package com.sisintegrados.view.form;
 
+import com.fundamental.model.Turno;
 import com.fundamental.model.Utils;
 import com.fundamental.services.SvcDetalleTcClientes;
 import com.fundamental.utils.Constant;
@@ -58,7 +59,7 @@ public class FormDetalleCliDavivienda extends Window {
     String currencySymbol;
     Integer idestacion;
     Integer idpais;
-    Date fecha;
+    Turno turno;
     SvcDetalleTcClientes dao = new SvcDetalleTcClientes();
     BeanItemContainer<Estacion> ContEstacion = new BeanItemContainer<Estacion>(Estacion.class);
     BeanItemContainer<GenericBeanMedioPago> ContMediosPago = new BeanItemContainer<GenericBeanMedioPago>(GenericBeanMedioPago.class);
@@ -76,12 +77,12 @@ public class FormDetalleCliDavivienda extends Window {
     };
     Utils utils = new Utils();
 
-    public FormDetalleCliDavivienda(Integer idestacion, String currencySymbol, Integer idpais, BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi, Date fecha) {
+    public FormDetalleCliDavivienda(Integer idestacion, String currencySymbol, Integer idpais, BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi, Turno turno) {
         this.idestacion = idestacion;
         this.currencySymbol = currencySymbol;
         this.idpais = idpais;
         this.bcrDetalleCliDavi = bcrDetalleCliDavi;
-        this.fecha = fecha;
+        this.turno = turno;
         addStyleName(Constant.stylePopUps);
         Responsive.makeResponsive(this);
         setModal(true);
@@ -104,7 +105,7 @@ public class FormDetalleCliDavivienda extends Window {
         if (idestacion != null) {
             ContEstacion.addAll(dao.getAllEstaciones(true, idpais));
             ContMediosPago.addAll(dao.getAllMediosPago(true, idpais));
-            ContLote.addAll(dao.getAllLotesbyMedioPago(115, idestacion, fecha));
+            ContLote.addAll(dao.getAllLotesbyMedioPago(115,turno.getTurnoId()));
         }
         detailsWrapper.addComponent(buildFields());
         content.addComponent(buildButtons());
