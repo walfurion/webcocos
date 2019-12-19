@@ -472,11 +472,9 @@ public class PrCuadre extends Panel implements View {
 
         List<Arqueocaja> arqueos = service.getArqueocajaByTurnoid(turno.getTurnoId());
         Arqueocaja acaja = new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), new Date(), 1, null, null, null, null, null);
-        System.out.println("CAJA " + acaja);
         acaja.setNombre("Nuevo cuadre");
         arqueos.add(0, acaja);
         contArqueos = new ListContainer<Arqueocaja>(Arqueocaja.class, arqueos);
-        System.out.println("ARQUEOS " + contArqueos);
 
         contCustomerCredit = new ListContainer<Cliente>(Cliente.class, service.getCustomersByStationidType(estacion.getEstacionId(), "C"));
         contCustomerPrepaid = new ListContainer<Cliente>(Cliente.class, service.getCustomersByStationidType(estacion.getEstacionId(), "P"));
@@ -547,7 +545,6 @@ public class PrCuadre extends Panel implements View {
                 }
                 currencySymbol = pais.getMonedaSimbolo() + " ";
                 volumenSymbol = pais.getVolSimbolo() + " ";
-                System.out.println("PAIS " + pais.toString());
 
             }
         });
@@ -562,10 +559,8 @@ public class PrCuadre extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 estacion = (Estacion) cbxEstacion.getValue();
-                System.out.println("estacion: " + estacion.getEstacionId());
                 dfdFecha.setValue(null);
                 contTurnos = new ListContainer<>(Turno.class, new ArrayList());
-                System.out.println("contTurnos: " + contTurnos.size());
                 cbxTurno.setContainerDataSource(contTurnos);
                 cbxTurno.setValue(null);
                 contArqueos = new ListContainer<>(Arqueocaja.class, new ArrayList());
@@ -573,7 +568,6 @@ public class PrCuadre extends Panel implements View {
                 cbxArqueos.setValue(null);
                 SvcCuadre service = new SvcCuadre();
                 List<Producto> prodAdicionales = service.getProdAdicionalesByEstacionid(estacion.getEstacionId());
-                System.out.println("prodAdicionales: " + prodAdicionales.size());
                 bcrProducto.removeAllItems();
                 bcrProducto.addAll(prodAdicionales);
                 ultimoDia = (ultimoDia.getFecha() == null) ? service.getUltimoDiaByEstacionid(estacion.getEstacionId()) : ultimoDia;
@@ -656,10 +650,8 @@ public class PrCuadre extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
 //                turno = (Turno) cbxTurno.getValue();
-//                System.out.println("turno: "+turno.getTurnoId().toString());
 //                SvcCuadre service = new SvcCuadre();
 //                listEmpleados = service.getEmpleadosByTurnoid(turno.getTurnoId());
-//                System.out.println("listEmpleados: "+listEmpleados.size());
 //                service.closeConnections();
 //                cbxEmpleado.setContainerDataSource(new ListContainer<>(Empleado.class, listEmpleados));
 //                actionComboboxTurno();
@@ -762,7 +754,6 @@ public class PrCuadre extends Panel implements View {
 //                try {
 //                    Constant constant = new Constant();
 //                    if (constant.MAP_MIMETYPES_EXT.containsKey(mimeType)) {
-//                        System.out.println("receiveUpload::: " + filename + "; " + mimeType);
 //                        tmpString = "Faltante" + user.getEstacionLogin().getNombre().replaceAll(" ", "-").concat(Constant.SDF_yyyyMMddHHmmss.format(new Date()));
 //                        tempFile = File.createTempFile(tmpString, constant.MAP_MIMETYPES_EXT.get(mimeType));
 //                        return new FileOutputStream(tempFile);
@@ -859,7 +850,6 @@ public class PrCuadre extends Panel implements View {
         tableCalc.setColumnFooter("volumen", volumenSymbol + numberFmt.format(totalArqueoVol));
         tableCalc.setColumnFooter("venta", currencySymbol + numberFmt.format(totalArqueoCurr));
         tableCalc.setColumnFooter("diferencia", currencySymbol + numberFmt.format(totalArqueoDif));
-        System.out.println("RECALCULAR " + totalArqueoDif);
 
         totalProducto = 0D;
         tblProd.setColumnFooter("nombre", "Total:");
@@ -1013,8 +1003,6 @@ public class PrCuadre extends Panel implements View {
 //TODO: Considerar hacer con commit y rollback este conjunto de interacciones a base de datos.
                                 Arqueocaja arqueo = ((Empleado) cbxEmpleado.getValue()).getArqueo();
                                 String myAction = (arqueo == null || arqueo.getArqueocajaId() == null) ? Dao.ACTION_ADD : Dao.ACTION_UPDATE;
-                                System.out.println("ADD " + Dao.ACTION_ADD);
-                                System.out.println("UPDATE " + Dao.ACTION_UPDATE);
                                 arqueo = (arqueo == null || arqueo.getArqueocajaId() == null)
                                         ? new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), turno.getFecha(), 1, user.getUsername(), user.getNombreLogin(), ((Empleado) cbxEmpleado.getValue()).getEmpleadoId())/*Retire nombre jefe y pistero ASG*/
                                         : arqueo;
@@ -1208,7 +1196,7 @@ public class PrCuadre extends Panel implements View {
                 tmpDoublePr = (Double) VaadinSession.getCurrent().getAttribute("totalProd");
 
                 for (Integer itemId : bcrProducto.getItemIds()) {
-                    System.out.println("bcrProducto.getItem(itemId).getBean().getProductoId()" + bcrProducto.getItem(itemId).getBean().getProductoId());
+//                    System.out.println("bcrProducto.getItem(itemId).getBean().getProductoId()" + bcrProducto.getItem(itemId).getBean().getProductoId());
                 }
 
                 for (Integer itemId : bcrProducto.getItemIds()) {
@@ -1364,7 +1352,6 @@ public class PrCuadre extends Panel implements View {
         String[] cHeaders = new String[]{"Despacho", "Producto", "Volumen", "Venta"};
         Align[] cAlignments = new Align[]{Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT};
         if (pais.getPaisId() != null && pais.getPaisId() == 320) {  //Guatemala
-            System.out.println("PAIS " + pais.getPaisId());
             vColumns = new Object[]{"nombreDespacho", "nombreProducto", "volumen", "venta", "diferencia"};
             cHeaders = new String[]{"Despacho", "Producto", "Volumen", "Venta", "Diferencia"};
             cAlignments = new Align[]{Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT};
@@ -1478,7 +1465,6 @@ public class PrCuadre extends Panel implements View {
         tblMediospago.addGeneratedColumn("colMonto", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
-                System.out.println("tblMediospago.colMonto::: " + source.getId());
                 Property pro = source.getItem(itemId).getItemProperty("value");  //Atributo del bean
                 Property desc = source.getItem(itemId).getItemProperty("mediopagoId");
                 final TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
@@ -1560,7 +1546,6 @@ public class PrCuadre extends Panel implements View {
         tblPartida.addGeneratedColumn("colMonto", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
-                System.out.println("tblMediospago.colMonto::: " + source.getId());
                 Property pro = source.getItem(itemId).getItemProperty("value");  //Atributo del bean
                 final TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
                 tfdValue.setValue("0.00");
@@ -1688,7 +1673,7 @@ public class PrCuadre extends Panel implements View {
                             return;
                         }
                         if (!Util.isDoublePositive(bcEfectivo.getItem(itemId).getBean().getValue().toString().replaceAll(",", ""))) {
-                            System.out.println("valida: " + bcEfectivo.getItem(itemId).getBean().getValue().toString().replaceAll(",", ""));
+//                            System.out.println("valida: " + bcEfectivo.getItem(itemId).getBean().getValue().toString().replaceAll(",", ""));
                             Double valorCero = 0.00;
                             if (bcEfectivo.getItem(itemId).getBean().getValue() < 0) {
                                 bcEfectivo.getItem(itemId).getBean().setValue(valorCero);
@@ -2582,7 +2567,6 @@ public class PrCuadre extends Panel implements View {
             List<Mediopago> efectivos = svcTC.getEfectivoByArqueoid(arqueoCajaId);
             bcEfectivo.removeAllItems();
             listaEfectivo = new ArrayList();
-            System.out.println("onchangeCbxArqueo ");
             int itemId = 1;
             for (Mediopago mp : efectivos) {
                 for (Mediopago mpoe : mediosPagoEfectivo) {

@@ -15,6 +15,7 @@ import com.sisintegrados.generic.bean.GenericBeanMedioPago;
 import com.sisintegrados.generic.bean.GenericDetalleFM;
 import com.sisintegrados.generic.bean.GenericLote;
 import com.sisintegrados.generic.bean.Usuario;
+import static com.sisintegrados.view.form.FormDetalleCliDavivienda.numberFmt;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItemContainer;
@@ -38,14 +39,13 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
  *
  * @author Allan G.
  */
-public class FormDetalleCliDavivienda extends Window {
+public class FormDetalleCliScottia extends Window {
 
     static final DecimalFormat numberFmt = new DecimalFormat("### ###,##0.00;-#");
     static final DecimalFormat numberFmt3D = new DecimalFormat("### ###,##0.000;-#");
@@ -64,9 +64,9 @@ public class FormDetalleCliDavivienda extends Window {
     BeanItemContainer<Estacion> ContEstacion = new BeanItemContainer<Estacion>(Estacion.class);
     BeanItemContainer<GenericBeanMedioPago> ContMediosPago = new BeanItemContainer<GenericBeanMedioPago>(GenericBeanMedioPago.class);
     BeanItemContainer<GenericLote> ContLote = new BeanItemContainer<GenericLote>(GenericLote.class);
-    BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
+    BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
     List<GenericDetalleFM> listDetallecli = new ArrayList();
-    Table tableFMDavivienda = new Table() {
+    Table tableFMScott = new Table() {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
             if (colId.equals("venta")) {
@@ -77,11 +77,11 @@ public class FormDetalleCliDavivienda extends Window {
     };
     Utils utils = new Utils();
 
-    public FormDetalleCliDavivienda(Estacion estacion, String currencySymbol, Integer idpais, BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi, Turno turno) {
+    public FormDetalleCliScottia(Estacion estacion, String currencySymbol, Integer idpais, BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott, Turno turno) {
         this.estacion = estacion;
         this.currencySymbol = currencySymbol;
         this.idpais = idpais;
-        this.bcrDetalleCliDavi = bcrDetalleCliDavi;
+        this.bcrDetalleCliScott = bcrDetalleCliScott;
         this.turno = turno;
         addStyleName(Constant.stylePopUps);
         Responsive.makeResponsive(this);
@@ -105,7 +105,7 @@ public class FormDetalleCliDavivienda extends Window {
         if (estacion != null) {
             ContEstacion.addAll(dao.getAllEstaciones(true, idpais));
             ContMediosPago.addAll(dao.getAllMediosPago(true, idpais));
-            ContLote.addAll(dao.getAllLotesbyMedioPago(115,turno.getTurnoId()));
+            ContLote.addAll(dao.getAllLotesbyMedioPago(116, turno.getTurnoId()));
         }
         detailsWrapper.addComponent(buildFields());
         content.addComponent(buildButtons());
@@ -113,11 +113,11 @@ public class FormDetalleCliDavivienda extends Window {
 
     private Component buildFields() {
         HorizontalLayout hl = new HorizontalLayout();
-        hl.setCaption("Clientes FleetMagic Davivienda");
+        hl.setCaption("Clientes FleetMagic Scottia");
         hl.setIcon(FontAwesome.FLAG);
         hl.setSpacing(true);
         buildTableFMDavivienda();
-        hl.addComponent(tableFMDavivienda);
+        hl.addComponent(tableFMScott);
         return hl;
     }
 
@@ -126,10 +126,10 @@ public class FormDetalleCliDavivienda extends Window {
         btnasignar.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnasignar.addStyleName(ValoTheme.BUTTON_SMALL);
         btnasignar.addClickListener((Button.ClickListener) event -> {
-            GenericDetalleFM dtaclie = new GenericDetalleFM(utils.getRandomNumberInRange(1, 1000), new Estacion(estacion.getEstacionId(),estacion.getNombre()), new GenericBeanMedioPago(115,"FLEET MAGIC DAVIVIENDA"), null, "", null, "");
+            GenericDetalleFM dtaclie = new GenericDetalleFM(utils.getRandomNumberInRange(1, 1000),  new Estacion(estacion.getEstacionId(),estacion.getNombre()), new GenericBeanMedioPago(116,"TARJETA FLEET MAGIC SB"), null, "", null, "");
             dtaclie.setVenta(0D);
             listDetallecli.add(dtaclie);
-            bcrDetalleCliDavi.addAll(listDetallecli);
+            bcrDetalleCliScott.addAll(listDetallecli);
         });
         btnasignar.focus();
 
@@ -138,10 +138,8 @@ public class FormDetalleCliDavivienda extends Window {
         btnguardar.addStyleName(ValoTheme.BUTTON_FRIENDLY);
         btnguardar.addStyleName(ValoTheme.BUTTON_SMALL);
         btnguardar.addClickListener((Button.ClickListener) event -> {
-            if (bcrDetalleCliDavi.size() <= 0) {
-                bcrDetalleCliDavi = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
-//                VaadinSession.getCurrent().setAttribute("detalleCredito", bcrDetalleCliDavi);
-//                VaadinSession.getCurrent().setAttribute("totalCredito", 0.00);
+            if (bcrDetalleCliScott.size() <= 0) {
+                bcrDetalleCliScott = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
             } else {
                 updateTableFooterDetaCli();
             }
@@ -158,14 +156,14 @@ public class FormDetalleCliDavivienda extends Window {
     }
 
     private void buildTableFMDavivienda() {
-        bcrDetalleCliDavi.setBeanIdProperty("iddet");
-        tableFMDavivienda.setContainerDataSource(bcrDetalleCliDavi);
-        tableFMDavivienda.setWidth(650f, Unit.PIXELS);
-        tableFMDavivienda.setHeight(335f, Unit.PIXELS);
-        tableFMDavivienda.addStyleName(ValoTheme.TABLE_BORDERLESS);
-        tableFMDavivienda.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
-        tableFMDavivienda.setImmediate(true);
-        tableFMDavivienda.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
+        bcrDetalleCliScott.setBeanIdProperty("iddet");
+        tableFMScott.setContainerDataSource(bcrDetalleCliScott);
+        tableFMScott.setWidth(650f, Unit.PIXELS);
+        tableFMScott.setHeight(335f, Unit.PIXELS);
+        tableFMScott.addStyleName(ValoTheme.TABLE_BORDERLESS);
+        tableFMScott.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
+        tableFMScott.setImmediate(true);
+        tableFMScott.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
@@ -181,7 +179,7 @@ public class FormDetalleCliDavivienda extends Window {
             }
         });
 
-        tableFMDavivienda.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
+        tableFMScott.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
@@ -198,7 +196,7 @@ public class FormDetalleCliDavivienda extends Window {
             }
         });
 
-        tableFMDavivienda.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+        tableFMScott.addGeneratedColumn("collote", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
@@ -215,7 +213,7 @@ public class FormDetalleCliDavivienda extends Window {
             }
         });
 
-        tableFMDavivienda.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
+        tableFMScott.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
@@ -227,7 +225,7 @@ public class FormDetalleCliDavivienda extends Window {
             }
         });
 
-        tableFMDavivienda.addGeneratedColumn("colventa", new Table.ColumnGenerator() {
+        tableFMScott.addGeneratedColumn("colventa", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("venta");  //Atributo del bean
@@ -248,7 +246,7 @@ public class FormDetalleCliDavivienda extends Window {
             }
         });
 
-        tableFMDavivienda.addGeneratedColumn("colcomentario", new Table.ColumnGenerator() {
+        tableFMScott.addGeneratedColumn("colcomentario", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("comentario");  //Atributo del bean
@@ -261,7 +259,7 @@ public class FormDetalleCliDavivienda extends Window {
             }
         });
 
-        tableFMDavivienda.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
+        tableFMScott.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Button btnDelete = new Button(FontAwesome.TRASH);
@@ -270,7 +268,7 @@ public class FormDetalleCliDavivienda extends Window {
                 btnDelete.addClickListener(new Button.ClickListener() {
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
-                        bcrDetalleCliDavi.removeItem(itemId);
+                        bcrDetalleCliScott.removeItem(itemId);
                         List<GenericDetalleFM> tempList = new ArrayList();
                         for (GenericDetalleFM deo : listDetallecli) {
                             if (deo.getIddet() != itemId) {
@@ -286,24 +284,22 @@ public class FormDetalleCliDavivienda extends Window {
         });
 //        tableFMDavivienda.setVisibleColumns(new Object[]{"colestacion", "colmedio", "collote", "cliente", "venta", "comentario"});
 //        tableFMDavivienda.setColumnHeaders(new String[]{"Estacion", "Medio Pago", "Lote", "Cliente", "Venta", "Comentarios"});
-        tableFMDavivienda.setVisibleColumns(new Object[]{"collote", "colcliente", "colventa", "colcomentario", "colDelete"});
-        tableFMDavivienda.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios", "Borrar"});
+        tableFMScott.setVisibleColumns(new Object[]{"collote", "colcliente", "colventa", "colcomentario", "colDelete"});
+        tableFMScott.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios", "Borrar"});
 //        tableFMDavivienda.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT,Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
-        tableFMDavivienda.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
-        tableFMDavivienda.setHeight(200f, Unit.PIXELS);
-        tableFMDavivienda.addStyleName(ValoTheme.TABLE_COMPACT);
-        tableFMDavivienda.addStyleName(ValoTheme.TABLE_SMALL);
+        tableFMScott.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableFMScott.setHeight(200f, Unit.PIXELS);
+        tableFMScott.addStyleName(ValoTheme.TABLE_COMPACT);
+        tableFMScott.addStyleName(ValoTheme.TABLE_SMALL);
     }
 
     public void updateTableFooterDetaCli() {
         tmpDouble = 0;
-        for (Integer itemId : bcrDetalleCliDavi.getItemIds()) {
-            tmpDouble += bcrDetalleCliDavi.getItem(itemId).getBean().getVenta();
+        for (Integer itemId : bcrDetalleCliScott.getItemIds()) {
+            tmpDouble += bcrDetalleCliScott.getItem(itemId).getBean().getVenta();
         }
-        tableFMDavivienda.setFooterVisible(true);
-        tableFMDavivienda.setColumnFooter("colcomentario", "Total:");
-        tableFMDavivienda.setColumnFooter("colcomentario", currencySymbol + numberFmt.format(tmpDouble).trim());
-//        VaadinSession.getCurrent().setAttribute("detClienteDavivienda", bcrDetalleCliDavi);
-//        VaadinSession.getCurrent().setAttribute("totalDavivienda", tmpDouble);
+        tableFMScott.setFooterVisible(true);
+        tableFMScott.setColumnFooter("colcomentario", "Total:");
+        tableFMScott.setColumnFooter("colcomentario", currencySymbol + numberFmt.format(tmpDouble).trim());
     }
 }

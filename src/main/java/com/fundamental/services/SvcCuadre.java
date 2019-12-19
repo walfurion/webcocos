@@ -149,7 +149,6 @@ public class SvcCuadre extends Dao {
                     + " AND pe.estacion_id = " + stationId
                     + query
                     + " ORDER BY p.orden_pos";
-            System.out.println("query ----  " + query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Producto producto;

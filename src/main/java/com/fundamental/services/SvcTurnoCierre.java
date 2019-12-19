@@ -82,7 +82,6 @@ public class SvcTurnoCierre extends Dao {
                     + "WHERE ad.mediopago_id = m.mediopago_id AND ad.arqueocaja_id IN (" + arqueoIds + ") "
                     + "GROUP BY m.mediopago_id, m.nombre, m.tipo "
                     + "ORDER BY m.mediopago_id";
-            System.out.println("query medio pago "+query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Mediopago mediopago;
@@ -108,7 +107,6 @@ public class SvcTurnoCierre extends Dao {
                     + "WHERE e.mediopago_id = m.mediopago_id AND e.arqueocaja_id IN (" + arqueoIds + ") "
                     + "GROUP BY m.mediopago_id, m.nombre, m.tipo, e.orden, e.efectivo_id "
                     + "ORDER BY efectivo_id, m.mediopago_id";
-            System.out.println("query efectivo "+query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Mediopago mediopago;
@@ -135,7 +133,6 @@ public class SvcTurnoCierre extends Dao {
                     + "where ARQ.TARJETA_ID=TAR.TARJETA_ID and ARQUEOCAJA_ID IN (" + arqueocajaId + ") "
                     + "group by ARQ.LOTE, TAR.NOMBRE, TAR.TARJETA_ID order by TAR.NOMBRE, ARQ.LOTE ";
             pst = getConnection().prepareStatement(query);
-            System.out.println("entra a la tarjeta "+query);
             ResultSet rst = pst.executeQuery();
             ArqueoTC atc;
             int count =0;
@@ -357,9 +354,6 @@ public class SvcTurnoCierre extends Dao {
                     + "WHERE i.producto_id = p.producto_id "
                     + "AND i.fecha = TO_DATE(?, 'dd/mm/yyyy') AND i.estacion_id = ? "
                     + "ORDER BY p.producto_id";
-//            System.out.println("Inventario "+query);
-//            System.out.println("fecha "+Constant.SDF_ddMMyyyy.format(fecha));
-//            System.out.println("estacion "+estacionId);
             pst = getConnection().prepareStatement(query);
             pst.setString(1, Constant.SDF_ddMMyyyy.format(fecha));
             pst.setInt(2, estacionId);
@@ -499,7 +493,6 @@ public class SvcTurnoCierre extends Dao {
             miQuery = "select INVRECEPCION_ID,PILOTO,UNIDAD,FACTURA "
                     + "from RECEPCION_INVENTARIO "
                     + "where PAIS_ID="+pais+" and ESTACION_ID="+estacion+" and FECHA = to_date('"+dateString+"','dd/mm/yyyy')";
-            System.out.println("quer... "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             while (rst.next()) {
