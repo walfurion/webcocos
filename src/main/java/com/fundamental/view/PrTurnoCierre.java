@@ -22,6 +22,7 @@ import com.sisintegrados.generic.bean.ArqueoTC;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
 import com.sisintegrados.generic.bean.GenericDetalleFM;
 import com.sisintegrados.generic.bean.GenericLote;
+import com.sisintegrados.view.form.FormDetalleCliDavivienda;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -167,7 +168,6 @@ public class PrTurnoCierre extends Panel implements View {
     };
     /*Fin Detalle ASG*/
     BeanContainer<Integer, Arqueocaja> bcrArqueocaja = new BeanContainer<Integer, Arqueocaja>(Arqueocaja.class);
-    ;
     BeanContainer<Integer, Bomba> bcrBombas = new BeanContainer<Integer, Bomba>(Bomba.class);
     BeanContainer<Integer, DtoArqueo> bcrVentas = new BeanContainer<Integer, DtoArqueo>(DtoArqueo.class);
     BeanContainer<Integer, Producto> bcrProducto = new BeanContainer<Integer, Producto>(Producto.class);
@@ -184,8 +184,10 @@ public class PrTurnoCierre extends Panel implements View {
     BeanItemContainer<GenericLote> ContLoteScott = new BeanItemContainer<GenericLote>(GenericLote.class);
     BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
     BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
-    /*FIN DETALLE ASG*/
 
+    FormDetalleCliDavivienda formDetalleCliDavivienda;
+
+    /*FIN DETALLE ASG*/
     Double totalVentas = 0D, totalDinero = 0D;
     String symCurrency, symVolumen;
 
@@ -352,9 +354,7 @@ public class PrTurnoCierre extends Panel implements View {
             btnfmdavivienda = new Button("FM DAVIVIENDA", FontAwesome.PLUS);
             btnfmdavivienda.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btnfmdavivienda.addStyleName(ValoTheme.BUTTON_SMALL);
-            btnfmdavivienda.addClickListener((final Button.ClickEvent event) -> {
-//            FormDetalleVenta2.open();
-            });
+            btnfmdavivienda.addClickListener(clickEvent -> formDetalleCliDavivienda(estacion.getEstacionId(), " MONEDA ", pais.getPaisId()));
 
             btndmscottia = new Button("FM SCOTTIA", FontAwesome.PLUS);
             btndmscottia.addStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -385,15 +385,28 @@ public class PrTurnoCierre extends Panel implements View {
             hltables.setSpacing(true);
             hltables.setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
             setContent(hltables);
-//            setContent(new HorizontalLayout() {
-//                {
-//                    setSizeFull();
-//                    setMargin(true);
-//                    setSpacing(true);
-//                    setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
-//                    addComponents(tableFMDavivienda);
+        }
+    }
+
+    /*Metodo Llama Forma Clientes Prepago*///ASG
+    private void formDetalleCliDavivienda(Integer idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxTurno.getValue() != null) {
+            formDetalleCliDavivienda = new FormDetalleCliDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavi,dfdFecha.getValue());
+            formDetalleCliDavivienda.addCloseListener((e) -> {
+//                bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class
+//                );
+//                bcrPrepaid = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detallePrepago");
+//                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("totalPrepago");
+//                for (Integer itemId : bcrMediopago.getItemIds()) {
+//                    if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_VENTA_PREPAGO) {
+//                        bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDouble);
+////                        bcrMediopago.getItem(itemId).getItemProperty("value").setReadOnly(true);
+//                        break;
+//                    }
 //                }
-//            });
+            });
+            getUI().addWindow(formDetalleCliDavivienda);
+            formDetalleCliDavivienda.focus();
         }
     }
 
@@ -410,8 +423,6 @@ public class PrTurnoCierre extends Panel implements View {
         bcrDetalleCliDavi.setBeanIdProperty("iddet");
         bcrDetalleCliScott.setBeanIdProperty("iddet");
 
-        ContEstacion.addAll(dao.getAllEstaciones(true));
-        ContMediosPago.addAll(dao.getAllMediosPago(true));
         /*FIN ASG*/
         SvcTurnoCierre service = new SvcTurnoCierre();
 
@@ -540,6 +551,10 @@ public class PrTurnoCierre extends Panel implements View {
                     /*DETALLLE CLIENTES TC ASG*/
                     bcrDetalleCliDavi.removeAllItems();
                     bcrDetalleCliScott.removeAllItems();
+                    if (cbxPais.getValue() != null) {
+                        ContEstacion.addAll(dao.getAllEstaciones(true, pais.getPaisId()));
+                        ContMediosPago.addAll(dao.getAllMediosPago(true, pais.getPaisId()));
+                    }
                     if (cbxEstacion.getValue() != null) {
                         Estacion esta = new Estacion();
                         esta = (Estacion) cbxEstacion.getValue();

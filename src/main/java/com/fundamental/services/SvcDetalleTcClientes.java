@@ -69,7 +69,7 @@ public class SvcDetalleTcClientes extends Dao {
         return result;
     }
 
-    public List<Estacion> getAllEstaciones(boolean includeInactive) {
+    public List<Estacion> getAllEstaciones(boolean includeInactive,Integer paisid) {
         List<Estacion> result = new ArrayList();
         //String statusName;
         ResultSet rst = null;
@@ -78,6 +78,7 @@ public class SvcDetalleTcClientes extends Dao {
             query = "SELECT e.estacion_id, e.nombre "
                     + "FROM estacion e, pais p "
                     + "WHERE e.pais_id = p.pais_id "
+                    + "AND e.pais_id = "+paisid
                     + query
                     + " ORDER BY p.nombre ";
             pst = getConnection().prepareStatement(query);
@@ -148,13 +149,14 @@ public class SvcDetalleTcClientes extends Dao {
         return result;
     }
 
-    public List<GenericBeanMedioPago> getAllMediosPago(boolean includeInactives) {
+    public List<GenericBeanMedioPago> getAllMediosPago(boolean includeInactives,Integer paisid) {
         List<GenericBeanMedioPago> result = new ArrayList();
         try {
             query = (includeInactives) ? "" : " AND m.estado = 'A' ";
             query = "SELECT m.mediopago_id, m.nombre "
                     + "FROM mediopago m, pais p "
                     + "WHERE m.pais_id = p.pais_id "
+                    + " AND m.pais_id = "+paisid
                     + query
                     + " ORDER BY m.nombre";
             pst = getConnection().prepareStatement(query);
