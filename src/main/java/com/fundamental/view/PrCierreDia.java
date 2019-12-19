@@ -35,6 +35,7 @@ import com.sisintegrados.view.form.FormClientesCredito;
 import com.sisintegrados.generic.bean.InventarioRecepcion;
 import com.sisintegrados.generic.bean.RecepcionInventario;
 import com.sisintegrados.generic.bean.Tarjeta;
+import com.sisintegrados.view.form.FormDetalleDeposito;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
@@ -110,6 +111,8 @@ public class PrCierreDia extends Panel implements View {
     double tmpDouble;
     double tmpDoubleDolar;
     double tmpDoubleOther;
+    double totalEfectivo;
+    double totalDepositos;
 //    {
 //        @Override
 //        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
@@ -196,7 +199,7 @@ public class PrCierreDia extends Panel implements View {
     List<Precio> precios;
     List<Producto> productos;
     Acceso acceso = new Acceso();
-//    FormDetalleDeposito formDetalleDeposito; //jlopez
+    FormDetalleDeposito formDetalleDeposito; //jlopez
     Button btnDetalleDeposito;
 
     SvcDeposito daoDeposito = new SvcDeposito();
@@ -672,7 +675,7 @@ public class PrCierreDia extends Panel implements View {
         }
 
         for (Integer id : bcrDeposito.getItemIds()) {
-            totalDinero += bcrDeposito.getItem(id).getBean().getMonto();
+            //totalDinero += bcrDeposito.getItem(id).getBean().getMonto();
             tpDeposito += bcrDeposito.getItem(id).getBean().getMonto();
         }
 
@@ -693,6 +696,8 @@ public class PrCierreDia extends Panel implements View {
         tableDeposito.setFooterVisible(true);
         tableDeposito.setColumnFooter("mediopago", "Total:");
         tableDeposito.setColumnFooter("monto", symCurrency + numberFmt.format(tpDeposito));
+        totalEfectivo = tpEfectivo;
+        totalDepositos = tpDeposito;
 
     }
 
@@ -818,9 +823,9 @@ public class PrCierreDia extends Panel implements View {
             }
         });
 
-        tableDeposito.setVisibleColumns(new Object[]{"colmedio", "noboleta","comentarios", "monto", "montousd"});
+        tableDeposito.setVisibleColumns(new Object[]{"colmedio", "noboleta", "comentarios", "monto", "montousd"});
         tableDeposito.setColumnHeaders(new String[]{"Medio Pago", "No Boleta", "Comentarios", "Monto", "USD"});
-        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT,Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableDeposito.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
         tableDeposito.setHeight(200f, Unit.PIXELS);
         tableDeposito.addStyleName(ValoTheme.TABLE_COMPACT);
         tableDeposito.addStyleName(ValoTheme.TABLE_SMALL);
@@ -1152,7 +1157,7 @@ public class PrCierreDia extends Panel implements View {
         btnDetalleDeposito = new Button("Detalle Efectivo", FontAwesome.PLUS);
         btnDetalleDeposito.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnDetalleDeposito.addStyleName(ValoTheme.BUTTON_SMALL);
-        btnDetalleDeposito.addClickListener(clickEvent -> formDeposito(estacion.getEstacionId(), currencySymbol, pais.getPaisId()));
+        btnDetalleDeposito.addClickListener(clickEvent -> formDeposito(estacion.getEstacionId(), currencySymbol, pais.getPaisId(), dfdFecha.getValue()));
 
         btnAll.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         btnAll.addStyleName(ValoTheme.BUTTON_LINK);
@@ -1184,6 +1189,11 @@ public class PrCierreDia extends Panel implements View {
         btnGuardar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(final Button.ClickEvent event) {
+
+                if (totalEfectivo != totalDepositos) {
+                    Notification.show("ERROR:", "El detalle de efectivo no coincide con el registro de Depósitos", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
 
                 for (Integer itemId : bcrInventario.getItemIds()) {
                     if (bcrInventario.getItem(itemId).getBean().getComprasDto() > 0
@@ -1505,24 +1515,24 @@ public class PrCierreDia extends Panel implements View {
     }
 
     /*Metodo Llama Forma Detalle de depositos */// jlopez
-    private void formDeposito(Integer idestacion, String simboloMoneda, Integer idpais) {
+    private void formDeposito(Integer idestacion, String simboloMoneda, Integer idpais, Date fechaCierre) {
         System.out.println("ingresa a metodo formDeposito");
-//        if (cbxEstacion.getValue() != null) {
-////            System.out.println("dentro de for cbxestacion");
-////            formDetalleDeposito = new FormDetalleDeposito(simboloMoneda, bcrDeposito, idpais, idestacion);
-////            formDetalleDeposito.addCloseListener((e) -> {
-//////                bcrDeposito = new BeanContainer<Integer, GenericDepositoDet>(GenericDepositoDet.class);
-//////                bcrDeposito = (BeanContainer<Integer, GenericDepositoDet>) VaadinSession.getCurrent().getAttribute("detalleDeposito");
-////                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("total");
-////                tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
-////                tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
-////                System.out.println("tmodouble en cierre" + tmpDouble);
-////                System.out.println("tmodouble en cierre" + tmpDoubleDolar);
-////                System.out.println("tmodoubleother en cierre" + tmpDoubleOther);
-//
-//            });
-//        getUI().addWindow(formDetalleDeposito);
-//        formDetalleDeposito.focus();
-//        }
+        if (cbxEstacion.getValue() != null) {
+            System.out.println("dentro de for cbxestacion");
+            formDetalleDeposito = new FormDetalleDeposito(simboloMoneda, bcrDeposito, idpais, idestacion, fechaCierre);
+            formDetalleDeposito.addCloseListener((e) -> {
+                bcrDeposito = new BeanContainer<Integer, GenericMedioPago>(GenericMedioPago.class);
+                bcrDeposito = (BeanContainer<Integer, GenericMedioPago>) VaadinSession.getCurrent().getAttribute("detalleDeposito");
+                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("total");
+                tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
+                tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
+                System.out.println("tmodouble en cierre" + tmpDouble);
+                System.out.println("tmodouble en cierre" + tmpDoubleDolar);
+                System.out.println("tmodoubleother en cierre" + tmpDoubleOther);
+
+            });
+            getUI().addWindow(formDetalleDeposito);
+            formDetalleDeposito.focus();
+        }
     }
 }
