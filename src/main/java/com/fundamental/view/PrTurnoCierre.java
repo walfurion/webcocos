@@ -168,7 +168,19 @@ public class PrTurnoCierre extends Panel implements View {
             return super.formatPropertyValue(rowId, colId, property);
         }
     };
+    
+    Table tableBCR = new Table() {
+        @Override
+        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
+            if (colId.equals("venta")) {
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
+            }
+            return super.formatPropertyValue(rowId, colId, property);
+        }
+    };
     /*Fin Detalle ASG*/
+    
+    
     BeanContainer<Integer, Arqueocaja> bcrArqueocaja = new BeanContainer<Integer, Arqueocaja>(Arqueocaja.class);
     BeanContainer<Integer, Bomba> bcrBombas = new BeanContainer<Integer, Bomba>(Bomba.class);
     BeanContainer<Integer, DtoArqueo> bcrVentas = new BeanContainer<Integer, DtoArqueo>(DtoArqueo.class);
@@ -186,10 +198,12 @@ public class PrTurnoCierre extends Panel implements View {
     BeanItemContainer<GenericLote> ContLoteScott = new BeanItemContainer<GenericLote>(GenericLote.class);
     BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
     BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
+    BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliBCR = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
 
     /*Popups Detalle Clientes TC ASG*/
     FormDetalleCliDavivienda formDetalleCliDavivienda;
     FormDetalleCliScottia formDetalleCliScottia;
+    //FormDetalleBCR formDetalleBCR;
     //Totales Para Detalles de TC
     Double totFMDavi = 0D;
     Double totFMScott = 0D;
@@ -342,7 +356,7 @@ public class PrTurnoCierre extends Panel implements View {
             btnbcr.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btnbcr.addStyleName(ValoTheme.BUTTON_SMALL);
             btnbcr.addClickListener((final Button.ClickEvent event) -> {
-//            FormDetalleVenta2.open();
+                formDetalleBCR(estacion, symCurrency, pais.getPaisId());
             });
 
             btncredomatic = new Button("CREDOMATIC", FontAwesome.PLUS);
@@ -413,6 +427,18 @@ public class PrTurnoCierre extends Panel implements View {
             });
             getUI().addWindow(formDetalleCliScottia);
             formDetalleCliScottia.focus();
+        }
+    }
+
+    /*Metodo Llama Forma BCR*///JLOPEZ
+    private void formDetalleBCR(Estacion idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxTurno.getValue() != null) {
+            formDetalleCliDavivienda = new FormDetalleCliDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavi, turno);
+            formDetalleCliDavivienda.addCloseListener((e) -> {
+                updateTableFooterDetaCliFm();
+            });
+            getUI().addWindow(formDetalleCliDavivienda);
+            formDetalleCliDavivienda.focus();
         }
     }
 
