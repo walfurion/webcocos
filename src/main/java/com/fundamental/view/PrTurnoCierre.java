@@ -22,7 +22,7 @@ import com.sisintegrados.generic.bean.ArqueoTC;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
 import com.sisintegrados.generic.bean.GenericDetalleFM;
 import com.sisintegrados.generic.bean.GenericLote;
-import com.sisintegrados.view.form.FormDetalleCliDavivienda;
+//import com.sisintegrados.view.form.FormDetalleCliDavivienda;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -185,7 +185,7 @@ public class PrTurnoCierre extends Panel implements View {
     BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
     BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
 
-    FormDetalleCliDavivienda formDetalleCliDavivienda;
+//    FormDetalleCliDavivienda formDetalleCliDavivienda;
 
     /*FIN DETALLE ASG*/
     Double totalVentas = 0D, totalDinero = 0D;
@@ -354,7 +354,7 @@ public class PrTurnoCierre extends Panel implements View {
             btnfmdavivienda = new Button("FM DAVIVIENDA", FontAwesome.PLUS);
             btnfmdavivienda.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btnfmdavivienda.addStyleName(ValoTheme.BUTTON_SMALL);
-            btnfmdavivienda.addClickListener(clickEvent -> formDetalleCliDavivienda(estacion.getEstacionId(), " MONEDA ", pais.getPaisId()));
+//            btnfmdavivienda.addClickListener(clickEvent -> formDetalleCliDavivienda(estacion.getEstacionId(), " MONEDA ", pais.getPaisId()));
 
             btndmscottia = new Button("FM SCOTTIA", FontAwesome.PLUS);
             btndmscottia.addStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -389,26 +389,26 @@ public class PrTurnoCierre extends Panel implements View {
     }
 
     /*Metodo Llama Forma Clientes Prepago*///ASG
-    private void formDetalleCliDavivienda(Integer idestacion, String simboloMoneda, Integer idpais) {
-        if (cbxTurno.getValue() != null) {
-            formDetalleCliDavivienda = new FormDetalleCliDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavi,dfdFecha.getValue());
-            formDetalleCliDavivienda.addCloseListener((e) -> {
-//                bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class
-//                );
-//                bcrPrepaid = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detallePrepago");
-//                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("totalPrepago");
-//                for (Integer itemId : bcrMediopago.getItemIds()) {
-//                    if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_VENTA_PREPAGO) {
-//                        bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDouble);
-////                        bcrMediopago.getItem(itemId).getItemProperty("value").setReadOnly(true);
-//                        break;
-//                    }
-//                }
-            });
-            getUI().addWindow(formDetalleCliDavivienda);
-            formDetalleCliDavivienda.focus();
-        }
-    }
+//    private void formDetalleCliDavivienda(Integer idestacion, String simboloMoneda, Integer idpais) {
+//        if (cbxTurno.getValue() != null) {
+////            formDetalleCliDavivienda = new FormDetalleCliDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavi,dfdFecha.getValue());
+//            formDetalleCliDavivienda.addCloseListener((e) -> {
+////                bcrPrepaid = new BeanContainer<Integer, DtoProducto>(DtoProducto.class
+////                );
+////                bcrPrepaid = (BeanContainer<Integer, DtoProducto>) VaadinSession.getCurrent().getAttribute("detallePrepago");
+////                tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("totalPrepago");
+////                for (Integer itemId : bcrMediopago.getItemIds()) {
+////                    if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == Constant.MP_CRI_VENTA_PREPAGO) {
+////                        bcrMediopago.getItem(itemId).getItemProperty("value").setValue(tmpDouble);
+//////                        bcrMediopago.getItem(itemId).getItemProperty("value").setReadOnly(true);
+////                        break;
+////                    }
+////                }
+//            });
+//            getUI().addWindow(formDetalleCliDavivienda);
+//            formDetalleCliDavivienda.focus();
+//        }
+//    }
 
     public void getAllData() {
         bcrArqueocaja.setBeanIdProperty("arqueocajaId");

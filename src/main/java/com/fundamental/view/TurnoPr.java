@@ -1470,7 +1470,7 @@ public class TurnoPr extends Panel implements View {
                 
                 int count = dao.countTurnOpen(estacion.getEstacionId());
                 if (count > 5) {
-                    Notification.show("ERROR:", "No puede haber mas de 5 turnos abiertos.", Notification.Type.ERROR_MESSAGE);
+                    Notification.show("ERROR:", "No puede haber mas de 5 dias abiertos.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
                 
