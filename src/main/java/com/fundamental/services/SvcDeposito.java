@@ -10,6 +10,7 @@ import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
 import com.sisintegrados.generic.bean.GenericDepositoDet;
 import com.sisintegrados.generic.bean.GenericMedioPago;
+import com.vaadin.data.util.BeanContainer;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Date;
@@ -165,13 +166,15 @@ public class SvcDeposito extends Dao {
         return result;
     }
 
-    public List<GenericBeanMedioPago> getAllMediosPago(boolean includeInactives) {
+    public List<GenericBeanMedioPago> getAllMediosPago(boolean includeInactives, int idpais) {
         List<GenericBeanMedioPago> result = new ArrayList();
         try {
             String query = (includeInactives) ? "" : " AND m.estado = 'A' ";
             query = "SELECT m.mediopago_id, m.nombre "
                     + "FROM mediopago m, pais p "
                     + "WHERE m.pais_id = p.pais_id "
+                    + " and and p.PAIS_ID = " + idpais
+                    + " and m.tipo = 2 "
                     + query
                     + " ORDER BY m.nombre";
             pst = getConnection().prepareStatement(query);
@@ -191,4 +194,131 @@ public class SvcDeposito extends Dao {
         }
         return result;
     }
+
+    public double getTasaCambio(int paisid) {
+        double result = 0;
+        String query = "";
+        try {
+
+            query = "select TASA FROM TASACAMBIO "
+                    + "WHERE "
+                    + "PAIS_ID = " + paisid;
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+
+            while (rst.next()) {
+                result = rst.getDouble(1);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
+    public int deleteDepositoByDate(int estacionid, Date dia) {
+        int respuesta = 0;
+        try {
+            miQuery = "delete DEPOSITO_DET "
+                    + "    where ESTACION_ID = ? "
+                    + "    and FECHA = ? ";
+            pst = getConnection().prepareStatement(miQuery);
+
+            java.sql.Date sqlDateIni = new java.sql.Date(dia.getTime());
+
+            /*Envio parametros necesarios*/
+            pst.setString(1, String.valueOf(estacionid));
+            pst.setDate(2, sqlDateIni);
+            ResultSet rst = pst.executeQuery();
+            closePst();
+            System.out.println("delete exitoso");
+            respuesta = 1;
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        
+        return respuesta;
+
+    }
+
+    public BeanContainer<Integer, GenericMedioPago> insertDepositoDetalle(BeanContainer<Integer, GenericMedioPago> bcrDeposito, double tasacambio, int estacionid, Date fechaCierre) {
+        int respuesta = 0;
+        String query = "";
+        System.out.println("ingresa metodo guardar");
+        java.sql.Date sqlDateIni = new java.sql.Date(fechaCierre.getTime());
+        try {
+
+            for (Integer itemId : bcrDeposito.getItemIds()) {
+                //pst = getConnection().prepareStatement(query);
+                double montoDolar = 0;
+                double totalDolar = 0;
+                montoDolar = bcrDeposito.getItem(itemId).getBean().getMontousd();
+                if(montoDolar!=0){
+                    totalDolar = montoDolar * tasacambio;
+                    bcrDeposito.getItem(itemId).getBean().setMonto(totalDolar);
+                }
+                query = "INSERT INTO DEPOSITO_DET (IDDEPOSITODET, FECHA, ESTACION_ID, MEDIOPAGO_ID, NOBOLETA, COMENTARIOS, MONTO, MONTOUSD) "
+                        + " VALUES (seq_deposito_det.nextval, "
+                        + " to_date('" +sqlDateIni+ "', 'yyyy-mm-dd'),"
+                        //+ sqlDateIni + ","
+                        + estacionid + ","
+                        + bcrDeposito.getItem(itemId).getBean().getMediopago().getMediopagoid() + ","
+                        + "'" + bcrDeposito.getItem(itemId).getBean().getNoboleta() + "',"
+                        + "'" + bcrDeposito.getItem(itemId).getBean().getComentarios() + "',"
+                        + bcrDeposito.getItem(itemId).getBean().getMonto() + ","
+                        + montoDolar + ")";
+                
+                System.out.println("query --->" + query);
+
+                pst = getConnection().prepareStatement(query);
+                pst.executeUpdate();
+            }
+            respuesta = 1;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            respuesta = 0;
+        }
+
+        return bcrDeposito;
+    }
+    
+    public List<GenericBeanMedioPago> getAllMediosPago(boolean includeInactives) {
+        List<GenericBeanMedioPago> result = new ArrayList();
+        try {
+            String query = (includeInactives) ? "" : " AND m.estado = 'A' ";
+            query = "SELECT m.mediopago_id, m.nombre "
+                    + "FROM mediopago m, pais p "
+                    + "WHERE m.pais_id = p.pais_id "
+                    //+ " and and p.PAIS_ID = " + idpais
+                    + " and m.tipo = 2 "
+                    + query
+                    + " ORDER BY m.nombre";
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            GenericBeanMedioPago mediopago;
+            while (rst.next()) {
+                mediopago = new GenericBeanMedioPago(rst.getInt(1), rst.getString(2));
+                result.add(mediopago);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
 }
