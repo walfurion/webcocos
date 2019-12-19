@@ -388,7 +388,8 @@ public class PrCierreDia extends Panel implements View {
             if (dia != null && dia.getEstadoId() != null && dia.getEstadoId() == 2) { //cerrado
                 List<RecepcionInventario> listRec = service.getRecepcion(estacion.getPaisId(), estacion.getEstacionId(), dfdFecha.getValue());
                 if (!listRec.isEmpty()) {
-                    bcrRecepcion.addAll(listRec);
+                    bcrRecepcion.removeAllItems();
+                    bcrRecepcion.addAll(listRec);     
                     recepcion = bcrRecepcion.getItem(bcrRecepcion.getItemIds().get(0)).getBean();
                     tfdDriver.setValue(recepcion.getPiloto());
                     tfdUnit.setValue(recepcion.getUnidad());

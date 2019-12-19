@@ -503,11 +503,11 @@ public class SvcTurnoCierre extends Dao {
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             while (rst.next()) {
-                RecepcionInventario rec = new RecepcionInventario();
-                rec.setInvrecepcion_id(rst.getInt(1));
-                rec.setPiloto(rst.getString(2));
-                rec.setUnidad(rst.getString(3));
-                rec.setFactura(rst.getString(4));
+                RecepcionInventario rec = new RecepcionInventario(rst.getInt(1),null,0,0,rst.getString(2),rst.getString(3),rst.getString(4));
+//                rec.setInvrecepcion_id(rst.getInt(1));
+//                rec.setPiloto(rst.getString(2));
+//                rec.setUnidad(rst.getString(3));
+//                rec.setFactura(rst.getString(4));
                 result.add(rec);
             }
         } catch (Exception exc) {
