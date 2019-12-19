@@ -1381,13 +1381,14 @@ public class ExcelGeneratorCrlMediosPago {
         return workbook;
     }
 
-//    private void setBordersToMergedCells(XSSFSheet sheet) {
-//        int numMerged = sheet.getNumMergedRegions();
-//        for (int i = 0; i < numMerged; i++) {
-//            CellRangeAddress mergedRegions = sheet.getMergedRegion(i);
-//            RegionUtil.setBorderLeft(CellStyle.BORDER_THIN, mergedRegions, sheet);
-//            RegionUtil.setBorderRight(CellStyle.BORDER_THIN, mergedRegions, sheet);
-//            RegionUtil.setBorderTop(CellStyle.BORDER_THIN, mergedRegions, sheet);
-//            RegionUtil.setBorderBottom(CellStyle.BORDER_THIN, mergedRegions, sheet);
-//        }
+private void setBordersToMergedCells(XSSFSheet sheet) {
+        int numMerged = sheet.getNumMergedRegions();
+        for (int i = 0; i < numMerged; i++) {
+            CellRangeAddress mergedRegions = sheet.getMergedRegion(i);
+            RegionUtil.setBorderLeft(CellStyle.BORDER_THIN, mergedRegions, sheet);
+            RegionUtil.setBorderRight(CellStyle.BORDER_THIN, mergedRegions, sheet);
+            RegionUtil.setBorderTop(CellStyle.BORDER_THIN, mergedRegions, sheet);
+            RegionUtil.setBorderBottom(CellStyle.BORDER_THIN, mergedRegions, sheet);
+        }
+    }
 }

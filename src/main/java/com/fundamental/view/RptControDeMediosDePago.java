@@ -36,8 +36,12 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import com.fundamental.services.SvcReporteControlMediosPago;
+import com.fundamental.utils.AdvancedFileDownloader;
+import com.fundamental.utils.AdvancedFileDownloader.AdvancedDownloaderListener;
+import com.fundamental.utils.AdvancedFileDownloader.DownloaderEvent;
 import com.fundamental.utils.ExcelGeneratorCrlMediosPago;
 import com.fundamental.utils.XlsxReportGenerator;
+import com.fundamental.utils.Zip;
 import com.sisintegrados.generic.bean.GenericEstacion;
 import com.sisintegrados.generic.bean.GenericRprControlMediosPago;
 import com.vaadin.data.util.BeanContainer;
@@ -62,6 +66,8 @@ import java.util.Locale;
 import com.sisintegrados.generic.bean.Estacion;
 import com.vaadin.demo.dashboard.view.DashboardViewType;
 import com.vaadin.ui.UI;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -86,7 +92,7 @@ public class RptControDeMediosDePago extends Panel implements View {
     SvcReporteControlMediosPago SvcReporteControlMediosPago = new SvcReporteControlMediosPago();
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
     Button btnGenerar = new Button("Generar Reporte");
-    Button btnExportar = new Button("Exportar a Excel", FontAwesome.EDIT);
+    Button btnExportar2 = new Button("Exportar a Excel", FontAwesome.EDIT);
     Button btnSelectAll;
     Button btnUnselectAll;
 
@@ -97,6 +103,10 @@ public class RptControDeMediosDePago extends Panel implements View {
     Grid grid;
     ExcelGeneratorCrlMediosPago excel = new ExcelGeneratorCrlMediosPago();
     String Estacion = "";
+    final AdvancedFileDownloader downloader = new AdvancedFileDownloader();
+    final AtomicBoolean makeZip = new AtomicBoolean(false);
+    final AtomicReference<Object> name = new AtomicReference<Object>();
+    SvcMtd svcmtd = new SvcMtd();
 
     public RptControDeMediosDePago() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
@@ -107,15 +117,10 @@ public class RptControDeMediosDePago extends Panel implements View {
         super.setContent(components.createVertical(Constant.styleTransactions, "100%", false, true, true, new Component[]{buildForm()}));
         checkestacionesm.setBeanIdProperty("estacionid");
         cargaInfoSesion();
-
-        //Para exportar
-        StreamResource sr = GenerarExcel();
-        FileDownloader fileDownloader = new FileDownloader(sr);
-        fileDownloader.extend(btnExportar);
     }
 
     private Component buildForm() {
-        btnExportar.setEnabled(false);
+        btnExportar2.setEnabled(false);
         return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), buildTableData(),/*buildToolbar2(),*/ buildButtons()});
     }
 
@@ -154,7 +159,7 @@ public class RptControDeMediosDePago extends Panel implements View {
                     VerticalLayout vl = new VerticalLayout();
                     HorizontalLayout hl = new HorizontalLayout();
                     HorizontalLayout hlroot = new HorizontalLayout();
-                    hlroot.setSpacing(true);
+//                    hlroot.setSpacing(true);
                     hlroot.setResponsive(true);
                     btnSelectAll = new Button("Todas");
                     btnSelectAll.setStyleName(ValoTheme.BUTTON_TINY);
@@ -163,8 +168,8 @@ public class RptControDeMediosDePago extends Panel implements View {
                     btnSelectAll.addClickListener(new Button.ClickListener() {
                         @Override
                         public void buttonClick(Button.ClickEvent event) {
-                            optStation.select(361);
-                            optStation.select(checkestacionesm.getIdByIndex(2));
+//                            optStation.select(361);
+//                            optStation.select(checkestacionesm.getIdByIndex(2));
                             for (int i = 0; i < optStation.size(); i++) {
                                 optStation.select(checkestacionesm.getIdByIndex(i));
                             }
@@ -177,8 +182,8 @@ public class RptControDeMediosDePago extends Panel implements View {
                     btnUnselectAll.addClickListener(new Button.ClickListener() {
                         @Override
                         public void buttonClick(Button.ClickEvent event) {
-                            optStation.select(361);
-                            optStation.select(checkestacionesm.getIdByIndex(2));
+//                            optStation.select(361);
+//                            optStation.select(checkestacionesm.getIdByIndex(2));
                             for (int i = 0; i < optStation.size(); i++) {
                                 optStation.unselect(checkestacionesm.getIdByIndex(i));
                             }
@@ -192,7 +197,7 @@ public class RptControDeMediosDePago extends Panel implements View {
                     lblestacion.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
                     vl.addComponent(lblestacion);
                     optStation = new OptionGroup(null, checkestacionesm);
-                    optStation.setMultiSelect(false);
+                    optStation.setMultiSelect(true);
                     optStation.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
                     vl.addComponent(optStation);
                     for (Integer noid : checkestacionesm.getItemIds()) {
@@ -236,7 +241,6 @@ public class RptControDeMediosDePago extends Panel implements View {
 
     private Component buildToolbar2() {
         toolbarContainerTables = new CssLayout();
-//        return toolbarContainerTables;
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarContainerTables)});
     }
 
@@ -244,7 +248,6 @@ public class RptControDeMediosDePago extends Panel implements View {
 
     private Component buildTableData() {
         toolbarData = new CssLayout();
-//        return toolbarContainerTables;
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarData)});
     }
 
@@ -263,120 +266,150 @@ public class RptControDeMediosDePago extends Panel implements View {
             @Override
             public void buttonClick(final Button.ClickEvent event) {
                 if (cmbPais.getValue() != null && cmbFechaInicio.getValue() != null && cmbFechaFin.getValue() != null && optStation.size() > 0) {
-                    try {
-                        sourceGeneric = new BeanItemContainer<GenericRprControlMediosPago>(GenericRprControlMediosPago.class);
-                        int idEstacion = Integer.parseInt(optStation.getValue().toString());
-                        String paisId = SvcReporteControlMediosPago.getPaisId(idEstacion);
-                        SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), String.valueOf(idEstacion), paisId);
-                        sourceGeneric.addAll(SvcReporteControlMediosPago.getCtlMediosPago());
-                        grid = new Grid(sourceGeneric);
-                        grid.setCaption("Control de medios de pago");
-                        grid.setWidth("1080px");
-                        grid.setContainerDataSource(sourceGeneric);
-                        grid.removeAllColumns();
-                        grid.addColumn("fecha");
-                        grid.addColumn("lote");
-                        grid.addColumn("monto_bruto");
-                        grid.addColumn("comision");
-                        grid.addColumn("monto_neto");
-                        grid.addColumn("comentarios");
-                        Grid.Column fecha = grid.getColumn("fecha");
-                        fecha.setHeaderCaption("Fecha");
-                        Grid.Column lote = grid.getColumn("lote");
-                        lote.setHeaderCaption("Lote");
-                        Grid.Column monto_bruto = grid.getColumn("monto_bruto");
-                        monto_bruto.setHeaderCaption("Monto bruto");
-                        Grid.Column comision = grid.getColumn("comision");
-                        comision.setHeaderCaption("Comision");
-                        Grid.Column monto_neto = grid.getColumn("monto_neto");
-                        monto_neto.setHeaderCaption("Monto neto");
-                        Grid.Column comentarios = grid.getColumn("comentarios");
-                        comentarios.setHeaderCaption("Comentarios");
-                        grid.setColumnOrder("fecha", "lote", "monto_bruto", "comision", "monto_neto", "comentarios");
-                        toolbarData.removeAllComponents();
-                        toolbarData.addComponent(grid);
-                        btnExportar.setEnabled(true);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
+                    if (optStation.getValue() != null) {
+                        try {
+                            sourceGeneric = new BeanItemContainer<GenericRprControlMediosPago>(GenericRprControlMediosPago.class);
+                            String[] Seleccion;
+                            Seleccion = getSeleccion();
+                           for (String string : Seleccion) {
+                                SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim(),"188");
+                                sourceGeneric.addAll(SvcReporteControlMediosPago.getCtlMediosPago());
+                                Estacion = svcmtd.getEstacion(Integer.parseInt(string.trim()));
+                           }
+                            System.out.println("seleccion " + Seleccion.length);
+                            if (Seleccion.length>1) {
+                                name.set("Estaciones_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".zip"));
+                                makeZip.set(true);
+                            } else {
+                                name.set("COCOs_CMDP_" + Estacion.concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx"));
+                                makeZip.set(false);
+                            }
+
+                            grid = new Grid(sourceGeneric);
+                            grid.setWidth("1080px");
+                            grid.removeAllColumns();
+                            grid.addColumn("fecha");
+                            grid.addColumn("lote");
+                            grid.addColumn("monto_bruto");
+                            grid.addColumn("comision");
+                            grid.addColumn("monto_neto");
+                            grid.addColumn("comentarios");
+                            Grid.Column fecha = grid.getColumn("fecha");
+                            fecha.setHeaderCaption("Fecha");
+                            Grid.Column lote = grid.getColumn("lote");
+                            lote.setHeaderCaption("Lote");
+                            Grid.Column monto_bruto = grid.getColumn("monto_bruto");
+                            monto_bruto.setHeaderCaption("Monto bruto");
+                            Grid.Column comision = grid.getColumn("comision");
+                            comision.setHeaderCaption("Comision");
+                            Grid.Column monto_neto = grid.getColumn("monto_neto");
+                            monto_neto.setHeaderCaption("Monto neto");
+                            Grid.Column comentarios = grid.getColumn("comentarios");
+                            comentarios.setHeaderCaption("Comentarios");
+                            grid.setColumnOrder("fecha", "lote", "monto_bruto", "comision", "monto_neto", "comentarios");
+                            toolbarData.removeAllComponents();
+                            toolbarData.addComponent(grid);
+                            btnExportar2.setEnabled(true);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            }
+                        }
+                    } else {
+                        Notification.show("ERROR:", "Debe seleccionar todos los campos necesarios.\n", Notification.Type.ERROR_MESSAGE);
+                        return;
                     }
-                } else {
-                    Notification.show("ERROR:", "Debe seleccionar todos los campos necesarios.\n", Notification.Type.ERROR_MESSAGE);
-                    return;
                 }
-            }
+            });
+
+            btnExportar2.setCaption ("Exportar a Excel");
+            btnExportar2.setStyleName (ValoTheme.BUTTON_PRIMARY);
+            btnExportar2.setIcon (FontAwesome.EDIT);
+            btnExportar2.addClickListener ( new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+          }
         });
 
-        btnExportar.setCaption("Exportar a Excel");
-        btnExportar.setStyleName(ValoTheme.BUTTON_PRIMARY);
-        btnExportar.setIcon(FontAwesome.EDIT);
-        btnExportar.setStyleName(ValoTheme.BUTTON_PRIMARY);
-        btnExportar.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                UI.getCurrent().getNavigator().navigateTo(DashboardViewType.RPT_CONTROLMEDIOPAGO.getViewName());
-                //            /*Devulevo una lista de string seleccionados*/
-                //          String[] Seleccion;
-                //        Seleccion = getSeleccion();
-                //      /*Recorro la seleccion de estaciones para enviarlas al query*/
-                //    for (String string : Seleccion) {
-                //      //*Ejemplo de query */
-                //    System.out.println("Select * from estacion where estacion_id = " + string.trim());
-                // }
-            }
-        });
+            downloader.addAdvancedDownloaderListener (new AdvancedDownloaderListener() {
+                @Override
+                public void beforeDownload(DownloaderEvent downloadEvent) {
+                if (sourceGeneric.size() > 0) {
+                        System.out.println("IMP mery fea " + Estacion);
+                        downloader.setFileDownloadResource(GenerarExcel());
+                    }
+                }
+            });
+            downloader.extend (btnExportar2);
 
-        HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnGenerar, btnExportar});
-
-        footer.setComponentAlignment(btnGenerar, Alignment.TOP_RIGHT);
-        footer.setWidth(
-                100.0f, Sizeable.Unit.PERCENTAGE);
-        return footer;
-    }
+            HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnGenerar, btnExportar2});
+            
+            footer.setComponentAlignment (btnGenerar, Alignment.TOP_RIGHT);
+            footer.setWidth (
+                100.0f, Unit.PERCENTAGE);
+            return footer ;
+        }
 
     private StreamResource GenerarExcel() {
-        StreamResource.StreamSource source = new StreamResource.StreamSource() {
+        StreamResource.StreamSource source = new StreamResource.StreamSource(){
             public InputStream getStream() {
-                ByteArrayOutputStream stream;
+                ByteArrayOutputStream stream = null;
                 InputStream input = null;
-                List<String> tituloscolumnas = new ArrayList<String>();
-                String[] titulos = new String[]{"Fecha", "Lote", "Monto bruto", "Comision", "Monto neto", "Comentarios"};
-                /*como crear un objeto arrylist de tipo string*/
-                ArrayList<String> tituloshoja = new ArrayList<String>();
-                tituloshoja.add("VERSATEC");
-                tituloshoja.add("TC FLOTA BCR");
-                tituloshoja.add("TARJETA BANCO NACIONAL");
-                tituloshoja.add("TARJETA CREDOMATIC");
-                tituloshoja.add("FLEET MAGIC DAVIVIENDA");
-                tituloshoja.add("TARJETA FLEET MAGIC SB");
-                tituloshoja.add("TARJETA BCR");
-                tituloshoja.add("TC FLOTA BAC");
-                tituloshoja.add("UNO PLUS");
-                tituloshoja.add("TC DAVIVIENDA");
-
-                tituloscolumnas = Arrays.asList(titulos);
-
-                XSSFWorkbook workbook = new XSSFWorkbook();
-                /*Generar Reporte en XLS*/
-                workbook = excel.generar(10, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION(ES) " + optStation.getValue().toString(), "Flota BAC", sourceGeneric, tituloshoja);
-
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 try {
-                    workbook.write(bos);
-                } catch (Exception exc) {
-                    try {
-                        bos.close();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
+
+                    String[] Seleccion;
+                    Seleccion = getSeleccion();
+                    /*Recorro la seleccion de estaciones para enviarlas al query*/
+                    List<Object[]> files = new ArrayList<>();
+                    for (String string : Seleccion) {
+                        try {
+                            Object[] f = new Object[2];
+                            sourceGeneric = new BeanItemContainer<GenericRprControlMediosPago>(GenericRprControlMediosPago.class);
+//                            int idEstacion = Integer.parseInt(optStation.getValue().toString());
+//                            String paisId = SvcReporteControlMediosPago.getPaisId(idEstacion);
+                            SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim(), "188");
+                            sourceGeneric.addAll(SvcReporteControlMediosPago.getCtlMediosPago());
+                             System.out.println("sourceGeneric "+sourceGeneric.size());
+                            Estacion = svcmtd.getEstacion(Integer.parseInt(string.trim()));                            
+                            
+                            List<String> tituloscolumnas = new ArrayList<String>();
+                            String[] titulos = new String[]{"Fecha", "Lote", "Monto bruto", "Comision", "Monto neto", "Comentarios"};
+
+                            tituloscolumnas = Arrays.asList(titulos);
+
+//                            XSSFWorkbook workbook = new XSSFWorkbook();
+                            /*Generar Reporte en XLS*/
+  //                          System.out.println("ESTACION " + Estacion);
+                            XSSFWorkbook workbook = excel.generar(10, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION " + Estacion, "RCMD", sourceGeneric, null);
+
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                            try {
+                                workbook.write(bos);
+                            } catch (Exception exc) {
+                                bos.close();
+                            }
+                            String nameFile = "COCOs_CMDP_" + Estacion.concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
+                            f[0] = nameFile;
+                            f[1] = bos;
+                            files.add(f);
+
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
                     }
-                    exc.printStackTrace();
+                    if (makeZip.get()) {
+                        Zip zip = new Zip();
+                        input = zip.makeZip("Estaciones", files);
+                    } else {
+                        stream = (ByteArrayOutputStream) files.get(0)[10];
+                        input = new ByteArrayInputStream(stream.toByteArray());
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-                stream = bos;
-                input = new ByteArrayInputStream(stream.toByteArray());
                 return input;
             }
         };
-        String fileName = "COCOs_CrtMediosPagonew_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
-        StreamResource resource = new StreamResource(source, fileName);
+        StreamResource resource = new StreamResource(source, (String) name.get());
         return resource;
     }
 
