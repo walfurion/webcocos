@@ -216,6 +216,7 @@ public class PrTurnoCierre extends Panel implements View {
     /*Detalle TC ASG*/
     SvcDetalleTcClientes dao = new SvcDetalleTcClientes();
     HorizontalLayout hltables = new HorizontalLayout();
+    HorizontalLayout hltables2 = new HorizontalLayout();
     BeanItemContainer<Estacion> ContEstacion = new BeanItemContainer<Estacion>(Estacion.class);
     BeanItemContainer<GenericBeanMedioPago> ContMediosPago = new BeanItemContainer<GenericBeanMedioPago>(GenericBeanMedioPago.class);
     BeanItemContainer<GenericLote> ContLote = new BeanItemContainer<GenericLote>(GenericLote.class);
@@ -296,7 +297,7 @@ public class PrTurnoCierre extends Panel implements View {
         buildTableFMScottia();
         buildTableBCR();
         buildTableCredomatic();
-       // buildTableDavivienda();
+        buildTableDavivienda();
 
         /*FIN ASG*/
         buildFilters();
@@ -411,7 +412,7 @@ public class PrTurnoCierre extends Panel implements View {
             btndavivienda.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btndavivienda.addStyleName(ValoTheme.BUTTON_SMALL);
             btndavivienda.addClickListener((final Button.ClickEvent event) -> {
-                formDetalleCliDavivienda(estacion, symCurrency, pais.getPaisId());
+                formDetalleDavivienda(estacion, symCurrency, pais.getPaisId());
             });
 
             btnfmdavivienda = new Button("FM DAVIVIENDA", FontAwesome.PLUS);
@@ -440,11 +441,20 @@ public class PrTurnoCierre extends Panel implements View {
 
         public SectionPanelTablesDet(String caption) {
             setCaption(caption);
+            VerticalLayout vl = new VerticalLayout();
+
             hltables.setSizeFull();
             hltables.setMargin(true);
             hltables.setSpacing(true);
             hltables.setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
-            setContent(hltables);
+            hltables2.setSizeFull();
+            hltables2.setMargin(true);
+            hltables2.setSpacing(true);
+            hltables2.setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
+            
+            vl.addComponent(hltables);
+            vl.addComponent(hltables2);
+            setContent(vl);
         }
     }
 
@@ -495,7 +505,7 @@ public class PrTurnoCierre extends Panel implements View {
         }
     }
 
-        /*Metodo Llama Forma DAVIVIENDA*///JLOPEZ
+    /*Metodo Llama Forma DAVIVIENDA*///JLOPEZ
     private void formDetalleDavivienda(Estacion idestacion, String simboloMoneda, Integer idpais) {
         if (cbxTurno.getValue() != null) {
             formDetalleDavivienda = new FormDetalleDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavivienda, turno);
@@ -506,6 +516,7 @@ public class PrTurnoCierre extends Panel implements View {
             formDetalleDavivienda.focus();
         }
     }
+
     /*ASG DETALLE CLIENTES*/
     public void updateTableFooterDetaCliFm() {
         totFMDavi = 0D;
@@ -513,7 +524,7 @@ public class PrTurnoCierre extends Panel implements View {
         totBCR = 0D;
         totCredomatic = 0D;
         totDavivienda = 0D;
-        
+
         /*Footer para FM Davivienda*/
         for (Integer itemId : bcrDetalleCliDavi.getItemIds()) {
             totFMDavi += bcrDetalleCliDavi.getItem(itemId).getBean().getVenta();
@@ -545,6 +556,14 @@ public class PrTurnoCierre extends Panel implements View {
         tableCredomatic.setFooterVisible(true);
         tableCredomatic.setColumnFooter("comentario", "Total:");
         tableCredomatic.setColumnFooter("comentario", symCurrency + numberFmt.format(totCredomatic).trim());
+
+        /*Footer para FM DAVIVIENDA*/
+        for (Integer itemId : bcrDetalleCliDavivienda.getItemIds()) {
+            totCredomatic += bcrDetalleCliDavivienda.getItem(itemId).getBean().getVenta();
+        }
+        tableDavivienda.setFooterVisible(true);
+        tableDavivienda.setColumnFooter("comentario", "Total:");
+        tableDavivienda.setColumnFooter("comentario", symCurrency + numberFmt.format(totDavivienda).trim());
     }
 
     public boolean validaTotalMedioPago(Integer mediopagoid, Double total) {
@@ -575,6 +594,7 @@ public class PrTurnoCierre extends Panel implements View {
         bcrDetalleCliScott.setBeanIdProperty("iddet");
         bcrDetalleCliBCR.setBeanIdProperty("iddet");
         bcrDetalleCliCredomatic.setBeanIdProperty("iddet");
+        bcrDetalleCliDavivienda.setBeanIdProperty("iddet");
 
         /*FIN ASG*/
         SvcTurnoCierre service = new SvcTurnoCierre();
@@ -710,6 +730,7 @@ public class PrTurnoCierre extends Panel implements View {
                     bcrDetalleCliScott.removeAllItems();
                     bcrDetalleCliBCR.removeAllItems();
                     bcrDetalleCliCredomatic.removeAllItems();
+                    bcrDetalleCliDavivienda.removeAllItems();
                     /*FIN ASG*/
                     calcularSumas();
 
@@ -749,6 +770,7 @@ public class PrTurnoCierre extends Panel implements View {
             bcrDetalleCliScott.removeAllItems();
             bcrDetalleCliBCR.removeAllItems();
             bcrDetalleCliCredomatic.removeAllItems();
+            bcrDetalleCliDavivienda.removeAllItems();
             ContEstacion.addAll(dao.getAllEstaciones(true, pais.getPaisId()));
             ContMediosPago.addAll(dao.getAllMediosPago(true, pais.getPaisId()));
             //FM Davivienda  115
@@ -757,6 +779,7 @@ public class PrTurnoCierre extends Panel implements View {
             ContLoteScott.addAll(dao.getAllLotesbyMedioPago(116, turno.getTurnoId()));
             ContLoteBCR.addAll(dao.getAllLotesbyMedioPago(118, turno.getTurnoId()));
             ContLoteCredomatic.addAll(dao.getAllLotesbyMedioPago(107, turno.getTurnoId()));
+            ContLoteDavivienda.addAll(dao.getAllLotesbyMedioPago(123, turno.getTurnoId()));
             ContCliGen.addAll(dao.getAllCustomers(true, estacion.getEstacionId()));
 
             Estacion est = new Estacion();
@@ -765,16 +788,19 @@ public class PrTurnoCierre extends Panel implements View {
             bcrDetalleCliScott.addAll(dao.getDetalleByMedioPago(est.getEstacionId(), turno.getTurnoId(), 116));
             bcrDetalleCliBCR.addAll(dao.getDetalleByMedioPagoForBCR(est.getEstacionId(), turno.getTurnoId(), 118));
             bcrDetalleCliCredomatic.addAll(dao.getDetalleByMedioPagoForBCR(est.getEstacionId(), turno.getTurnoId(), 107));
+            bcrDetalleCliDavivienda.addAll(dao.getDetalleByMedioPagoForBCR(est.getEstacionId(), turno.getTurnoId(), 123));
 
             hltables.removeComponent(tableFMDavivienda);
             hltables.removeComponent(tableFMScott);
             hltables.removeComponent(tableBCR);
             hltables.removeComponent(tableCredomatic);
+            hltables2.removeComponent(tableDavivienda);
 
             hltables.addComponent(tableFMDavivienda);
             hltables.addComponent(tableFMScott);
             hltables.addComponent(tableBCR);
             hltables.addComponent(tableCredomatic);
+            hltables2.addComponent(tableDavivienda);
 
             updateTableFooterDetaCliFm();
         }
@@ -881,6 +907,7 @@ public class PrTurnoCierre extends Panel implements View {
                                         dao.CreaClienteFMScott(turno.getTurnoId(), 116, bcrDetalleCliScott); //FM Scottia
                                         dao.CreaClienteBCR(turno.getTurnoId(), 118, bcrDetalleCliBCR); // BCR
                                         dao.CreaClienteBCR(turno.getTurnoId(), 107, bcrDetalleCliCredomatic); // CREDOMATIC
+                                        dao.CreaClienteBCR(turno.getTurnoId(), 123, bcrDetalleCliDavivienda); // DAVIVIENDA
 
                                     } catch (SQLException ex) {
                                         ex.printStackTrace();
@@ -1360,6 +1387,86 @@ public class PrTurnoCierre extends Panel implements View {
         tableCredomatic.setHeight(200f, Unit.PIXELS);
         tableCredomatic.addStyleName(ValoTheme.TABLE_COMPACT);
         tableCredomatic.addStyleName(ValoTheme.TABLE_SMALL);
+    }
+
+    private void buildTableDavivienda() {
+        tableDavivienda.setCaption("Detalle Clientes Davivieda:");
+        tableDavivienda.setContainerDataSource(bcrDetalleCliDavivienda);
+        tableDavivienda.setImmediate(true);
+        tableDavivienda.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
+                ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
+                cmbEstacion.setReadOnly(true);
+                cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbEstacion.setItemCaptionPropertyId("nombre");
+                cmbEstacion.setNullSelectionAllowed(false);
+                cmbEstacion.addStyleName(ValoTheme.BUTTON_TINY);
+                cmbEstacion.setPropertyDataSource(pro);
+                cmbEstacion.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbEstacion.setWidth("250px");
+                return cmbEstacion;
+            }
+        });
+
+        tableDavivienda.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
+                ComboBox cmbMedio = new ComboBox(null, ContMediosPago);
+                cmbMedio.setReadOnly(true);
+                cmbMedio.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbMedio.setItemCaptionPropertyId("nombre");
+                cmbMedio.setNullSelectionAllowed(false);
+                cmbMedio.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbMedio.setPropertyDataSource(pro);
+                cmbMedio.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbMedio.setWidth("125px");
+                return cmbMedio;
+            }
+        });
+
+        tableDavivienda.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
+                ComboBox cmbLote = new ComboBox(null, ContLoteDavivienda);
+                cmbLote.setReadOnly(true);
+                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbLote.setItemCaptionPropertyId("lote");
+                cmbLote.setNullSelectionAllowed(false);
+                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbLote.setPropertyDataSource(pro);
+                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
+                cmbLote.setWidth("85px");
+                return cmbLote;
+            }
+        });
+
+        tableDavivienda.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
+                ComboBox cmbCliente = new ComboBox(null, ContCliGen);
+                cmbCliente.setReadOnly(true);
+                cmbCliente.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbCliente.setItemCaptionPropertyId("nombre");
+                cmbCliente.setNullSelectionAllowed(false);
+                cmbCliente.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbCliente.setPropertyDataSource(pro);
+                cmbCliente.setFilteringMode(FilteringMode.CONTAINS);
+                cmbCliente.setWidth("85px");
+                return cmbCliente;
+            }
+        });
+
+        tableDavivienda.setVisibleColumns(new Object[]{"collote", "colcliente", "venta", "comentario"});
+        tableDavivienda.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
+        tableDavivienda.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableDavivienda.setHeight(200f, Unit.PIXELS);
+        tableDavivienda.addStyleName(ValoTheme.TABLE_COMPACT);
+        tableDavivienda.addStyleName(ValoTheme.TABLE_SMALL);
     }
 
     private HorizontalLayout buildDetalleMontos() {

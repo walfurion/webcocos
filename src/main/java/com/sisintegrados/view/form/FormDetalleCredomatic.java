@@ -117,7 +117,7 @@ public class FormDetalleCredomatic extends Window {
 
     private Component buildFields() {
         HorizontalLayout hl = new HorizontalLayout();
-        hl.setCaption("Clientes BCR");
+        hl.setCaption("Clientes Credomatic");
         hl.setIcon(FontAwesome.FLAG);
         hl.setSpacing(true);
         buildTableBCR();
