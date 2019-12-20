@@ -5,9 +5,6 @@
  */
 package com.sisintegrados.view.form;
 
-import com.fundamental.model.Cliente;
-import com.fundamental.model.Lubricanteprecio;
-import com.fundamental.model.Mediopago;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoProducto;
@@ -16,7 +13,6 @@ import com.fundamental.services.SvcCuadre;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
 import com.sisintegrados.generic.bean.GenericProduct;
-import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
@@ -64,11 +60,7 @@ public class FormDetalleLubricantes extends Window {
     Table tblLubricantes;
     BeanContainer<Integer, DtoProducto> bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
     BeanContainer<Integer, Producto> bcrProducto = new BeanContainer<Integer, Producto>(Producto.class);
-
-//    BeanContainer<Integer, GenericProduct> bcrLubs = new BeanContainer<Integer, GenericProduct>(GenericProduct.class);
-    //  BeanContainer<Integer, GenericProduct> bcrProducto = new BeanContainer<Integer, GenericProduct>(GenericProduct.class);
     Container contCustomerPrepaid = new ListContainer<>(Producto.class, new ArrayList());
-    // BeanContainer<Integer, Mediopago> bcrMediopago = new BeanContainer<Integer, Mediopago>(Mediopago.class);
     List<DtoProducto> listLubs = new ArrayList();
     Utils utils = new Utils();
     SvcCuadre dao = new SvcCuadre();
@@ -84,12 +76,10 @@ public class FormDetalleLubricantes extends Window {
     Date fechaQuery;
     
     SvcCuadre daoDispInve = new SvcCuadre();
-    //DateField fecha = new DateField("Fecha");
 DateField dfdFecha = new DateField("Fecha:");
     int tmpInt;
     int tmpIntUno;
     int tmpIntNoUno;
-    // Container contLubs = new ListContainer<>(Producto.class, new ArrayList());
     Container contLubs = new ListContainer<>(GenericProduct.class, new ArrayList());
     SvcCuadre service = new SvcCuadre();
 
@@ -109,7 +99,6 @@ DateField dfdFecha = new DateField("Fecha:");
 
         VerticalLayout content = new VerticalLayout();
         content.setSizeFull();
-//        content.setMargin(new MarginInfo(true, false, false, false));
         setContent(content);
 
         TabSheet detailsWrapper = new TabSheet();
@@ -120,7 +109,6 @@ DateField dfdFecha = new DateField("Fecha:");
         content.addComponent(detailsWrapper);
         content.setExpandRatio(detailsWrapper, 1f);
         if (idestacion != null) {
-            //    contCustomerPrepaid = new ListContainer<Producto>(Producto.class, dao.getLubricantsByCountryStation(true, idestacion, idpais));
             contLubs = new ListContainer<Producto>(Producto.class, service.getLubricantsGenericsCountryStation(idpais, idestacion));
 
         }
@@ -133,7 +121,6 @@ DateField dfdFecha = new DateField("Fecha:");
         btnasignar.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnasignar.addStyleName(ValoTheme.BUTTON_SMALL);
         btnasignar.addClickListener((Button.ClickListener) event -> {
-//            bcrPrepaid.removeAllItems();
             DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
             dtoprod.setValor(0D);
             listLubs.add(dtoprod);
