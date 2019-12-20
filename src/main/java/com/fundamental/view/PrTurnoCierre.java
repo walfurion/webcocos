@@ -29,6 +29,7 @@ import com.sisintegrados.view.form.FormDetalleCliDavivienda;
 import com.sisintegrados.view.form.FormDetalleCliScottia;
 import com.sisintegrados.view.form.FormDetalleCredomatic;
 import com.sisintegrados.view.form.FormDetalleDavivienda;
+import com.sisintegrados.view.form.FormDetalleNacional;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -203,6 +204,16 @@ public class PrTurnoCierre extends Panel implements View {
             return super.formatPropertyValue(rowId, colId, property);
         }
     };
+    
+    Table tableNacional = new Table() {
+        @Override
+        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
+            if (colId.equals("venta")) {
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
+            }
+            return super.formatPropertyValue(rowId, colId, property);
+        }
+    };
     /*Fin Detalle ASG*/
 
     BeanContainer<Integer, Arqueocaja> bcrArqueocaja = new BeanContainer<Integer, Arqueocaja>(Arqueocaja.class);
@@ -224,6 +235,7 @@ public class PrTurnoCierre extends Panel implements View {
     BeanItemContainer<GenericLote> ContLoteBCR = new BeanItemContainer<GenericLote>(GenericLote.class);
     BeanItemContainer<GenericLote> ContLoteCredomatic = new BeanItemContainer<GenericLote>(GenericLote.class);
     BeanItemContainer<GenericLote> ContLoteDavivienda = new BeanItemContainer<GenericLote>(GenericLote.class);
+    BeanItemContainer<GenericLote> ContLoteNacional = new BeanItemContainer<GenericLote>(GenericLote.class);
 
     BeanItemContainer<GenericBeanCliente> ContCliGen = new BeanItemContainer<GenericBeanCliente>(GenericBeanCliente.class);
 
@@ -232,6 +244,7 @@ public class PrTurnoCierre extends Panel implements View {
     BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliBCR = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
     BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliCredomatic = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
     BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliDavivienda = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
+    BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliNacional = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
 
     /*Popups Detalle Clientes TC ASG*/
     FormDetalleCliDavivienda formDetalleCliDavivienda;
@@ -239,12 +252,14 @@ public class PrTurnoCierre extends Panel implements View {
     FormDetalleBCR formDetalleBCR;
     FormDetalleCredomatic formDetalleCredomatic;
     FormDetalleDavivienda formDetalleDavivienda;
+    FormDetalleNacional formDetalleNacional;
     //Totales Para Detalles de TC
     Double totFMDavi = 0D;
     Double totFMScott = 0D;
     Double totBCR = 0D;
     Double totCredomatic = 0D;
     Double totDavivienda = 0D;
+    Double totNacional = 0D;
 
     /*FIN DETALLE ASG*/
     Double totalVentas = 0D, totalDinero = 0D;
@@ -391,7 +406,7 @@ public class PrTurnoCierre extends Panel implements View {
             btnbanknac.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btnbanknac.addStyleName(ValoTheme.BUTTON_SMALL);
             btnbanknac.addClickListener((final Button.ClickEvent event) -> {
-//            FormDetalleVenta2.open();
+                formDetalleNacional(estacion, symCurrency, pais.getPaisId());
             });
 
             btnbcr = new Button("BCR", FontAwesome.PLUS);
@@ -516,6 +531,18 @@ public class PrTurnoCierre extends Panel implements View {
             formDetalleDavivienda.focus();
         }
     }
+    
+    /*Metodo Llama Forma NACIONAL*///JLOPEZ
+    private void formDetalleNacional(Estacion idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxTurno.getValue() != null) {
+            formDetalleNacional = new FormDetalleNacional(idestacion, simboloMoneda, idpais, bcrDetalleCliNacional, turno);
+            formDetalleNacional.addCloseListener((e) -> {
+                updateTableFooterDetaCliFm();
+            });
+            getUI().addWindow(formDetalleNacional);
+            formDetalleNacional.focus();
+        }
+    }
 
     /*ASG DETALLE CLIENTES*/
     public void updateTableFooterDetaCliFm() {
@@ -524,6 +551,7 @@ public class PrTurnoCierre extends Panel implements View {
         totBCR = 0D;
         totCredomatic = 0D;
         totDavivienda = 0D;
+        totNacional = 0D;
 
         /*Footer para FM Davivienda*/
         for (Integer itemId : bcrDetalleCliDavi.getItemIds()) {
@@ -564,6 +592,14 @@ public class PrTurnoCierre extends Panel implements View {
         tableDavivienda.setFooterVisible(true);
         tableDavivienda.setColumnFooter("comentario", "Total:");
         tableDavivienda.setColumnFooter("comentario", symCurrency + numberFmt.format(totDavivienda).trim());
+        
+        /*Footer para FM NACIONAL*/
+        for (Integer itemId : bcrDetalleCliNacional.getItemIds()) {
+            totNacional += bcrDetalleCliNacional.getItem(itemId).getBean().getVenta();
+        }
+        tableNacional.setFooterVisible(true);
+        tableNacional.setColumnFooter("comentario", "Total:");
+        tableNacional.setColumnFooter("comentario", symCurrency + numberFmt.format(totNacional).trim());
     }
 
     public boolean validaTotalMedioPago(Integer mediopagoid, Double total) {
@@ -595,6 +631,7 @@ public class PrTurnoCierre extends Panel implements View {
         bcrDetalleCliBCR.setBeanIdProperty("iddet");
         bcrDetalleCliCredomatic.setBeanIdProperty("iddet");
         bcrDetalleCliDavivienda.setBeanIdProperty("iddet");
+        bcrDetalleCliNacional.setBeanIdProperty("iddet");
 
         /*FIN ASG*/
         SvcTurnoCierre service = new SvcTurnoCierre();
@@ -731,6 +768,8 @@ public class PrTurnoCierre extends Panel implements View {
                     bcrDetalleCliBCR.removeAllItems();
                     bcrDetalleCliCredomatic.removeAllItems();
                     bcrDetalleCliDavivienda.removeAllItems();
+                    bcrDetalleCliNacional.removeAllItems();
+                    
                     /*FIN ASG*/
                     calcularSumas();
 
@@ -771,6 +810,8 @@ public class PrTurnoCierre extends Panel implements View {
             bcrDetalleCliBCR.removeAllItems();
             bcrDetalleCliCredomatic.removeAllItems();
             bcrDetalleCliDavivienda.removeAllItems();
+            bcrDetalleCliNacional.removeAllItems();
+            
             ContEstacion.addAll(dao.getAllEstaciones(true, pais.getPaisId()));
             ContMediosPago.addAll(dao.getAllMediosPago(true, pais.getPaisId()));
             //FM Davivienda  115
@@ -780,6 +821,7 @@ public class PrTurnoCierre extends Panel implements View {
             ContLoteBCR.addAll(dao.getAllLotesbyMedioPago(118, turno.getTurnoId()));
             ContLoteCredomatic.addAll(dao.getAllLotesbyMedioPago(107, turno.getTurnoId()));
             ContLoteDavivienda.addAll(dao.getAllLotesbyMedioPago(123, turno.getTurnoId()));
+            ContLoteNacional.addAll(dao.getAllLotesbyMedioPago(7, turno.getTurnoId()));
             ContCliGen.addAll(dao.getAllCustomers(true, estacion.getEstacionId()));
 
             Estacion est = new Estacion();
@@ -789,18 +831,21 @@ public class PrTurnoCierre extends Panel implements View {
             bcrDetalleCliBCR.addAll(dao.getDetalleByMedioPagoForBCR(est.getEstacionId(), turno.getTurnoId(), 118));
             bcrDetalleCliCredomatic.addAll(dao.getDetalleByMedioPagoForBCR(est.getEstacionId(), turno.getTurnoId(), 107));
             bcrDetalleCliDavivienda.addAll(dao.getDetalleByMedioPagoForBCR(est.getEstacionId(), turno.getTurnoId(), 123));
+            bcrDetalleCliNacional.addAll(dao.getDetalleByMedioPagoForBCR(est.getEstacionId(), turno.getTurnoId(), 7));
 
             hltables.removeComponent(tableFMDavivienda);
             hltables.removeComponent(tableFMScott);
             hltables.removeComponent(tableBCR);
             hltables.removeComponent(tableCredomatic);
             hltables2.removeComponent(tableDavivienda);
+            hltables2.removeComponent(tableNacional);
 
             hltables.addComponent(tableFMDavivienda);
             hltables.addComponent(tableFMScott);
             hltables.addComponent(tableBCR);
             hltables.addComponent(tableCredomatic);
             hltables2.addComponent(tableDavivienda);
+            hltables2.addComponent(tableNacional);
 
             updateTableFooterDetaCliFm();
         }
@@ -908,6 +953,7 @@ public class PrTurnoCierre extends Panel implements View {
                                         dao.CreaClienteBCR(turno.getTurnoId(), 118, bcrDetalleCliBCR); // BCR
                                         dao.CreaClienteBCR(turno.getTurnoId(), 107, bcrDetalleCliCredomatic); // CREDOMATIC
                                         dao.CreaClienteBCR(turno.getTurnoId(), 123, bcrDetalleCliDavivienda); // DAVIVIENDA
+                                        dao.CreaClienteBCR(turno.getTurnoId(), 7, bcrDetalleCliNacional); // DAVIVIENDA
 
                                     } catch (SQLException ex) {
                                         ex.printStackTrace();
@@ -1467,6 +1513,86 @@ public class PrTurnoCierre extends Panel implements View {
         tableDavivienda.setHeight(200f, Unit.PIXELS);
         tableDavivienda.addStyleName(ValoTheme.TABLE_COMPACT);
         tableDavivienda.addStyleName(ValoTheme.TABLE_SMALL);
+    }
+    
+    private void buildTableNacional() {
+        tableNacional.setCaption("Detalle Clientes Banco Nacional:");
+        tableNacional.setContainerDataSource(bcrDetalleCliDavivienda);
+        tableNacional.setImmediate(true);
+        tableNacional.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
+                ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
+                cmbEstacion.setReadOnly(true);
+                cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbEstacion.setItemCaptionPropertyId("nombre");
+                cmbEstacion.setNullSelectionAllowed(false);
+                cmbEstacion.addStyleName(ValoTheme.BUTTON_TINY);
+                cmbEstacion.setPropertyDataSource(pro);
+                cmbEstacion.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbEstacion.setWidth("250px");
+                return cmbEstacion;
+            }
+        });
+
+        tableNacional.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
+                ComboBox cmbMedio = new ComboBox(null, ContMediosPago);
+                cmbMedio.setReadOnly(true);
+                cmbMedio.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbMedio.setItemCaptionPropertyId("nombre");
+                cmbMedio.setNullSelectionAllowed(false);
+                cmbMedio.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbMedio.setPropertyDataSource(pro);
+                cmbMedio.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbMedio.setWidth("125px");
+                return cmbMedio;
+            }
+        });
+
+        tableNacional.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
+                ComboBox cmbLote = new ComboBox(null, ContLoteNacional);
+                cmbLote.setReadOnly(true);
+                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbLote.setItemCaptionPropertyId("lote");
+                cmbLote.setNullSelectionAllowed(false);
+                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbLote.setPropertyDataSource(pro);
+                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
+                cmbLote.setWidth("85px");
+                return cmbLote;
+            }
+        });
+
+        tableNacional.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
+                ComboBox cmbCliente = new ComboBox(null, ContCliGen);
+                cmbCliente.setReadOnly(true);
+                cmbCliente.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbCliente.setItemCaptionPropertyId("nombre");
+                cmbCliente.setNullSelectionAllowed(false);
+                cmbCliente.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbCliente.setPropertyDataSource(pro);
+                cmbCliente.setFilteringMode(FilteringMode.CONTAINS);
+                cmbCliente.setWidth("85px");
+                return cmbCliente;
+            }
+        });
+
+        tableNacional.setVisibleColumns(new Object[]{"collote", "colcliente", "venta", "comentario"});
+        tableNacional.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
+        tableNacional.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableNacional.setHeight(200f, Unit.PIXELS);
+        tableNacional.addStyleName(ValoTheme.TABLE_COMPACT);
+        tableNacional.addStyleName(ValoTheme.TABLE_SMALL);
     }
 
     private HorizontalLayout buildDetalleMontos() {
