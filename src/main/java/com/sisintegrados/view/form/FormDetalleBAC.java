@@ -102,7 +102,7 @@ public class FormDetalleBAC extends Window{
             ContLote.addAll(dao.getAllLotesbyMedioPago(115,turno.getTurnoId()));
         }
         detailsWrapper.addComponent(buildFields());
-        content.addComponent(buildButtons());
+//        content.addComponent(buildButtons());
     }
     
     private Component buildFields() {
@@ -115,37 +115,37 @@ public class FormDetalleBAC extends Window{
         return hl;
     }
 
-    private Component buildButtons() {
-        btnasignar = new Button("Agregar");
-        btnasignar.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        btnasignar.addStyleName(ValoTheme.BUTTON_SMALL);
-        btnasignar.addClickListener((Button.ClickListener) event -> {
-            GenericDetalleBCR dtaclie = new GenericDetalleBCR(new Estacion(estacion.getEstacionId(),"",);
-            dtaclie.setVenta(0D);
-            listDetallecli.add(dtaclie);
-            bcrDetalle.addAll(listDetallecli);
-        });
-        btnasignar.focus();
-
-        btnguardar = new Button("Guardar", FontAwesome.SAVE);
-
-        btnguardar.addStyleName(ValoTheme.BUTTON_FRIENDLY);
-        btnguardar.addStyleName(ValoTheme.BUTTON_SMALL);
-        btnguardar.addClickListener((Button.ClickListener) event -> {
-            if (bcrDetalleCliScott.size() <= 0) {
-                bcrDetalleCliScott = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
-            } else {
-                updateTableFooterDetaCli();
-            }
-            close();
-        });
-
-        HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnasignar, btnguardar});
-        footer.setComponentAlignment(btnasignar, Alignment.TOP_RIGHT);
-        if (!btnasignar.isVisible()) {
-            footer.setComponentAlignment(btnguardar, Alignment.TOP_CENTER);
-        }
-        footer.setWidth(100.0f, Sizeable.Unit.PERCENTAGE);
-        return footer;
-    }
+//    private Component buildButtons() {
+//        btnasignar = new Button("Agregar");
+//        btnasignar.addStyleName(ValoTheme.BUTTON_PRIMARY);
+//        btnasignar.addStyleName(ValoTheme.BUTTON_SMALL);
+//        btnasignar.addClickListener((Button.ClickListener) event -> {
+//            GenericDetalleBCR dtaclie = new GenericDetalleBCR(new Estacion(estacion.getEstacionId(),"",);
+//            dtaclie.setVenta(0D);
+//            listDetallecli.add(dtaclie);
+//            bcrDetalle.addAll(listDetallecli);
+//        });
+//        btnasignar.focus();
+//
+//        btnguardar = new Button("Guardar", FontAwesome.SAVE);
+//
+//        btnguardar.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+//        btnguardar.addStyleName(ValoTheme.BUTTON_SMALL);
+//        btnguardar.addClickListener((Button.ClickListener) event -> {
+//            if (bcrDetalleCliScott.size() <= 0) {
+//                bcrDetalleCliScott = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
+//            } else {
+//                updateTableFooterDetaCli();
+//            }
+//            close();
+//        });
+//
+//        HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnasignar, btnguardar});
+//        footer.setComponentAlignment(btnasignar, Alignment.TOP_RIGHT);
+//        if (!btnasignar.isVisible()) {
+//            footer.setComponentAlignment(btnguardar, Alignment.TOP_CENTER);
+//        }
+//        footer.setWidth(100.0f, Sizeable.Unit.PERCENTAGE);
+//        return footer;
+//    }
 }

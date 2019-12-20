@@ -3,8 +3,6 @@ package com.fundamental.view;
 import com.fundamental.model.Dia;
 import com.fundamental.model.Turno;
 import com.fundamental.model.Utils;
-import com.fundamental.services.SvcMedioPago;
-import com.fundamental.services.SvcMtd;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcUsuario;
 import com.fundamental.utils.Constant;
@@ -21,7 +19,6 @@ import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
@@ -33,43 +30,31 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Date;
 import com.fundamental.services.SvcReporteControlMediosPago;
 import com.fundamental.utils.AdvancedFileDownloader;
-import com.fundamental.utils.AdvancedFileDownloader.AdvancedDownloaderListener;
-import com.fundamental.utils.AdvancedFileDownloader.DownloaderEvent;
 import com.fundamental.utils.ExcelGeneratorCrlMediosPago;
-import com.fundamental.utils.XlsxReportGenerator;
 import com.fundamental.utils.Zip;
 import com.sisintegrados.generic.bean.GenericEstacion;
 import com.sisintegrados.generic.bean.GenericRprControlMediosPago;
 import com.vaadin.data.util.BeanContainer;
-import com.vaadin.server.FileDownloader;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.OptionGroup;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import com.sisintegrados.generic.bean.Estacion;
-import com.vaadin.demo.dashboard.view.DashboardViewType;
-import com.vaadin.ui.UI;
+import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.ui.renderers.Renderer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC;
-import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
@@ -92,7 +77,7 @@ public class RptControDeMediosDePago extends Panel implements View {
     SvcReporteControlMediosPago SvcReporteControlMediosPago = new SvcReporteControlMediosPago();
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
     Button btnGenerar = new Button("Generar Reporte");
-    Button btnExportar2 = new Button("Exportar a Excel", FontAwesome.EDIT);
+    Button btnExportar = new Button("Exportar a Excel", FontAwesome.EDIT);
     Button btnSelectAll;
     Button btnUnselectAll;
 
@@ -103,10 +88,12 @@ public class RptControDeMediosDePago extends Panel implements View {
     Grid grid;
     ExcelGeneratorCrlMediosPago excel = new ExcelGeneratorCrlMediosPago();
     String Estacion = "";
+    Integer idEstacion;
+    String paisId;
+    //Para exportar
     final AdvancedFileDownloader downloader = new AdvancedFileDownloader();
     final AtomicBoolean makeZip = new AtomicBoolean(false);
     final AtomicReference<Object> name = new AtomicReference<Object>();
-    SvcMtd svcmtd = new SvcMtd();
 
     public RptControDeMediosDePago() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
@@ -120,7 +107,7 @@ public class RptControDeMediosDePago extends Panel implements View {
     }
 
     private Component buildForm() {
-        btnExportar2.setEnabled(false);
+        btnExportar.setEnabled(false);
         return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), buildTableData(),/*buildToolbar2(),*/ buildButtons()});
     }
 
@@ -159,7 +146,7 @@ public class RptControDeMediosDePago extends Panel implements View {
                     VerticalLayout vl = new VerticalLayout();
                     HorizontalLayout hl = new HorizontalLayout();
                     HorizontalLayout hlroot = new HorizontalLayout();
-//                    hlroot.setSpacing(true);
+                    hlroot.setSpacing(true);
                     hlroot.setResponsive(true);
                     btnSelectAll = new Button("Todas");
                     btnSelectAll.setStyleName(ValoTheme.BUTTON_TINY);
@@ -241,6 +228,7 @@ public class RptControDeMediosDePago extends Panel implements View {
 
     private Component buildToolbar2() {
         toolbarContainerTables = new CssLayout();
+//        return toolbarContainerTables;
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarContainerTables)});
     }
 
@@ -248,6 +236,7 @@ public class RptControDeMediosDePago extends Panel implements View {
 
     private Component buildTableData() {
         toolbarData = new CssLayout();
+//        return toolbarContainerTables;
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarData)});
     }
 
@@ -271,22 +260,25 @@ public class RptControDeMediosDePago extends Panel implements View {
                             sourceGeneric = new BeanItemContainer<GenericRprControlMediosPago>(GenericRprControlMediosPago.class);
                             String[] Seleccion;
                             Seleccion = getSeleccion();
-                           for (String string : Seleccion) {
-                                SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim(),"188");
+                            for (String string : Seleccion) {
+                                paisId = SvcReporteControlMediosPago.getPaisId(Integer.parseInt(string.trim()));
+                                SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim(), paisId);
                                 sourceGeneric.addAll(SvcReporteControlMediosPago.getCtlMediosPago());
-                                Estacion = svcmtd.getEstacion(Integer.parseInt(string.trim()));
-                           }
+                                Estacion = SvcReporteControlMediosPago.getEstacion(Integer.parseInt(string.trim()));
+                            }
                             System.out.println("seleccion " + Seleccion.length);
-                            if (Seleccion.length>1) {
+                            if (Seleccion.length > 1) {
                                 name.set("Estaciones_".concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".zip"));
                                 makeZip.set(true);
                             } else {
-                                name.set("COCOs_CMDP_" + Estacion.concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx"));
+                                name.set("COCOs_CTRL_M_PAGOS_" + Estacion.concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx"));
                                 makeZip.set(false);
                             }
 
+                            System.out.println("nombre " + name.get() + " " + makeZip.get());
                             grid = new Grid(sourceGeneric);
                             grid.setWidth("1080px");
+                            grid.setContainerDataSource(sourceGeneric);
                             grid.removeAllColumns();
                             grid.addColumn("fecha");
                             grid.addColumn("lote");
@@ -296,6 +288,7 @@ public class RptControDeMediosDePago extends Panel implements View {
                             grid.addColumn("comentarios");
                             Grid.Column fecha = grid.getColumn("fecha");
                             fecha.setHeaderCaption("Fecha");
+                            fecha.setRenderer((Renderer) new DateRenderer("%1$td/%1$tm/%1$tY"));
                             Grid.Column lote = grid.getColumn("lote");
                             lote.setHeaderCaption("Lote");
                             Grid.Column monto_bruto = grid.getColumn("monto_bruto");
@@ -309,77 +302,90 @@ public class RptControDeMediosDePago extends Panel implements View {
                             grid.setColumnOrder("fecha", "lote", "monto_bruto", "comision", "monto_neto", "comentarios");
                             toolbarData.removeAllComponents();
                             toolbarData.addComponent(grid);
-                            btnExportar2.setEnabled(true);
+                            btnExportar.setEnabled(true);
                         } catch (Exception ex) {
+                            System.out.println("error " + ex.getMessage());
                             ex.printStackTrace();
-                            }
                         }
-                    } else {
-                        Notification.show("ERROR:", "Debe seleccionar todos los campos necesarios.\n", Notification.Type.ERROR_MESSAGE);
-                        return;
                     }
+                } else {
+                    Notification.show("ERROR:", "Debe seleccionar todos los campos necesarios.\n", Notification.Type.ERROR_MESSAGE);
+                    return;
                 }
-            });
-
-            btnExportar2.setCaption ("Exportar a Excel");
-            btnExportar2.setStyleName (ValoTheme.BUTTON_PRIMARY);
-            btnExportar2.setIcon (FontAwesome.EDIT);
-            btnExportar2.addClickListener ( new Button.ClickListener() {
-                @Override
-                public void buttonClick(Button.ClickEvent event) {
-          }
+            }
         });
 
-            downloader.addAdvancedDownloaderListener (new AdvancedDownloaderListener() {
-                @Override
-                public void beforeDownload(DownloaderEvent downloadEvent) {
-                if (sourceGeneric.size() > 0) {
-                        System.out.println("IMP mery fea " + Estacion);
-                        downloader.setFileDownloadResource(GenerarExcel());
-                    }
-                }
-            });
-            downloader.extend (btnExportar2);
+        btnExportar.setCaption("Exportar a Excel");
+        btnExportar.setStyleName(ValoTheme.BUTTON_PRIMARY);
+        btnExportar.setIcon(FontAwesome.EDIT);
+        btnExportar.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+//                UI.getCurrent().getNavigator().navigateTo(DashboardViewType.RPT_MTD.getViewName());
+//                //                getUI().getPage().open(resource, "_blank", false);
+            }
+        });
 
-            HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnGenerar, btnExportar2});
-            
-            footer.setComponentAlignment (btnGenerar, Alignment.TOP_RIGHT);
-            footer.setWidth (
-                100.0f, Unit.PERCENTAGE);
-            return footer ;
-        }
+        downloader.addAdvancedDownloaderListener(new AdvancedFileDownloader.AdvancedDownloaderListener() {
+            @Override
+            public void beforeDownload(AdvancedFileDownloader.DownloaderEvent downloadEvent) {
+                if (sourceGeneric.size() > 0) {
+                    System.out.println("IMP " + Estacion);
+                    downloader.setFileDownloadResource(GenerarExcel());
+                }
+            }
+        });
+        downloader.extend(btnExportar);
+
+        HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnGenerar, btnExportar});
+
+        footer.setComponentAlignment(btnGenerar, Alignment.TOP_RIGHT);
+        footer.setWidth(
+                100.0f, Sizeable.Unit.PERCENTAGE);
+        return footer;
+    }
 
     private StreamResource GenerarExcel() {
-        StreamResource.StreamSource source = new StreamResource.StreamSource(){
+        StreamResource.StreamSource source = new StreamResource.StreamSource() {
             public InputStream getStream() {
-                ByteArrayOutputStream stream = null;
+                ByteArrayOutputStream stream;
                 InputStream input = null;
                 try {
 
                     String[] Seleccion;
                     Seleccion = getSeleccion();
+
                     /*Recorro la seleccion de estaciones para enviarlas al query*/
                     List<Object[]> files = new ArrayList<>();
                     for (String string : Seleccion) {
                         try {
                             Object[] f = new Object[2];
                             sourceGeneric = new BeanItemContainer<GenericRprControlMediosPago>(GenericRprControlMediosPago.class);
-//                            int idEstacion = Integer.parseInt(optStation.getValue().toString());
-//                            String paisId = SvcReporteControlMediosPago.getPaisId(idEstacion);
-                            SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim(), "188");
+                            paisId = SvcReporteControlMediosPago.getPaisId(Integer.parseInt(string.trim()));
+                            SvcReporteControlMediosPago.generar_datacrt(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim(), paisId);
                             sourceGeneric.addAll(SvcReporteControlMediosPago.getCtlMediosPago());
-                             System.out.println("sourceGeneric "+sourceGeneric.size());
-                            Estacion = svcmtd.getEstacion(Integer.parseInt(string.trim()));                            
-                            
+                            Estacion = SvcReporteControlMediosPago.getEstacion(Integer.parseInt(string.trim()));
+
                             List<String> tituloscolumnas = new ArrayList<String>();
                             String[] titulos = new String[]{"Fecha", "Lote", "Monto bruto", "Comision", "Monto neto", "Comentarios"};
+                            /*como crear un objeto arrylist de tipo string*/
+                            ArrayList<String> tituloshoja = new ArrayList<String>();
+                            tituloshoja.add("VERSATEC");
+                            tituloshoja.add("TC FLOTA BCR");
+                            tituloshoja.add("TARJETA BANCO NACIONAL");
+                            tituloshoja.add("TARJETA CREDOMATIC");
+                            tituloshoja.add("FLEET MAGIC DAVIVIENDA");
+                            tituloshoja.add("TARJETA FLEET MAGIC SB");
+                            tituloshoja.add("TARJETA BCR");
+                            tituloshoja.add("TC FLOTA BAC");
+                            tituloshoja.add("UNO PLUS");
+                            tituloshoja.add("TC DAVIVIENDA");
 
                             tituloscolumnas = Arrays.asList(titulos);
 
-//                            XSSFWorkbook workbook = new XSSFWorkbook();
+                            XSSFWorkbook workbook = new XSSFWorkbook();
                             /*Generar Reporte en XLS*/
-  //                          System.out.println("ESTACION " + Estacion);
-                            XSSFWorkbook workbook = excel.generar(10, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION " + Estacion, "RCMD", sourceGeneric, null);
+                            workbook = excel.generar(10, tituloscolumnas.size(), tituloscolumnas, "UNO-PETROL", "ESTACION " + Estacion, "Flota BAC", sourceGeneric, tituloshoja);
 
                             ByteArrayOutputStream bos = new ByteArrayOutputStream();
                             try {
@@ -387,7 +393,8 @@ public class RptControDeMediosDePago extends Panel implements View {
                             } catch (Exception exc) {
                                 bos.close();
                             }
-                            String nameFile = "COCOs_CMDP_" + Estacion.concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
+
+                            String nameFile = "COCOs_CTRL_M_PAGOS_" + Estacion.concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
                             f[0] = nameFile;
                             f[1] = bos;
                             files.add(f);
@@ -400,12 +407,13 @@ public class RptControDeMediosDePago extends Panel implements View {
                         Zip zip = new Zip();
                         input = zip.makeZip("Estaciones", files);
                     } else {
-                        stream = (ByteArrayOutputStream) files.get(0)[10];
+                        stream = (ByteArrayOutputStream) files.get(0)[1];
                         input = new ByteArrayInputStream(stream.toByteArray());
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
+
                 return input;
             }
         };

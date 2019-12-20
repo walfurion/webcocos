@@ -110,7 +110,6 @@ public class SvcGeneral extends Dao {
                 pst.setString(4, cliente.getCreadoPor());
                 pst.setString(5, cliente.getCodigoEnvoy());
                 pst.setString(6, cliente.getCedulaJuridica());
-                System.out.println("estado "+cliente.getEstado());
                 pst.setString(7, cliente.getEstado());                
                 pst.setInt(8, cliente.getClienteId());
                 pst.executeUpdate();
