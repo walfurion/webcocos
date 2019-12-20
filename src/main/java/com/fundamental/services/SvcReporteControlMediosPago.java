@@ -5,12 +5,8 @@
  */
 package com.fundamental.services;
 
-import com.fundamental.utils.Constant;
 import com.sisintegrados.generic.bean.GenericEstacion;
-import com.sisintegrados.generic.bean.GenericMTD;
 import com.sisintegrados.generic.bean.GenericRprControlMediosPago;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.themes.ValoTheme;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,6 +45,26 @@ public class SvcReporteControlMediosPago extends Dao {
         return result;
     }
 
+    public String getEstacion(Integer idestacion) {
+        String result = "";
+        query = "SELECT NOMBRE FROM ESTACION WHERE ESTACION_ID =" + idestacion;
+        try {
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            while (rst.next()) {
+                result = rst.getString(1);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
     public ArrayList<GenericRprControlMediosPago> getCtlMediosPago() {
         ArrayList<GenericRprControlMediosPago> result = new ArrayList<GenericRprControlMediosPago>();
         GenericRprControlMediosPago genctl = new GenericRprControlMediosPago();
@@ -56,7 +72,7 @@ public class SvcReporteControlMediosPago extends Dao {
             query = "Select FECHA, MEDIOPAGO_ID, LOTE, MONTO_BRUTO, COMISION, \n"
                     + "                MONTO_NETO, COMENTARIOS, CODIGO, ESTACION, BANCO, NODEPOSITO, MONTOCH, MONTOUSD "
                     + "from CTRL_Medios_pago order by fecha asc";
-            System.out.println("QUERY " + query);
+//            System.out.println("QUERY " + query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
@@ -86,14 +102,14 @@ public class SvcReporteControlMediosPago extends Dao {
     }
 
     public void generar_datacrt(Date fecha_ini, Date fecha_fin, String estaciones, String paisid) throws SQLException {
-        String query = "{call rep (?,?,?,?)}";
+        String query = "{call REPORT_CTRL_MEDIO_PAGO (?,?,?,?)}";
         CallableStatement cst = getConnection().prepareCall(query);
 //        String sfecha_ini = Constant.SDF_ddMMyyyy.format(fecha_ini);
 //        String sfecha_fin = Constant.SDF_ddMMyyyy.format(fecha_fin);
 
-         java.sql.Date sqlDateIni = new java.sql.Date(fecha_ini.getTime());
-         java.sql.Date sqlDateFin = new java.sql.Date(fecha_fin.getTime());
-        System.out.println("PROCEDIMIENTO " + query);
+        java.sql.Date sqlDateIni = new java.sql.Date(fecha_ini.getTime());
+        java.sql.Date sqlDateFin = new java.sql.Date(fecha_fin.getTime());
+//        System.out.println("PROCEDIMIENTO " + query);
 
         /*Envio parametros necesarios*/
         cst.setDate(1, sqlDateIni);
@@ -102,7 +118,7 @@ public class SvcReporteControlMediosPago extends Dao {
         cst.setString(4, paisid);
         cst.execute();
     }
-    
+
     public String getPaisId(Integer idestacion) {
         String result = "";
         query = "SELECT PAIS_ID FROM ESTACION WHERE ESTACION_ID = " + idestacion;

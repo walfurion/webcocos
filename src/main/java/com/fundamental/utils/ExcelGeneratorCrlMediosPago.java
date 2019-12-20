@@ -817,12 +817,12 @@ public class ExcelGeneratorCrlMediosPago {
                     /*Al Final*/
                     j++;
 
-                    System.out.println("MEDIO " + itemId.getFecha());
-                    System.out.println("MEDIO2 " + itemId.getLote());
-                    System.out.println("MEDIO3 " + itemId.getMediopago_id());
-                    System.out.println("MEDIO4 " + itemId.getMonto_bruto());
-                    System.out.println("MEDIO5 " + itemId.getComision());
-                    System.out.println("MEDIO6 " + itemId.getMonto_neto());
+//                    System.out.println("MEDIO " + itemId.getFecha());
+//                    System.out.println("MEDIO2 " + itemId.getLote());
+//                    System.out.println("MEDIO3 " + itemId.getMediopago_id());
+//                    System.out.println("MEDIO4 " + itemId.getMonto_bruto());
+//                    System.out.println("MEDIO5 " + itemId.getComision());
+//                    System.out.println("MEDIO6 " + itemId.getMonto_neto());
                 }
 
                 if (itemId.getMediopago_id() == 120) {
