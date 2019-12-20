@@ -28,6 +28,7 @@ import com.sisintegrados.view.form.FormDetalleBCR;
 import com.sisintegrados.view.form.FormDetalleCliDavivienda;
 import com.sisintegrados.view.form.FormDetalleCliScottia;
 import com.sisintegrados.view.form.FormDetalleCredomatic;
+import com.sisintegrados.view.form.FormDetalleDavivienda;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -192,6 +193,16 @@ public class PrTurnoCierre extends Panel implements View {
             return super.formatPropertyValue(rowId, colId, property);
         }
     };
+
+    Table tableDavivienda = new Table() {
+        @Override
+        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
+            if (colId.equals("venta")) {
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
+            }
+            return super.formatPropertyValue(rowId, colId, property);
+        }
+    };
     /*Fin Detalle ASG*/
 
     BeanContainer<Integer, Arqueocaja> bcrArqueocaja = new BeanContainer<Integer, Arqueocaja>(Arqueocaja.class);
@@ -211,6 +222,7 @@ public class PrTurnoCierre extends Panel implements View {
     BeanItemContainer<GenericLote> ContLoteScott = new BeanItemContainer<GenericLote>(GenericLote.class);
     BeanItemContainer<GenericLote> ContLoteBCR = new BeanItemContainer<GenericLote>(GenericLote.class);
     BeanItemContainer<GenericLote> ContLoteCredomatic = new BeanItemContainer<GenericLote>(GenericLote.class);
+    BeanItemContainer<GenericLote> ContLoteDavivienda = new BeanItemContainer<GenericLote>(GenericLote.class);
 
     BeanItemContainer<GenericBeanCliente> ContCliGen = new BeanItemContainer<GenericBeanCliente>(GenericBeanCliente.class);
 
@@ -218,17 +230,20 @@ public class PrTurnoCierre extends Panel implements View {
     BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
     BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliBCR = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
     BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliCredomatic = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
+    BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliDavivienda = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
 
     /*Popups Detalle Clientes TC ASG*/
     FormDetalleCliDavivienda formDetalleCliDavivienda;
     FormDetalleCliScottia formDetalleCliScottia;
     FormDetalleBCR formDetalleBCR;
     FormDetalleCredomatic formDetalleCredomatic;
+    FormDetalleDavivienda formDetalleDavivienda;
     //Totales Para Detalles de TC
     Double totFMDavi = 0D;
     Double totFMScott = 0D;
     Double totBCR = 0D;
     Double totCredomatic = 0D;
+    Double totDavivienda = 0D;
 
     /*FIN DETALLE ASG*/
     Double totalVentas = 0D, totalDinero = 0D;
@@ -281,6 +296,7 @@ public class PrTurnoCierre extends Panel implements View {
         buildTableFMScottia();
         buildTableBCR();
         buildTableCredomatic();
+       // buildTableDavivienda();
 
         /*FIN ASG*/
         buildFilters();
@@ -395,7 +411,7 @@ public class PrTurnoCierre extends Panel implements View {
             btndavivienda.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btndavivienda.addStyleName(ValoTheme.BUTTON_SMALL);
             btndavivienda.addClickListener((final Button.ClickEvent event) -> {
-//            FormDetalleVenta2.open();
+                formDetalleCliDavivienda(estacion, symCurrency, pais.getPaisId());
             });
 
             btnfmdavivienda = new Button("FM DAVIVIENDA", FontAwesome.PLUS);
@@ -479,13 +495,25 @@ public class PrTurnoCierre extends Panel implements View {
         }
     }
 
+        /*Metodo Llama Forma DAVIVIENDA*///JLOPEZ
+    private void formDetalleDavivienda(Estacion idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxTurno.getValue() != null) {
+            formDetalleDavivienda = new FormDetalleDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavivienda, turno);
+            formDetalleDavivienda.addCloseListener((e) -> {
+                updateTableFooterDetaCliFm();
+            });
+            getUI().addWindow(formDetalleDavivienda);
+            formDetalleDavivienda.focus();
+        }
+    }
     /*ASG DETALLE CLIENTES*/
     public void updateTableFooterDetaCliFm() {
         totFMDavi = 0D;
         totFMScott = 0D;
         totBCR = 0D;
         totCredomatic = 0D;
-
+        totDavivienda = 0D;
+        
         /*Footer para FM Davivienda*/
         for (Integer itemId : bcrDetalleCliDavi.getItemIds()) {
             totFMDavi += bcrDetalleCliDavi.getItem(itemId).getBean().getVenta();
