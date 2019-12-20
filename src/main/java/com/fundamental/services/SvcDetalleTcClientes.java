@@ -6,7 +6,9 @@
 package com.fundamental.services;
 
 import com.sisintegrados.generic.bean.Estacion;
+import com.sisintegrados.generic.bean.GenericBeanCliente;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
+import com.sisintegrados.generic.bean.GenericDetalleBCR;
 import com.sisintegrados.generic.bean.GenericDetalleFM;
 import com.sisintegrados.generic.bean.GenericLote;
 import com.vaadin.data.util.BeanContainer;
@@ -25,13 +27,13 @@ public class SvcDetalleTcClientes extends Dao {
 
     private String query;
 
-    public boolean CreaClienteFMDavivienda(Integer turnoid,Integer mediopagoid,BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi) throws SQLException {
+    public boolean CreaClienteFMDavivienda(Integer turnoid, Integer mediopagoid, BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi) throws SQLException {
         boolean result = false;
         PreparedStatement pst = null;
 
         /*Elimina antes de volver asignar*/
         try {
-            query = "DELETE FROM TARJETA_DETALLE_FM WHERE IDMEDIOPAGO = " + mediopagoid + " AND TURNOID = "+turnoid;
+            query = "DELETE FROM TARJETA_DETALLE_FM WHERE IDMEDIOPAGO = " + mediopagoid + " AND TURNOID = " + turnoid;
             pst = getConnection().prepareStatement(query);
             pst.executeUpdate();
             closePst();
@@ -66,13 +68,14 @@ public class SvcDetalleTcClientes extends Dao {
         }
         return result;
     }
-    public boolean CreaClienteFMScott(Integer turnoid,Integer mediopagoid,BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott) throws SQLException {
+
+    public boolean CreaClienteFMScott(Integer turnoid, Integer mediopagoid, BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott) throws SQLException {
         boolean result = false;
         PreparedStatement pst = null;
 
         /*Elimina antes de volver asignar*/
         try {
-            query = "DELETE FROM TARJETA_DETALLE_FM WHERE IDMEDIOPAGO = " + mediopagoid + " AND TURNOID = "+turnoid;
+            query = "DELETE FROM TARJETA_DETALLE_FM WHERE IDMEDIOPAGO = " + mediopagoid + " AND TURNOID = " + turnoid;
             pst = getConnection().prepareStatement(query);
             pst.executeUpdate();
             closePst();
@@ -250,4 +253,128 @@ public class SvcDetalleTcClientes extends Dao {
         }
         return result;
     }
+
+    public List<GenericDetalleBCR> getDetalleByMedioPagoForBCR(Integer estacionid, Integer turnoid, Integer mediopagoid) {
+        List<GenericDetalleBCR> result = new ArrayList();
+
+        try {
+            query = "SELECT A.IDDET,A.CLIENTE,A.VENTA,A.COMENTARIO, --DETALLECLIE\n"
+                    + "                     B.ESTACION_ID,B.NOMBRE, --ESTACION\n"
+                    + "                       C.MEDIOPAGO_ID,C.NOMBRE, ---MEDIO PAGO\n"
+                    + "                      D.LOTE_ID,D.LOTE,  ---INFORMACION GENERIC BEAN LOTE\n"
+                    + "                      E.CLIENTE_ID,E.CODIGO,E.NOMBRE  ---INFORMACION PARA EL GENERIC BEAN CLIENTE\n"
+                    + "                 FROM TARJETA_DETALLE_CLIE  A, ESTACION B, MEDIOPAGO C, CLIENTE E,\n"
+                    + "                     (SELECT x.LOTE LOTE_ID, x.lote FROM arqueocaja_tc x, mediopago y WHERE x.TARJETA_ID = y.MEDIOPAGO_ID AND x.tarjeta_id = ? AND x.arqueocaja_id IN\n"
+                    + "                                         (SELECT arqueocaja_id FROM arqueocaja WHERE turno_id = ?)\n"
+                    + "                          GROUP BY x.tarjeta_id, y.NOMBRE, x.lote) D\n"
+                    + "                    WHERE     A.IDESTACION = B.ESTACION_ID\n"
+                    + "                        AND A.IDMEDIOPAGO = C.MEDIOPAGO_ID\n"
+                    + "                       AND A.LOTE = D.LOTE_ID\n"
+                    + "                       AND A.CLIENTE = E.CLIENTE_ID\n"
+                    + "                       AND A.IDESTACION = E.ESTACION_ID\n"
+                    + "                       AND A.IDMEDIOPAGO = ?\n"
+                    + "                       AND A.IDESTACION = ?\n"
+                    + "                        AND A.turnoid = ?";
+            pst = getConnection().prepareStatement(query);
+
+            /*Envio parametros necesarios*/
+            pst.setInt(1, mediopagoid);
+            pst.setInt(2, turnoid);
+            pst.setInt(3, mediopagoid);
+            pst.setInt(4, estacionid);
+            pst.setInt(5, turnoid);
+            ResultSet rst = pst.executeQuery();
+
+            while (rst.next()) {
+                result.add(
+                        new GenericDetalleBCR(rst.getInt(1),
+                                new Estacion(rst.getInt(5), rst.getString(6)),
+                                new GenericBeanMedioPago(rst.getInt(7), rst.getString(8)),
+                                new GenericLote(rst.getInt(9), rst.getInt(10)),
+                                new GenericBeanCliente(rst.getInt(11), rst.getInt(12), rst.getString(13)),
+                                rst.getDouble(3),
+                                rst.getString(4)));
+            }
+            closePst();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
+    public boolean CreaClienteBCR(Integer turnoid, Integer mediopagoid, BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliBCR) throws SQLException {
+        boolean result = false;
+        PreparedStatement pst = null;
+
+        /*Elimina antes de volver asignar*/
+        try {
+            query = "DELETE FROM TARJETA_DETALLE_CLIE WHERE IDMEDIOPAGO = " + mediopagoid + " AND TURNOID = " + turnoid;
+            pst = getConnection().prepareStatement(query);
+            pst.executeUpdate();
+            closePst();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        /*Asigna detalle clientes tc al turno*/
+        try {
+            query = "INSERT INTO TARJETA_DETALLE_CLIE (IDDET,IDESTACION, IDMEDIOPAGO, TURNOID, LOTE,CLIENTE,VENTA,COMENTARIO) "
+                    + "VALUES (SQ_TC_DETALLE_CLIE.nextval,?,?,?,?,?,?,?)";
+
+            for (Integer itemId : bcrDetalleCliBCR.getItemIds()) {
+                pst = getConnection().prepareStatement(query);
+                pst.setInt(1, bcrDetalleCliBCR.getItem(itemId).getBean().getEstacion().getEstacionId());
+                pst.setInt(2, bcrDetalleCliBCR.getItem(itemId).getBean().getMediopago().getMediopagoid());
+                pst.setInt(3, turnoid);
+                pst.setInt(4, bcrDetalleCliBCR.getItem(itemId).getBean().getGenlote().getIdlote());
+                pst.setInt(5, bcrDetalleCliBCR.getItem(itemId).getBean().getCliente().getClienteid());
+                pst.setDouble(6, bcrDetalleCliBCR.getItem(itemId).getBean().getVenta());
+                pst.setString(7, bcrDetalleCliBCR.getItem(itemId).getBean().getComentario());
+                pst.executeUpdate();
+                closePst();
+            }
+            result = true;
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+        }
+        return result;
+    }
+
+    public List<GenericBeanCliente> getAllCustomers(boolean includeInactives, Integer estacionid) {
+        List<GenericBeanCliente> result = new ArrayList();
+        try {
+            query = (includeInactives) ? "" : " AND m.estado = 'A' ";
+            query = "select cliente_id, codigo, nombre "
+                    + " from cliente "
+                    + " where "
+                    + " ESTACION_ID = " + estacionid
+                    + query;
+               
+            pst = getConnection().prepareStatement(query);
+            ResultSet rst = pst.executeQuery();
+            GenericBeanCliente customer;
+            while (rst.next()) {
+                customer = new GenericBeanCliente(rst.getInt(1), rst.getInt(2), rst.getString(3));
+                result.add(customer);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
 }

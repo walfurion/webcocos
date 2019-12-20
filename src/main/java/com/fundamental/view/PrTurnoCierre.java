@@ -19,11 +19,18 @@ import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.sisintegrados.generic.bean.ArqueoTC;
+import com.sisintegrados.generic.bean.GenericBeanCliente;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
+import com.sisintegrados.generic.bean.GenericDetalleBCR;
 import com.sisintegrados.generic.bean.GenericDetalleFM;
 import com.sisintegrados.generic.bean.GenericLote;
+import com.sisintegrados.view.form.FormDetalleBCR;
 import com.sisintegrados.view.form.FormDetalleCliDavivienda;
 import com.sisintegrados.view.form.FormDetalleCliScottia;
+import com.sisintegrados.view.form.FormDetalleCredomatic;
+import com.sisintegrados.view.form.FormDetalleDavivienda;
+import com.sisintegrados.view.form.FormDetalleNacional;
+import com.sisintegrados.view.form.FormDetalleFloBac;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -168,7 +175,7 @@ public class PrTurnoCierre extends Panel implements View {
             return super.formatPropertyValue(rowId, colId, property);
         }
     };
-    
+
     Table tableBCR = new Table() {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
@@ -178,9 +185,49 @@ public class PrTurnoCierre extends Panel implements View {
             return super.formatPropertyValue(rowId, colId, property);
         }
     };
+
+//    Table tableBAC = new Table() {
+    Table tableCredomatic = new Table() {
+        @Override
+        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
+            if (colId.equals("venta")) {
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
+            }
+            return super.formatPropertyValue(rowId, colId, property);
+        }
+    };
+
+    Table tableDavivienda = new Table() {
+        @Override
+        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
+            if (colId.equals("venta")) {
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
+            }
+            return super.formatPropertyValue(rowId, colId, property);
+        }
+    };
+
+    Table tableNacional = new Table() {
+        @Override
+        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
+            if (colId.equals("venta")) {
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
+            }
+            return super.formatPropertyValue(rowId, colId, property);
+        }
+    };
+
+    Table tableFlotaBac = new Table() {
+        @Override
+        protected String formatPropertyValue(Object rowId, Object colId, Property property) {
+            if (colId.equals("venta")) {
+                return numberFmt.format((property.getValue() == null) ? 0D : property.getValue());
+            }
+            return super.formatPropertyValue(rowId, colId, property);
+        }
+    };
     /*Fin Detalle ASG*/
-    
-    
+
     BeanContainer<Integer, Arqueocaja> bcrArqueocaja = new BeanContainer<Integer, Arqueocaja>(Arqueocaja.class);
     BeanContainer<Integer, Bomba> bcrBombas = new BeanContainer<Integer, Bomba>(Bomba.class);
     BeanContainer<Integer, DtoArqueo> bcrVentas = new BeanContainer<Integer, DtoArqueo>(DtoArqueo.class);
@@ -192,21 +239,49 @@ public class PrTurnoCierre extends Panel implements View {
     /*Detalle TC ASG*/
     SvcDetalleTcClientes dao = new SvcDetalleTcClientes();
     HorizontalLayout hltables = new HorizontalLayout();
+    HorizontalLayout hltables2 = new HorizontalLayout();
     BeanItemContainer<Estacion> ContEstacion = new BeanItemContainer<Estacion>(Estacion.class);
     BeanItemContainer<GenericBeanMedioPago> ContMediosPago = new BeanItemContainer<GenericBeanMedioPago>(GenericBeanMedioPago.class);
     BeanItemContainer<GenericLote> ContLote = new BeanItemContainer<GenericLote>(GenericLote.class);
     BeanItemContainer<GenericLote> ContLoteScott = new BeanItemContainer<GenericLote>(GenericLote.class);
+    BeanItemContainer<GenericLote> ContLoteBCR = new BeanItemContainer<GenericLote>(GenericLote.class);
+    BeanItemContainer<GenericLote> ContLoteCredomatic = new BeanItemContainer<GenericLote>(GenericLote.class);
+    BeanItemContainer<GenericLote> ContLoteDavivienda = new BeanItemContainer<GenericLote>(GenericLote.class);
+    BeanItemContainer<GenericLote> ContLoteNacional = new BeanItemContainer<GenericLote>(GenericLote.class);
+
+    BeanItemContainer<GenericLote> ContLoteFloBac = new BeanItemContainer<GenericLote>(GenericLote.class);
+
+    BeanItemContainer<GenericBeanCliente> ContCliGen = new BeanItemContainer<GenericBeanCliente>(GenericBeanCliente.class);
+
     BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
     BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
-    BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliBCR = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
+
+    BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliBAC = new BeanContainer<Integer, GenericDetalleFM>(GenericDetalleFM.class);
+
+    BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliBCR = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
+    BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliCredomatic = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
+    BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliDavivienda = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
+    BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliNacional = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
+
+    BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliFloBac = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
 
     /*Popups Detalle Clientes TC ASG*/
     FormDetalleCliDavivienda formDetalleCliDavivienda;
     FormDetalleCliScottia formDetalleCliScottia;
-    //FormDetalleBCR formDetalleBCR;
-    //Totales Para Detalles de TC
+    FormDetalleBCR formDetalleBCR;
+    FormDetalleCredomatic formDetalleCredomatic;
+    FormDetalleDavivienda formDetalleDavivienda;
+    FormDetalleNacional formDetalleNacional;
+    FormDetalleFloBac formDetalleFloBac;
+
     Double totFMDavi = 0D;
     Double totFMScott = 0D;
+    Double totBCR = 0D;
+    Double totCredomatic = 0D;
+    Double totDavivienda = 0D;
+    Double totNacional = 0D;
+
+    Double totFlotaBac = 0D;
 
     /*FIN DETALLE ASG*/
     Double totalVentas = 0D, totalDinero = 0D;
@@ -257,6 +332,12 @@ public class PrTurnoCierre extends Panel implements View {
         /*Tablas para detalles de tarjetas de credito*/ //ASG
         buildTableFMDavivienda();
         buildTableFMScottia();
+        buildTableBCR();
+        buildTableCredomatic();
+        buildTableDavivienda();
+
+        buildTableFLOTABAC();
+
         /*FIN ASG*/
         buildFilters();
         buildButtons();
@@ -338,18 +419,16 @@ public class PrTurnoCierre extends Panel implements View {
     public class SectionPanelButtons extends Panel {
 
         public SectionPanelButtons(String caption) {
-            btnbac = new Button("BAC", FontAwesome.PLUS);
+            btnbac = new Button("FLOTA BAC", FontAwesome.PLUS);
             btnbac.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btnbac.addStyleName(ValoTheme.BUTTON_SMALL);
-            btnbac.addClickListener((final Button.ClickEvent event) -> {
-//            FormDetalleVenta2.open();
-            });
+            btnbac.addClickListener(clickEvent -> formDetalleFloBac(estacion, symCurrency, pais.getPaisId()));
 
             btnbanknac = new Button("BANCO NACIONAL", FontAwesome.PLUS);
             btnbanknac.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btnbanknac.addStyleName(ValoTheme.BUTTON_SMALL);
             btnbanknac.addClickListener((final Button.ClickEvent event) -> {
-//            FormDetalleVenta2.open();
+                formDetalleNacional(estacion, symCurrency, pais.getPaisId());
             });
 
             btnbcr = new Button("BCR", FontAwesome.PLUS);
@@ -363,14 +442,14 @@ public class PrTurnoCierre extends Panel implements View {
             btncredomatic.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btncredomatic.addStyleName(ValoTheme.BUTTON_SMALL);
             btncredomatic.addClickListener((final Button.ClickEvent event) -> {
-//            FormDetalleVenta2.open();
+                formDetalleCredomatic(estacion, symCurrency, pais.getPaisId());
             });
 
             btndavivienda = new Button("DAVIVIENDA", FontAwesome.PLUS);
             btndavivienda.addStyleName(ValoTheme.BUTTON_PRIMARY);
             btndavivienda.addStyleName(ValoTheme.BUTTON_SMALL);
             btndavivienda.addClickListener((final Button.ClickEvent event) -> {
-//            FormDetalleVenta2.open();
+                formDetalleDavivienda(estacion, symCurrency, pais.getPaisId());
             });
 
             btnfmdavivienda = new Button("FM DAVIVIENDA", FontAwesome.PLUS);
@@ -399,11 +478,20 @@ public class PrTurnoCierre extends Panel implements View {
 
         public SectionPanelTablesDet(String caption) {
             setCaption(caption);
+            VerticalLayout vl = new VerticalLayout();
+
             hltables.setSizeFull();
             hltables.setMargin(true);
             hltables.setSpacing(true);
             hltables.setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
-            setContent(hltables);
+            hltables2.setSizeFull();
+            hltables2.setMargin(true);
+            hltables2.setSpacing(true);
+            hltables2.setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
+
+            vl.addComponent(hltables);
+            vl.addComponent(hltables2);
+            setContent(vl);
         }
     }
 
@@ -433,12 +521,59 @@ public class PrTurnoCierre extends Panel implements View {
     /*Metodo Llama Forma BCR*///JLOPEZ
     private void formDetalleBCR(Estacion idestacion, String simboloMoneda, Integer idpais) {
         if (cbxTurno.getValue() != null) {
-            formDetalleCliDavivienda = new FormDetalleCliDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavi, turno);
-            formDetalleCliDavivienda.addCloseListener((e) -> {
+            formDetalleBCR = new FormDetalleBCR(idestacion, simboloMoneda, idpais, bcrDetalleCliBCR, turno);
+            formDetalleBCR.addCloseListener((e) -> {
                 updateTableFooterDetaCliFm();
             });
-            getUI().addWindow(formDetalleCliDavivienda);
-            formDetalleCliDavivienda.focus();
+            getUI().addWindow(formDetalleBCR);
+            formDetalleBCR.focus();
+        }
+    }
+
+    /*Metodo Llama Forma CREDOMATIC*///JLOPEZ
+    private void formDetalleCredomatic(Estacion idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxTurno.getValue() != null) {
+            formDetalleCredomatic = new FormDetalleCredomatic(idestacion, simboloMoneda, idpais, bcrDetalleCliCredomatic, turno);
+            formDetalleCredomatic.addCloseListener((e) -> {
+                updateTableFooterDetaCliFm();
+            });
+            getUI().addWindow(formDetalleCredomatic);
+            formDetalleCredomatic.focus();
+        }
+    }
+
+    /*Metodo Llama Forma DAVIVIENDA*///JLOPEZ
+    private void formDetalleDavivienda(Estacion idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxTurno.getValue() != null) {
+            formDetalleDavivienda = new FormDetalleDavivienda(idestacion, simboloMoneda, idpais, bcrDetalleCliDavivienda, turno);
+            formDetalleDavivienda.addCloseListener((e) -> {
+                updateTableFooterDetaCliFm();
+            });
+            getUI().addWindow(formDetalleDavivienda);
+            formDetalleDavivienda.focus();
+        }
+    }
+
+    /*Metodo Llama Forma NACIONAL*///JLOPEZ
+    private void formDetalleNacional(Estacion idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxTurno.getValue() != null) {
+            formDetalleNacional = new FormDetalleNacional(idestacion, simboloMoneda, idpais, bcrDetalleCliNacional, turno);
+            formDetalleNacional.addCloseListener((e) -> {
+                updateTableFooterDetaCliFm();
+            });
+            getUI().addWindow(formDetalleNacional);
+            formDetalleNacional.focus();
+        }
+    }
+
+    private void formDetalleFloBac(Estacion idestacion, String simboloMoneda, Integer idpais) {
+        if (cbxTurno.getValue() != null) {
+            formDetalleFloBac = new FormDetalleFloBac(idestacion, simboloMoneda, idpais, bcrDetalleCliFloBac, turno);
+            formDetalleFloBac.addCloseListener((e) -> {
+                updateTableFooterDetaCliFm();
+            });
+            getUI().addWindow(formDetalleFloBac);
+            formDetalleFloBac.focus();
         }
     }
 
@@ -446,6 +581,12 @@ public class PrTurnoCierre extends Panel implements View {
     public void updateTableFooterDetaCliFm() {
         totFMDavi = 0D;
         totFMScott = 0D;
+        totBCR = 0D;
+        totCredomatic = 0D;
+        totDavivienda = 0D;
+        totNacional = 0D;
+
+        totFlotaBac = 0D;
 
         /*Footer para FM Davivienda*/
         for (Integer itemId : bcrDetalleCliDavi.getItemIds()) {
@@ -462,6 +603,47 @@ public class PrTurnoCierre extends Panel implements View {
         tableFMScott.setFooterVisible(true);
         tableFMScott.setColumnFooter("comentario", "Total:");
         tableFMScott.setColumnFooter("comentario", symCurrency + numberFmt.format(totFMScott).trim());
+
+        /*Footer para FM BCR*/
+        for (Integer itemId : bcrDetalleCliBCR.getItemIds()) {
+            totBCR += bcrDetalleCliBCR.getItem(itemId).getBean().getVenta();
+        }
+        tableBCR.setFooterVisible(true);
+        tableBCR.setColumnFooter("comentario", "Total:");
+        tableBCR.setColumnFooter("comentario", symCurrency + numberFmt.format(totBCR).trim());
+
+        /*Footer para FM CREDOMATIC*/
+        for (Integer itemId : bcrDetalleCliCredomatic.getItemIds()) {
+            totCredomatic += bcrDetalleCliCredomatic.getItem(itemId).getBean().getVenta();
+        }
+        tableCredomatic.setFooterVisible(true);
+        tableCredomatic.setColumnFooter("comentario", "Total:");
+        tableCredomatic.setColumnFooter("comentario", symCurrency + numberFmt.format(totCredomatic).trim());
+
+        /*Footer para TC DAVIVIENDA*/
+        for (Integer itemId : bcrDetalleCliDavivienda.getItemIds()) {
+            totCredomatic += bcrDetalleCliDavivienda.getItem(itemId).getBean().getVenta();
+        }
+        tableDavivienda.setFooterVisible(true);
+        tableDavivienda.setColumnFooter("comentario", "Total:");
+        tableDavivienda.setColumnFooter("comentario", symCurrency + numberFmt.format(totDavivienda).trim());
+
+        /*Footer para FM NACIONAL*/
+        for (Integer itemId : bcrDetalleCliNacional.getItemIds()) {
+            totNacional += bcrDetalleCliNacional.getItem(itemId).getBean().getVenta();
+        }
+        tableNacional.setFooterVisible(true);
+        tableNacional.setColumnFooter("comentario", "Total:");
+        tableNacional.setColumnFooter("comentario", symCurrency + numberFmt.format(totNacional).trim());
+
+        /*Footer para FLOTA BAC*/
+        for (Integer itemId : bcrDetalleCliFloBac.getItemIds()) {
+            totFlotaBac += bcrDetalleCliFloBac.getItem(itemId).getBean().getVenta();
+        }
+        tableFlotaBac.setFooterVisible(true);
+        tableFlotaBac.setColumnFooter("comentario", "Total:");
+        tableFlotaBac.setColumnFooter("comentario", symCurrency + numberFmt.format(totFlotaBac).trim());
+
     }
 
     public boolean validaTotalMedioPago(Integer mediopagoid, Double total) {
@@ -490,7 +672,11 @@ public class PrTurnoCierre extends Panel implements View {
         /*ASG Detalle Cliente Tarjetas*/
         bcrDetalleCliDavi.setBeanIdProperty("iddet");
         bcrDetalleCliScott.setBeanIdProperty("iddet");
-
+        bcrDetalleCliBCR.setBeanIdProperty("iddet");
+        bcrDetalleCliCredomatic.setBeanIdProperty("iddet");
+        bcrDetalleCliDavivienda.setBeanIdProperty("iddet");
+        bcrDetalleCliNacional.setBeanIdProperty("iddet");
+        bcrDetalleCliFloBac.setBeanIdProperty("iddet");
         /*FIN ASG*/
         SvcTurnoCierre service = new SvcTurnoCierre();
 
@@ -623,6 +809,12 @@ public class PrTurnoCierre extends Panel implements View {
                     /*ASG DETALLE CLIENTES TC*/
                     bcrDetalleCliDavi.removeAllItems();
                     bcrDetalleCliScott.removeAllItems();
+                    bcrDetalleCliBCR.removeAllItems();
+                    bcrDetalleCliCredomatic.removeAllItems();
+                    bcrDetalleCliDavivienda.removeAllItems();
+                    bcrDetalleCliNacional.removeAllItems();
+                    bcrDetalleCliFloBac.removeAllItems();
+
                     /*FIN ASG*/
                     calcularSumas();
 
@@ -660,22 +852,52 @@ public class PrTurnoCierre extends Panel implements View {
         if (turno != null) {
             bcrDetalleCliDavi.removeAllItems();
             bcrDetalleCliScott.removeAllItems();
+            bcrDetalleCliBCR.removeAllItems();
+            bcrDetalleCliCredomatic.removeAllItems();
+            bcrDetalleCliDavivienda.removeAllItems();
+            bcrDetalleCliNacional.removeAllItems();
+            bcrDetalleCliFloBac.removeAllItems();
             ContEstacion.addAll(dao.getAllEstaciones(true, pais.getPaisId()));
             ContMediosPago.addAll(dao.getAllMediosPago(true, pais.getPaisId()));
             //FM Davivienda  115
             //FM Scottia 116
             ContLote.addAll(dao.getAllLotesbyMedioPago(115, turno.getTurnoId()));
             ContLoteScott.addAll(dao.getAllLotesbyMedioPago(116, turno.getTurnoId()));
+            ContLoteBCR.addAll(dao.getAllLotesbyMedioPago(118, turno.getTurnoId()));
+            ContLoteCredomatic.addAll(dao.getAllLotesbyMedioPago(107, turno.getTurnoId()));
+            ContLoteDavivienda.addAll(dao.getAllLotesbyMedioPago(123, turno.getTurnoId()));
+            ContLoteNacional.addAll(dao.getAllLotesbyMedioPago(7, turno.getTurnoId()));
+            ContLoteFloBac.addAll(dao.getAllLotesbyMedioPago(121, turno.getTurnoId()));
+
+            ContCliGen.addAll(dao.getAllCustomers(true, estacion.getEstacionId()));
 
             Estacion est = new Estacion();
             est = (Estacion) cbxEstacion.getValue();
             bcrDetalleCliDavi.addAll(dao.getDetalleByMedioPago(est.getEstacionId(), turno.getTurnoId(), 115));
             bcrDetalleCliScott.addAll(dao.getDetalleByMedioPago(est.getEstacionId(), turno.getTurnoId(), 116));
+            bcrDetalleCliBCR.addAll(dao.getDetalleByMedioPagoForBCR(est.getEstacionId(), turno.getTurnoId(), 118));
+            bcrDetalleCliCredomatic.addAll(dao.getDetalleByMedioPagoForBCR(est.getEstacionId(), turno.getTurnoId(), 107));
+            bcrDetalleCliDavivienda.addAll(dao.getDetalleByMedioPagoForBCR(est.getEstacionId(), turno.getTurnoId(), 123));
+            bcrDetalleCliNacional.addAll(dao.getDetalleByMedioPagoForBCR(est.getEstacionId(), turno.getTurnoId(), 7));
+
+            bcrDetalleCliFloBac.addAll(dao.getDetalleByMedioPagoForBCR(est.getEstacionId(), turno.getTurnoId(), 121));
 
             hltables.removeComponent(tableFMDavivienda);
             hltables.removeComponent(tableFMScott);
+            hltables.removeComponent(tableBCR);
+            hltables.removeComponent(tableCredomatic);
+            hltables2.removeComponent(tableDavivienda);
+            hltables2.removeComponent(tableNacional);
+            hltables2.removeComponent(tableFlotaBac);
+
             hltables.addComponent(tableFMDavivienda);
             hltables.addComponent(tableFMScott);
+            hltables.addComponent(tableBCR);
+            hltables.addComponent(tableCredomatic);
+            hltables2.addComponent(tableDavivienda);
+            hltables2.addComponent(tableNacional);
+            hltables2.addComponent(tableFlotaBac);
+            
             updateTableFooterDetaCliFm();
         }
     }
@@ -779,6 +1001,13 @@ public class PrTurnoCierre extends Panel implements View {
                                     try {
                                         dao.CreaClienteFMDavivienda(turno.getTurnoId(), 115, bcrDetalleCliDavi); //FM Davivienda
                                         dao.CreaClienteFMScott(turno.getTurnoId(), 116, bcrDetalleCliScott); //FM Scottia
+                                        dao.CreaClienteBCR(turno.getTurnoId(), 118, bcrDetalleCliBCR); // BCR
+                                        dao.CreaClienteBCR(turno.getTurnoId(), 107, bcrDetalleCliCredomatic); // CREDOMATIC
+                                        dao.CreaClienteBCR(turno.getTurnoId(), 123, bcrDetalleCliDavivienda); // DAVIVIENDA
+                                        dao.CreaClienteBCR(turno.getTurnoId(), 7, bcrDetalleCliNacional); // DAVIVIENDA
+
+                                        dao.CreaClienteBCR(turno.getTurnoId(), 121, bcrDetalleCliFloBac); // FLOTA BAC
+
                                     } catch (SQLException ex) {
                                         ex.printStackTrace();
                                     }
@@ -1027,22 +1256,6 @@ public class PrTurnoCierre extends Panel implements View {
             }
         });
 
-//        tableFMDavivienda.addGeneratedColumn("colventa", new Table.ColumnGenerator() {
-//            @Override
-//            public Object generateCell(Table source, final Object itemId, Object columnId) {
-//                Property pro = source.getItem(itemId).getItemProperty("venta");  //Atributo del bean
-//                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
-//                nfd.setReadOnly(true);
-//                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
-//                nfd.setValue(numberFmt.format(value));
-//                nfd.setWidth("150px");
-//                nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
-//                nfd.addStyleName("align-right");
-//                return nfd;
-//            }
-//        });
-//        tableFMDavivienda.setVisibleColumns(new Object[]{"colestacion", "colmedio", "collote", "cliente", "venta", "comentario"});
-//        tableFMDavivienda.setColumnHeaders(new String[]{"Estacion", "Medio Pago", "Lote", "Cliente", "Venta", "Comentarios"});
         tableFMDavivienda.setVisibleColumns(new Object[]{"collote", "cliente", "venta", "comentario"});
         tableFMDavivienda.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
         tableFMDavivienda.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
@@ -1107,28 +1320,412 @@ public class PrTurnoCierre extends Panel implements View {
             }
         });
 
-//        tableFMDavivienda.addGeneratedColumn("colventa", new Table.ColumnGenerator() {
-//            @Override
-//            public Object generateCell(Table source, final Object itemId, Object columnId) {
-//                Property pro = source.getItem(itemId).getItemProperty("venta");  //Atributo del bean
-//                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
-//                nfd.setReadOnly(true);
-//                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
-//                nfd.setValue(numberFmt.format(value));
-//                nfd.setWidth("150px");
-//                nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
-//                nfd.addStyleName("align-right");
-//                return nfd;
-//            }
-//        });
-//        tableFMDavivienda.setVisibleColumns(new Object[]{"colestacion", "colmedio", "collote", "cliente", "venta", "comentario"});
-//        tableFMDavivienda.setColumnHeaders(new String[]{"Estacion", "Medio Pago", "Lote", "Cliente", "Venta", "Comentarios"});
         tableFMScott.setVisibleColumns(new Object[]{"collote", "cliente", "venta", "comentario"});
         tableFMScott.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
         tableFMScott.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
         tableFMScott.setHeight(200f, Unit.PIXELS);
         tableFMScott.addStyleName(ValoTheme.TABLE_COMPACT);
         tableFMScott.addStyleName(ValoTheme.TABLE_SMALL);
+    }
+
+    private void buildTableBCR() {
+        tableBCR.setCaption("Detalle Clientes BCR:");
+        tableBCR.setContainerDataSource(bcrDetalleCliBCR);
+        tableBCR.setImmediate(true);
+        tableBCR.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
+                ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
+                cmbEstacion.setReadOnly(true);
+                cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbEstacion.setItemCaptionPropertyId("nombre");
+                cmbEstacion.setNullSelectionAllowed(false);
+                cmbEstacion.addStyleName(ValoTheme.BUTTON_TINY);
+                cmbEstacion.setPropertyDataSource(pro);
+                cmbEstacion.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbEstacion.setWidth("250px");
+                return cmbEstacion;
+            }
+        });
+
+        tableBCR.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
+                ComboBox cmbMedio = new ComboBox(null, ContMediosPago);
+                cmbMedio.setReadOnly(true);
+                cmbMedio.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbMedio.setItemCaptionPropertyId("nombre");
+                cmbMedio.setNullSelectionAllowed(false);
+                cmbMedio.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbMedio.setPropertyDataSource(pro);
+                cmbMedio.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbMedio.setWidth("125px");
+                return cmbMedio;
+            }
+        });
+
+        tableBCR.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
+                ComboBox cmbLote = new ComboBox(null, ContLoteBCR);
+                cmbLote.setReadOnly(true);
+                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbLote.setItemCaptionPropertyId("lote");
+                cmbLote.setNullSelectionAllowed(false);
+                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbLote.setPropertyDataSource(pro);
+                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
+                cmbLote.setWidth("85px");
+                return cmbLote;
+            }
+        });
+
+        tableBCR.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
+                ComboBox cmbCliente = new ComboBox(null, ContCliGen);
+                cmbCliente.setReadOnly(true);
+                cmbCliente.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbCliente.setItemCaptionPropertyId("nombre");
+                cmbCliente.setNullSelectionAllowed(false);
+                cmbCliente.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbCliente.setPropertyDataSource(pro);
+                cmbCliente.setFilteringMode(FilteringMode.CONTAINS);
+                cmbCliente.setWidth("85px");
+                return cmbCliente;
+            }
+        });
+
+        tableBCR.setVisibleColumns(new Object[]{"collote", "colcliente", "venta", "comentario"});
+        tableBCR.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
+        tableBCR.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableBCR.setHeight(200f, Unit.PIXELS);
+        tableBCR.addStyleName(ValoTheme.TABLE_COMPACT);
+        tableBCR.addStyleName(ValoTheme.TABLE_SMALL);
+    }
+
+    private void buildTableCredomatic() {
+        tableCredomatic.setCaption("Detalle Clientes Credomatic:");
+        tableCredomatic.setContainerDataSource(bcrDetalleCliCredomatic);
+        tableCredomatic.setImmediate(true);
+        tableCredomatic.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
+                ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
+                cmbEstacion.setReadOnly(true);
+                cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbEstacion.setItemCaptionPropertyId("nombre");
+                cmbEstacion.setNullSelectionAllowed(false);
+                cmbEstacion.addStyleName(ValoTheme.BUTTON_TINY);
+                cmbEstacion.setPropertyDataSource(pro);
+                cmbEstacion.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbEstacion.setWidth("250px");
+                return cmbEstacion;
+            }
+        });
+
+        tableCredomatic.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
+                ComboBox cmbMedio = new ComboBox(null, ContMediosPago);
+                cmbMedio.setReadOnly(true);
+                cmbMedio.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbMedio.setItemCaptionPropertyId("nombre");
+                cmbMedio.setNullSelectionAllowed(false);
+                cmbMedio.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbMedio.setPropertyDataSource(pro);
+                cmbMedio.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbMedio.setWidth("125px");
+                return cmbMedio;
+            }
+        });
+
+        tableCredomatic.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
+                ComboBox cmbLote = new ComboBox(null, ContLoteCredomatic);
+                cmbLote.setReadOnly(true);
+                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbLote.setItemCaptionPropertyId("lote");
+                cmbLote.setNullSelectionAllowed(false);
+                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbLote.setPropertyDataSource(pro);
+                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
+                cmbLote.setWidth("85px");
+                return cmbLote;
+            }
+        });
+
+        tableCredomatic.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
+                ComboBox cmbCliente = new ComboBox(null, ContCliGen);
+                cmbCliente.setReadOnly(true);
+                cmbCliente.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbCliente.setItemCaptionPropertyId("nombre");
+                cmbCliente.setNullSelectionAllowed(false);
+                cmbCliente.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbCliente.setPropertyDataSource(pro);
+                cmbCliente.setFilteringMode(FilteringMode.CONTAINS);
+                cmbCliente.setWidth("85px");
+                return cmbCliente;
+            }
+        });
+
+        tableCredomatic.setVisibleColumns(new Object[]{"collote", "colcliente", "venta", "comentario"});
+        tableCredomatic.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
+        tableCredomatic.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableCredomatic.setHeight(200f, Unit.PIXELS);
+        tableCredomatic.addStyleName(ValoTheme.TABLE_COMPACT);
+        tableCredomatic.addStyleName(ValoTheme.TABLE_SMALL);
+    }
+
+    private void buildTableDavivienda() {
+        tableDavivienda.setCaption("Detalle Clientes Davivieda:");
+        tableDavivienda.setContainerDataSource(bcrDetalleCliDavivienda);
+        tableDavivienda.setImmediate(true);
+        tableDavivienda.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
+                ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
+                cmbEstacion.setReadOnly(true);
+                cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbEstacion.setItemCaptionPropertyId("nombre");
+                cmbEstacion.setNullSelectionAllowed(false);
+                cmbEstacion.addStyleName(ValoTheme.BUTTON_TINY);
+                cmbEstacion.setPropertyDataSource(pro);
+                cmbEstacion.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbEstacion.setWidth("250px");
+                return cmbEstacion;
+            }
+        });
+
+        tableDavivienda.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
+                ComboBox cmbMedio = new ComboBox(null, ContMediosPago);
+                cmbMedio.setReadOnly(true);
+                cmbMedio.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbMedio.setItemCaptionPropertyId("nombre");
+                cmbMedio.setNullSelectionAllowed(false);
+                cmbMedio.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbMedio.setPropertyDataSource(pro);
+                cmbMedio.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbMedio.setWidth("125px");
+                return cmbMedio;
+            }
+        });
+
+        tableDavivienda.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
+                ComboBox cmbLote = new ComboBox(null, ContLoteDavivienda);
+                cmbLote.setReadOnly(true);
+                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbLote.setItemCaptionPropertyId("lote");
+                cmbLote.setNullSelectionAllowed(false);
+                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbLote.setPropertyDataSource(pro);
+                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
+                cmbLote.setWidth("85px");
+                return cmbLote;
+            }
+        });
+
+        tableDavivienda.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
+                ComboBox cmbCliente = new ComboBox(null, ContCliGen);
+                cmbCliente.setReadOnly(true);
+                cmbCliente.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbCliente.setItemCaptionPropertyId("nombre");
+                cmbCliente.setNullSelectionAllowed(false);
+                cmbCliente.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbCliente.setPropertyDataSource(pro);
+                cmbCliente.setFilteringMode(FilteringMode.CONTAINS);
+                cmbCliente.setWidth("85px");
+                return cmbCliente;
+            }
+        });
+
+        tableDavivienda.setVisibleColumns(new Object[]{"collote", "colcliente", "venta", "comentario"});
+        tableDavivienda.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
+        tableDavivienda.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableDavivienda.setHeight(200f, Unit.PIXELS);
+        tableDavivienda.addStyleName(ValoTheme.TABLE_COMPACT);
+        tableDavivienda.addStyleName(ValoTheme.TABLE_SMALL);
+    }
+
+    private void buildTableNacional() {
+        tableNacional.setCaption("Detalle Clientes Banco Nacional:");
+        tableNacional.setContainerDataSource(bcrDetalleCliDavivienda);
+        tableNacional.setImmediate(true);
+        tableNacional.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
+                ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
+                cmbEstacion.setReadOnly(true);
+                cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbEstacion.setItemCaptionPropertyId("nombre");
+                cmbEstacion.setNullSelectionAllowed(false);
+                cmbEstacion.addStyleName(ValoTheme.BUTTON_TINY);
+                cmbEstacion.setPropertyDataSource(pro);
+                cmbEstacion.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbEstacion.setWidth("250px");
+                return cmbEstacion;
+            }
+        });
+
+        tableNacional.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
+                ComboBox cmbMedio = new ComboBox(null, ContMediosPago);
+                cmbMedio.setReadOnly(true);
+                cmbMedio.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbMedio.setItemCaptionPropertyId("nombre");
+                cmbMedio.setNullSelectionAllowed(false);
+                cmbMedio.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbMedio.setPropertyDataSource(pro);
+                cmbMedio.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbMedio.setWidth("125px");
+                return cmbMedio;
+            }
+        });
+
+        tableNacional.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
+                ComboBox cmbLote = new ComboBox(null, ContLoteNacional);
+                cmbLote.setReadOnly(true);
+                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbLote.setItemCaptionPropertyId("lote");
+                cmbLote.setNullSelectionAllowed(false);
+                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbLote.setPropertyDataSource(pro);
+                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
+                cmbLote.setWidth("85px");
+                return cmbLote;
+            }
+        });
+
+        tableNacional.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
+                ComboBox cmbCliente = new ComboBox(null, ContCliGen);
+                cmbCliente.setReadOnly(true);
+                cmbCliente.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbCliente.setItemCaptionPropertyId("nombre");
+                cmbCliente.setNullSelectionAllowed(false);
+                cmbCliente.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbCliente.setPropertyDataSource(pro);
+                cmbCliente.setFilteringMode(FilteringMode.CONTAINS);
+                cmbCliente.setWidth("85px");
+                return cmbCliente;
+            }
+        });
+
+        tableNacional.setVisibleColumns(new Object[]{"collote", "colcliente", "venta", "comentario"});
+        tableNacional.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
+        tableNacional.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableNacional.setHeight(200f, Unit.PIXELS);
+        tableNacional.addStyleName(ValoTheme.TABLE_COMPACT);
+        tableNacional.addStyleName(ValoTheme.TABLE_SMALL);
+    }
+
+    private void buildTableFLOTABAC() {
+        tableFlotaBac.setCaption("Detalle Clientes Flota BAC:");
+        tableFlotaBac.setContainerDataSource(bcrDetalleCliFloBac);
+        tableFlotaBac.setImmediate(true);
+        tableFlotaBac.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
+                ComboBox cmbEstacion = new ComboBox(null, ContEstacion);
+                cmbEstacion.setReadOnly(true);
+                cmbEstacion.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbEstacion.setItemCaptionPropertyId("nombre");
+                cmbEstacion.setNullSelectionAllowed(false);
+                cmbEstacion.addStyleName(ValoTheme.BUTTON_TINY);
+                cmbEstacion.setPropertyDataSource(pro);
+                cmbEstacion.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbEstacion.setWidth("250px");
+                return cmbEstacion;
+            }
+        });
+
+        tableFlotaBac.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
+                ComboBox cmbMedio = new ComboBox(null, ContMediosPago);
+                cmbMedio.setReadOnly(true);
+                cmbMedio.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbMedio.setItemCaptionPropertyId("nombre");
+                cmbMedio.setNullSelectionAllowed(false);
+                cmbMedio.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbMedio.setPropertyDataSource(pro);
+                cmbMedio.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbMedio.setWidth("125px");
+                return cmbMedio;
+            }
+        });
+
+        tableFlotaBac.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
+                ComboBox cmbLote = new ComboBox(null, ContLoteFloBac);
+                cmbLote.setReadOnly(true);
+                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbLote.setItemCaptionPropertyId("lote");
+                cmbLote.setNullSelectionAllowed(false);
+                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbLote.setPropertyDataSource(pro);
+                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
+                cmbLote.setWidth("85px");
+                return cmbLote;
+            }
+        });
+
+        tableFlotaBac.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, final Object itemId, Object columnId) {
+                Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
+                ComboBox cmbCliente = new ComboBox(null, ContCliGen);
+                cmbCliente.setReadOnly(true);
+                cmbCliente.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                cmbCliente.setItemCaptionPropertyId("nombre");
+                cmbCliente.setNullSelectionAllowed(false);
+                cmbCliente.addStyleName(ValoTheme.COMBOBOX_TINY);
+                cmbCliente.setPropertyDataSource(pro);
+                cmbCliente.setFilteringMode(FilteringMode.CONTAINS);
+                cmbCliente.setWidth("85px");
+                return cmbCliente;
+            }
+        });
+
+        tableFlotaBac.setVisibleColumns(new Object[]{"collote", "colcliente", "venta", "comentario"});
+        tableFlotaBac.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
+        tableFlotaBac.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableFlotaBac.setHeight(200f, Unit.PIXELS);
+        tableFlotaBac.addStyleName(ValoTheme.TABLE_COMPACT);
+        tableFlotaBac.addStyleName(ValoTheme.TABLE_SMALL);
     }
 
     private HorizontalLayout buildDetalleMontos() {
