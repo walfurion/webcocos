@@ -31,8 +31,12 @@ public class GenericRprControlMediosPago {
     private String nodeposito;
     private Double montoch;
     private Double montousd;
+    private String cliente;
+    
+    private String cod_cliente;
+    private String tipo_cliente;
 
-    public GenericRprControlMediosPago(Date fecha, Double mediopago_id, Double lote, Double monto_bruto, Double comision, Double monto_neto, String comentarios, String codigo, String estacion, String banco, String nodeposito, Double montoch, Double montousd) {
+    public GenericRprControlMediosPago(Date fecha, Double mediopago_id, Double lote, Double monto_bruto, Double comision, Double monto_neto, String comentarios, String codigo, String estacion, String banco, String nodeposito, Double montoch, Double montousd, String cliente,  String cod_cliente, String tipo_cliente) {
         this.fecha = fecha;
         this.mediopago_id = mediopago_id;
         this.lote = lote;
@@ -46,7 +50,9 @@ public class GenericRprControlMediosPago {
         this.nodeposito = nodeposito;
         this.montoch = montoch;
         this.montousd = montousd;
+        this.cliente = cliente;
+        
+        this.cod_cliente = cod_cliente;
+        this.tipo_cliente = tipo_cliente;
     }
-
-    
 }
