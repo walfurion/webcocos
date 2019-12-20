@@ -169,14 +169,14 @@ public class ExcelGeneratorCrlMediosPago {
             /*Se agrega el titulo a la hoja*/
             XSSFSheet sheetVERSATEC = null;
             XSSFSheet sheetTC_FLOTA_BCR = null;
-            XSSFSheet sheetTARJETA_BANCO_NACIONAL = null;
-            XSSFSheet sheetTARJETA_CREDOMATIC = null;
-            XSSFSheet sheetFLEET_MAGIC_DAVIVIENDA = null;
-            XSSFSheet sheetTARJETA_FLEET_MAGIC_SB = null;
-            XSSFSheet sheetTARJETA_BCR = null;
-            XSSFSheet sheetTC_FLOTA_BAC = null;
+            //XSSFSheet sheetTARJETA_BANCO_NACIONAL = null;
+            //XSSFSheet sheetTARJETA_CREDOMATIC = null;
+            //XSSFSheet sheetFLEET_MAGIC_DAVIVIENDA = null;
+            //XSSFSheet sheetTARJETA_FLEET_MAGIC_SB = null;
+            //XSSFSheet sheetTARJETA_BCR = null;
+            //XSSFSheet sheetTC_FLOTA_BAC = null;
             XSSFSheet sheetUNO_PLUS = null;
-            XSSFSheet sheetTC_DAVIVIENDA = null;
+            //XSSFSheet sheetTC_DAVIVIENDA = null;
 
             for (String titulohoja : sheetsname) {
                 if (titulohoja.equals("VERSATEC")) {
@@ -185,30 +185,30 @@ public class ExcelGeneratorCrlMediosPago {
                 if (titulohoja.equals("TC FLOTA BCR")) {
                     sheetTC_FLOTA_BCR = workbook.createSheet(titulohoja);
                 }
-                if (titulohoja.equals("TARJETA BANCO NACIONAL")) {
-                    sheetTARJETA_BANCO_NACIONAL = workbook.createSheet(titulohoja);
-                }
-                if (titulohoja.equals("TARJETA CREDOMATIC")) {
-                    sheetTARJETA_CREDOMATIC = workbook.createSheet(titulohoja);
-                }
-                if (titulohoja.equals("FLEET MAGIC DAVIVIENDA")) {
-                    sheetFLEET_MAGIC_DAVIVIENDA = workbook.createSheet(titulohoja);
-                }
-                if (titulohoja.equals("TARJETA FLEET MAGIC SB")) {
-                    sheetTARJETA_FLEET_MAGIC_SB = workbook.createSheet(titulohoja);
-                }
-                if (titulohoja.equals("TARJETA BCR")) {
-                    sheetTARJETA_BCR = workbook.createSheet(titulohoja);
-                }
-                if (titulohoja.equals("TC FLOTA BAC")) {
-                    sheetTC_FLOTA_BAC = workbook.createSheet(titulohoja);
-                }
+//                if (titulohoja.equals("TARJETA BANCO NACIONAL")) {
+//                    sheetTARJETA_BANCO_NACIONAL = workbook.createSheet(titulohoja);
+//                }
+//                if (titulohoja.equals("TARJETA CREDOMATIC")) {
+//                    sheetTARJETA_CREDOMATIC = workbook.createSheet(titulohoja);
+//                }
+//                if (titulohoja.equals("FLEET MAGIC DAVIVIENDA")) {
+//                    sheetFLEET_MAGIC_DAVIVIENDA = workbook.createSheet(titulohoja);
+//                }
+//                if (titulohoja.equals("TARJETA FLEET MAGIC SB")) {
+//                    sheetTARJETA_FLEET_MAGIC_SB = workbook.createSheet(titulohoja);
+//                }
+//                if (titulohoja.equals("TARJETA BCR")) {
+//                    sheetTARJETA_BCR = workbook.createSheet(titulohoja);
+//                }
+//                if (titulohoja.equals("TC FLOTA BAC")) {
+//                    sheetTC_FLOTA_BAC = workbook.createSheet(titulohoja);
+//                }
                 if (titulohoja.equals("UNO PLUS")) {
                     sheetUNO_PLUS = workbook.createSheet(titulohoja);
                 }
-                if (titulohoja.equals("TC DAVIVIENDA")) {
-                    sheetTC_DAVIVIENDA = workbook.createSheet(titulohoja);
-                }
+//                if (titulohoja.equals("TC DAVIVIENDA")) {
+//                    sheetTC_DAVIVIENDA = workbook.createSheet(titulohoja);
+//                }
             }
 
             //VERSATEC
@@ -346,278 +346,278 @@ public class ExcelGeneratorCrlMediosPago {
 //            //TARJETA BANCO NACIONAL
 //            
             /*Se setea el ancho de cada una de las columnas */
-            for (int b = 0; b < nocols + 7; b++) {
-                sheetTARJETA_BANCO_NACIONAL.setColumnWidth(b, 5500);
-            }
-
-
-            /*Se crea la primer fila para el titulo*/
-            XSSFRow header3 = sheetTARJETA_BANCO_NACIONAL.createRow(0);
-
-//            Se escribe el titulo principal
-            XSSFCell headerCellBN = header3.createCell(2); // Numero de columna en la que se creara el titulo
-            headerCellBN.setCellValue("TARJETA BANCO NACIONAL");
-            headerCellBN.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulo*/
-            XSSFRow subtituloBN = sheetTARJETA_BANCO_NACIONAL.createRow(2);
-            XSSFCell subtituloCellBN = subtituloBN.createCell(2);
-            subtituloCellBN.setCellValue(subtitulo1);
-            subtituloCellBN.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
-            XSSFRow subcombinadoBN = sheetTARJETA_BANCO_NACIONAL.createRow(5);
-//            int firstRow int lastRow int firstCol int lastCol
-            sheetTARJETA_BANCO_NACIONAL.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
-            XSSFCell subcombinadoCellBN = subcombinadoBN.createCell(0);
-            subcombinadoCellBN.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
-            subcombinadoCellBN.setCellStyle(subheaderStyle);
-
-            /*Agrega Borde a todas las Celdas Combinadas*/
-//            setBordersToMergedCells(sheet); Pendiente de corregir
-
-            /*Se crean los titulos de columnas*/
-            XSSFRow subprincipalBN = sheetTARJETA_BANCO_NACIONAL.createRow(6);
-            XSSFCell subprincipalcellBN;
-            Integer b;
-            b = 0;
-            for (String string : colsname) {
-                subprincipalcellBN = subprincipalBN.createCell(b);
-                subprincipalcellBN.setCellValue(string);
-                subprincipalcellBN.setCellStyle(subheaderStyle);
-                b++;
-
-            }
-//            
-//            //TARJETA CREDOMATIC
-//            
-            /*Se setea el ancho de cada una de las columnas */
-            for (int c = 0; c < nocols + 7; c++) {
-                sheetTARJETA_CREDOMATIC.setColumnWidth(c, 5500);
-            }
-
-
-            /*Se crea la primer fila para el titulo*/
-            XSSFRow header4 = sheetTARJETA_CREDOMATIC.createRow(0);
-
-//            Se escribe el titulo principal
-            XSSFCell headerCellCA = header4.createCell(2); // Numero de columna en la que se creara el titulo
-            headerCellCA.setCellValue("TARJETA CREDOMATIC");
-            headerCellCA.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulo*/
-            XSSFRow subtituloCA = sheetTARJETA_CREDOMATIC.createRow(2);
-            XSSFCell subtituloCellCA = subtituloCA.createCell(2);
-            subtituloCellCA.setCellValue(subtitulo1);
-            subtituloCellCA.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
-            XSSFRow subcombinadoCA = sheetTARJETA_CREDOMATIC.createRow(5);
-//            int firstRow int lastRow int firstCol int lastCol
-            sheetTARJETA_CREDOMATIC.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
-            XSSFCell subcombinadoCellCA = subcombinadoCA.createCell(0);
-            subcombinadoCellCA.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
-            subcombinadoCellCA.setCellStyle(subheaderStyle);
-
-            /*Agrega Borde a todas las Celdas Combinadas*/
-//            setBordersToMergedCells(sheet); Pendiente de corregir
-
-            /*Se crean los titulos de columnas*/
-            XSSFRow subprincipalCA = sheetTARJETA_CREDOMATIC.createRow(6);
-            XSSFCell subprincipalcellCA;
-            Integer c;
-            c = 0;
-            for (String string : colsname) {
-                subprincipalcellCA = subprincipalCA.createCell(c);
-                subprincipalcellCA.setCellValue(string);
-                subprincipalcellCA.setCellStyle(subheaderStyle);
-                c++;
-
-            }
-//            
-//            //FLEET MAGIC DAVIVIENDA
-//            
-            /*Se setea el ancho de cada una de las columnas */
-            for (int d = 0; d < nocols + 7; d++) {
-                sheetFLEET_MAGIC_DAVIVIENDA.setColumnWidth(d, 5500);
-            }
-
-
-            /*Se crea la primer fila para el titulo*/
-            XSSFRow header5 = sheetFLEET_MAGIC_DAVIVIENDA.createRow(0);
-
-//            Se escribe el titulo principal
-            XSSFCell headerCellFMD = header5.createCell(2); // Numero de columna en la que se creara el titulo
-            headerCellFMD.setCellValue("FLEET MAGIC DAVIVIENDA");
-            headerCellFMD.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulo*/
-            XSSFRow subtituloFMD = sheetFLEET_MAGIC_DAVIVIENDA.createRow(2);
-            XSSFCell subtituloCellFMD = subtituloFMD.createCell(2);
-            subtituloCellFMD.setCellValue(subtitulo1);
-            subtituloCellFMD.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
-            XSSFRow subcombinadoFMD = sheetFLEET_MAGIC_DAVIVIENDA.createRow(5);
-//            int firstRow int lastRow int firstCol int lastCol
-            sheetFLEET_MAGIC_DAVIVIENDA.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
-            XSSFCell subcombinadoCellFMD = subcombinadoFMD.createCell(0);
-            subcombinadoCellFMD.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
-            subcombinadoCellFMD.setCellStyle(subheaderStyle);
-
-            /*Agrega Borde a todas las Celdas Combinadas*/
-//            setBordersToMergedCells(sheet); Pendiente de corregir
-
-            /*Se crean los titulos de columnas*/
-            XSSFRow subprincipalFMD = sheetFLEET_MAGIC_DAVIVIENDA.createRow(6);
-            XSSFCell subprincipalcellFMD;
-            Integer d;
-            d = 0;
-            for (String string : colsname) {
-                subprincipalcellFMD = subprincipalFMD.createCell(d);
-                subprincipalcellFMD.setCellValue(string);
-                subprincipalcellFMD.setCellStyle(subheaderStyle);
-                d++;
-
-            }
-//            
-//            //TARJETA FLEET MAGIC SB
-//            
-            /*Se setea el ancho de cada una de las columnas */
-            for (int e = 0; e < nocols + 7; e++) {
-                sheetTARJETA_FLEET_MAGIC_SB.setColumnWidth(e, 5500);
-            }
-
-
-            /*Se crea la primer fila para el titulo*/
-            XSSFRow header6 = sheetTARJETA_FLEET_MAGIC_SB.createRow(0);
-
-//            Se escribe el titulo principal
-            XSSFCell headerCellFMS = header6.createCell(2); // Numero de columna en la que se creara el titulo
-            headerCellFMS.setCellValue("TARJETA FLEET MAGIC SB");
-            headerCellFMS.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulo*/
-            XSSFRow subtituloFMS = sheetTARJETA_FLEET_MAGIC_SB.createRow(2);
-            XSSFCell subtituloCellFMS = subtituloFMS.createCell(2);
-            subtituloCellFMS.setCellValue(subtitulo1);
-            subtituloCellFMS.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
-            XSSFRow subcombinadoFMS = sheetTARJETA_FLEET_MAGIC_SB.createRow(5);
-//            int firstRow int lastRow int firstCol int lastCol
-            sheetTARJETA_FLEET_MAGIC_SB.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
-            XSSFCell subcombinadoCellFMS = subcombinadoFMS.createCell(0);
-            subcombinadoCellFMS.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
-            subcombinadoCellFMS.setCellStyle(subheaderStyle);
-
-            /*Agrega Borde a todas las Celdas Combinadas*/
-//            setBordersToMergedCells(sheet); Pendiente de corregir
-
-            /*Se crean los titulos de columnas*/
-            XSSFRow subprincipalFMS = sheetTARJETA_FLEET_MAGIC_SB.createRow(6);
-            XSSFCell subprincipalcellFMS;
-            Integer e;
-            e = 0;
-            for (String string : colsname) {
-                subprincipalcellFMS = subprincipalFMS.createCell(e);
-                subprincipalcellFMS.setCellValue(string);
-                subprincipalcellFMS.setCellStyle(subheaderStyle);
-                e++;
-
-            }
-//         
-//            //TARJETA BCR
-//            
-            /*Se setea el ancho de cada una de las columnas */
-            for (int f = 0; f < nocols + 7; f++) {
-                sheetTARJETA_BCR.setColumnWidth(f, 5500);
-            }
-
-
-            /*Se crea la primer fila para el titulo*/
-            XSSFRow header7 = sheetTARJETA_BCR.createRow(0);
-
-//            Se escribe el titulo principal
-            XSSFCell headerCellBCR = header7.createCell(2); // Numero de columna en la que se creara el titulo
-            headerCellBCR.setCellValue("TARJETA BCR");
-            headerCellBCR.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulo*/
-            XSSFRow subtituloBCR = sheetTARJETA_BCR.createRow(2);
-            XSSFCell subtituloCellBCR = subtituloBCR.createCell(2);
-            subtituloCellBCR.setCellValue(subtitulo1);
-            subtituloCellBCR.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
-            XSSFRow subcombinadoBCR = sheetTARJETA_BCR.createRow(5);
-//            int firstRow int lastRow int firstCol int lastCol
-            sheetTARJETA_BCR.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
-            XSSFCell subcombinadoCellBCR = subcombinadoBCR.createCell(0);
-            subcombinadoCellBCR.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
-            subcombinadoCellBCR.setCellStyle(subheaderStyle);
-
-            /*Agrega Borde a todas las Celdas Combinadas*/
-//            setBordersToMergedCells(sheet); Pendiente de corregir
-
-            /*Se crean los titulos de columnas*/
-            XSSFRow subprincipalBCR = sheetTARJETA_BCR.createRow(6);
-            XSSFCell subprincipalcellBCR;
-            Integer f;
-            f = 0;
-            for (String string : colsname) {
-                subprincipalcellBCR = subprincipalBCR.createCell(f);
-                subprincipalcellBCR.setCellValue(string);
-                subprincipalcellBCR.setCellStyle(subheaderStyle);
-                f++;
-
-            }
-//            
-//            //TC FLOTA BAC
-//            
-            /*Se setea el ancho de cada una de las columnas */
-            for (int g = 0; g < nocols + 7; g++) {
-                sheetTC_FLOTA_BAC.setColumnWidth(g, 5500);
-            }
-
-
-            /*Se crea la primer fila para el titulo*/
-            XSSFRow header8 = sheetTC_FLOTA_BAC.createRow(0);
-
-//            Se escribe el titulo principal
-            XSSFCell headerCellTFB = header8.createCell(2); // Numero de columna en la que se creara el titulo
-            headerCellTFB.setCellValue("TC FLOTA BAC");
-            headerCellTFB.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulo*/
-            XSSFRow subtituloTFB = sheetTC_FLOTA_BAC.createRow(2);
-            XSSFCell subtituloCellTFB = subtituloTFB.createCell(2);
-            subtituloCellTFB.setCellValue(subtitulo1);
-            subtituloCellTFB.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
-            XSSFRow subcombinadoTFB = sheetTC_FLOTA_BAC.createRow(5);
-//            int firstRow int lastRow int firstCol int lastCol
-            sheetTC_FLOTA_BAC.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
-            XSSFCell subcombinadoCellTFB = subcombinadoTFB.createCell(0);
-            subcombinadoCellTFB.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
-            subcombinadoCellTFB.setCellStyle(subheaderStyle);
-
-            /*Agrega Borde a todas las Celdas Combinadas*/
-//            setBordersToMergedCells(sheet); Pendiente de corregir
-
-            /*Se crean los titulos de columnas*/
-            XSSFRow subprincipalTFB = sheetTC_FLOTA_BAC.createRow(6);
-            XSSFCell subprincipalcellTFB;
-            Integer g;
-            g = 0;
-            for (String string : colsname) {
-                subprincipalcellTFB = subprincipalTFB.createCell(g);
-                subprincipalcellTFB.setCellValue(string);
-                subprincipalcellTFB.setCellStyle(subheaderStyle);
-                g++;
-
-            }
+//            for (int b = 0; b < nocols + 7; b++) {
+//                sheetTARJETA_BANCO_NACIONAL.setColumnWidth(b, 5500);
+//            }
+//
+//
+//            /*Se crea la primer fila para el titulo*/
+//            XSSFRow header3 = sheetTARJETA_BANCO_NACIONAL.createRow(0);
+//
+////            Se escribe el titulo principal
+//            XSSFCell headerCellBN = header3.createCell(2); // Numero de columna en la que se creara el titulo
+//            headerCellBN.setCellValue("TARJETA BANCO NACIONAL");
+//            headerCellBN.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulo*/
+//            XSSFRow subtituloBN = sheetTARJETA_BANCO_NACIONAL.createRow(2);
+//            XSSFCell subtituloCellBN = subtituloBN.createCell(2);
+//            subtituloCellBN.setCellValue(subtitulo1);
+//            subtituloCellBN.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+//            XSSFRow subcombinadoBN = sheetTARJETA_BANCO_NACIONAL.createRow(5);
+////            int firstRow int lastRow int firstCol int lastCol
+//            sheetTARJETA_BANCO_NACIONAL.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+//            XSSFCell subcombinadoCellBN = subcombinadoBN.createCell(0);
+//            subcombinadoCellBN.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+//            subcombinadoCellBN.setCellStyle(subheaderStyle);
+//
+//            /*Agrega Borde a todas las Celdas Combinadas*/
+////            setBordersToMergedCells(sheet); Pendiente de corregir
+//
+//            /*Se crean los titulos de columnas*/
+//            XSSFRow subprincipalBN = sheetTARJETA_BANCO_NACIONAL.createRow(6);
+//            XSSFCell subprincipalcellBN;
+//            Integer b;
+//            b = 0;
+//            for (String string : colsname) {
+//                subprincipalcellBN = subprincipalBN.createCell(b);
+//                subprincipalcellBN.setCellValue(string);
+//                subprincipalcellBN.setCellStyle(subheaderStyle);
+//                b++;
+//
+//            }
+////            
+////            //TARJETA CREDOMATIC
+////            
+//            /*Se setea el ancho de cada una de las columnas */
+//            for (int c = 0; c < nocols + 7; c++) {
+//                sheetTARJETA_CREDOMATIC.setColumnWidth(c, 5500);
+//            }
+//
+//
+//            /*Se crea la primer fila para el titulo*/
+//            XSSFRow header4 = sheetTARJETA_CREDOMATIC.createRow(0);
+//
+////            Se escribe el titulo principal
+//            XSSFCell headerCellCA = header4.createCell(2); // Numero de columna en la que se creara el titulo
+//            headerCellCA.setCellValue("TARJETA CREDOMATIC");
+//            headerCellCA.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulo*/
+//            XSSFRow subtituloCA = sheetTARJETA_CREDOMATIC.createRow(2);
+//            XSSFCell subtituloCellCA = subtituloCA.createCell(2);
+//            subtituloCellCA.setCellValue(subtitulo1);
+//            subtituloCellCA.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+//            XSSFRow subcombinadoCA = sheetTARJETA_CREDOMATIC.createRow(5);
+////            int firstRow int lastRow int firstCol int lastCol
+//            sheetTARJETA_CREDOMATIC.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+//            XSSFCell subcombinadoCellCA = subcombinadoCA.createCell(0);
+//            subcombinadoCellCA.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+//            subcombinadoCellCA.setCellStyle(subheaderStyle);
+//
+//            /*Agrega Borde a todas las Celdas Combinadas*/
+////            setBordersToMergedCells(sheet); Pendiente de corregir
+//
+//            /*Se crean los titulos de columnas*/
+//            XSSFRow subprincipalCA = sheetTARJETA_CREDOMATIC.createRow(6);
+//            XSSFCell subprincipalcellCA;
+//            Integer c;
+//            c = 0;
+//            for (String string : colsname) {
+//                subprincipalcellCA = subprincipalCA.createCell(c);
+//                subprincipalcellCA.setCellValue(string);
+//                subprincipalcellCA.setCellStyle(subheaderStyle);
+//                c++;
+//
+//            }
+////            
+////            //FLEET MAGIC DAVIVIENDA
+////            
+//            /*Se setea el ancho de cada una de las columnas */
+//            for (int d = 0; d < nocols + 7; d++) {
+//                sheetFLEET_MAGIC_DAVIVIENDA.setColumnWidth(d, 5500);
+//            }
+//
+//
+//            /*Se crea la primer fila para el titulo*/
+//            XSSFRow header5 = sheetFLEET_MAGIC_DAVIVIENDA.createRow(0);
+//
+////            Se escribe el titulo principal
+//            XSSFCell headerCellFMD = header5.createCell(2); // Numero de columna en la que se creara el titulo
+//            headerCellFMD.setCellValue("FLEET MAGIC DAVIVIENDA");
+//            headerCellFMD.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulo*/
+//            XSSFRow subtituloFMD = sheetFLEET_MAGIC_DAVIVIENDA.createRow(2);
+//            XSSFCell subtituloCellFMD = subtituloFMD.createCell(2);
+//            subtituloCellFMD.setCellValue(subtitulo1);
+//            subtituloCellFMD.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+//            XSSFRow subcombinadoFMD = sheetFLEET_MAGIC_DAVIVIENDA.createRow(5);
+////            int firstRow int lastRow int firstCol int lastCol
+//            sheetFLEET_MAGIC_DAVIVIENDA.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+//            XSSFCell subcombinadoCellFMD = subcombinadoFMD.createCell(0);
+//            subcombinadoCellFMD.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+//            subcombinadoCellFMD.setCellStyle(subheaderStyle);
+//
+//            /*Agrega Borde a todas las Celdas Combinadas*/
+////            setBordersToMergedCells(sheet); Pendiente de corregir
+//
+//            /*Se crean los titulos de columnas*/
+//            XSSFRow subprincipalFMD = sheetFLEET_MAGIC_DAVIVIENDA.createRow(6);
+//            XSSFCell subprincipalcellFMD;
+//            Integer d;
+//            d = 0;
+//            for (String string : colsname) {
+//                subprincipalcellFMD = subprincipalFMD.createCell(d);
+//                subprincipalcellFMD.setCellValue(string);
+//                subprincipalcellFMD.setCellStyle(subheaderStyle);
+//                d++;
+//
+//            }
+////            
+////            //TARJETA FLEET MAGIC SB
+////            
+//            /*Se setea el ancho de cada una de las columnas */
+//            for (int e = 0; e < nocols + 7; e++) {
+//                sheetTARJETA_FLEET_MAGIC_SB.setColumnWidth(e, 5500);
+//            }
+//
+//
+//            /*Se crea la primer fila para el titulo*/
+//            XSSFRow header6 = sheetTARJETA_FLEET_MAGIC_SB.createRow(0);
+//
+////            Se escribe el titulo principal
+//            XSSFCell headerCellFMS = header6.createCell(2); // Numero de columna en la que se creara el titulo
+//            headerCellFMS.setCellValue("TARJETA FLEET MAGIC SB");
+//            headerCellFMS.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulo*/
+//            XSSFRow subtituloFMS = sheetTARJETA_FLEET_MAGIC_SB.createRow(2);
+//            XSSFCell subtituloCellFMS = subtituloFMS.createCell(2);
+//            subtituloCellFMS.setCellValue(subtitulo1);
+//            subtituloCellFMS.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+//            XSSFRow subcombinadoFMS = sheetTARJETA_FLEET_MAGIC_SB.createRow(5);
+////            int firstRow int lastRow int firstCol int lastCol
+//            sheetTARJETA_FLEET_MAGIC_SB.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+//            XSSFCell subcombinadoCellFMS = subcombinadoFMS.createCell(0);
+//            subcombinadoCellFMS.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+//            subcombinadoCellFMS.setCellStyle(subheaderStyle);
+//
+//            /*Agrega Borde a todas las Celdas Combinadas*/
+////            setBordersToMergedCells(sheet); Pendiente de corregir
+//
+//            /*Se crean los titulos de columnas*/
+//            XSSFRow subprincipalFMS = sheetTARJETA_FLEET_MAGIC_SB.createRow(6);
+//            XSSFCell subprincipalcellFMS;
+//            Integer e;
+//            e = 0;
+//            for (String string : colsname) {
+//                subprincipalcellFMS = subprincipalFMS.createCell(e);
+//                subprincipalcellFMS.setCellValue(string);
+//                subprincipalcellFMS.setCellStyle(subheaderStyle);
+//                e++;
+//
+//            }
+////         
+////            //TARJETA BCR
+////            
+//            /*Se setea el ancho de cada una de las columnas */
+//            for (int f = 0; f < nocols + 7; f++) {
+//                sheetTARJETA_BCR.setColumnWidth(f, 5500);
+//            }
+//
+//
+//            /*Se crea la primer fila para el titulo*/
+//            XSSFRow header7 = sheetTARJETA_BCR.createRow(0);
+//
+////            Se escribe el titulo principal
+//            XSSFCell headerCellBCR = header7.createCell(2); // Numero de columna en la que se creara el titulo
+//            headerCellBCR.setCellValue("TARJETA BCR");
+//            headerCellBCR.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulo*/
+//            XSSFRow subtituloBCR = sheetTARJETA_BCR.createRow(2);
+//            XSSFCell subtituloCellBCR = subtituloBCR.createCell(2);
+//            subtituloCellBCR.setCellValue(subtitulo1);
+//            subtituloCellBCR.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+//            XSSFRow subcombinadoBCR = sheetTARJETA_BCR.createRow(5);
+////            int firstRow int lastRow int firstCol int lastCol
+//            sheetTARJETA_BCR.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+//            XSSFCell subcombinadoCellBCR = subcombinadoBCR.createCell(0);
+//            subcombinadoCellBCR.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+//            subcombinadoCellBCR.setCellStyle(subheaderStyle);
+//
+//            /*Agrega Borde a todas las Celdas Combinadas*/
+////            setBordersToMergedCells(sheet); Pendiente de corregir
+//
+//            /*Se crean los titulos de columnas*/
+//            XSSFRow subprincipalBCR = sheetTARJETA_BCR.createRow(6);
+//            XSSFCell subprincipalcellBCR;
+//            Integer f;
+//            f = 0;
+//            for (String string : colsname) {
+//                subprincipalcellBCR = subprincipalBCR.createCell(f);
+//                subprincipalcellBCR.setCellValue(string);
+//                subprincipalcellBCR.setCellStyle(subheaderStyle);
+//                f++;
+//
+//            }
+////            
+////            //TC FLOTA BAC
+////            
+//            /*Se setea el ancho de cada una de las columnas */
+//            for (int g = 0; g < nocols + 7; g++) {
+//                sheetTC_FLOTA_BAC.setColumnWidth(g, 5500);
+//            }
+//
+//
+//            /*Se crea la primer fila para el titulo*/
+//            XSSFRow header8 = sheetTC_FLOTA_BAC.createRow(0);
+//
+////            Se escribe el titulo principal
+//            XSSFCell headerCellTFB = header8.createCell(2); // Numero de columna en la que se creara el titulo
+//            headerCellTFB.setCellValue("TC FLOTA BAC");
+//            headerCellTFB.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulo*/
+//            XSSFRow subtituloTFB = sheetTC_FLOTA_BAC.createRow(2);
+//            XSSFCell subtituloCellTFB = subtituloTFB.createCell(2);
+//            subtituloCellTFB.setCellValue(subtitulo1);
+//            subtituloCellTFB.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+//            XSSFRow subcombinadoTFB = sheetTC_FLOTA_BAC.createRow(5);
+////            int firstRow int lastRow int firstCol int lastCol
+//            sheetTC_FLOTA_BAC.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+//            XSSFCell subcombinadoCellTFB = subcombinadoTFB.createCell(0);
+//            subcombinadoCellTFB.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+//            subcombinadoCellTFB.setCellStyle(subheaderStyle);
+//
+//            /*Agrega Borde a todas las Celdas Combinadas*/
+////            setBordersToMergedCells(sheet); Pendiente de corregir
+//
+//            /*Se crean los titulos de columnas*/
+//            XSSFRow subprincipalTFB = sheetTC_FLOTA_BAC.createRow(6);
+//            XSSFCell subprincipalcellTFB;
+//            Integer g;
+//            g = 0;
+//            for (String string : colsname) {
+//                subprincipalcellTFB = subprincipalTFB.createCell(g);
+//                subprincipalcellTFB.setCellValue(string);
+//                subprincipalcellTFB.setCellStyle(subheaderStyle);
+//                g++;
+//
+//            }
 //            
 //            //UNO PLUS
 //            
@@ -668,48 +668,48 @@ public class ExcelGeneratorCrlMediosPago {
 //            //TC DAVIVIENDA
 //            
             /*Se setea el ancho de cada una de las columnas */
-            for (int k = 0; k < nocols + 7; k++) {
-                sheetTC_DAVIVIENDA.setColumnWidth(k, 5500);
-            }
-
-
-            /*Se crea la primer fila para el titulo*/
-            XSSFRow header10 = sheetTC_DAVIVIENDA.createRow(0);
-
-//            Se escribe el titulo principal
-            XSSFCell headerCellTD = header10.createCell(2); // Numero de columna en la que se creara el titulo
-            headerCellTD.setCellValue("TC DAVIVIENDA");
-            headerCellTD.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulo*/
-            XSSFRow subtituloTD = sheetTC_DAVIVIENDA.createRow(2);
-            XSSFCell subtituloCellTD = subtituloTD.createCell(2);
-            subtituloCellTD.setCellValue(subtitulo1);
-            subtituloCellTD.setCellStyle(headerStyle);
-
-            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
-            XSSFRow subcombinadoTD = sheetTC_DAVIVIENDA.createRow(5);
-//            int firstRow int lastRow int firstCol int lastCol
-            sheetTC_DAVIVIENDA.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
-            XSSFCell subcombinadoCellTD = subcombinadoTD.createCell(0);
-            subcombinadoCellTD.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
-            subcombinadoCellTD.setCellStyle(subheaderStyle);
-
-            /*Agrega Borde a todas las Celdas Combinadas*/
-//            setBordersToMergedCells(sheet); Pendiente de corregir
-
-            /*Se crean los titulos de columnas*/
-            XSSFRow subprincipalTD = sheetTC_DAVIVIENDA.createRow(6);
-            XSSFCell subprincipalcellTD;
-            Integer k;
-            k = 0;
-            for (String string : colsname) {
-                subprincipalcellTD = subprincipalTD.createCell(k);
-                subprincipalcellTD.setCellValue(string);
-                subprincipalcellTD.setCellStyle(subheaderStyle);
-                k++;
-
-            }
+//            for (int k = 0; k < nocols + 7; k++) {
+//                sheetTC_DAVIVIENDA.setColumnWidth(k, 5500);
+//            }
+//
+//
+//            /*Se crea la primer fila para el titulo*/
+//            XSSFRow header10 = sheetTC_DAVIVIENDA.createRow(0);
+//
+////            Se escribe el titulo principal
+//            XSSFCell headerCellTD = header10.createCell(2); // Numero de columna en la que se creara el titulo
+//            headerCellTD.setCellValue("TC DAVIVIENDA");
+//            headerCellTD.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulo*/
+//            XSSFRow subtituloTD = sheetTC_DAVIVIENDA.createRow(2);
+//            XSSFCell subtituloCellTD = subtituloTD.createCell(2);
+//            subtituloCellTD.setCellValue(subtitulo1);
+//            subtituloCellTD.setCellStyle(headerStyle);
+//
+//            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+//            XSSFRow subcombinadoTD = sheetTC_DAVIVIENDA.createRow(5);
+////            int firstRow int lastRow int firstCol int lastCol
+//            sheetTC_DAVIVIENDA.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+//            XSSFCell subcombinadoCellTD = subcombinadoTD.createCell(0);
+//            subcombinadoCellTD.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+//            subcombinadoCellTD.setCellStyle(subheaderStyle);
+//
+//            /*Agrega Borde a todas las Celdas Combinadas*/
+////            setBordersToMergedCells(sheet); Pendiente de corregir
+//
+//            /*Se crean los titulos de columnas*/
+//            XSSFRow subprincipalTD = sheetTC_DAVIVIENDA.createRow(6);
+//            XSSFCell subprincipalcellTD;
+//            Integer k;
+//            k = 0;
+//            for (String string : colsname) {
+//                subprincipalcellTD = subprincipalTD.createCell(k);
+//                subprincipalcellTD.setCellValue(string);
+//                subprincipalcellTD.setCellStyle(subheaderStyle);
+//                k++;
+//
+//            }
 
             //Cuando se desee crear mas de una Hoja se debe leer el Array de Hojas y crear 1 a 1
             XSSFRow datosVERSATEC;
@@ -726,47 +726,47 @@ public class ExcelGeneratorCrlMediosPago {
             aa = 0;
             Integer filasfb = lista.size();
 
-            XSSFRow datosTARJETA_BANCO_NACIONAL;
-            XSSFCell datoscellTARJETA_BANCO_NACIONAL;
-            Integer bb; //COLUMNAS
-            Integer bn = 7; //FILAS
-            bb = 0;
-            Integer filasbn = lista.size();
-
-            XSSFRow datosTARJETA_CREDOMATIC;
-            XSSFCell datoscellTARJETA_CREDOMATIC;
-            Integer cc; //COLUMNAS
-            Integer tc = 7; //FILAS
-            cc = 0;
-            Integer filastc = lista.size();
-
-            XSSFRow datosFLEET_MAGIC_DAVIVIENDA;
-            XSSFCell datoscellFLEET_MAGIC_DAVIVIENDA;
-            Integer dd; //COLUMNAS
-            Integer md = 7; //FILAS
-            dd = 0;
-            Integer filasmd = lista.size();
-
-            XSSFRow datosTARJETA_FLEET_MAGIC_SB;
-            XSSFCell datoscellTARJETA_FLEET_MAGIC_SB;
-            Integer ee; //COLUMNAS
-            Integer fm = 7; //FILAS
-            ee = 0;
-            Integer filasfm = lista.size();
-
-            XSSFRow datosTARJETA_BCR;
-            XSSFCell datoscellTARJETA_BCR;
-            Integer ff; //COLUMNAS
-            Integer tb = 7; //FILAS
-            ff = 0;
-            Integer filastb = lista.size();
-
-            XSSFRow datosTC_FLOTA_BAC;
-            XSSFCell datoscellTC_FLOTA_BAC;
-            Integer gg; //COLUMNAS
-            Integer tfb = 7; //FILAS
-            gg = 0;
-            Integer filastfb = lista.size();
+//            XSSFRow datosTARJETA_BANCO_NACIONAL;
+//            XSSFCell datoscellTARJETA_BANCO_NACIONAL;
+//            Integer bb; //COLUMNAS
+//            Integer bn = 7; //FILAS
+//            bb = 0;
+//            Integer filasbn = lista.size();
+//
+//            XSSFRow datosTARJETA_CREDOMATIC;
+//            XSSFCell datoscellTARJETA_CREDOMATIC;
+//            Integer cc; //COLUMNAS
+//            Integer tc = 7; //FILAS
+//            cc = 0;
+//            Integer filastc = lista.size();
+//
+//            XSSFRow datosFLEET_MAGIC_DAVIVIENDA;
+//            XSSFCell datoscellFLEET_MAGIC_DAVIVIENDA;
+//            Integer dd; //COLUMNAS
+//            Integer md = 7; //FILAS
+//            dd = 0;
+//            Integer filasmd = lista.size();
+//
+//            XSSFRow datosTARJETA_FLEET_MAGIC_SB;
+//            XSSFCell datoscellTARJETA_FLEET_MAGIC_SB;
+//            Integer ee; //COLUMNAS
+//            Integer fm = 7; //FILAS
+//            ee = 0;
+//            Integer filasfm = lista.size();
+//
+//            XSSFRow datosTARJETA_BCR;
+//            XSSFCell datoscellTARJETA_BCR;
+//            Integer ff; //COLUMNAS
+//            Integer tb = 7; //FILAS
+//            ff = 0;
+//            Integer filastb = lista.size();
+//
+//            XSSFRow datosTC_FLOTA_BAC;
+//            XSSFCell datoscellTC_FLOTA_BAC;
+//            Integer gg; //COLUMNAS
+//            Integer tfb = 7; //FILAS
+//            gg = 0;
+//            Integer filastfb = lista.size();
 
             XSSFRow datosUNO_PLUS;
             XSSFCell datoscellUNO_PLUS;
@@ -775,12 +775,12 @@ public class ExcelGeneratorCrlMediosPago {
             hh = 0;
             Integer filasup = lista.size();
 
-            XSSFRow datosTC_DAVIVIENDA;
-            XSSFCell datoscellTC_DAVIVIENDA;
-            Integer jj; //COLUMNAS
-            Integer dv = 7; //FILAS
-            jj = 0;
-            Integer filasdv = lista.size();
+//            XSSFRow datosTC_DAVIVIENDA;
+//            XSSFCell datoscellTC_DAVIVIENDA;
+//            Integer jj; //COLUMNAS
+//            Integer dv = 7; //FILAS
+//            jj = 0;
+//            Integer filasdv = lista.size();
 
             for (GenericRprControlMediosPago itemId : lista.getItemIds()) {
                 if (itemId.getMediopago_id() == 119) {
@@ -860,215 +860,215 @@ public class ExcelGeneratorCrlMediosPago {
                     fb++;
                 }
 
-                if (itemId.getMediopago_id() == 7) {
-                    datosTARJETA_BANCO_NACIONAL = sheetTARJETA_BANCO_NACIONAL.createRow(bn);
-
-                    bb = 0;
-                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
-                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getFecha());
-                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleFecha);
-                    bb++;
-                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
-                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getLote());
-                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
-                    bb++;
-                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
-                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getMonto_bruto());
-                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
-                    bb++;
-                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
-                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getComision());
-                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
-                    bb++;
-
-                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
-                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getMonto_neto());
-                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
-                    bb++;
-
-                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
-                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getComentarios());
-                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleString);
-                    bb++;
-
-                    /*Al Final*/
-                    bn++;
-                }
-
-                if (itemId.getMediopago_id() == 107) {
-                    datosTARJETA_CREDOMATIC = sheetTARJETA_CREDOMATIC.createRow(tc);
-
-                    cc = 0;
-                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
-                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getFecha());
-                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleFecha);
-                    cc++;
-                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
-                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getLote());
-                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
-                    cc++;
-                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
-                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getMonto_bruto());
-                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
-                    cc++;
-                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
-                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getComision());
-                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
-                    cc++;
-
-                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
-                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getMonto_neto());
-                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
-                    cc++;
-
-                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
-                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getComentarios());
-                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleString);
-                    cc++;
-
-                    /*Al Final*/
-                    tc++;
-                }
-
-                if (itemId.getMediopago_id() == 115) {
-                    datosFLEET_MAGIC_DAVIVIENDA = sheetFLEET_MAGIC_DAVIVIENDA.createRow(md);
-
-                    dd = 0;
-                    datoscellFLEET_MAGIC_DAVIVIENDA = datosFLEET_MAGIC_DAVIVIENDA.createCell(dd);
-                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellValue(itemId.getFecha());
-                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellStyle(styleFecha);
-                    dd++;
-                    datoscellFLEET_MAGIC_DAVIVIENDA = datosFLEET_MAGIC_DAVIVIENDA.createCell(dd);
-                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellValue(itemId.getLote());
-                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellStyle(styleNumber);
-                    dd++;
-                    datoscellFLEET_MAGIC_DAVIVIENDA = datosFLEET_MAGIC_DAVIVIENDA.createCell(dd);
-                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellValue(itemId.getMonto_bruto());
-                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellStyle(styleNumber);
-                    dd++;
-                    datoscellFLEET_MAGIC_DAVIVIENDA = datosFLEET_MAGIC_DAVIVIENDA.createCell(dd);
-                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellValue(itemId.getComision());
-                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellStyle(styleNumber);
-                    dd++;
-
-                    datoscellFLEET_MAGIC_DAVIVIENDA = datosFLEET_MAGIC_DAVIVIENDA.createCell(dd);
-                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellValue(itemId.getMonto_neto());
-                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellStyle(styleNumber);
-                    dd++;
-
-                    datoscellFLEET_MAGIC_DAVIVIENDA = datosFLEET_MAGIC_DAVIVIENDA.createCell(dd);
-                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellValue(itemId.getComentarios());
-                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellStyle(styleString);
-                    dd++;
-
-                    /*Al Final*/
-                    md++;
-                }
-
-                if (itemId.getMediopago_id() == 116) {
-                    datosTARJETA_FLEET_MAGIC_SB = sheetTARJETA_FLEET_MAGIC_SB.createRow(fm);
-
-                    ee = 0;
-                    datoscellTARJETA_FLEET_MAGIC_SB = datosTARJETA_FLEET_MAGIC_SB.createCell(ee);
-                    datoscellTARJETA_FLEET_MAGIC_SB.setCellValue(itemId.getFecha());
-                    datoscellTARJETA_FLEET_MAGIC_SB.setCellStyle(styleFecha);
-                    ee++;
-                    datoscellTARJETA_FLEET_MAGIC_SB = datosTARJETA_FLEET_MAGIC_SB.createCell(ee);
-                    datoscellTARJETA_FLEET_MAGIC_SB.setCellValue(itemId.getLote());
-                    datoscellTARJETA_FLEET_MAGIC_SB.setCellStyle(styleNumber);
-                    ee++;
-                    datoscellTARJETA_FLEET_MAGIC_SB = datosTARJETA_FLEET_MAGIC_SB.createCell(ee);
-                    datoscellTARJETA_FLEET_MAGIC_SB.setCellValue(itemId.getMonto_bruto());
-                    datoscellTARJETA_FLEET_MAGIC_SB.setCellStyle(styleNumber);
-                    ee++;
-                    datoscellTARJETA_FLEET_MAGIC_SB = datosTARJETA_FLEET_MAGIC_SB.createCell(ee);
-                    datoscellTARJETA_FLEET_MAGIC_SB.setCellValue(itemId.getComision());
-                    datoscellTARJETA_FLEET_MAGIC_SB.setCellStyle(styleNumber);
-                    ee++;
-
-                    datoscellTARJETA_FLEET_MAGIC_SB = datosTARJETA_FLEET_MAGIC_SB.createCell(ee);
-                    datoscellTARJETA_FLEET_MAGIC_SB.setCellValue(itemId.getMonto_neto());
-                    datoscellTARJETA_FLEET_MAGIC_SB.setCellStyle(styleNumber);
-                    ee++;
-
-                    datoscellTARJETA_FLEET_MAGIC_SB = datosTARJETA_FLEET_MAGIC_SB.createCell(ee);
-                    datoscellTARJETA_FLEET_MAGIC_SB.setCellValue(itemId.getComentarios());
-                    datoscellTARJETA_FLEET_MAGIC_SB.setCellStyle(styleString);
-                    ee++;
-
-                    /*Al Final*/
-                    fm++;
-                }
-
-                if (itemId.getMediopago_id() == 118) {
-                    datosTARJETA_BCR = sheetTARJETA_BCR.createRow(tb);
-
-                    ff = 0;
-                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
-                    datoscellTARJETA_BCR.setCellValue(itemId.getFecha());
-                    datoscellTARJETA_BCR.setCellStyle(styleFecha);
-                    ff++;
-                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
-                    datoscellTARJETA_BCR.setCellValue(itemId.getLote());
-                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
-                    ff++;
-                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
-                    datoscellTARJETA_BCR.setCellValue(itemId.getMonto_bruto());
-                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
-                    ff++;
-                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
-                    datoscellTARJETA_BCR.setCellValue(itemId.getComision());
-                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
-                    ff++;
-
-                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
-                    datoscellTARJETA_BCR.setCellValue(itemId.getMonto_neto());
-                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
-                    ff++;
-
-                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
-                    datoscellTARJETA_BCR.setCellValue(itemId.getComentarios());
-                    datoscellTARJETA_BCR.setCellStyle(styleString);
-                    ff++;
-
-                    /*Al Final*/
-                    tb++;
-                }
-
-                if (itemId.getMediopago_id() == 121) {
-                    datosTC_FLOTA_BAC = sheetTC_FLOTA_BAC.createRow(tfb);
-
-                    gg = 0;
-                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
-                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getFecha());
-                    datoscellTC_FLOTA_BAC.setCellStyle(styleFecha);
-                    gg++;
-                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
-                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getLote());
-                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
-                    gg++;
-                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
-                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getMonto_bruto());
-                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
-                    gg++;
-                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
-                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getComision());
-                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
-                    gg++;
-
-                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
-                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getMonto_neto());
-                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
-                    gg++;
-
-                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
-                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getComentarios());
-                    datoscellTC_FLOTA_BAC.setCellStyle(styleString);
-                    gg++;
-
-                    /*Al Final*/
-                    tfb++;
-                }
+//                if (itemId.getMediopago_id() == 7) {
+//                    datosTARJETA_BANCO_NACIONAL = sheetTARJETA_BANCO_NACIONAL.createRow(bn);
+//
+//                    bb = 0;
+//                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+//                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getFecha());
+//                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleFecha);
+//                    bb++;
+//                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+//                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getLote());
+//                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
+//                    bb++;
+//                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+//                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getMonto_bruto());
+//                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
+//                    bb++;
+//                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+//                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getComision());
+//                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
+//                    bb++;
+//
+//                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+//                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getMonto_neto());
+//                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
+//                    bb++;
+//
+//                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+//                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getComentarios());
+//                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleString);
+//                    bb++;
+//
+//                    /*Al Final*/
+//                    bn++;
+//                }
+//
+//                if (itemId.getMediopago_id() == 107) {
+//                    datosTARJETA_CREDOMATIC = sheetTARJETA_CREDOMATIC.createRow(tc);
+//
+//                    cc = 0;
+//                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+//                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getFecha());
+//                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleFecha);
+//                    cc++;
+//                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+//                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getLote());
+//                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
+//                    cc++;
+//                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+//                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getMonto_bruto());
+//                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
+//                    cc++;
+//                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+//                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getComision());
+//                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
+//                    cc++;
+//
+//                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+//                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getMonto_neto());
+//                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
+//                    cc++;
+//
+//                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+//                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getComentarios());
+//                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleString);
+//                    cc++;
+//
+//                    /*Al Final*/
+//                    tc++;
+//                }
+//
+//                if (itemId.getMediopago_id() == 115) {
+//                    datosFLEET_MAGIC_DAVIVIENDA = sheetFLEET_MAGIC_DAVIVIENDA.createRow(md);
+//
+//                    dd = 0;
+//                    datoscellFLEET_MAGIC_DAVIVIENDA = datosFLEET_MAGIC_DAVIVIENDA.createCell(dd);
+//                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellValue(itemId.getFecha());
+//                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellStyle(styleFecha);
+//                    dd++;
+//                    datoscellFLEET_MAGIC_DAVIVIENDA = datosFLEET_MAGIC_DAVIVIENDA.createCell(dd);
+//                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellValue(itemId.getLote());
+//                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellStyle(styleNumber);
+//                    dd++;
+//                    datoscellFLEET_MAGIC_DAVIVIENDA = datosFLEET_MAGIC_DAVIVIENDA.createCell(dd);
+//                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellValue(itemId.getMonto_bruto());
+//                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellStyle(styleNumber);
+//                    dd++;
+//                    datoscellFLEET_MAGIC_DAVIVIENDA = datosFLEET_MAGIC_DAVIVIENDA.createCell(dd);
+//                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellValue(itemId.getComision());
+//                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellStyle(styleNumber);
+//                    dd++;
+//
+//                    datoscellFLEET_MAGIC_DAVIVIENDA = datosFLEET_MAGIC_DAVIVIENDA.createCell(dd);
+//                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellValue(itemId.getMonto_neto());
+//                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellStyle(styleNumber);
+//                    dd++;
+//
+//                    datoscellFLEET_MAGIC_DAVIVIENDA = datosFLEET_MAGIC_DAVIVIENDA.createCell(dd);
+//                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellValue(itemId.getComentarios());
+//                    datoscellFLEET_MAGIC_DAVIVIENDA.setCellStyle(styleString);
+//                    dd++;
+//
+//                    /*Al Final*/
+//                    md++;
+//                }
+//
+//                if (itemId.getMediopago_id() == 116) {
+//                    datosTARJETA_FLEET_MAGIC_SB = sheetTARJETA_FLEET_MAGIC_SB.createRow(fm);
+//
+//                    ee = 0;
+//                    datoscellTARJETA_FLEET_MAGIC_SB = datosTARJETA_FLEET_MAGIC_SB.createCell(ee);
+//                    datoscellTARJETA_FLEET_MAGIC_SB.setCellValue(itemId.getFecha());
+//                    datoscellTARJETA_FLEET_MAGIC_SB.setCellStyle(styleFecha);
+//                    ee++;
+//                    datoscellTARJETA_FLEET_MAGIC_SB = datosTARJETA_FLEET_MAGIC_SB.createCell(ee);
+//                    datoscellTARJETA_FLEET_MAGIC_SB.setCellValue(itemId.getLote());
+//                    datoscellTARJETA_FLEET_MAGIC_SB.setCellStyle(styleNumber);
+//                    ee++;
+//                    datoscellTARJETA_FLEET_MAGIC_SB = datosTARJETA_FLEET_MAGIC_SB.createCell(ee);
+//                    datoscellTARJETA_FLEET_MAGIC_SB.setCellValue(itemId.getMonto_bruto());
+//                    datoscellTARJETA_FLEET_MAGIC_SB.setCellStyle(styleNumber);
+//                    ee++;
+//                    datoscellTARJETA_FLEET_MAGIC_SB = datosTARJETA_FLEET_MAGIC_SB.createCell(ee);
+//                    datoscellTARJETA_FLEET_MAGIC_SB.setCellValue(itemId.getComision());
+//                    datoscellTARJETA_FLEET_MAGIC_SB.setCellStyle(styleNumber);
+//                    ee++;
+//
+//                    datoscellTARJETA_FLEET_MAGIC_SB = datosTARJETA_FLEET_MAGIC_SB.createCell(ee);
+//                    datoscellTARJETA_FLEET_MAGIC_SB.setCellValue(itemId.getMonto_neto());
+//                    datoscellTARJETA_FLEET_MAGIC_SB.setCellStyle(styleNumber);
+//                    ee++;
+//
+//                    datoscellTARJETA_FLEET_MAGIC_SB = datosTARJETA_FLEET_MAGIC_SB.createCell(ee);
+//                    datoscellTARJETA_FLEET_MAGIC_SB.setCellValue(itemId.getComentarios());
+//                    datoscellTARJETA_FLEET_MAGIC_SB.setCellStyle(styleString);
+//                    ee++;
+//
+//                    /*Al Final*/
+//                    fm++;
+//                }
+//
+//                if (itemId.getMediopago_id() == 118) {
+//                    datosTARJETA_BCR = sheetTARJETA_BCR.createRow(tb);
+//
+//                    ff = 0;
+//                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+//                    datoscellTARJETA_BCR.setCellValue(itemId.getFecha());
+//                    datoscellTARJETA_BCR.setCellStyle(styleFecha);
+//                    ff++;
+//                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+//                    datoscellTARJETA_BCR.setCellValue(itemId.getLote());
+//                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
+//                    ff++;
+//                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+//                    datoscellTARJETA_BCR.setCellValue(itemId.getMonto_bruto());
+//                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
+//                    ff++;
+//                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+//                    datoscellTARJETA_BCR.setCellValue(itemId.getComision());
+//                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
+//                    ff++;
+//
+//                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+//                    datoscellTARJETA_BCR.setCellValue(itemId.getMonto_neto());
+//                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
+//                    ff++;
+//
+//                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+//                    datoscellTARJETA_BCR.setCellValue(itemId.getComentarios());
+//                    datoscellTARJETA_BCR.setCellStyle(styleString);
+//                    ff++;
+//
+//                    /*Al Final*/
+//                    tb++;
+//                }
+//
+//                if (itemId.getMediopago_id() == 121) {
+//                    datosTC_FLOTA_BAC = sheetTC_FLOTA_BAC.createRow(tfb);
+//
+//                    gg = 0;
+//                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+//                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getFecha());
+//                    datoscellTC_FLOTA_BAC.setCellStyle(styleFecha);
+//                    gg++;
+//                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+//                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getLote());
+//                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
+//                    gg++;
+//                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+//                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getMonto_bruto());
+//                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
+//                    gg++;
+//                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+//                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getComision());
+//                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
+//                    gg++;
+//
+//                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+//                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getMonto_neto());
+//                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
+//                    gg++;
+//
+//                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+//                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getComentarios());
+//                    datoscellTC_FLOTA_BAC.setCellStyle(styleString);
+//                    gg++;
+//
+//                    /*Al Final*/
+//                    tfb++;
+//                }
 
                 if (itemId.getMediopago_id() == 122) {
                     datosUNO_PLUS = sheetUNO_PLUS.createRow(up);
@@ -1105,40 +1105,40 @@ public class ExcelGeneratorCrlMediosPago {
                     up++;
                 }
 
-                if (itemId.getMediopago_id() == 123) {
-                    datosTC_DAVIVIENDA = sheetTC_DAVIVIENDA.createRow(dv);
-
-                    jj = 0;
-                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
-                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getFecha());
-                    datoscellTC_DAVIVIENDA.setCellStyle(styleFecha);
-                    jj++;
-                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
-                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getLote());
-                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
-                    jj++;
-                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
-                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getMonto_bruto());
-                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
-                    jj++;
-                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
-                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getComision());
-                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
-                    jj++;
-
-                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
-                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getMonto_neto());
-                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
-                    jj++;
-
-                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
-                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getComentarios());
-                    datoscellTC_DAVIVIENDA.setCellStyle(styleString);
-                    jj++;
-
-                    /*Al Final*/
-                    dv++;
-                }
+//                if (itemId.getMediopago_id() == 123) {
+//                    datosTC_DAVIVIENDA = sheetTC_DAVIVIENDA.createRow(dv);
+//
+//                    jj = 0;
+//                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+//                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getFecha());
+//                    datoscellTC_DAVIVIENDA.setCellStyle(styleFecha);
+//                    jj++;
+//                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+//                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getLote());
+//                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
+//                    jj++;
+//                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+//                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getMonto_bruto());
+//                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
+//                    jj++;
+//                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+//                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getComision());
+//                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
+//                    jj++;
+//
+//                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+//                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getMonto_neto());
+//                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
+//                    jj++;
+//
+//                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+//                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getComentarios());
+//                    datoscellTC_DAVIVIENDA.setCellStyle(styleString);
+//                    jj++;
+//
+//                    /*Al Final*/
+//                    dv++;
+//                }
 
             }
             XSSFSheet sheetDEPOSITOS_COLONES = null;
@@ -1377,6 +1377,780 @@ public class ExcelGeneratorCrlMediosPago {
                     usdd++;
                 }
             }
+            
+            XSSFSheet sheetFF_MAGIC_DAV = null;
+            XSSFSheet sheetFF_MAGIC_SCOTTIA = null;
+            List<String> titulosColumnasHijosClientesManuales = new ArrayList<String>();
+            String[] titulosHijosClientesManuales = new String[]{"Fecha", "Lote", "Cliente", "Venta", "Comentarios"};
+            /*como crear un objeto arrylist de tipo string*/
+            ArrayList<String> tituloshojasHijosClientesManuales = new ArrayList<String>();
+            tituloshojasHijosClientesManuales.add("FF MAGIC DAV");
+            tituloshojasHijosClientesManuales.add("FF MAGIC SCOTTIA");
+
+            titulosColumnasHijosClientesManuales = Arrays.asList(titulosHijosClientesManuales);
+
+            //DEPOSITOS COLONES
+            for (String tituloshojasHijosClientesManuales1 : tituloshojasHijosClientesManuales) {
+                if (tituloshojasHijosClientesManuales1.equals("FF MAGIC DAV")) {
+                    sheetFF_MAGIC_DAV = workbook.createSheet(tituloshojasHijosClientesManuales1);
+                }
+                if (tituloshojasHijosClientesManuales1.equals("FF MAGIC SCOTTIA")) {
+                    sheetFF_MAGIC_SCOTTIA = workbook.createSheet(tituloshojasHijosClientesManuales1);
+                }
+
+            }
+//            
+            /*Se setea el ancho de cada una de las columnas */
+            for (int vv = 0; vv < nocols + 7; vv++) {
+                sheetFF_MAGIC_DAV.setColumnWidth(vv, 5500);
+            }
+            
+//            for (int vv = 0; vv < tituloscolumnasefectivo.size(); vv++) {
+//                sheetDEPOSITOS_COLONES.setColumnWidth(vv, 5500);
+//            }
+
+
+            /*Se crea la primer fila para el titulo*/
+            XSSFRow header13 = sheetFF_MAGIC_DAV.createRow(0);
+
+//            Se escribe el titulo principal
+            XSSFCell headerCellDAV = header13.createCell(2); // Numero de columna en la que se creara el titulo
+            headerCellDAV.setCellValue("FF MAGIC DAV");
+            headerCellDAV.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulo*/
+            XSSFRow subtituloDAV = sheetFF_MAGIC_DAV.createRow(2);
+            XSSFCell subtituloCellDAV = subtituloDAV.createCell(2);
+            subtituloCellDAV.setCellValue(subtitulo1);
+            subtituloCellDAV.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+            XSSFRow subcombinadoDAV = sheetFF_MAGIC_DAV.createRow(5);
+//            int firstRow int lastRow int firstCol int lastCol
+            sheetFF_MAGIC_DAV.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+            XSSFCell subcombinadoCellDAV = subcombinadoDAV.createCell(0);
+            subcombinadoCellDAV.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+            subcombinadoCellDAV.setCellStyle(subheaderStyle);
+
+            /*Agrega Borde a todas las Celdas Combinadas*/
+//            setBordersToMergedCells(sheet); Pendiente de corregir
+
+            /*Se crean los titulos de columnas*/
+            XSSFRow subprincipalDAV = sheetFF_MAGIC_DAV.createRow(6);
+            XSSFCell subprincipalcellDAV;
+            Integer DAV;
+            DAV = 0;
+            for (String string : titulosHijosClientesManuales) {
+                subprincipalcellDAV = subprincipalDAV.createCell(DAV);
+                subprincipalcellDAV.setCellValue(string);
+                subprincipalcellDAV.setCellStyle(subheaderStyle);
+                DAV++;
+
+            }
+
+            //DEPOSITOS DOLARES
+//            
+            /*Se setea el ancho de cada una de las columnas */
+            for (int TIA = 0; TIA < nocols + 7; TIA++) {
+                sheetFF_MAGIC_SCOTTIA.setColumnWidth(TIA, 5500);
+            }
+            
+//            for (int xx = 0; xx < tituloscolumnasefectivo.size(); xx++) {
+//                sheetDEPOSITOS_DOLARES.setColumnWidth(xx, 5500);
+//            }
+
+
+            /*Se crea la primer fila para el titulo*/
+            XSSFRow header14 = sheetFF_MAGIC_SCOTTIA.createRow(0);
+
+//            Se escribe el titulo principal
+            XSSFCell headerCellTIA = header14.createCell(2); // Numero de columna en la que se creara el titulo
+            headerCellTIA.setCellValue("FF MAGIC SCOTTIA");
+            headerCellTIA.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulo*/
+            XSSFRow subtituloTIA = sheetFF_MAGIC_SCOTTIA.createRow(2);
+            XSSFCell subtituloCellTIA = subtituloTIA.createCell(2);
+            subtituloCellTIA.setCellValue(subtitulo1);
+            subtituloCellTIA.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+            XSSFRow subcombinadoTIA = sheetFF_MAGIC_SCOTTIA.createRow(5);
+//            int firstRow int lastRow int firstCol int lastCol
+            sheetFF_MAGIC_SCOTTIA.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+            XSSFCell subcombinadoCellTIA = subcombinadoTIA.createCell(0);
+            subcombinadoCellTIA.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+            subcombinadoCellTIA.setCellStyle(subheaderStyle);
+
+            /*Agrega Borde a todas las Celdas Combinadas*/
+//            setBordersToMergedCells(sheet); Pendiente de corregir
+
+            /*Se crean los titulos de columnas*/
+            XSSFRow subprincipalTIA = sheetFF_MAGIC_SCOTTIA.createRow(6);
+            XSSFCell subprincipalcellTIA;
+            Integer TIA;
+            TIA = 0;
+            for (String string : titulosHijosClientesManuales) {
+                subprincipalcellTIA = subprincipalTIA.createCell(TIA);
+                subprincipalcellTIA.setCellValue(string);
+                subprincipalcellTIA.setCellStyle(subheaderStyle);
+                TIA++;
+
+            }
+
+            XSSFRow datosFF_MAGIC_DAV;
+            XSSFCell datoscellFF_MAGIC_DAV;
+            Integer MAG; //COLUMNAS
+            Integer IC = 7; //FILAS
+            MAG = 0;
+            Integer filasMAG = lista.size();
+            
+            XSSFRow datosFF_MAGIC_SCOTTIA;
+            XSSFCell datoscellFF_MAGIC_SCOTTIA;
+            Integer SCO; //COLUMNAS
+            Integer TTIA = 7; //FILAS
+            SCO = 0;
+            Integer filasSCO = lista.size();
+
+
+            for (GenericRprControlMediosPago itemId : lista.getItemIds()) {
+                if (itemId.getMediopago_id() == 115) {
+                    datosFF_MAGIC_DAV = sheetFF_MAGIC_DAV.createRow(IC);
+
+                    MAG = 0;
+                    datoscellFF_MAGIC_DAV = datosFF_MAGIC_DAV.createCell(MAG);
+                    datoscellFF_MAGIC_DAV.setCellValue(itemId.getFecha());
+                    datoscellFF_MAGIC_DAV.setCellStyle(styleFecha);
+                    MAG++;
+                    datoscellFF_MAGIC_DAV = datosFF_MAGIC_DAV.createCell(MAG);
+                    datoscellFF_MAGIC_DAV.setCellValue(itemId.getLote());
+                    datoscellFF_MAGIC_DAV.setCellStyle(styleNumber);
+                    MAG++;
+                    datoscellFF_MAGIC_DAV = datosFF_MAGIC_DAV.createCell(MAG);
+                    datoscellFF_MAGIC_DAV.setCellValue(itemId.getCliente());
+                    datoscellFF_MAGIC_DAV.setCellStyle(styleString);
+                    MAG++;
+                    datoscellFF_MAGIC_DAV = datosFF_MAGIC_DAV.createCell(MAG);
+                    datoscellFF_MAGIC_DAV.setCellValue(itemId.getMonto_bruto());
+                    datoscellFF_MAGIC_DAV.setCellStyle(styleNumber);
+                    MAG++;
+
+                    datoscellFF_MAGIC_DAV = datosFF_MAGIC_DAV.createCell(MAG);
+                    datoscellFF_MAGIC_DAV.setCellValue(itemId.getComentarios());
+                    datoscellFF_MAGIC_DAV.setCellStyle(styleString);
+                    MAG++;
+                    /*Al Final*/
+                    IC++;
+                }
+                
+                if (itemId.getMediopago_id() == 116) {
+                    datosFF_MAGIC_SCOTTIA = sheetFF_MAGIC_SCOTTIA.createRow(TTIA);
+
+                    SCO = 0;
+                    datoscellFF_MAGIC_SCOTTIA = datosFF_MAGIC_SCOTTIA.createCell(SCO);
+                    datoscellFF_MAGIC_SCOTTIA.setCellValue(itemId.getFecha());
+                    datoscellFF_MAGIC_SCOTTIA.setCellStyle(styleFecha);
+                    SCO++;
+                    datoscellFF_MAGIC_SCOTTIA = datosFF_MAGIC_SCOTTIA.createCell(SCO);
+                    datoscellFF_MAGIC_SCOTTIA.setCellValue(itemId.getLote());
+                    datoscellFF_MAGIC_SCOTTIA.setCellStyle(styleNumber);
+                    SCO++;
+                    datoscellFF_MAGIC_SCOTTIA = datosFF_MAGIC_SCOTTIA.createCell(SCO);
+                    datoscellFF_MAGIC_SCOTTIA.setCellValue(itemId.getCliente());
+                    datoscellFF_MAGIC_SCOTTIA.setCellStyle(styleString);
+                    SCO++;
+                    datoscellFF_MAGIC_SCOTTIA = datosFF_MAGIC_SCOTTIA.createCell(SCO);
+                    datoscellFF_MAGIC_SCOTTIA.setCellValue(itemId.getMonto_bruto());
+                    datoscellFF_MAGIC_SCOTTIA.setCellStyle(styleNumber);
+                    SCO++;
+
+                    datoscellFF_MAGIC_SCOTTIA = datosFF_MAGIC_SCOTTIA.createCell(SCO);
+                    datoscellFF_MAGIC_SCOTTIA.setCellValue(itemId.getComentarios());
+                    datoscellFF_MAGIC_SCOTTIA.setCellStyle(styleString);
+                    SCO++;
+                    /*Al Final*/
+                    TTIA++;
+                }
+            }
+          
+            XSSFSheet sheetTARJETA_BANCO_NACIONAL = null;
+            XSSFSheet sheetTARJETA_CREDOMATIC = null;
+            XSSFSheet sheetTARJETA_BCR = null;
+            XSSFSheet sheetTC_FLOTA_BAC = null;
+            XSSFSheet sheetTC_DAVIVIENDA = null;
+            List<String> titulosColumnasHijosClientesDeLaEstacion = new ArrayList<String>();
+            String[] titulosHijosClientesDeLaEstacion = new String[]{"Fecha", "Lote", "Monto bruto", "Comision",  "Monto neto", "Cliente", "Venta", "Codigo cliente", "Tipo cliente", "Comentarios"};
+            /*como crear un objeto arrylist de tipo string*/
+            ArrayList<String> tituloshojasHijosClientesDeLaEstacion = new ArrayList<String>();
+            tituloshojasHijosClientesDeLaEstacion.add("TARJETA BANCO NACIONAL");
+            tituloshojasHijosClientesDeLaEstacion.add("TARJETA CREDOMATIC");
+            tituloshojasHijosClientesDeLaEstacion.add("TARJETA BCR");
+            tituloshojasHijosClientesDeLaEstacion.add("TC FLOTA BAC");
+            tituloshojasHijosClientesDeLaEstacion.add("TC DAVIVIENDA");
+
+            titulosColumnasHijosClientesDeLaEstacion = Arrays.asList(titulosHijosClientesDeLaEstacion);
+
+            //DEPOSITOS COLONES
+            for (String tituloshojasHijosClientesDeLaestacion : tituloshojasHijosClientesDeLaEstacion) {
+                if (tituloshojasHijosClientesDeLaestacion.equals("TARJETA BANCO NACIONAL")) {
+                    sheetTARJETA_BANCO_NACIONAL = workbook.createSheet(tituloshojasHijosClientesDeLaestacion);
+                }
+                if (tituloshojasHijosClientesDeLaestacion.equals("TARJETA CREDOMATIC")) {
+                    sheetTARJETA_CREDOMATIC = workbook.createSheet(tituloshojasHijosClientesDeLaestacion);
+                }
+                if (tituloshojasHijosClientesDeLaestacion.equals("TARJETA BCR")) {
+                    sheetTARJETA_BCR = workbook.createSheet(tituloshojasHijosClientesDeLaestacion);
+                }
+                if (tituloshojasHijosClientesDeLaestacion.equals("TC FLOTA BAC")) {
+                    sheetTC_FLOTA_BAC = workbook.createSheet(tituloshojasHijosClientesDeLaestacion);
+                }
+                  if (tituloshojasHijosClientesDeLaestacion.equals("TC DAVIVIENDA")) {
+                    sheetTC_DAVIVIENDA = workbook.createSheet(tituloshojasHijosClientesDeLaestacion);
+                }
+            }
+//            
+            //TARJETA BANCO NACIONAL
+//            
+            /*Se setea el ancho de cada una de las columnas */
+            for (int b = 0; b < nocols + 7; b++) {
+                sheetTARJETA_BANCO_NACIONAL.setColumnWidth(b, 5500);
+            }
+
+
+            /*Se crea la primer fila para el titulo*/
+            XSSFRow header3 = sheetTARJETA_BANCO_NACIONAL.createRow(0);
+
+//            Se escribe el titulo principal
+            XSSFCell headerCellBN = header3.createCell(2); // Numero de columna en la que se creara el titulo
+            headerCellBN.setCellValue("TARJETA BANCO NACIONAL");
+            headerCellBN.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulo*/
+            XSSFRow subtituloBN = sheetTARJETA_BANCO_NACIONAL.createRow(2);
+            XSSFCell subtituloCellBN = subtituloBN.createCell(2);
+            subtituloCellBN.setCellValue(subtitulo1);
+            subtituloCellBN.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+            XSSFRow subcombinadoBN = sheetTARJETA_BANCO_NACIONAL.createRow(5);
+//            int firstRow int lastRow int firstCol int lastCol
+            sheetTARJETA_BANCO_NACIONAL.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+            XSSFCell subcombinadoCellBN = subcombinadoBN.createCell(0);
+            subcombinadoCellBN.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+            subcombinadoCellBN.setCellStyle(subheaderStyle);
+
+            /*Agrega Borde a todas las Celdas Combinadas*/
+//            setBordersToMergedCells(sheet); Pendiente de corregir
+
+            /*Se crean los titulos de columnas*/
+            XSSFRow subprincipalBN = sheetTARJETA_BANCO_NACIONAL.createRow(6);
+            XSSFCell subprincipalcellBN;
+            Integer b;
+            b = 0;
+            for (String string : titulosHijosClientesDeLaEstacion) {
+                subprincipalcellBN = subprincipalBN.createCell(b);
+                subprincipalcellBN.setCellValue(string);
+                subprincipalcellBN.setCellStyle(subheaderStyle);
+                b++;
+
+            }
+//            
+//            //TARJETA CREDOMATIC
+//            
+            /*Se setea el ancho de cada una de las columnas */
+            for (int c = 0; c < nocols + 7; c++) {
+                sheetTARJETA_CREDOMATIC.setColumnWidth(c, 5500);
+            }
+
+
+            /*Se crea la primer fila para el titulo*/
+            XSSFRow header4 = sheetTARJETA_CREDOMATIC.createRow(0);
+
+//            Se escribe el titulo principal
+            XSSFCell headerCellCA = header4.createCell(2); // Numero de columna en la que se creara el titulo
+            headerCellCA.setCellValue("TARJETA CREDOMATIC");
+            headerCellCA.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulo*/
+            XSSFRow subtituloCA = sheetTARJETA_CREDOMATIC.createRow(2);
+            XSSFCell subtituloCellCA = subtituloCA.createCell(2);
+            subtituloCellCA.setCellValue(subtitulo1);
+            subtituloCellCA.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+            XSSFRow subcombinadoCA = sheetTARJETA_CREDOMATIC.createRow(5);
+//            int firstRow int lastRow int firstCol int lastCol
+            sheetTARJETA_CREDOMATIC.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+            XSSFCell subcombinadoCellCA = subcombinadoCA.createCell(0);
+            subcombinadoCellCA.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+            subcombinadoCellCA.setCellStyle(subheaderStyle);
+
+            /*Agrega Borde a todas las Celdas Combinadas*/
+//            setBordersToMergedCells(sheet); Pendiente de corregir
+
+            /*Se crean los titulos de columnas*/
+            XSSFRow subprincipalCA = sheetTARJETA_CREDOMATIC.createRow(6);
+            XSSFCell subprincipalcellCA;
+            Integer c;
+            c = 0;
+            for (String string : titulosHijosClientesDeLaEstacion) {
+                subprincipalcellCA = subprincipalCA.createCell(c);
+                subprincipalcellCA.setCellValue(string);
+                subprincipalcellCA.setCellStyle(subheaderStyle);
+                c++;
+
+            }
+            
+            //TARJETA BCR
+////            
+//            /*Se setea el ancho de cada una de las columnas */
+            for (int f = 0; f < nocols + 7; f++) {
+                sheetTARJETA_BCR.setColumnWidth(f, 5500);
+            }
+
+
+            /*Se crea la primer fila para el titulo*/
+            XSSFRow header7 = sheetTARJETA_BCR.createRow(0);
+
+//            Se escribe el titulo principal
+            XSSFCell headerCellBCR = header7.createCell(2); // Numero de columna en la que se creara el titulo
+            headerCellBCR.setCellValue("TARJETA BCR");
+            headerCellBCR.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulo*/
+            XSSFRow subtituloBCR = sheetTARJETA_BCR.createRow(2);
+            XSSFCell subtituloCellBCR = subtituloBCR.createCell(2);
+            subtituloCellBCR.setCellValue(subtitulo1);
+            subtituloCellBCR.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+            XSSFRow subcombinadoBCR = sheetTARJETA_BCR.createRow(5);
+//            int firstRow int lastRow int firstCol int lastCol
+            sheetTARJETA_BCR.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+            XSSFCell subcombinadoCellBCR = subcombinadoBCR.createCell(0);
+            subcombinadoCellBCR.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+            subcombinadoCellBCR.setCellStyle(subheaderStyle);
+
+            /*Agrega Borde a todas las Celdas Combinadas*/
+//            setBordersToMergedCells(sheet); Pendiente de corregir
+
+            /*Se crean los titulos de columnas*/
+            XSSFRow subprincipalBCR = sheetTARJETA_BCR.createRow(6);
+            XSSFCell subprincipalcellBCR;
+            Integer f;
+            f = 0;
+            for (String string : titulosHijosClientesDeLaEstacion) {
+                subprincipalcellBCR = subprincipalBCR.createCell(f);
+                subprincipalcellBCR.setCellValue(string);
+                subprincipalcellBCR.setCellStyle(subheaderStyle);
+                f++;
+
+            }
+//            
+//            //TC FLOTA BAC
+//            
+            /*Se setea el ancho de cada una de las columnas */
+            for (int g = 0; g < nocols + 7; g++) {
+                sheetTC_FLOTA_BAC.setColumnWidth(g, 5500);
+            }
+
+
+            /*Se crea la primer fila para el titulo*/
+            XSSFRow header8 = sheetTC_FLOTA_BAC.createRow(0);
+
+//            Se escribe el titulo principal
+            XSSFCell headerCellTFB = header8.createCell(2); // Numero de columna en la que se creara el titulo
+            headerCellTFB.setCellValue("TC FLOTA BAC");
+            headerCellTFB.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulo*/
+            XSSFRow subtituloTFB = sheetTC_FLOTA_BAC.createRow(2);
+            XSSFCell subtituloCellTFB = subtituloTFB.createCell(2);
+            subtituloCellTFB.setCellValue(subtitulo1);
+            subtituloCellTFB.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+            XSSFRow subcombinadoTFB = sheetTC_FLOTA_BAC.createRow(5);
+//            int firstRow int lastRow int firstCol int lastCol
+            sheetTC_FLOTA_BAC.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+            XSSFCell subcombinadoCellTFB = subcombinadoTFB.createCell(0);
+            subcombinadoCellTFB.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+            subcombinadoCellTFB.setCellStyle(subheaderStyle);
+
+            /*Agrega Borde a todas las Celdas Combinadas*/
+//            setBordersToMergedCells(sheet); Pendiente de corregir
+
+            /*Se crean los titulos de columnas*/
+            XSSFRow subprincipalTFB = sheetTC_FLOTA_BAC.createRow(6);
+            XSSFCell subprincipalcellTFB;
+            Integer g;
+            g = 0;
+            for (String string : titulosHijosClientesDeLaEstacion) {
+                subprincipalcellTFB = subprincipalTFB.createCell(g);
+                subprincipalcellTFB.setCellValue(string);
+                subprincipalcellTFB.setCellStyle(subheaderStyle);
+                g++;
+
+            }
+            
+            //TC DAVIVIENDA
+//            
+            /*Se setea el ancho de cada una de las columnas */
+            for (int k = 0; k < nocols + 7; k++) {
+                sheetTC_DAVIVIENDA.setColumnWidth(k, 5500);
+            }
+
+
+            /*Se crea la primer fila para el titulo*/
+            XSSFRow header10 = sheetTC_DAVIVIENDA.createRow(0);
+
+//            Se escribe el titulo principal
+            XSSFCell headerCellTD = header10.createCell(2); // Numero de columna en la que se creara el titulo
+            headerCellTD.setCellValue("TC DAVIVIENDA");
+            headerCellTD.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulo*/
+            XSSFRow subtituloTD = sheetTC_DAVIVIENDA.createRow(2);
+            XSSFCell subtituloCellTD = subtituloTD.createCell(2);
+            subtituloCellTD.setCellValue(subtitulo1);
+            subtituloCellTD.setCellStyle(headerStyle);
+
+            /*Se crea el subtitulos combinados APLICA SOLO PARA MTD*/
+            XSSFRow subcombinadoTD = sheetTC_DAVIVIENDA.createRow(5);
+//            int firstRow int lastRow int firstCol int lastCol
+            sheetTC_DAVIVIENDA.addMergedRegion(new CellRangeAddress(5, 5, 0, 4));
+            XSSFCell subcombinadoCellTD = subcombinadoTD.createCell(0);
+            subcombinadoCellTD.setCellValue("DETALLE DE VENTAS EN LA ESTACION");
+            subcombinadoCellTD.setCellStyle(subheaderStyle);
+
+            /*Agrega Borde a todas las Celdas Combinadas*/
+//            setBordersToMergedCells(sheet); Pendiente de corregir
+
+            /*Se crean los titulos de columnas*/
+            XSSFRow subprincipalTD = sheetTC_DAVIVIENDA.createRow(6);
+            XSSFCell subprincipalcellTD;
+            Integer k;
+            k = 0;
+            for (String string : titulosHijosClientesDeLaEstacion) {
+                subprincipalcellTD = subprincipalTD.createCell(k);
+                subprincipalcellTD.setCellValue(string);
+                subprincipalcellTD.setCellStyle(subheaderStyle);
+                k++;
+
+            }
+
+
+            XSSFRow datosTARJETA_BANCO_NACIONAL;
+            XSSFCell datoscellTARJETA_BANCO_NACIONAL;
+            Integer bb; //COLUMNAS
+            Integer bn = 7; //FILAS
+            bb = 0;
+            Integer filasbn = lista.size();
+
+            XSSFRow datosTARJETA_CREDOMATIC;
+            XSSFCell datoscellTARJETA_CREDOMATIC;
+            Integer cc; //COLUMNAS
+            Integer tc = 7; //FILAS
+            cc = 0;
+            Integer filastc = lista.size();
+            
+            XSSFRow datosTARJETA_BCR;
+            XSSFCell datoscellTARJETA_BCR;
+            Integer ff; //COLUMNAS
+            Integer tb = 7; //FILAS
+            ff = 0;
+            Integer filastb = lista.size();
+
+            XSSFRow datosTC_FLOTA_BAC;
+            XSSFCell datoscellTC_FLOTA_BAC;
+            Integer gg; //COLUMNAS
+            Integer tfb = 7; //FILAS
+            gg = 0;
+            Integer filastfb = lista.size();
+            
+            XSSFRow datosTC_DAVIVIENDA;
+            XSSFCell datoscellTC_DAVIVIENDA;
+            Integer jj; //COLUMNAS
+            Integer dv = 7; //FILAS
+            jj = 0;
+            Integer filasdv = lista.size();
+
+            for (GenericRprControlMediosPago itemId : lista.getItemIds()) {
+                if (itemId.getMediopago_id() == 7) {
+                    datosTARJETA_BANCO_NACIONAL = sheetTARJETA_BANCO_NACIONAL.createRow(bn);
+
+                    bb = 0;
+                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getFecha());
+                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleFecha);
+                    bb++;
+                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getLote());
+                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
+                    bb++;
+                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getMonto_bruto());
+                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
+                    bb++;
+                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getComision());
+                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
+                    bb++;
+
+                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getMonto_neto());
+                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
+                    bb++;
+                    
+                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getCliente());
+                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleString);
+                    bb++;
+                    
+                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getMonto_bruto());
+                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
+                    bb++;
+                    
+                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getCod_cliente());
+                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleString);
+                    bb++;
+                    
+                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getTipo_cliente());
+                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleString);
+                    bb++;
+
+                    datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
+                    datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getComentarios());
+                    datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleString);
+                    bb++;
+
+                    /*Al Final*/
+                    bn++;
+                }
+
+                if (itemId.getMediopago_id() == 107) {
+                    datosTARJETA_CREDOMATIC = sheetTARJETA_CREDOMATIC.createRow(tc);
+
+                    cc = 0;
+                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getFecha());
+                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleFecha);
+                    cc++;
+                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getLote());
+                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
+                    cc++;
+                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getMonto_bruto());
+                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
+                    cc++;
+                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getComision());
+                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
+                    cc++;
+
+                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getMonto_neto());
+                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
+                    cc++;
+                    
+                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getCliente());
+                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleString);
+                    cc++;
+                    
+                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getMonto_bruto());
+                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
+                    cc++;
+                    
+                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getCod_cliente());
+                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleString);
+                    cc++;
+                    
+                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getTipo_cliente());
+                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleString);
+                    cc++;
+
+                    datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
+                    datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getComentarios());
+                    datoscellTARJETA_CREDOMATIC.setCellStyle(styleString);
+                    cc++;
+
+                    /*Al Final*/
+                    tc++;
+                }
+                
+                if (itemId.getMediopago_id() == 118) {
+                    datosTARJETA_BCR = sheetTARJETA_BCR.createRow(tb);
+
+                    ff = 0;
+                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+                    datoscellTARJETA_BCR.setCellValue(itemId.getFecha());
+                    datoscellTARJETA_BCR.setCellStyle(styleFecha);
+                    ff++;
+                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+                    datoscellTARJETA_BCR.setCellValue(itemId.getLote());
+                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
+                    ff++;
+                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+                    datoscellTARJETA_BCR.setCellValue(itemId.getMonto_bruto());
+                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
+                    ff++;
+                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+                    datoscellTARJETA_BCR.setCellValue(itemId.getComision());
+                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
+                    ff++;
+
+                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+                    datoscellTARJETA_BCR.setCellValue(itemId.getMonto_neto());
+                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
+                    ff++;
+                    
+                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+                    datoscellTARJETA_BCR.setCellValue(itemId.getCliente());
+                    datoscellTARJETA_BCR.setCellStyle(styleString);
+                    ff++;
+                    
+                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+                    datoscellTARJETA_BCR.setCellValue(itemId.getMonto_bruto());
+                    datoscellTARJETA_BCR.setCellStyle(styleNumber);
+                    ff++;
+                    
+                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+                    datoscellTARJETA_BCR.setCellValue(itemId.getCod_cliente());
+                    datoscellTARJETA_BCR.setCellStyle(styleString);
+                    ff++;
+                    
+                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+                    datoscellTARJETA_BCR.setCellValue(itemId.getTipo_cliente());
+                    datoscellTARJETA_BCR.setCellStyle(styleString);
+                    ff++;
+
+                    datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
+                    datoscellTARJETA_BCR.setCellValue(itemId.getComentarios());
+                    datoscellTARJETA_BCR.setCellStyle(styleString);
+                    ff++;
+
+                    /*Al Final*/
+                    tb++;
+                }
+
+                if (itemId.getMediopago_id() == 121) {
+                    datosTC_FLOTA_BAC = sheetTC_FLOTA_BAC.createRow(tfb);
+
+                    gg = 0;
+                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getFecha());
+                    datoscellTC_FLOTA_BAC.setCellStyle(styleFecha);
+                    gg++;
+                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getLote());
+                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
+                    gg++;
+                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getMonto_bruto());
+                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
+                    gg++;
+                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getComision());
+                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
+                    gg++;
+
+                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getMonto_neto());
+                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
+                    gg++;
+                    
+                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getCliente());
+                    datoscellTC_FLOTA_BAC.setCellStyle(styleString);
+                    gg++;
+                    
+                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getMonto_bruto());
+                    datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
+                    gg++;
+                    
+                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getCod_cliente());
+                    datoscellTC_FLOTA_BAC.setCellStyle(styleString);
+                    gg++;
+                    
+                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getTipo_cliente());
+                    datoscellTC_FLOTA_BAC.setCellStyle(styleString);
+                    gg++;
+
+                    datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
+                    datoscellTC_FLOTA_BAC.setCellValue(itemId.getComentarios());
+                    datoscellTC_FLOTA_BAC.setCellStyle(styleString);
+                    gg++;
+
+                    /*Al Final*/
+                    tfb++;
+                }
+                
+                if (itemId.getMediopago_id() == 123) {
+                    datosTC_DAVIVIENDA = sheetTC_DAVIVIENDA.createRow(dv);
+
+                    jj = 0;
+                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getFecha());
+                    datoscellTC_DAVIVIENDA.setCellStyle(styleFecha);
+                    jj++;
+                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getLote());
+                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
+                    jj++;
+                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getMonto_bruto());
+                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
+                    jj++;
+                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getComision());
+                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
+                    jj++;
+
+                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getMonto_neto());
+                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
+                    jj++;
+                    
+                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getCliente());
+                    datoscellTC_DAVIVIENDA.setCellStyle(styleString);
+                    jj++;
+                    
+                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getMonto_bruto());
+                    datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
+                    jj++;
+                    
+                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getCod_cliente());
+                    datoscellTC_DAVIVIENDA.setCellStyle(styleString);
+                    jj++;
+                    
+                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getTipo_cliente());
+                    datoscellTC_DAVIVIENDA.setCellStyle(styleString);
+                    jj++;
+
+                    datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
+                    datoscellTC_DAVIVIENDA.setCellValue(itemId.getComentarios());
+                    datoscellTC_DAVIVIENDA.setCellStyle(styleString);
+                    jj++;
+
+                    /*Al Final*/
+                    dv++;
+                }
+            }     
         }
         return workbook;
     }
