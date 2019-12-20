@@ -32,6 +32,4 @@ public class GenericDetalleBCR {
         this.venta = venta;
         this.comentario = comentario;
     }
-
-
 }
