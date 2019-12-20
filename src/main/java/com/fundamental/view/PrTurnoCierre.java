@@ -239,6 +239,7 @@ public class PrTurnoCierre extends Panel implements View {
     SvcDetalleTcClientes dao = new SvcDetalleTcClientes();
     HorizontalLayout hltables = new HorizontalLayout();
     HorizontalLayout hltables2 = new HorizontalLayout();
+    HorizontalLayout hltables3 = new HorizontalLayout();
     BeanItemContainer<Estacion> ContEstacion = new BeanItemContainer<Estacion>(Estacion.class);
     BeanItemContainer<GenericBeanMedioPago> ContMediosPago = new BeanItemContainer<GenericBeanMedioPago>(GenericBeanMedioPago.class);
     BeanItemContainer<GenericLote> ContLote = new BeanItemContainer<GenericLote>(GenericLote.class);
@@ -479,18 +480,24 @@ public class PrTurnoCierre extends Panel implements View {
         public SectionPanelTablesDet(String caption) {
             setCaption(caption);
             VerticalLayout vl = new VerticalLayout();
-
-            hltables.setSizeFull();
-            hltables.setMargin(true);
+            vl.setSpacing(true);
+//            hltables.setSizeFull();
+//            hltables.setMargin(true);
             hltables.setSpacing(true);
             hltables.setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
-            hltables2.setSizeFull();
-            hltables2.setMargin(true);
+//            hltables2.setSizeFull();
+//            hltables2.setMargin(true);
             hltables2.setSpacing(true);
             hltables2.setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
 
+//            hltables3.setSizeFull();
+//            hltables2.setMargin(true);
+            hltables3.setSpacing(true);
+            hltables3.setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
+
             vl.addComponent(hltables);
             vl.addComponent(hltables2);
+            vl.addComponent(hltables3);
             setContent(vl);
         }
     }
@@ -885,19 +892,19 @@ public class PrTurnoCierre extends Panel implements View {
 
             hltables.removeComponent(tableFMDavivienda);
             hltables.removeComponent(tableFMScott);
-            hltables.removeComponent(tableBCR);
-            hltables.removeComponent(tableCredomatic);
-            hltables2.removeComponent(tableDavivienda);
-            hltables2.removeComponent(tableNacional);
-            hltables2.removeComponent(tableFlotaBac);
+            hltables2.removeComponent(tableBCR);
+            hltables2.removeComponent(tableCredomatic);
+            hltables3.removeComponent(tableDavivienda);
+            hltables3.removeComponent(tableNacional);
+            hltables3.removeComponent(tableFlotaBac);
 
             hltables.addComponent(tableFMDavivienda);
             hltables.addComponent(tableFMScott);
-            hltables.addComponent(tableBCR);
-            hltables.addComponent(tableCredomatic);
-            hltables2.addComponent(tableDavivienda);
-            hltables2.addComponent(tableNacional);
-            hltables2.addComponent(tableFlotaBac);
+            hltables2.addComponent(tableBCR);
+            hltables2.addComponent(tableCredomatic);
+            hltables3.addComponent(tableDavivienda);
+            hltables3.addComponent(tableNacional);
+            hltables3.addComponent(tableFlotaBac);
 
             updateTableFooterDetaCliFm();
 //            panel2.close();
@@ -1397,7 +1404,7 @@ public class PrTurnoCierre extends Panel implements View {
                 cmbCliente.addStyleName(ValoTheme.COMBOBOX_TINY);
                 cmbCliente.setPropertyDataSource(pro);
                 cmbCliente.setFilteringMode(FilteringMode.CONTAINS);
-                cmbCliente.setWidth("85px");
+//                cmbCliente.setWidth("85px");
                 return cmbCliente;
             }
         });
@@ -1477,7 +1484,7 @@ public class PrTurnoCierre extends Panel implements View {
                 cmbCliente.addStyleName(ValoTheme.COMBOBOX_TINY);
                 cmbCliente.setPropertyDataSource(pro);
                 cmbCliente.setFilteringMode(FilteringMode.CONTAINS);
-                cmbCliente.setWidth("85px");
+//                cmbCliente.setWidth("85px");
                 return cmbCliente;
             }
         });
@@ -1557,7 +1564,7 @@ public class PrTurnoCierre extends Panel implements View {
                 cmbCliente.addStyleName(ValoTheme.COMBOBOX_TINY);
                 cmbCliente.setPropertyDataSource(pro);
                 cmbCliente.setFilteringMode(FilteringMode.CONTAINS);
-                cmbCliente.setWidth("85px");
+//                cmbCliente.setWidth("85px");
                 return cmbCliente;
             }
         });
@@ -1637,7 +1644,7 @@ public class PrTurnoCierre extends Panel implements View {
                 cmbCliente.addStyleName(ValoTheme.COMBOBOX_TINY);
                 cmbCliente.setPropertyDataSource(pro);
                 cmbCliente.setFilteringMode(FilteringMode.CONTAINS);
-                cmbCliente.setWidth("85px");
+//                cmbCliente.setWidth("85px");
                 return cmbCliente;
             }
         });
@@ -1717,7 +1724,7 @@ public class PrTurnoCierre extends Panel implements View {
                 cmbCliente.addStyleName(ValoTheme.COMBOBOX_TINY);
                 cmbCliente.setPropertyDataSource(pro);
                 cmbCliente.setFilteringMode(FilteringMode.CONTAINS);
-                cmbCliente.setWidth("85px");
+//                cmbCliente.setWidth("85px");
                 return cmbCliente;
             }
         });
