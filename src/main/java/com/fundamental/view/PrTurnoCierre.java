@@ -59,7 +59,6 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.Align;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -296,6 +295,7 @@ public class PrTurnoCierre extends Panel implements View {
     Acceso acceso = new Acceso();
     Panel panelDetalles = new Panel();
     Panel panelTableDetalles = new Panel();
+    StackPanel panel2;
     Button btnbac;
     Button btnbanknac;
     Button btnbcr;
@@ -335,7 +335,7 @@ public class PrTurnoCierre extends Panel implements View {
         buildTableBCR();
         buildTableCredomatic();
         buildTableDavivienda();
-
+        buildTableNacional();
         buildTableFLOTABAC();
 
         /*FIN ASG*/
@@ -382,7 +382,7 @@ public class PrTurnoCierre extends Panel implements View {
         panelTableDetalles = new SectionPanelTablesDet("Tablas Detalles Tarjetas");
         panelTableDetalles.setIcon(FontAwesome.ADJUST);
         panelTableDetalles.setSizeFull();
-        StackPanel.extend(panelTableDetalles);
+        panel2 = StackPanel.extend(panelTableDetalles);
         hldetalles.addComponent(panelDetalles);
         vldetalles.addComponent(hldetalles);
         vldetalles.addComponent(panelTableDetalles);
@@ -413,7 +413,7 @@ public class PrTurnoCierre extends Panel implements View {
 
         root.addComponents(cltInfo, vldetalles/*hlCombos*/, content);
         root.setExpandRatio(content, 1);
-
+//        panel2.close();
     }
 
     public class SectionPanelButtons extends Panel {
@@ -622,7 +622,7 @@ public class PrTurnoCierre extends Panel implements View {
 
         /*Footer para TC DAVIVIENDA*/
         for (Integer itemId : bcrDetalleCliDavivienda.getItemIds()) {
-            totCredomatic += bcrDetalleCliDavivienda.getItem(itemId).getBean().getVenta();
+            totDavivienda += bcrDetalleCliDavivienda.getItem(itemId).getBean().getVenta();
         }
         tableDavivienda.setFooterVisible(true);
         tableDavivienda.setColumnFooter("comentario", "Total:");
@@ -850,6 +850,7 @@ public class PrTurnoCierre extends Panel implements View {
     /*DETALLLE CLIENTES TC ASG*/
     private void changeTurno() {
         if (turno != null) {
+//            panel2.open();
             bcrDetalleCliDavi.removeAllItems();
             bcrDetalleCliScott.removeAllItems();
             bcrDetalleCliBCR.removeAllItems();
@@ -897,8 +898,9 @@ public class PrTurnoCierre extends Panel implements View {
             hltables2.addComponent(tableDavivienda);
             hltables2.addComponent(tableNacional);
             hltables2.addComponent(tableFlotaBac);
-            
+
             updateTableFooterDetaCliFm();
+//            panel2.close();
         }
     }
 
@@ -1570,7 +1572,7 @@ public class PrTurnoCierre extends Panel implements View {
 
     private void buildTableNacional() {
         tableNacional.setCaption("Detalle Clientes Banco Nacional:");
-        tableNacional.setContainerDataSource(bcrDetalleCliDavivienda);
+        tableNacional.setContainerDataSource(bcrDetalleCliNacional);
         tableNacional.setImmediate(true);
         tableNacional.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
             @Override
