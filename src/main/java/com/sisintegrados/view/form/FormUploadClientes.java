@@ -151,31 +151,28 @@ public class FormUploadClientes extends Window {
                         p = countries.get(t.getPais());
                         if(estacion!=null && p!=null){
                             c = result.get(p.getPaisId()+""+t.getCodigo_e1());
-                            if(c!=null){ 
-                                try{
-                                System.out.println(c.getEstado().equals(t.getEstado().trim())+" "+c.getNombre().equals(t.getNombre().trim()) 
-                                +" "+c.getTipo().equals(t.getTipo().trim())+" "+c.getCodigoEnvoy().equals(t.getCodigoEnvoy().trim()));
-                                if(!c.getEstado().equals(t.getEstado())  || !c.getNombre().equals(t.getNombre()) || !c.getTipo().equals(t.getTipo())
-                                        || !c.getCodigoEnvoy().equals(t.getCodigoEnvoy())){
-                                    c.setEstado(t.getEstado().equals("Activo")?"A":"I");
-                                    c.setNombre(t.getNombre());
-                                    c.setTipo(t.getTipo().equals("Prepago")?"P":"C");
-                                    c.setCodigoEnvoy(t.getCodigoEnvoy());
-                                    service.doActionCustomer(Dao.ACTION_UPDATE, c);
-                                    u = u + 1 ;                                    
-                                    System.out.println(u+" u "+c.toString());
+                            try{
+                                if(c!=null){                                     
+                                    if(!c.getEstado().equals(t.getEstado())  || !c.getNombre().equals(t.getNombre()) || !c.getTipo().equals(t.getTipo())
+                                            || !c.getCodigoEnvoy().equals(t.getCodigoEnvoy())){
+                                        c.setEstado(t.getEstado().equals("Activo")?"A":"I");
+                                        c.setNombre(t.getNombre());
+                                        c.setTipo(t.getTipo().equals("Prepago")?"P":"C");
+                                        c.setCodigoEnvoy(t.getCodigoEnvoy());
+                                        service.doActionCustomer(Dao.ACTION_UPDATE, c);
+                                        u = u + 1 ;                                    
+                                    }
+                                }else{
+                                    String codigoE1 = new Double(t.getCodigo_e1()).intValue()+"";
+                                    String codigoEn = new Double(t.getCodigoEnvoy()).intValue()+"";
+                                    c = new Cliente(0, codigoE1, t.getNombre(),estacion.getEstacionId(),
+                                            t.getEstado().equals("Activo")?"A":"I",
+                                            usuario.getUsername(), new java.util.Date(),  t.getTipo().equals("Prepago")?"P":"C", codigoEn, "");
+                                    service.doActionCustomer(Dao.ACTION_ADD,c);
+                                    i = i+ 1;
                                 }
-                                }catch(Exception ex){
-                                    
-                                }
-                            }else{
-                                c = new Cliente(0, t.getCodigo_e1(), t.getNombre(),estacion.getEstacionId(),
-                                        t.getEstado().equals("Activo")?"A":"I",
-                                        usuario.getUsername(), new java.util.Date(),  t.getTipo().equals("Prepago")?"P":"C", t.getCodigoEnvoy(), "");
-                                System.out.println(c.toString());
-                                service.doActionCustomer(Dao.ACTION_ADD,c);
-                                i = i+ 1;
-                                System.out.println(i+" i "+c.toString());
+                            }catch(Exception ex){
+                                ex.printStackTrace();
                             }
                         }
                         
