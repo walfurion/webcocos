@@ -692,7 +692,7 @@ public class SvcMaintenance extends Dao {
                     + "from TANQUE a, ESTACION b, PRODUCTO c\n"
                     + "where a.ESTACION_ID = b.ESTACION_ID\n"
                     + "  and a.PRODUCTO_ID = c.PRODUCTO_ID";
-            System.out.println("MiQuery   " + miQuery);
+
             pst = getConnection().prepareStatement(miQuery);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
@@ -774,7 +774,7 @@ public class SvcMaintenance extends Dao {
                 closePst();
                 query = "INSERT INTO tanque (idtanque, producto_id, estacion_id, descripcion, usuario_creacion, fecha_creacion) "
                         + "VALUES (?, ?, ?, ?, ?, SYSDATE)";
-                
+
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, tanque.getIdtanque());
                 pst.setObject(2, tanque.getProducto().getProductoId());
@@ -788,9 +788,10 @@ public class SvcMaintenance extends Dao {
             } else if (action.equals(Dao.ACTION_UPDATE)) {
                 System.out.println("ingresa metodo actualizar");
                 query = "UPDATE tanque "
-                        + "SET producto = ?, estacion = ?, descripcion = ?"
+                        + "SET producto_id = ?, estacion_id = ?, descripcion = ?, "
                         + "  usuario_modificacion = ?, fecha_modificacion = SYSDATE"
-                        + "WHERE idtanque = ?";
+                        + " WHERE idtanque = ?";
+
                 pst = getConnection().prepareStatement(query);
                 pst.setObject(1, tanque.getProducto().getProductoId());
                 pst.setObject(2, tanque.getEstacion().getEstacionId());
@@ -809,25 +810,24 @@ public class SvcMaintenance extends Dao {
         }
         return result;
     }
-    
-    
+
     public Usuario doActionPassword(Usuario usuario) {
         Usuario result = new Usuario();
-        try{
+        try {
             System.out.println("ingresa metodo actualizar");
-                query = "UPDATE usuario "
-                        + "SET clave = ?, "
-                        + "  modificado_por = ?, modificado_el = SYSDATE"
-                        + " WHERE usuario_id = ?";
-                System.out.println("query  " + query);
-                pst = getConnection().prepareStatement(query);
-                pst.setObject(1, usuario.getClave());
-                pst.setObject(2, usuario.getModificadoPor());
-                pst.setObject(3, usuario.getUsuarioId());
-
-                pst.executeUpdate();
-                result = usuario;
+            query = "UPDATE usuario "
+                    + "SET clave = ?, "
+                    + "  modificado_por = ?, modificado_el = SYSDATE"
+                    + " WHERE usuario_id = ?";
             
+            pst = getConnection().prepareStatement(query);
+            pst.setObject(1, usuario.getClave());
+            pst.setObject(2, usuario.getModificadoPor());
+            pst.setObject(3, usuario.getUsuarioId());
+
+            pst.executeUpdate();
+            result = usuario;
+
         } catch (Exception exc) {
             // result.setDescError(exc.getMessage());
             exc.printStackTrace();
@@ -836,7 +836,5 @@ public class SvcMaintenance extends Dao {
         }
         return result;
     }
-    
-    
 
 }

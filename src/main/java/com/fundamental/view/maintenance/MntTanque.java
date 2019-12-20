@@ -228,24 +228,31 @@ public class MntTanque extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 action = Dao.ACTION_UPDATE;
-                tanque = bcrTanque.getItem(tblTanque.getValue()).getBean();
+                if (bcrTanque.getItem(tblTanque.getValue()) != null) {
+                    tanque = bcrTanque.getItem(tblTanque.getValue()).getBean();
+                }
                 binder.setItemDataSource(tanque);
                 SvcMaintenance service = new SvcMaintenance();
-                int i;
-                for (i = 0; i < listestacion.size(); i++) {
-                    if (listestacion.get(i).getEstacionId().toString().trim().equals(bcrTanque.getItem(tblTanque.getValue()).getBean().getEstacion().getEstacionId().toString().trim())) {
-                        Estacion p = new Estacion();
-                        p = listestacion.get(i);
-                        cbxEstacion.setValue(p);
+                if (bcrTanque.getItem(tblTanque.getValue()) != null) {
+
+                    int i;
+                    for (i = 0; i < listestacion.size(); i++) {
+                        if (listestacion.get(i).getEstacionId().toString().trim().equals(bcrTanque.getItem(tblTanque.getValue()).getBean().getEstacion().getEstacionId().toString().trim())) {
+                            Estacion p = new Estacion();
+                            p = listestacion.get(i);
+                            cbxEstacion.setValue(p);
+                        }
                     }
-                }
-                int z;
-                for (z = 0; z < listproducto.size(); z++) {
-                    if (listproducto.get(z).getProductoId().toString().trim().equals(bcrTanque.getItem(tblTanque.getValue()).getBean().getProducto().getProductoId().toString().trim())) {
-                        Producto p = new Producto();
-                        p = listproducto.get(z);
-                        cbxProducto.setValue(p);
+                    int z;
+                    for (z = 0; z < listproducto.size(); z++) {
+                        if (listproducto.get(z).getProductoId().toString().trim().equals(bcrTanque.getItem(tblTanque.getValue()).getBean().getProducto().getProductoId().toString().trim())) {
+                            Producto p = new Producto();
+                            p = listproducto.get(z);
+                            cbxProducto.setValue(p);
+                        }
                     }
+                } else {
+                    txtDescripcion.setValue("");
                 }
 
                 service.closeConnections();
