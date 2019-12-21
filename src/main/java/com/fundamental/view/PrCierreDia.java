@@ -1462,12 +1462,13 @@ public class PrCierreDia extends Panel implements View {
             formDetalleDeposito.addCloseListener((e) -> {
                 bcrDeposito = new BeanContainer<Integer, GenericMedioPago>(GenericMedioPago.class);
                 bcrDeposito = (BeanContainer<Integer, GenericMedioPago>) VaadinSession.getCurrent().getAttribute("detalleDeposito");
+                bcrDeposito.removeAllItems();
+                SvcDeposito svcDep = new SvcDeposito();
+                bcrDeposito.addAll(svcDep.getDepositoByEstacion(estacion.getEstacionId().toString(), dfdFecha.getValue()));
                 tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("total");
                 tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
                 tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
-                System.out.println("tmodouble en cierre" + tmpDouble);
-                System.out.println("tmodouble en cierre" + tmpDoubleDolar);
-                System.out.println("tmodoubleother en cierre" + tmpDoubleOther);
+     
 
             });
             getUI().addWindow(formDetalleDeposito);
