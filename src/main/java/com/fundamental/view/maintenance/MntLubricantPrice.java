@@ -181,7 +181,7 @@ public class MntLubricantPrice extends Panel implements View {
         vlRight.setComponentAlignment(btnSave, Alignment.MIDDLE_CENTER);
         vlRight.setComponentAlignment(btnExcel, Alignment.MIDDLE_CENTER);
         vlRight.setComponentAlignment(btnCarga, Alignment.MIDDLE_CENTER);
-        
+
         Responsive.makeResponsive(vlRight);
 
 //        VerticalLayout vlUpload = new VerticalLayout(upload);
@@ -190,7 +190,6 @@ public class MntLubricantPrice extends Panel implements View {
 //        vlUpload.setId("vlUpload");
 //        vlUpload.setComponentAlignment(upload, Alignment.MIDDLE_CENTER);
 //        Responsive.makeResponsive(vlUpload);
-
         CssLayout cltTables = new CssLayout(utils.vlContainer(vlLeft), utils.vlContainer(vlRight));
         cltTables.setId("cltTables");
         cltTables.setSizeUndefined();
@@ -341,7 +340,6 @@ public class MntLubricantPrice extends Panel implements View {
 //            }
 //        });
 //        upload.setButtonCaption("Cargar");
-
         //Importante
 //        binder.bindMemberFields(this);
 //        binder.setItemDataSource(lubricante);
@@ -501,6 +499,17 @@ public class MntLubricantPrice extends Panel implements View {
                 Marca m = (Marca) cbxBrand.getValue();
                 Pais p = (Pais) cbxCountry.getValue();
                 frmUploadTarjetas = new FormUploadTarjetas(p, m);
+                frmUploadTarjetas.addCloseListener((e) -> {
+                    bcrProduct.removeAllItems();
+                    SvcGeneral service = new SvcGeneral();
+                    int countryId = ((Pais) cbxCountry.getValue()).getPaisId();
+                    int brandId = ((Marca) cbxBrand.getValue()).getIdMarca();
+                    listProducts = service.getLubpriceByCountryidStationid(countryId, brandId);
+                    allLubricants = service.getAllProductosByCountryTypeBrand(countryId, 2, brandId, false); //lubricants
+                    bcrProduct.addAll(listProducts);
+                    cbxProduct.setContainerDataSource(new ListContainer<Producto>(Producto.class, allLubricants));
+                    service.closeConnections();
+                });
                 getUI().addWindow(frmUploadTarjetas);
                 frmUploadTarjetas.focus();
             }
