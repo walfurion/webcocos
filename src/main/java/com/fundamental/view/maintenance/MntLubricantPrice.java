@@ -82,7 +82,7 @@ import org.vaadin.addons.excelexporter.builder.ExportExcelSheetConfigurationBuil
  * @author Henry Barrientos
  */
 public class MntLubricantPrice extends Panel implements View {
-    
+
     Acceso acceso = new Acceso();
     Button btnSave, btnAdd, btnFilterClear, btnExcel, btnCarga;
     TextField tfdFilter;
@@ -98,7 +98,7 @@ public class MntLubricantPrice extends Panel implements View {
             return super.formatPropertyValue(rowId, colId, property);
         }
     };
-    
+
     private BeanFieldGroup<Lubricanteprecio> binder = new BeanFieldGroup<Lubricanteprecio>(Lubricanteprecio.class);
 //    @PropertyId("pais")
     ComboBox cbxCountry; //cbxStation, 
@@ -114,11 +114,11 @@ public class MntLubricantPrice extends Panel implements View {
     DateField dfdEnd;
     Lubricanteprecio lubricante;
     Lubricanteprecio lubricante_log;
-    
+
     Upload upload;
     File tempFile;
     int line;
-    
+
     List<Pais> listCountries;
     List<Estacion> listStations = new ArrayList();
     List<Lubricanteprecio> listProducts = new ArrayList();
@@ -131,12 +131,12 @@ public class MntLubricantPrice extends Panel implements View {
     private Utils utils = new Utils();
     private Usuario user;
     FormUploadTarjetas frmUploadTarjetas;
-    
+
     public MntLubricantPrice() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
         DashboardEventBus.register(this);
-        
+
         vlRoot = new VerticalLayout();
         vlRoot.setSizeFull();
 //        vlRoot.setSizeUndefined();
@@ -145,7 +145,7 @@ public class MntLubricantPrice extends Panel implements View {
         setContent(vlRoot);
         Responsive.makeResponsive(vlRoot);
         vlRoot.setId("vlRoot");
-        
+
         user = (Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName());
         vlRoot.addComponent(utils.buildHeader("Precio lubricantes", false, true));
         vlRoot.addComponent(utils.buildSeparator());
@@ -155,7 +155,7 @@ public class MntLubricantPrice extends Panel implements View {
         buildControls();
         buildTableContent();
         buildButtons();
-        
+
         CssLayout filtering = new CssLayout();
         filtering.addComponents(tfdFilter, btnFilterClear);
         filtering.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
@@ -173,7 +173,7 @@ public class MntLubricantPrice extends Panel implements View {
         vlLeft.setComponentAlignment(filtering, Alignment.MIDDLE_CENTER);
         vlLeft.setComponentAlignment(btnAdd, Alignment.MIDDLE_CENTER);
         Responsive.makeResponsive(vlLeft);
-        
+
         VerticalLayout vlRight = new VerticalLayout(cbxCountry, cbxBrand, cbxProduct, dfdStart, dfdEnd, tfdPrice, btnSave, btnExcel, btnCarga);
         vlRight.setSpacing(true);
         vlRight.setSizeUndefined();
@@ -181,7 +181,7 @@ public class MntLubricantPrice extends Panel implements View {
         vlRight.setComponentAlignment(btnSave, Alignment.MIDDLE_CENTER);
         vlRight.setComponentAlignment(btnExcel, Alignment.MIDDLE_CENTER);
         vlRight.setComponentAlignment(btnCarga, Alignment.MIDDLE_CENTER);
-        
+
         Responsive.makeResponsive(vlRight);
 
 //        VerticalLayout vlUpload = new VerticalLayout(upload);
@@ -194,17 +194,17 @@ public class MntLubricantPrice extends Panel implements View {
         cltTables.setId("cltTables");
         cltTables.setSizeUndefined();
         Responsive.makeResponsive(cltTables);
-        
+
         vlRoot.addComponents(cltTables);
         vlRoot.setExpandRatio(cltTables, 1);
-        
+
         if (bcrProduct.size() > 0) {
             tblProduct.setValue(bcrProduct.getItemIds().get(0));
         } else {
             btnAdd.click();
         }
     }
-    
+
     private void getAllData() {
         bcrProduct.setBeanIdProperty("lubricanteprecio");
         bcrProduct.addAll(new ArrayList());
@@ -214,7 +214,7 @@ public class MntLubricantPrice extends Panel implements View {
 //        allLubricants = service.getAllProductosByTypeMarca(2, false, null); //lubricants
         service.closeConnections();
     }
-    
+
     private void buildControls() {
         cbxCountry = utils.buildCombobox("Pais:", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, new ListContainer<Pais>(Pais.class, listCountries));
         cbxCountry.setItemIconPropertyId("flag");
@@ -235,11 +235,11 @@ public class MntLubricantPrice extends Panel implements View {
                 }
             }
         });
-        
+
         cbxProduct = utils.buildCombobox("Producto:", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, new ListContainer<Producto>(Producto.class, allLubricants));
         cbxProduct.setFilteringMode(FilteringMode.CONTAINS);
         cbxProduct.setWidth("300px");
-        
+
         btnFilterClear = new Button(FontAwesome.TIMES);
         btnFilterClear.addStyleName(ValoTheme.BUTTON_SMALL);
         btnFilterClear.addClickListener(new Button.ClickListener() {
@@ -273,7 +273,7 @@ public class MntLubricantPrice extends Panel implements View {
                                 //                                || filterByProperty("estacionNombre", item, event.getText())
                                 || filterByProperty("productoNombre", item, event.getText());
                     }
-                    
+
                     @Override
                     public boolean appliesToProperty(final Object propertyId) {
                         return propertyId.equals("paisNombre")
@@ -283,11 +283,11 @@ public class MntLubricantPrice extends Panel implements View {
                 });
             }
         });
-        
+
         dfdStart = utils.buildDateField("Fecha inicio:", "yyyy/MM/dd", new Locale("es", "ES"), ValoTheme.DATEFIELD_SMALL, null, null, true, Resolution.DAY, new Date());
-        
+
         dfdEnd = utils.buildDateField("Fecha fin:", "yyyy/MM/dd", new Locale("es", "ES"), ValoTheme.DATEFIELD_SMALL, new Date(), null, true, Resolution.DAY, new Date());
-        
+
         tfdPrice = utils.buildTextField("Precio:", "0", false, 10, true, ValoTheme.TEXTFIELD_SMALL);
         tfdPrice.addStyleName("align-right");
         binder.bindMemberFields(this);
@@ -344,7 +344,7 @@ public class MntLubricantPrice extends Panel implements View {
 //        binder.bindMemberFields(this);
 //        binder.setItemDataSource(lubricante);
     }
-    
+
     private void buildTableContent() {
         tblProduct.setCaption("Lubricantes:");
         tblProduct.setHeight(200, Unit.PERCENTAGE);
@@ -374,7 +374,7 @@ public class MntLubricantPrice extends Panel implements View {
                     cbxProduct.removeAllItems();
                     cbxProduct.addItem(lubricante.getProducto());
                     cbxProduct.select(lubricante.getProducto());
-                    
+
                     System.out.println("lubricante_log " + lubricante_log.toString());
                     binder.setItemDataSource(bcrProduct.getItem(tblProduct.getValue()));
                 }
@@ -401,7 +401,7 @@ public class MntLubricantPrice extends Panel implements View {
         tblProduct.setColumnHeaders(new String[]{"Pais", "Marca", "Producto", "Inicio", "Fin", "Precio", "Historial"});
         tblProduct.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.CENTER);
     }
-    
+
     private void buildButtons() {
         btnAdd = utils.buildButton("Agregar", FontAwesome.PLUS, ValoTheme.BUTTON_PRIMARY);
         btnAdd.setSizeUndefined();
@@ -417,7 +417,7 @@ public class MntLubricantPrice extends Panel implements View {
                 binder.setItemDataSource(lubricante);
             }
         });
-        
+
         btnSave = utils.buildButton("Guardar", FontAwesome.SAVE, ValoTheme.BUTTON_FRIENDLY);
         btnSave.setEnabled(false);
         btnSave.addClickListener(new Button.ClickListener() {
@@ -479,7 +479,7 @@ public class MntLubricantPrice extends Panel implements View {
 //                }
             }
         });
-        
+
         btnExcel = utils.buildButton("Exportar", FontAwesome.TABLE, ValoTheme.BUTTON_FRIENDLY);
         btnExcel.setDescription("Exportar a Excel");
         btnExcel.addClickListener(new Button.ClickListener() {
@@ -490,7 +490,7 @@ public class MntLubricantPrice extends Panel implements View {
                 }
             }
         });
-        
+
         btnCarga = utils.buildButton("Cargar", FontAwesome.UPLOAD, ValoTheme.BUTTON_FRIENDLY);
         btnCarga.setDescription("Cargar desde Excel");
         btnCarga.addClickListener(new Button.ClickListener() {
@@ -500,15 +500,23 @@ public class MntLubricantPrice extends Panel implements View {
                 Pais p = (Pais) cbxCountry.getValue();
                 frmUploadTarjetas = new FormUploadTarjetas(p, m);
                 frmUploadTarjetas.addCloseListener((e) -> {
-                    cbxCountry.setValue(null);
+                    bcrProduct.removeAllItems();
+                    SvcGeneral service = new SvcGeneral();
+                    int countryId = ((Pais) cbxCountry.getValue()).getPaisId();
+                    int brandId = ((Marca) cbxBrand.getValue()).getIdMarca();
+                    listProducts = service.getLubpriceByCountryidStationid(countryId, brandId);
+                    allLubricants = service.getAllProductosByCountryTypeBrand(countryId, 2, brandId, false); //lubricants
+                    bcrProduct.addAll(listProducts);
+                    cbxProduct.setContainerDataSource(new ListContainer<Producto>(Producto.class, allLubricants));
+                    service.closeConnections();
                 });
                 getUI().addWindow(frmUploadTarjetas);
                 frmUploadTarjetas.focus();
             }
         });
-        
+
     }
-    
+
     private boolean filterByProperty(final String prop, final Item item, final String text) {
         if (item == null || item.getItemProperty(prop) == null || item.getItemProperty(prop).getValue() == null) {
             return false;
@@ -519,7 +527,7 @@ public class MntLubricantPrice extends Panel implements View {
         }
         return false;
     }
-    
+
     private void XlsxReader(File tempFile, boolean firstRowContainsHeaders) throws IOException {
         FileInputStream excelFile = new FileInputStream(tempFile);
         Workbook workbook = new XSSFWorkbook(excelFile);
@@ -529,7 +537,7 @@ public class MntLubricantPrice extends Panel implements View {
         if (firstRowContainsHeaders && rowIterator.hasNext()) {
             currentRow = rowIterator.next();    //move cursor
         }
-        
+
         List<String> insertList = new ArrayList();
         line = 1;
         while (rowIterator.hasNext()) {
@@ -548,7 +556,7 @@ public class MntLubricantPrice extends Panel implements View {
         if (tempFile.exists()) {
             tempFile.delete();
         }
-        
+
         if (!insertList.isEmpty()) {
             SvcGeneral service = new SvcGeneral();
             String result = service.doBulkInsert(insertList);
@@ -564,9 +572,9 @@ public class MntLubricantPrice extends Panel implements View {
                 Notification.show("Ocurrió un error al insertar los datos: \n" + result, Notification.Type.ERROR_MESSAGE);
             }
         }
-        
+
     }
-    
+
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         Dao dao = new Dao();
@@ -578,7 +586,7 @@ public class MntLubricantPrice extends Panel implements View {
         btnCarga.setEnabled(acceso.isAgregar());
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     public void getHistory(int id, String descproduct) {
         System.out.println("getHItory");
         VerticalLayout v = new VerticalLayout();
@@ -596,7 +604,7 @@ public class MntLubricantPrice extends Panel implements View {
         bcrProductH.removeAllItems();
         bcrProductH.addAll(new ArrayList());
         bcrProductH.addAll(listProductsH);
-        
+
         Table tblProductH = new Table() {
             @Override
             protected String formatPropertyValue(Object rowId, Object colId, Property property) {
@@ -625,13 +633,13 @@ public class MntLubricantPrice extends Panel implements View {
         window.setContent(v);
         this.getUI().getUI().addWindow(window);
     }
-    
+
     public void enabledField(boolean enabled) {
         cbxCountry.setEnabled(enabled);
         cbxProduct.setEnabled(enabled);
         cbxBrand.setEnabled(enabled);
     }
-    
+
     public ExcelExport generaExcel() {
         TableHolder tableHolder = new DefaultTableHolder(tblProduct);
         ExcelExport excelExport = new ExcelExport(tableHolder);
@@ -640,7 +648,7 @@ public class MntLubricantPrice extends Panel implements View {
         excelExport.setExportFileName("LubricantesPrecio" + ".xls");
         return excelExport;
     }
-    
+
     private void uploadTarjetas() {
         if (tblProduct.isVisible()) {
             Pais pais = (Pais) cbxCountry.getValue();
@@ -653,5 +661,5 @@ public class MntLubricantPrice extends Panel implements View {
             frmUploadTarjetas.focus();
         }
     }
-    
+
 }
