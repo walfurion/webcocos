@@ -1471,6 +1471,7 @@ public class PrCierreDia extends Panel implements View {
                 tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("total");
                 tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
                 tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
+                calcularSumas();
      
 
             });
