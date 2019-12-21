@@ -315,8 +315,8 @@ public class MntInventarioFisico extends Panel implements View {
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("total_unidad_fisica");  //Atributo del bean
                 Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
-                lbl.setWidth("85px");
-                lbl.addStyleName(ValoTheme.LABEL_SMALL);
+                lbl.setWidth("65px");
+//                lbl.addStyleName(ValoTheme.LABEL_SMALL);
                 lbl.addStyleName("align-right");
                 lbl.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
@@ -357,8 +357,10 @@ public class MntInventarioFisico extends Panel implements View {
                 return tfdValue;
             }
         }); 
-        tblProduct.setVisibleColumns(new Object[]{"numero","productoNombre", "presentacion",  "precio", "inv_final", "uniFisTienda", "uniFisBodega", "uniFisPista","totalInvUniFis","difInvFinal","colComentario"});
-        tblProduct.setColumnHeaders(new String[]{"#","Descripcion", "Presentacion", "Precio </br> de venta", "Inventario </br> final", "Unidades </br> fisicas </br> en tienda", "Unidades </br> fisicas </br> en Bodega", "Unidades </br> fisicas </br> en Pista","Total </br> unidades </br> fisicas","Diferencia inv. </br> final en </br> mov. vrs toma","Comentarios"});
+//        tblProduct.setVisibleColumns(new Object[]{"numero","productoNombre", "presentacion",  "precio", "inv_final", "uniFisTienda", "uniFisBodega", "uniFisPista","totalInvUniFis","difInvFinal","colComentario"});
+//        tblProduct.setColumnHeaders(new String[]{"#","Descripcion", "Presentacion", "Precio </br> de venta", "Inventario </br> final", "Unidades </br> fisicas </br> en tienda", "Unidades </br> fisicas </br> en Bodega", "Unidades </br> fisicas </br> en Pista","Total </br> unidades </br> fisicas","Diferencia </br> inv. final en </br> mov. vrs toma","Comentarios"});
+        tblProduct.setVisibleColumns(new Object[]{"productoNombre", "presentacion",  "precio", "inv_final", "uniFisTienda", "uniFisBodega", "uniFisPista","totalInvUniFis","difInvFinal","colComentario"});
+        tblProduct.setColumnHeaders(new String[]{"Descripcion", "Presentacion", "Precio </br> de venta", "Inventario </br> final", "Unidades </br> fisicas </br> en tienda", "Unidades </br> fisicas </br> en Bodega", "Unidades </br> fisicas </br> en Pista","Total </br> unidades </br> fisicas","Diferencia </br> inv. final en </br> mov. vrs toma","Comentarios"});
 //        tblProduct.setColumnAlignments(new Table.Align[]{Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT});
         return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tblProduct)});
     }
