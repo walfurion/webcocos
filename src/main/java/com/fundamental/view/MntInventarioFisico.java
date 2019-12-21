@@ -350,14 +350,15 @@ public class MntInventarioFisico extends Panel implements View {
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("comentario");  //Atributo del bean
                 TextArea tfdValue = new TextArea(pro);
+                tfdValue.setRows(2);
                 tfdValue.setWidth("85px");
-                tfdValue.setStyleName(ValoTheme.TEXTAREA_SMALL);
+                tfdValue.setStyleName(ValoTheme.TEXTAREA_TINY);
                 tfdValue.setNullRepresentation("");
                 return tfdValue;
             }
         }); 
         tblProduct.setVisibleColumns(new Object[]{"numero","productoNombre", "presentacion",  "precio", "inv_final", "uniFisTienda", "uniFisBodega", "uniFisPista","totalInvUniFis","difInvFinal","colComentario"});
-        tblProduct.setColumnHeaders(new String[]{"#","Descripcion", "Presentacion", "Precio de venta", "Inventario final", "Unidades fisicas /n en tienda", "Unidades fisicas en Bodega", "Unidades fisicas en Pista","Total unidades fisicas","Diferencia inv. final en mov. vrs toma","Comentarios"});
+        tblProduct.setColumnHeaders(new String[]{"#","Descripcion", "Presentacion", "Precio </br> de venta", "Inventario </br> final", "Unidades </br> fisicas </br> en tienda", "Unidades </br> fisicas </br> en Bodega", "Unidades </br> fisicas </br> en Pista","Total </br> unidades </br> fisicas","Diferencia inv. </br> final en </br> mov. vrs toma","Comentarios"});
 //        tblProduct.setColumnAlignments(new Table.Align[]{Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT});
         return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tblProduct)});
     }
