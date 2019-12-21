@@ -188,7 +188,13 @@ public class Dao {
         ResultSet rst = null;
         try {
             miQuery = (bombasIds == null) ? "" : " AND ec.bomba_id IN (" + bombasIds + ") ";
-            miQuery = "SELECT pro.nombre, td.nombre, SUM(ld.lectura_final-ld.lectura_inicial-ld.calibracion) galones, SUM((ld.lectura_final-ld.lectura_inicial-ld.calibracion)*p.precio) venta, pro.producto_id, ld.tipodespacho_id, SUM(ld.calibracion*p.precio) cal "
+            miQuery = "SELECT pro.nombre, td.nombre, CASE "
+                    + "WHEN (SUM(ld.lectura_final-ld.lectura_inicial-ld.calibracion)) < 0.00 THEN (999999.99+SUM(ld.lectura_final-ld.lectura_inicial-ld.calibracion)) "
+                    + "WHEN (SUM(ld.lectura_final-ld.lectura_inicial-ld.calibracion)) > 0.00 THEN (SUM(ld.lectura_final-ld.lectura_inicial-ld.calibracion)) "
+                    + "END GALONES, CASE "
+                    + "WHEN (SUM(((ld.lectura_final-ld.lectura_inicial)-(ld.calibracion)))) < 0.00 THEN p.precio * (999999.99+SUM(ld.lectura_final-ld.lectura_inicial-ld.calibracion)) "
+                    + "WHEN (SUM(((ld.lectura_final-ld.lectura_inicial)-(ld.calibracion)))) > 0.00 THEN (SUM(((ld.lectura_final-ld.lectura_inicial)-(ld.calibracion))*p.precio)) "
+                    + "END VENTA, pro.producto_id, ld.tipodespacho_id, SUM(ld.calibracion*p.precio) cal "
                     + "FROM turno t, precio p, estacion_conf_head ech, estacion_conf ec, producto pro, tipodespacho td, lectura l, lectura_detalle ld "
                     + "WHERE t.turno_id = p.turno_id AND t.estacionconfhead_id = ech.estacionconfhead_id AND ech.estacionconfhead_id = ec.estacionconfhead_id "
                     + " AND ec.tipodespacho_id = p.tipodespacho_id "
@@ -197,9 +203,8 @@ public class Dao {
                     + "AND ld.bomba_id = ec.bomba_id AND ld.producto_id = p.producto_id AND ld.tipodespacho_id = p.tipodespacho_id "
                     + "AND ec.ESTACION_ID = l.ESTACION_ID"
                     + miQuery + " AND t.turno_id IN (" + turnosIds + ") AND ld.tipo = '" + tipo + "' "
-                    + "GROUP BY td.nombre, pro.nombre, pro.producto_id, ld.tipodespacho_id "
+                    + "GROUP BY td.nombre, pro.nombre, pro.producto_id, ld.tipodespacho_id,p.precio "
                     + "ORDER BY td.nombre, pro.producto_id";
-
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             int count = 0;
@@ -339,16 +344,16 @@ public class Dao {
         }
         return result;
     }
-    
-    public HashMap<String,Pais> getAllPaisesMap() {
-        HashMap<String,Pais> result = new HashMap<String,Pais>();
+
+    public HashMap<String, Pais> getAllPaisesMap() {
+        HashMap<String, Pais> result = new HashMap<String, Pais>();
         miQuery = "SELECT pais_id, nombre, codigo, moneda_simbolo, estado, vol_simbolo "
                 + "FROM pais";
         ResultSet rst = null;
         try {
             rst = getConnection().prepareStatement(miQuery).executeQuery();
             while (rst.next()) {
-                result.put(rst.getString(2),new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5), null));
+                result.put(rst.getString(2), new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5), null));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -361,7 +366,6 @@ public class Dao {
         }
         return result;
     }
-
 
     public List<Estacion> getStationsByCountry(Integer paisId) {
         List<Estacion> result = new ArrayList();
@@ -386,19 +390,16 @@ public class Dao {
         }
         return result;
     }
-    
-    
 
-
-    public Map<String,Estacion> getAllEstacionesMap() {
-        Map<String,Estacion> result = new HashMap<String, Estacion>();
+    public Map<String, Estacion> getAllEstacionesMap() {
+        Map<String, Estacion> result = new HashMap<String, Estacion>();
         ResultSet rst = null;
         try {
             miQuery = "SELECT estacion_id, nombre, codigo, pais_id, estado, fact_electronica "
                     + "FROM estacion ";
             rst = getConnection().prepareStatement(miQuery).executeQuery();
             while (rst.next()) {
-                result.put(rst.getString(2),new Estacion(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5), rst.getString(6)));
+                result.put(rst.getString(2), new Estacion(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5), rst.getString(6)));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -654,7 +655,7 @@ public class Dao {
         }
         return result;
     }
-    
+
     public List<Lecturafinal> getLecturasfinales(Integer estacionId, String tipoLectura) {
         List<Lecturafinal> result = new ArrayList();
         ResultSet rst = null;
