@@ -117,7 +117,7 @@ public class FormDetalleNacional extends Window {
 
     private Component buildFields() {
         HorizontalLayout hl = new HorizontalLayout();
-        hl.setCaption("Clientes Credomatic");
+        hl.setCaption("Clientes Banco Nacional");
         hl.setIcon(FontAwesome.FLAG);
         hl.setSpacing(true);
         buildTableBCR();
@@ -209,6 +209,7 @@ public class FormDetalleNacional extends Window {
                 nfd.setWidth("150px");
                 nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
                 nfd.addStyleName("align-right");
+                nfd.setNullRepresentation("");
                 return nfd;
             }
         });
