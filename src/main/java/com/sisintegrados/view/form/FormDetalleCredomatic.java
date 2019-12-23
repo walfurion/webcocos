@@ -209,6 +209,7 @@ public class FormDetalleCredomatic extends Window {
                 nfd.setWidth("150px");
                 nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
                 nfd.addStyleName("align-right");
+                nfd.setNullRepresentation("");
                 return nfd;
             }
         });
