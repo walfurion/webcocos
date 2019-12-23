@@ -130,7 +130,7 @@ public class FormDetalleCredomatic extends Window {
         btnasignar.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnasignar.addStyleName(ValoTheme.BUTTON_SMALL);
         btnasignar.addClickListener((Button.ClickListener) event -> {
-            GenericDetalleBCR dtaclie = new GenericDetalleBCR(utils.getRandomNumberInRange(1, 1000), new Estacion(estacion.getEstacionId(), estacion.getNombre()), new GenericBeanMedioPago(107, "CREDOMATIC"),  null, null, null, "");
+            GenericDetalleBCR dtaclie = new GenericDetalleBCR(utils.getRandomNumberInRange(1, 1000), new Estacion(estacion.getEstacionId(), estacion.getNombre()), new GenericBeanMedioPago(107, "CREDOMATIC"), null, null, null, "");
             dtaclie.setVenta(0D);
             listDetallecli.add(dtaclie);
             bcrDetalleCliCredomatic.addAll(listDetallecli);
@@ -204,16 +204,12 @@ public class FormDetalleCredomatic extends Window {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
-                ComboBox cmbLote = new ComboBox(null, ContLoteCredomatic);
-//                cmbLote.setReadOnly(true);
-                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
-                cmbLote.setItemCaptionPropertyId("lote");
-                cmbLote.setNullSelectionAllowed(false);
-                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
-                cmbLote.setPropertyDataSource(pro);
-                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
-                cmbLote.setWidth("85px");
-                return cmbLote;
+                final TextField nfd = new TextField(pro);
+//                nfd.setReadOnly(true);
+                nfd.setWidth("150px");
+                nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
+                nfd.addStyleName("align-right");
+                return nfd;
             }
         });
 
