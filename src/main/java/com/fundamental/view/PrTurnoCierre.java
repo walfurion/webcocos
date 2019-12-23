@@ -1615,22 +1615,22 @@ public class PrTurnoCierre extends Panel implements View {
             }
         });
 
-        tableNacional.addGeneratedColumn("collote", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
-                ComboBox cmbLote = new ComboBox(null, ContLoteNacional);
-                cmbLote.setReadOnly(true);
-                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
-                cmbLote.setItemCaptionPropertyId("lote");
-                cmbLote.setNullSelectionAllowed(false);
-                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
-                cmbLote.setPropertyDataSource(pro);
-                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
-                cmbLote.setWidth("85px");
-                return cmbLote;
-            }
-        });
+//        tableNacional.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
+//                ComboBox cmbLote = new ComboBox(null, ContLoteNacional);
+//                cmbLote.setReadOnly(true);
+//                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+//                cmbLote.setItemCaptionPropertyId("lote");
+//                cmbLote.setNullSelectionAllowed(false);
+//                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
+//                cmbLote.setPropertyDataSource(pro);
+//                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbLote.setWidth("85px");
+//                return cmbLote;
+//            }
+//        });
 
         tableNacional.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
             @Override
@@ -1649,7 +1649,7 @@ public class PrTurnoCierre extends Panel implements View {
             }
         });
 
-        tableNacional.setVisibleColumns(new Object[]{"collote", "colcliente", "venta", "comentario"});
+        tableNacional.setVisibleColumns(new Object[]{"genlote", "colcliente", "venta", "comentario"});
         tableNacional.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
         tableNacional.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
         tableNacional.setHeight(200f, Unit.PIXELS);
@@ -1695,22 +1695,22 @@ public class PrTurnoCierre extends Panel implements View {
             }
         });
 
-        tableFlotaBac.addGeneratedColumn("collote", new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table source, final Object itemId, Object columnId) {
-                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
-                ComboBox cmbLote = new ComboBox(null, ContLoteFloBac);
-                cmbLote.setReadOnly(true);
-                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
-                cmbLote.setItemCaptionPropertyId("lote");
-                cmbLote.setNullSelectionAllowed(false);
-                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
-                cmbLote.setPropertyDataSource(pro);
-                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
-                cmbLote.setWidth("85px");
-                return cmbLote;
-            }
-        });
+//        tableFlotaBac.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+//            @Override
+//            public Object generateCell(Table source, final Object itemId, Object columnId) {
+//                Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
+//                ComboBox cmbLote = new ComboBox(null, ContLoteFloBac);
+//                cmbLote.setReadOnly(true);
+//                cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+//                cmbLote.setItemCaptionPropertyId("lote");
+//                cmbLote.setNullSelectionAllowed(false);
+//                cmbLote.addStyleName(ValoTheme.COMBOBOX_TINY);
+//                cmbLote.setPropertyDataSource(pro);
+//                cmbLote.setFilteringMode(FilteringMode.CONTAINS);
+//                cmbLote.setWidth("85px");
+//                return cmbLote;
+//            }
+//        });
 
         tableFlotaBac.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
             @Override
@@ -1729,7 +1729,7 @@ public class PrTurnoCierre extends Panel implements View {
             }
         });
 
-        tableFlotaBac.setVisibleColumns(new Object[]{"collote", "colcliente", "venta", "comentario"});
+        tableFlotaBac.setVisibleColumns(new Object[]{"genlote", "colcliente", "venta", "comentario"});
         tableFlotaBac.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios   "});
         tableFlotaBac.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
         tableFlotaBac.setHeight(200f, Unit.PIXELS);
