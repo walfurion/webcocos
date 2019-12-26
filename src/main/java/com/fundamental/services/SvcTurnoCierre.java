@@ -44,7 +44,10 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
@@ -69,7 +72,11 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { rst.close(); pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
@@ -94,7 +101,10 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
@@ -120,11 +130,14 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
-    
+
     public List<ArqueoTC> getArqueoTC(String arqueocajaId) {
         List<ArqueoTC> result = new ArrayList();
         try {
@@ -135,7 +148,7 @@ public class SvcTurnoCierre extends Dao {
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             ArqueoTC atc;
-            int count =0;
+            int count = 0;
             while (rst.next()) {
                 atc = new ArqueoTC(rst.getString(1), rst.getDouble(2), rst.getString(3), rst.getInt(4));
                 atc.setId(count++);
@@ -144,7 +157,10 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
@@ -166,7 +182,10 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
@@ -185,7 +204,10 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
@@ -209,7 +231,10 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
@@ -236,7 +261,10 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
@@ -261,7 +289,11 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { rst.close(); pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
@@ -286,7 +318,10 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
@@ -312,16 +347,24 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
 
+    /*ASG Modificacion*/
     public List<String[]> getCalibracionByFechaEstacion(Date fecha, Integer estacionId) {
         List<String[]> result = new ArrayList();
         try {
             //calibraciones por dia
-            query = "SELECT p.producto_id, SUM(ld.calibracion), SUM(ld.lectura_final - ld.lectura_inicial - ld.calibracion) "
+            query = "SELECT p.producto_id, SUM(ld.calibracion), "
+                    + "CASE "
+                    + "WHEN (SUM(ld.lectura_final-ld.lectura_inicial-ld.calibracion)) < 0.00 THEN (999999.99+SUM(ld.lectura_final-ld.lectura_inicial-ld.calibracion)) "
+                    + "WHEN (SUM(ld.lectura_final-ld.lectura_inicial-ld.calibracion)) > 0.00 THEN (SUM(ld.lectura_final-ld.lectura_inicial-ld.calibracion)) "
+                    + "END GALON "
                     + "FROM dia d, turno t, lectura l, lectura_detalle ld, producto p "
                     + "WHERE d.fecha = t.fecha AND d.estacion_id = t.estacion_id AND t.estacion_id = l.estacion_id AND t.turno_id = l.turno_id AND l.lectura_id = ld.lectura_id AND ld.producto_id = p.producto_id "
                     + "AND d.fecha = TO_DATE(?, 'dd/mm/yyyy') AND d.estacion_id = ? "
@@ -336,7 +379,10 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
@@ -381,31 +427,34 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
 
     public InventarioRec doActionInventario(String action, InventarioRec inventario) {
         InventarioRec result = new InventarioRec();
-        int idInv =0;
+        int idInv = 0;
         try {
             query = "select * from (select INVRECEPCION_ID from RECEPCION_INVENTARIO order by INVRECEPCION_ID desc) where rownum=1";
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();            
-            while(rst.next()){
+            ResultSet rst = pst.executeQuery();
+            while (rst.next()) {
                 idInv = rst.getInt(1);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        
+
         try {
             if (action.equals(Dao.ACTION_ADD)) {
                 query = "INSERT INTO RECEPCION_INVENTARIO_DETALLE (INVRECEPCION_DET_ID,INVRECEPCION_ID, inicial, "
                         + "final, compras, creado_por, creado_persona, creado_el, fecha, estacion_id, producto_id "
                         + ", inv_fisico, lectura_veeder, diferencia, varianza, compartimiento, vol_facturado, galones, ventas, calibracion) "
-                        + "VALUES (INVENTARIO_DETALLE_SEQ.NEXTVAL,"+idInv+",?, ?, ?, ?, ?, SYSDATE, ?, ?, ? "
+                        + "VALUES (INVENTARIO_DETALLE_SEQ.NEXTVAL," + idInv + ",?, ?, ?, ?, ?, SYSDATE, ?, ?, ? "
                         + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 pst = getConnection().prepareStatement(query);
                 pst.setDouble(1, inventario.getInicial());
@@ -450,17 +499,20 @@ public class SvcTurnoCierre extends Dao {
                 //pk
                 pst.setDate(14, (java.sql.Date) inventario.getFecha());
                 pst.setInt(15, inventario.getEstacionId());
-                pst.setInt(16, inventario.getProductoId());                
+                pst.setInt(16, inventario.getProductoId());
                 pst.executeUpdate();
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
-    
+
     public RecepcionInventario doActionInvRecepcion(String action, RecepcionInventario invrecep) {
         RecepcionInventario result = new RecepcionInventario();
         try {
@@ -480,7 +532,10 @@ public class SvcTurnoCierre extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
         }
         return result;
     }
@@ -492,11 +547,11 @@ public class SvcTurnoCierre extends Dao {
         try {
             miQuery = "select INVRECEPCION_ID,PILOTO,UNIDAD,FACTURA "
                     + "from RECEPCION_INVENTARIO "
-                    + "where PAIS_ID="+pais+" and ESTACION_ID="+estacion+" and FECHA = to_date('"+dateString+"','dd/mm/yyyy')";
+                    + "where PAIS_ID=" + pais + " and ESTACION_ID=" + estacion + " and FECHA = to_date('" + dateString + "','dd/mm/yyyy')";
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             while (rst.next()) {
-                RecepcionInventario rec = new RecepcionInventario(rst.getInt(1),null,0,0,rst.getString(2),rst.getString(3),rst.getString(4));
+                RecepcionInventario rec = new RecepcionInventario(rst.getInt(1), null, 0, 0, rst.getString(2), rst.getString(3), rst.getString(4));
 //                rec.setInvrecepcion_id(rst.getInt(1));
 //                rec.setPiloto(rst.getString(2));
 //                rec.setUnidad(rst.getString(3));

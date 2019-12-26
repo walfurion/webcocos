@@ -343,16 +343,12 @@ public class FormDetalleDeposito extends Window {
             tmpDouble += bcrDeposito.getItem(itemId).getBean().getMonto();
             if (bcrDeposito.getItem(itemId).getBean().getMediopago().getNombre().contains("Efectivo USD") || bcrDeposito.getItem(itemId).getBean().getMediopago().getNombre().contains("")) {
                 tmpDoubleDolar += bcrDeposito.getItem(itemId).getBean().getMontousd();
+                //bcrDeposito.getItem(itemId).getBean().setMonto(tasaUso*bcrDeposito.getItem(itemId).getBean().getMontousd());
             } else {
                 tmpDoubleOther += bcrDeposito.getItem(itemId).getBean().getMonto();
             }
         }
-
-        System.out.println("total dolar  " + tmpDoubleDolar);
-        System.out.println("total otros  " + tmpDoubleOther);
-        //tmpDouble = (tmpDoubleDolar * constanteDolar) + tmpDoubleOther;
-        System.out.println("tmpDouble total " + tmpDouble);
-
+        
         tblDeposito.setFooterVisible(true);
         tblDeposito.setColumnFooter("colmedio", "Total:");
         tblDeposito.setColumnFooter("colmonto", currencySymbol + numberFmt.format(tmpDouble).trim());

@@ -1397,7 +1397,10 @@ public class PrCierreDia extends Panel implements View {
                         System.out.println("entra a lectura veeder " + item.getInicialDto());
                         System.out.println("entra a lectura veeder " + item.getComprasDto());
                         item.setLecturaVeederRoot(item.getInicialDto() + item.getComprasDto());
-                        item.setVentas((item.getInicialDto() + item.getComprasDto()) - (item.getFinallDto() + item.getCalibracion()));
+                        
+//                        item.setVentas((item.getInicialDto() + item.getComprasDto()) - (item.getFinallDto() + item.getCalibracion()));
+                        System.out.println("VENTAAS "+item.getInicialDto());
+
                         item.setDiferencia(item.getVentasCons() - item.getVentas());
                         item.setEstado((item.getDiferencia() > 0) ? "SOBRANTE" : ((item.getDiferencia() == 0) ? "OK" : "FALTANTE"));
                         item.setEsNuevo(Boolean.FALSE);
@@ -1462,14 +1465,14 @@ public class PrCierreDia extends Panel implements View {
             formDetalleDeposito.addCloseListener((e) -> {
                 bcrDeposito = new BeanContainer<Integer, GenericMedioPago>(GenericMedioPago.class);
                 bcrDeposito = (BeanContainer<Integer, GenericMedioPago>) VaadinSession.getCurrent().getAttribute("detalleDeposito");
+                bcrDeposito.removeAllItems();
+                SvcDeposito svcDep = new SvcDeposito();
+                bcrDeposito.addAll(svcDep.getDepositoByEstacion(estacion.getEstacionId().toString(), dfdFecha.getValue()));
                 tmpDouble = (Double) VaadinSession.getCurrent().getAttribute("total");
                 tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
                 tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
-                System.out.println("tmodouble en cierre" + tmpDouble);
-                System.out.println("tmodouble en cierre" + tmpDoubleDolar);
-                System.out.println("tmodoubleother en cierre" + tmpDoubleOther);
-
-            });
+                calcularSumas();
+     });
             getUI().addWindow(formDetalleDeposito);
             formDetalleDeposito.focus();
         }

@@ -70,8 +70,8 @@ public class SvcReporteControlMediosPago extends Dao {
         GenericRprControlMediosPago genctl = new GenericRprControlMediosPago();
         try {
             query = "Select FECHA, MEDIOPAGO_ID, LOTE, MONTO_BRUTO, COMISION, \n"
-                    + "                MONTO_NETO, COMENTARIOS, CODIGO, ESTACION, BANCO, NODEPOSITO, MONTOCH, MONTOUSD "
-                    + "from CTRL_Medios_pago order by fecha asc";
+                    + "                MONTO_NETO, COMENTARIOS, CODIGO, ESTACION, BANCO, NODEPOSITO, MONTOCH, MONTOUSD, CLIENTE, COD_CLIENTE, TIPO_CLIENTE "
+                    + "from CTRL_MEDIOS_PAGO order by fecha asc";
 //            System.out.println("QUERY " + query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
@@ -87,7 +87,10 @@ public class SvcReporteControlMediosPago extends Dao {
                         rst.getString(10),
                         rst.getString(11),
                         rst.getDouble(12),
-                        rst.getDouble(13));
+                        rst.getDouble(13),
+                        rst.getString(14),
+                        rst.getString(15),
+                        rst.getString(16));
                 result.add(genctl);
             }
         } catch (Exception exc) {

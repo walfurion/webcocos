@@ -47,7 +47,7 @@ import java.util.List;
  *
  * @author Jorge J.
  */
-public class FormDetalleCredomatic extends Window {
+public class FormDetalleNacional extends Window {
 
     static final DecimalFormat numberFmt = new DecimalFormat("### ###,##0.00;-#");
     static final DecimalFormat numberFmt3D = new DecimalFormat("### ###,##0.000;-#");
@@ -65,11 +65,11 @@ public class FormDetalleCredomatic extends Window {
     SvcDetalleTcClientes dao = new SvcDetalleTcClientes();
     BeanItemContainer<Estacion> ContEstacion = new BeanItemContainer<Estacion>(Estacion.class);
     BeanItemContainer<GenericBeanMedioPago> ContMediosPago = new BeanItemContainer<GenericBeanMedioPago>(GenericBeanMedioPago.class);
-    BeanItemContainer<GenericLote> ContLoteCredomatic = new BeanItemContainer<GenericLote>(GenericLote.class);
+    BeanItemContainer<GenericLote> ContLoteNacional = new BeanItemContainer<GenericLote>(GenericLote.class);
     BeanItemContainer<GenericBeanCliente> ContCliGen = new BeanItemContainer<GenericBeanCliente>(GenericBeanCliente.class);
-    BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliCredomatic = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
+    BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliNacional = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
     List<GenericDetalleBCR> listDetallecli = new ArrayList();
-    Table tableCredomatic = new Table() {
+    Table tableNacional = new Table() {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
             if (colId.equals("venta")) {
@@ -80,11 +80,11 @@ public class FormDetalleCredomatic extends Window {
     };
     Utils utils = new Utils();
 
-    public FormDetalleCredomatic(Estacion estacion, String currencySymbol, Integer idpais, BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliCredomatic, Turno turno) {
+    public FormDetalleNacional(Estacion estacion, String currencySymbol, Integer idpais, BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliNacional, Turno turno) {
         this.estacion = estacion;
         this.currencySymbol = currencySymbol;
         this.idpais = idpais;
-        this.bcrDetalleCliCredomatic = bcrDetalleCliCredomatic;
+        this.bcrDetalleCliNacional = bcrDetalleCliNacional;
         this.turno = turno;
         addStyleName(Constant.stylePopUps);
         Responsive.makeResponsive(this);
@@ -108,7 +108,7 @@ public class FormDetalleCredomatic extends Window {
         if (estacion != null) {
             ContEstacion.addAll(dao.getAllEstaciones(true, idpais));
             ContMediosPago.addAll(dao.getAllMediosPago(true, idpais));
-            ContLoteCredomatic.addAll(dao.getAllLotesbyMedioPago(107, turno.getTurnoId()));
+            ContLoteNacional.addAll(dao.getAllLotesbyMedioPago(7, turno.getTurnoId()));
             ContCliGen.addAll(dao.getAllCustomers(true, estacion.getEstacionId()));
         }
         detailsWrapper.addComponent(buildFields());
@@ -117,11 +117,11 @@ public class FormDetalleCredomatic extends Window {
 
     private Component buildFields() {
         HorizontalLayout hl = new HorizontalLayout();
-        hl.setCaption("Clientes Credomatic");
+        hl.setCaption("Clientes Banco Nacional");
         hl.setIcon(FontAwesome.FLAG);
         hl.setSpacing(true);
         buildTableBCR();
-        hl.addComponent(tableCredomatic);
+        hl.addComponent(tableNacional);
         return hl;
     }
 
@@ -130,10 +130,10 @@ public class FormDetalleCredomatic extends Window {
         btnasignar.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnasignar.addStyleName(ValoTheme.BUTTON_SMALL);
         btnasignar.addClickListener((Button.ClickListener) event -> {
-            GenericDetalleBCR dtaclie = new GenericDetalleBCR(utils.getRandomNumberInRange(1, 1000), new Estacion(estacion.getEstacionId(), estacion.getNombre()), new GenericBeanMedioPago(107, "CREDOMATIC"), null, null, null, "");
+            GenericDetalleBCR dtaclie = new GenericDetalleBCR(utils.getRandomNumberInRange(1, 1000), new Estacion(estacion.getEstacionId(), estacion.getNombre()), new GenericBeanMedioPago(7, "TARJETA BANCO NACIONAL"),  null, null, null, "");
             dtaclie.setVenta(0D);
             listDetallecli.add(dtaclie);
-            bcrDetalleCliCredomatic.addAll(listDetallecli);
+            bcrDetalleCliNacional.addAll(listDetallecli);
         });
         btnasignar.focus();
 
@@ -142,8 +142,8 @@ public class FormDetalleCredomatic extends Window {
         btnguardar.addStyleName(ValoTheme.BUTTON_FRIENDLY);
         btnguardar.addStyleName(ValoTheme.BUTTON_SMALL);
         btnguardar.addClickListener((Button.ClickListener) event -> {
-            if (bcrDetalleCliCredomatic.size() <= 0) {
-                bcrDetalleCliCredomatic = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
+            if (bcrDetalleCliNacional.size() <= 0) {
+                bcrDetalleCliNacional = new BeanContainer<Integer, GenericDetalleBCR>(GenericDetalleBCR.class);
             } else {
                 updateTableFooterDetaCli();
             }
@@ -160,14 +160,14 @@ public class FormDetalleCredomatic extends Window {
     }
 
     private void buildTableBCR() {
-        bcrDetalleCliCredomatic.setBeanIdProperty("iddet");
-        tableCredomatic.setContainerDataSource(bcrDetalleCliCredomatic);
-        tableCredomatic.setWidth(650f, Unit.PIXELS);
-        tableCredomatic.setHeight(335f, Unit.PIXELS);
-        tableCredomatic.addStyleName(ValoTheme.TABLE_BORDERLESS);
-        tableCredomatic.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
-        tableCredomatic.setImmediate(true);
-        tableCredomatic.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
+        bcrDetalleCliNacional.setBeanIdProperty("iddet");
+        tableNacional.setContainerDataSource(bcrDetalleCliNacional);
+        tableNacional.setWidth(650f, Unit.PIXELS);
+        tableNacional.setHeight(335f, Unit.PIXELS);
+        tableNacional.addStyleName(ValoTheme.TABLE_BORDERLESS);
+        tableNacional.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
+        tableNacional.setImmediate(true);
+        tableNacional.addGeneratedColumn("colestacion", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("estacion");  //Atributo del bean
@@ -183,7 +183,7 @@ public class FormDetalleCredomatic extends Window {
             }
         });
 
-        tableCredomatic.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
+        tableNacional.addGeneratedColumn("colmedio", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("mediopago");  //Atributo del bean
@@ -200,7 +200,7 @@ public class FormDetalleCredomatic extends Window {
             }
         });
 
-        tableCredomatic.addGeneratedColumn("collote", new Table.ColumnGenerator() {
+        tableNacional.addGeneratedColumn("collote", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
@@ -214,7 +214,7 @@ public class FormDetalleCredomatic extends Window {
             }
         });
 
-        tableCredomatic.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
+        tableNacional.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
@@ -230,7 +230,7 @@ public class FormDetalleCredomatic extends Window {
             }
         });
 
-        tableCredomatic.addGeneratedColumn("colventa", new Table.ColumnGenerator() {
+        tableNacional.addGeneratedColumn("colventa", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("venta");  //Atributo del bean
@@ -251,7 +251,7 @@ public class FormDetalleCredomatic extends Window {
             }
         });
 
-        tableCredomatic.addGeneratedColumn("colcomentario", new Table.ColumnGenerator() {
+        tableNacional.addGeneratedColumn("colcomentario", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("comentario");  //Atributo del bean
@@ -264,7 +264,7 @@ public class FormDetalleCredomatic extends Window {
             }
         });
 
-        tableCredomatic.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
+        tableNacional.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Button btnDelete = new Button(FontAwesome.TRASH);
@@ -273,7 +273,7 @@ public class FormDetalleCredomatic extends Window {
                 btnDelete.addClickListener(new Button.ClickListener() {
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
-                        bcrDetalleCliCredomatic.removeItem(itemId);
+                        bcrDetalleCliNacional.removeItem(itemId);
                         List<GenericDetalleBCR> tempList = new ArrayList();
                         for (GenericDetalleBCR deo : listDetallecli) {
                             if (deo.getIddet() != itemId) {
@@ -289,22 +289,22 @@ public class FormDetalleCredomatic extends Window {
         });
 //        tableFMDavivienda.setVisibleColumns(new Object[]{"colestacion", "colmedio", "collote", "cliente", "venta", "comentario"});
 //        tableFMDavivienda.setColumnHeaders(new String[]{"Estacion", "Medio Pago", "Lote", "Cliente", "Venta", "Comentarios"});
-        tableCredomatic.setVisibleColumns(new Object[]{"collote", "colcliente", "colventa", "colcomentario", "colDelete"});
-        tableCredomatic.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios", "Borrar"});
+        tableNacional.setVisibleColumns(new Object[]{"collote", "colcliente", "colventa", "colcomentario", "colDelete"});
+        tableNacional.setColumnHeaders(new String[]{"Lote", "Cliente", "Venta", "Comentarios", "Borrar"});
 //        tableFMDavivienda.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT,Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
-        tableCredomatic.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
-        tableCredomatic.setHeight(200f, Unit.PIXELS);
-        tableCredomatic.addStyleName(ValoTheme.TABLE_COMPACT);
-        tableCredomatic.addStyleName(ValoTheme.TABLE_SMALL);
+        tableNacional.setColumnAlignments(Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT);
+        tableNacional.setHeight(200f, Unit.PIXELS);
+        tableNacional.addStyleName(ValoTheme.TABLE_COMPACT);
+        tableNacional.addStyleName(ValoTheme.TABLE_SMALL);
     }
 
     public void updateTableFooterDetaCli() {
         tmpDouble = 0;
-        for (Integer itemId : bcrDetalleCliCredomatic.getItemIds()) {
-            tmpDouble += bcrDetalleCliCredomatic.getItem(itemId).getBean().getVenta();
+        for (Integer itemId : bcrDetalleCliNacional.getItemIds()) {
+            tmpDouble += bcrDetalleCliNacional.getItem(itemId).getBean().getVenta();
         }
-        tableCredomatic.setFooterVisible(true);
-        tableCredomatic.setColumnFooter("colcomentario", "Total:");
-        tableCredomatic.setColumnFooter("colcomentario", currencySymbol + numberFmt.format(tmpDouble).trim());
+        tableNacional.setFooterVisible(true);
+        tableNacional.setColumnFooter("colcomentario", "Total:");
+        tableNacional.setColumnFooter("colcomentario", currencySymbol + numberFmt.format(tmpDouble).trim());
     }
 }
