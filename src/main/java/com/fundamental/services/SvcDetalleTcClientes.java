@@ -127,7 +127,7 @@ public class SvcDetalleTcClientes extends Dao {
                     + "       AND A.IDMEDIOPAGO = C.MEDIOPAGO_ID\n"
                     + "       AND A.LOTE = D.LOTE_ID\n"
                     + "       AND A.IDESTACION = ?\n"
-                    + "       AND A.turnoid = ?";
+                    + "       AND A.turnoid = ?  AND C.MEDIOPAGO_ID = ?";
             pst = getConnection().prepareStatement(query);
 
             /*Envio parametros necesarios*/
@@ -135,6 +135,7 @@ public class SvcDetalleTcClientes extends Dao {
             pst.setInt(2, turnoid);
             pst.setInt(3, estacionid);
             pst.setInt(4, turnoid);
+            pst.setInt(5, mediopagoid);
             ResultSet rst = pst.executeQuery();
 
             while (rst.next()) {
