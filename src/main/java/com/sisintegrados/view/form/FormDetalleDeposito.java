@@ -349,16 +349,6 @@ public class FormDetalleDeposito extends Window {
             }
         }
         
-//        System.out.println(" dolares a convertir " + tmpDoubleDolar * tasaUso);
-//        tmpDoubleDolar = tmpDoubleDolar * tasaUso;
-//        System.out.println(" dolares a convertir " + tmpDoubleDolar);
-//        System.out.println(" dolares a convertir " + tasaUso);
-//
-//        System.out.println("total dolar  " + tmpDoubleDolar);
-//        System.out.println("total otros  " + tmpDoubleOther);
-//        //tmpDouble = (tmpDoubleDolar * constanteDolar) + tmpDoubleOther;
-//        System.out.println("tmpDouble total " + tmpDouble);
-
         tblDeposito.setFooterVisible(true);
         tblDeposito.setColumnFooter("colmedio", "Total:");
         tblDeposito.setColumnFooter("colmonto", currencySymbol + numberFmt.format(tmpDouble).trim());

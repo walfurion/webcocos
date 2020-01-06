@@ -290,7 +290,8 @@ public class SvcDetalleTcClientes extends Dao {
                         new GenericDetalleBCR(rst.getInt(1),
                                 new Estacion(rst.getInt(5), rst.getString(6)),
                                 new GenericBeanMedioPago(rst.getInt(7), rst.getString(8)),
-                                new GenericLote(rst.getInt(9), rst.getInt(10)),
+                                //new GenericLote(rst.getInt(9), rst.getInt(10)),
+                                rst.getString(10),
                                 new GenericBeanCliente(rst.getInt(11), rst.getInt(12), rst.getString(13)),
                                 rst.getDouble(3),
                                 rst.getString(4)));
@@ -331,7 +332,7 @@ public class SvcDetalleTcClientes extends Dao {
                 pst.setInt(1, bcrDetalleCliBCR.getItem(itemId).getBean().getEstacion().getEstacionId());
                 pst.setInt(2, bcrDetalleCliBCR.getItem(itemId).getBean().getMediopago().getMediopagoid());
                 pst.setInt(3, turnoid);
-                pst.setInt(4, bcrDetalleCliBCR.getItem(itemId).getBean().getGenlote().getIdlote());
+                pst.setString(4, bcrDetalleCliBCR.getItem(itemId).getBean().getGenlote());
                 pst.setInt(5, bcrDetalleCliBCR.getItem(itemId).getBean().getCliente().getClienteid());
                 pst.setDouble(6, bcrDetalleCliBCR.getItem(itemId).getBean().getVenta());
                 pst.setString(7, bcrDetalleCliBCR.getItem(itemId).getBean().getComentario());

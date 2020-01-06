@@ -1472,9 +1472,7 @@ public class PrCierreDia extends Panel implements View {
                 tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
                 tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
                 calcularSumas();
-     
-
-            });
+     });
             getUI().addWindow(formDetalleDeposito);
             formDetalleDeposito.focus();
         }
