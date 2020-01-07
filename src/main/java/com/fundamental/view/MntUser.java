@@ -272,15 +272,17 @@ public class MntUser extends Panel implements View {
                 }
             }
         });
-
+//mery
         username = utils.buildTextField("Usuario:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
+//        String pattern = "^\\w+$z`";
         username.addValueChangeListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
+               
                 //TODO: al cambiar de valor este mismo colocarlo en la clave
             }
         });
-
+//        username.getValue().matches(pattern);
         clave = new PasswordField("Clave:");
         clave.setNullRepresentation("");
         clave.setRequired(true);
@@ -354,6 +356,7 @@ public class MntUser extends Panel implements View {
             public void buttonClick(Button.ClickEvent event) {
                 usuario = new Usuario();
                 usuario.setEstado("A");
+                
                 binder.setItemDataSource(usuario);
                 action = Dao.ACTION_ADD;
                 for (Integer bombaId : bcrRoles.getItemIds()) {
@@ -395,6 +398,10 @@ public class MntUser extends Panel implements View {
 //                }
                 if (!exists) {
                     Notification.show("Es obligatorio seleccionar al menos un rol.", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
+                if(username.getValue().trim().contains(" ")){
+                    Notification.show("El usuario no puede contener espacios en blanco", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
                 usuario.setStations(new ArrayList());
