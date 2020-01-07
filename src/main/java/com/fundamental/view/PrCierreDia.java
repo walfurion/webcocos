@@ -12,7 +12,6 @@ import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoArqueo;
 
-
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcDeposito;
 import com.fundamental.services.SvcEstacion;
@@ -28,7 +27,6 @@ import com.sisintegrados.generic.bean.RecepcionInventario;
 
 import com.sisintegrados.generic.bean.Tarjeta;
 import com.sisintegrados.view.form.FormDetalleDeposito;
-
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
@@ -105,8 +103,6 @@ public class PrCierreDia extends Panel implements View {
 
     double totalEfectivo;
     double totalDepositos;
-
-    
 
     Table tableVentas = new Table() {
         @Override
@@ -194,10 +190,15 @@ public class PrCierreDia extends Panel implements View {
     BeanItemContainer<Estacion> ContEstacion = new BeanItemContainer<Estacion>(Estacion.class);
     BeanItemContainer<GenericBeanMedioPago> ContMediosPago = new BeanItemContainer<GenericBeanMedioPago>(GenericBeanMedioPago.class);
 
+    Usuario usuario = new Usuario();
+    BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
+    BeanItemContainer<Estacion> estacionContainer = new BeanItemContainer<Estacion>(Estacion.class);
+
     public PrCierreDia() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
         DashboardEventBus.register(this);
+        usuario = VaadinSession.getCurrent().getAttribute(Usuario.class);
         root = new VerticalLayout();
         root.setSizeFull();
         root.setMargin(true);
@@ -245,14 +246,6 @@ public class PrCierreDia extends Panel implements View {
         hlContent4.addComponents(buildDetalleMontos(), btnGuardar);
         hlContent4.setComponentAlignment(btnGuardar, Alignment.BOTTOM_LEFT);
 
-//        VerticalLayout vlLabels = new VerticalLayout(lblTotalVentas, lblTotalDinero, lblDiferencia);
-//        vlLabels.setComponentAlignment(lblTotalVentas, Alignment.MIDDLE_RIGHT);
-//        vlLabels.setComponentAlignment(lblTotalDinero, Alignment.MIDDLE_RIGHT);
-//        vlLabels.setComponentAlignment(lblDiferencia, Alignment.MIDDLE_RIGHT);
-//        Responsive.makeResponsive(vlLabels);
-//        vlLabels.setSizeUndefined();
-//        hlContent4.addComponent(vlLabels, 0);
-//VerticalLayout vlContent = new VerticalLayout();
         CssLayout cltInfo = new CssLayout();
         cltInfo.setSizeUndefined();
         cltInfo.setWidth(100f, Unit.PERCENTAGE);
@@ -301,7 +294,31 @@ public class PrCierreDia extends Panel implements View {
 
         root.addComponents(cltInfo, hlCombo, content);
         root.setExpandRatio(content, 1);
+        cargaInfoSesion();
+    }
 
+    private void cargaInfoSesion() {
+        if (usuario.getPaisId() != null) {
+            int i = 0;
+            for (i = 0; i < contPais.size(); i++) {
+                Pais hh = new Pais();
+                hh = contPais.getIdByIndex(i);
+                if (usuario.getPaisId().toString().trim().equals(hh.getPaisId().toString().trim())) {
+                    cbxPais.setValue(contPais.getIdByIndex(i));
+                }
+            }
+        }
+        if (estacionContainer.size() > 0) {
+            int i = 0;
+            for (i = 0; i < estacionContainer.size(); i++) {
+                Estacion ss = new Estacion();
+                ss = estacionContainer.getIdByIndex(i);
+//                System.out.println("ESTACION " + usuario.getEstacionid());
+                if (usuario.getEstacionid().toString().trim().equals(ss.getEstacionId().toString().trim())) {
+                    cbxEstacion.setValue(estacionContainer.getIdByIndex(i));
+                }
+            }
+        }
     }
 
 //List<InventarioRecepcion> inventarioHoy=new ArrayList();
@@ -398,7 +415,7 @@ public class PrCierreDia extends Panel implements View {
                 List<RecepcionInventario> listRec = service.getRecepcion(estacion.getPaisId(), estacion.getEstacionId(), dfdFecha.getValue());
                 if (!listRec.isEmpty()) {
                     bcrRecepcion.removeAllItems();
-                    bcrRecepcion.addAll(listRec);     
+                    bcrRecepcion.addAll(listRec);
                     recepcion = bcrRecepcion.getItem(bcrRecepcion.getItemIds().get(0)).getBean();
                     tfdDriver.setValue(recepcion.getPiloto());
                     tfdUnit.setValue(recepcion.getUnidad());
@@ -478,7 +495,10 @@ public class PrCierreDia extends Panel implements View {
 
         //TODO: Los controles de pais y estacion se deben mostrar solo a los usuarios de rol de oficina.
         SvcTurnoCierre svcTC = new SvcTurnoCierre();
-        cbxPais = new ComboBox("País:", new ListContainer<Pais>(Pais.class, svcTC.getAllPaises()));
+        contPais = new BeanItemContainer<Pais>(Pais.class);
+        contPais.addAll(svcTC.getAllPaises());
+//        cbxPais = new ComboBox("País:", new ListContainer<Pais>(Pais.class, svcTC.getAllPaises()));
+        cbxPais = new ComboBox("País:", contPais);
         svcTC.closeConnections();
 
         cbxPais.setItemCaptionPropertyId("nombre");
@@ -492,7 +512,8 @@ public class PrCierreDia extends Panel implements View {
                 pais = new Pais();
                 pais = (Pais) cbxPais.getValue();
                 SvcEstacion svcEstacion = new SvcEstacion();
-                Container estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));
+//                estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));
+                estacionContainer = new BeanItemContainer<Estacion>(Estacion.class,svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));;
                 svcEstacion.closeConnections();
                 cbxEstacion.setContainerDataSource(estacionContainer);
                 currencySymbol = pais.getMonedaSimbolo() + " ";
@@ -647,7 +668,6 @@ public class PrCierreDia extends Panel implements View {
         totalDepositos = tpDeposito;
 
     }
-
 
     private void buildTableVentas() {
         tableVentas.setCaption("Ventas:");
@@ -1397,9 +1417,9 @@ public class PrCierreDia extends Panel implements View {
                         System.out.println("entra a lectura veeder " + item.getInicialDto());
                         System.out.println("entra a lectura veeder " + item.getComprasDto());
                         item.setLecturaVeederRoot(item.getInicialDto() + item.getComprasDto());
-                        
+
 //                        item.setVentas((item.getInicialDto() + item.getComprasDto()) - (item.getFinallDto() + item.getCalibracion()));
-                        System.out.println("VENTAAS "+item.getInicialDto());
+                        System.out.println("VENTAAS " + item.getInicialDto());
 
                         item.setDiferencia(item.getVentasCons() - item.getVentas());
                         item.setEstado((item.getDiferencia() > 0) ? "SOBRANTE" : ((item.getDiferencia() == 0) ? "OK" : "FALTANTE"));
@@ -1472,7 +1492,7 @@ public class PrCierreDia extends Panel implements View {
                 tmpDoubleDolar = (Double) VaadinSession.getCurrent().getAttribute("totalDolar");
                 tmpDoubleOther = (Double) VaadinSession.getCurrent().getAttribute("totalOtro");
                 calcularSumas();
-     });
+            });
             getUI().addWindow(formDetalleDeposito);
             formDetalleDeposito.focus();
         }

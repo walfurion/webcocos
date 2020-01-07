@@ -51,6 +51,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
@@ -103,7 +104,9 @@ public class PrTurnoCierre extends Panel implements View {
     Turno turno, ultimoTurno;
     Dia dia, ultimoDia;
     Container contTurnos = new ListContainer<Turno>(Turno.class, new ArrayList());
-    Container contPais = new ListContainer<Pais>(Pais.class, new ArrayList());
+//    Container contPais = new ListContainer<Pais>(Pais.class, new ArrayList());
+
+    BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
 
     Table tableCuadre = new Table() {
         @Override
@@ -305,10 +308,16 @@ public class PrTurnoCierre extends Panel implements View {
     Button btnfmdavivienda;
     Button btndmscottia;
 
+    Usuario usuario = new Usuario();
+
+//    Container estacionContainer;
+    BeanItemContainer<Estacion> estacionContainer = new BeanItemContainer<Estacion>(Estacion.class);
+
     public PrTurnoCierre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
         DashboardEventBus.register(this);
+        usuario = VaadinSession.getCurrent().getAttribute(Usuario.class);
         root = new VerticalLayout();
         root.setSizeFull();
         root.setMargin(true);
@@ -415,6 +424,31 @@ public class PrTurnoCierre extends Panel implements View {
         root.addComponents(cltInfo, vldetalles/*hlCombos*/, content);
         root.setExpandRatio(content, 1);
 //        panel2.close();
+        cargaInfoSesion();
+    }
+
+    private void cargaInfoSesion() {
+        if (usuario.getPaisId() != null) {
+            int i = 0;
+            for (i = 0; i < contPais.size(); i++) {
+                Pais hh = new Pais();
+                hh = contPais.getIdByIndex(i);
+                if (usuario.getPaisId().toString().trim().equals(hh.getPaisId().toString().trim())) {
+                    cbxPais.setValue(contPais.getIdByIndex(i));
+                }
+            }
+        }
+        if (estacionContainer.size()>0) {
+            int i = 0;
+            for (i = 0; i < estacionContainer.size(); i++) {
+                Estacion ss = new Estacion();
+                ss = estacionContainer.getIdByIndex(i);
+//                System.out.println("ESTACION " + usuario.getEstacionid());
+                if (usuario.getEstacionid().toString().trim().equals(ss.getEstacionId().toString().trim())) {
+                    cbxEstacion.setValue(estacionContainer.getIdByIndex(i));
+                }
+            }
+        }
     }
 
     public class SectionPanelButtons extends Panel {
@@ -690,7 +724,8 @@ public class PrTurnoCierre extends Panel implements View {
         pais = (user.getPaisLogin() != null)
                 ? user.getPaisLogin() : ((pais != null) ? pais : new Pais());
 //        if (user.getPaisLogin() == null && contPais.getItemIds().isEmpty()) {
-        contPais = new ListContainer<>(Pais.class, service.getAllPaises());
+//        contPais = new ListContainer<>(Pais.class, service.getAllPaises());
+        contPais = new BeanItemContainer<Pais>(Pais.class, service.getAllPaises());
 //        }
 
         estacion = (Estacion) ((user.getEstacionLogin() != null)
@@ -748,7 +783,8 @@ public class PrTurnoCierre extends Panel implements View {
             public void valueChange(final Property.ValueChangeEvent event) {
                 pais = (Pais) cbxPais.getValue();
                 SvcEstacion svcEstacion = new SvcEstacion();
-                Container estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));
+//                estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));
+                estacionContainer = new BeanItemContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId())); //ASG
                 svcEstacion.closeConnections();
                 cbxEstacion.setContainerDataSource(estacionContainer);
                 //limpiar
@@ -1391,7 +1427,6 @@ public class PrTurnoCierre extends Panel implements View {
 //                return cmbLote;
 //            }
 //        });
-
         tableBCR.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
@@ -1471,7 +1506,6 @@ public class PrTurnoCierre extends Panel implements View {
 //                return cmbLote;
 //            }
 //        });
-
         tableCredomatic.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
@@ -1551,7 +1585,6 @@ public class PrTurnoCierre extends Panel implements View {
 //                return cmbLote;
 //            }
 //        });
-
         tableDavivienda.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
@@ -1631,7 +1664,6 @@ public class PrTurnoCierre extends Panel implements View {
 //                return cmbLote;
 //            }
 //        });
-
         tableNacional.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
@@ -1711,7 +1743,6 @@ public class PrTurnoCierre extends Panel implements View {
 //                return cmbLote;
 //            }
 //        });
-
         tableFlotaBac.addGeneratedColumn("colcliente", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
