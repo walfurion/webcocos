@@ -10,48 +10,61 @@ package com.fundamental.utils;
  * @author Mery
  */
 public class Util {
-    public static void main(String ars[]){
+
+    public static void main(String ars[]) {
         double valor1 = 100.5665888;
         double d = 100;
-        System.out.println("dd "+isDoublePositive("0.0"));
+        System.out.println("dd " + isDoublePositive("0.0"));
 //        System.out.println("formateado = "+Math.ceil(valor1));
 //        double valor2 = valor1*d;
 //        System.out.println("formateado = "+valor2);
 //        System.out.println("formateado = "+Math.ceil(valor2));
 //        System.out.println("formateado = "+(Math.ceil(valor2))/d);
-        
+
     }
-    public static double toDoubleFormat(double n){
-            double newD=0;
-             double valor1 = 100.5665888;
-            double d = 100;
+
+    public static double toDoubleFormat(double n) {
+        double newD = 0;
+        double valor1 = 100.5665888;
+        double d = 100;
 //            System.out.println("formateado = "+Math.ceil(valor1));
-            double valor2 = valor1*d;
+        double valor2 = valor1 * d;
 //            System.out.println("formateado = "+valor2);
 //            System.out.println("formateado = "+Math.ceil(valor2));
 //            System.out.println("formateado = "+(Math.ceil(valor2))/d);
-            valor2 = (Math.ceil(valor2))/d;
-            return valor2;
+        valor2 = (Math.ceil(valor2)) / d;
+        return valor2;
     }
-    public static double isNumber(String s){
+
+    public static double isNumber(String s) {
         double newD = 0;
-        if(s.matches("\\d+")){
+        if (s.matches("\\d+")) {
             newD = Double.parseDouble(s);
         }
-    return newD;
+        return newD;
     }
-    public static boolean isDoublePositive(String s){
-        try{
+
+    public static boolean isDoublePositive(String s) {
+        try {
             double n = Double.parseDouble(s);
-            if(n>0){
+            if (n > 0) {
                 return true;
             }
             return false;
-        }catch(Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
-    public static boolean isPositive(double n){
-        return n>0?true:false;
+
+    public static boolean isPositive(double n) {
+        return n > 0 ? true : false;
+    }
+
+    public static double isNumberEst(String s) {
+        double newD = -1;
+        if (s.matches("\\d+")) {
+            newD = Double.parseDouble(s);
+        }
+        return newD;
     }
 }
