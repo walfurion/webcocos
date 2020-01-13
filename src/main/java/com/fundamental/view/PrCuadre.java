@@ -16,7 +16,6 @@ import com.fundamental.model.FactelectronicaPos;
 import com.fundamental.model.Lubricanteprecio;
 import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Pais;
-import com.fundamental.model.Parametro;
 import com.fundamental.model.Producto;
 import com.fundamental.model.TasaCambio;
 import com.fundamental.model.Turno;
@@ -30,16 +29,18 @@ import com.fundamental.services.SvcClientePrepago;
 import com.fundamental.services.SvcComVenLubricantes;
 import com.fundamental.services.SvcCuadre;
 import com.fundamental.services.SvcDetalleLubricantes;
-import com.fundamental.services.SvcProducto;
+import com.fundamental.services.SvcRepCuadrePistero;
 import com.fundamental.services.SvcTarjetaCredito;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
+import com.fundamental.utils.AdvancedFileDownloader;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
-import com.fundamental.utils.Mail;
+import com.fundamental.utils.ExcelGenerator;
 import com.fundamental.utils.Util;
-import com.sisintegrados.generic.bean.GenericProduct;
+import com.fundamental.utils.Zip;
 import com.sisintegrados.generic.bean.GenericTarjeta;
+import com.sisintegrados.generic.bean.RepCuadrePistero;
 import com.sisintegrados.generic.bean.genericMedioTarjeta;
 import com.sisintegrados.view.form.FormDetalleVenta;
 import com.sisintegrados.view.form.FormDetalleVenta2;
@@ -59,6 +60,7 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Responsive;
+import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.MarginInfo;
@@ -81,14 +83,14 @@ import com.vaadin.ui.Table.Align;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -96,12 +98,14 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.vaadin.maddon.ListContainer;
 import org.vaadin.ui.NumberField;
 
@@ -233,6 +237,16 @@ public class PrCuadre extends Panel implements View {
 
     double tmpTotal = 0.00;
 
+    /*ASG REPORTE PISTERO*/
+    final AdvancedFileDownloader downloader = new AdvancedFileDownloader();
+    final AtomicBoolean makeZip = new AtomicBoolean(false);
+    final AtomicReference<Object> name = new AtomicReference<Object>();
+    Button btnExportar2 = new Button("REPORTE PISTERO", FontAwesome.EDIT);
+    ExcelGenerator excel = new ExcelGenerator();
+    SvcRepCuadrePistero daoRep = new SvcRepCuadrePistero();
+    RepCuadrePistero sourceGeneric = new RepCuadrePistero();
+
+    /*FIN*/
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
@@ -310,9 +324,16 @@ public class PrCuadre extends Panel implements View {
 //        Responsive.makeResponsive(cltUpload);
         CssLayout cltTaDiff = buildDetalleMontos();
         cltTaDiff.setSizeFull();
-        cltTaDiff.addComponent(btnSave);
+        /*ASG REPORTE PISTERO*/
+        HorizontalLayout hlrep = new HorizontalLayout();
+        hlrep.setSpacing(true);
+        hlrep.addComponent(btnSave);
+        hlrep.addComponent(btnExportar2);
+//        cltTaDiff.addComponent(btnSave);
+        cltTaDiff.addComponent(hlrep);
+        /*FIN REPORTE PISTERO*/
 
-        /*ASG botones de detalles*/
+ /*ASG botones de detalles*/
         HorizontalLayout hl = new HorizontalLayout();
         hl.setSpacing(true);
         hl.setMargin(new MarginInfo(true, false, true, false));
@@ -1160,9 +1181,97 @@ public class PrCuadre extends Panel implements View {
         }
         );
 
+        /*REPORTE PISTERO ASG*/
+        btnExportar2.setCaption("Reporte Cuadre");
+        btnExportar2.setStyleName(ValoTheme.BUTTON_DANGER);
+        btnExportar2.setIcon(FontAwesome.EDIT);
+        btnExportar2.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+                /*Prueba empleado .. */
+                Empleado emp = new Empleado();
+                emp = (Empleado) cbxEmpleado.getValue();
+                System.out.println("EMPLEADO " + emp.getEmpleadoId());
+            }
+        });
+
+        downloader.addAdvancedDownloaderListener(new AdvancedFileDownloader.AdvancedDownloaderListener() {
+            @Override
+            public void beforeDownload(AdvancedFileDownloader.DownloaderEvent downloadEvent) {
+                if (sourceGeneric != null) {
+//                    System.out.println("IMP " + Estacion);
+                    downloader.setFileDownloadResource(GenerarExcel());
+                }
+            }
+        });
+        downloader.extend(btnExportar2);
+        /*FIN*/
     }
 
-    /*Metodo Llama Forma Clientes Prepago*///ASG
+    /*REPORTE CUADRE ASG*/
+    private StreamResource GenerarExcel() {
+        /*Asigno Nombre Reporte*/
+        name.set("COCOs_CDRE_PISTERO_" + estacion.getNombre().concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx"));
+        makeZip.set(false);
+        
+        /*Devulevo una lista de string seleccionados*/
+        StreamResource.StreamSource source = new StreamResource.StreamSource() {
+            public InputStream getStream() {
+                ByteArrayOutputStream stream = null;
+                InputStream input = null;
+                try {
+                    /*Recorro la seleccion de estaciones para enviarlas al query*/
+                    List<Object[]> files = new ArrayList<>();
+                    try {
+                        Object[] f = new Object[2];
+
+                        Estacion estacion = new Estacion();
+                        estacion = (Estacion) cbxEstacion.getValue();
+                        Turno turno = new Turno();
+                        turno = (Turno) cbxTurno.getValue();
+                        Empleado empleado = new Empleado();
+                        empleado = (Empleado) cbxEmpleado.getValue();
+                        String bomba = daoRep.getBombaByTurnoEmpleado(turno.getTurnoId(), empleado.getEmpleadoId());
+                        Integer calibracion = daoRep.getTotCalibraTurnoEmpleado(turno.getTurnoId(), empleado.getEmpleadoId());
+                        sourceGeneric = new RepCuadrePistero(empleado.getNombre(), bomba, turno.getNombre(), calibracion, bcArqueo, bcEfectivo, bcrMediopago, bcrProducto,dfdFecha.getValue());
+
+//                        XSSFWorkbook workbook = new XSSFWorkbook();
+                        /*Generar Reporte en XLS*/
+                        XSSFWorkbook workbook = excel.generarCuadrePistero(1, "UNO-PETROL ESTACION " + estacion.getNombre(), "CUADRE", sourceGeneric);
+                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        try {
+                            workbook.write(bos);
+                        } catch (Exception exc) {
+                            bos.close();
+                        }
+                        String nameFile = "COCOs_CDRE_PISTERO_" + estacion.getNombre().concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx");
+                        f[0] = nameFile;
+                        f[1] = bos;
+                        files.add(f);
+
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    if (makeZip.get()) {
+                        Zip zip = new Zip();
+                        input = zip.makeZip("Estaciones", files);
+                    } else {
+                        stream = (ByteArrayOutputStream) files.get(0)[1];
+                        input = new ByteArrayInputStream(stream.toByteArray());
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                return input;
+            }
+        };
+        StreamResource resource = new StreamResource(source, (String) name.get());
+        return resource;
+    }
+
+    /*FIN CUADRE ASG*/
+
+ /*Metodo Llama Forma Clientes Prepago*///ASG
     private void formPrepago(Integer idestacion, String simboloMoneda, Integer idpais) {
         if (cbxEmpleado.getValue() != null) {
             formClientePrepago = new FormClientePrepago(idestacion, simboloMoneda, idpais, bcrPrepaid);
