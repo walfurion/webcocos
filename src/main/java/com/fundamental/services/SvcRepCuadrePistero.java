@@ -6,6 +6,7 @@
 package com.fundamental.services;
 
 import com.sisintegrados.generic.bean.Estacion;
+import com.sisintegrados.generic.bean.LitroCalibracion;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,21 +47,31 @@ public class SvcRepCuadrePistero extends Dao {
         return bomba;
     }
 
-    public Integer getTotCalibraTurnoEmpleado(Integer turnoid, Integer empleadid) {
-        Integer total = 0;
+    public ArrayList<LitroCalibracion> getTotCalibraTurnoEmpleado(Integer turnoid, Integer empleadid) {
+        ArrayList<LitroCalibracion> calibracion = new ArrayList<LitroCalibracion>();
         ResultSet rst = null;
         try {
-            query = "select nvl(sum(calibracion),0) Calibracion \n"
+            query = "select d.nombre,\n"
+                    + "       c.precio,\n"
+                    + "       nvl(sum(calibracion),0) caliLT, \n"
+                    + "       nvl(sum(calibracion),0) * c.precio caliVT\n"
                     + "from lectura a,\n"
-                    + "     lectura_detalle b\n"
-                    + "where a.lectura_id = b.lectura_id \n"
-                    + "and b.tipo = 'E' \n"
-                    + "and a.turno_id = "+turnoid
-                    + " and a.empleado_id = "+empleadid;
+                    + "     lectura_detalle b,\n"
+                    + "     precio c,\n"
+                    + "     producto d\n"
+                    + "where a.lectura_id = b.lectura_id\n"
+                    + "and b.producto_id  = c.producto_id\n"
+                    + "and c.turno_id = a.turno_id\n"
+                    + "and d.producto_id = c.producto_id\n"
+                    + "and b.tipo = 'E'\n"
+                    + "and a.turno_id = \n" + turnoid
+                    + " and a.empleado_id = \n" + empleadid
+                    + "group by d.nombre,c.precio";
+
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             while (rst.next()) {
-                total = rst.getInt(1);
+                calibracion.add(new LitroCalibracion(rst.getString(1), rst.getDouble(2), rst.getDouble(3), rst.getDouble(4)));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -72,6 +83,6 @@ public class SvcRepCuadrePistero extends Dao {
             } catch (Exception ignore) {
             }
         }
-        return total;
+        return calibracion;
     }
 }

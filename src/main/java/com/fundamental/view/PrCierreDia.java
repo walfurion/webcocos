@@ -101,8 +101,11 @@ public class PrCierreDia extends Panel implements View {
     double tmpDoubleDolar;
     double tmpDoubleOther;
 
-    double totalEfectivo;
-    double totalDepositos;
+    Double totalEfectivo = 0D;
+    Double totalDepositos = 0D;
+
+    //double totalEfectivo;
+    //double totalDepositos;
 
     Table tableVentas = new Table() {
         @Override
@@ -1110,6 +1113,15 @@ public class PrCierreDia extends Panel implements View {
         tblInventory.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.LEFT);
          */
     }
+    
+    public boolean validaDetalleEfectivo(Double totalEfectivo, Double totalDepositos) {
+        boolean result = true;
+        /*Valida los totales en medios pago*/
+           if (Math.abs(totalEfectivo - totalDepositos) > 0.009) {
+                    result = false;
+                }
+        return result;
+    }
 
     private void buildButtons() {
 
@@ -1149,7 +1161,7 @@ public class PrCierreDia extends Panel implements View {
             @Override
             public void buttonClick(final Button.ClickEvent event) {
 
-                if (totalEfectivo != totalDepositos) {
+                if (!validaDetalleEfectivo(totalEfectivo, totalDepositos)){
                     Notification.show("ERROR:", "El detalle de efectivo no coincide con el registro de Depósitos", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
@@ -1254,6 +1266,8 @@ public class PrCierreDia extends Panel implements View {
         });
 
     }
+    
+    
 
     private HorizontalLayout buildDetalleMontos() {
         Label label3 = new Label("Diferencia: ");

@@ -10,6 +10,7 @@ import com.fundamental.model.Producto;
 import com.fundamental.model.dto.DtoArqueo;
 import com.fundamental.model.dto.DtoEfectivo;
 import com.vaadin.data.util.BeanContainer;
+import java.util.ArrayList;
 import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,14 +25,14 @@ public class RepCuadrePistero {
     String empleado;
     String bomba;
     String turno;
-    Integer calibracion;
+    ArrayList<LitroCalibracion> calibracion;
     BeanContainer<Integer, DtoArqueo> arqueo;
     BeanContainer<Integer, DtoEfectivo> efectivo;
     BeanContainer<Integer, Mediopago> mediopago;
     BeanContainer<Integer, Producto> prodadicionales;
     Date fecha;
 
-    public RepCuadrePistero(String empleado, String bomba, String turno, Integer calibracion, BeanContainer<Integer, DtoArqueo> arqueo, BeanContainer<Integer, DtoEfectivo> efectivo, BeanContainer<Integer, Mediopago> mediopago, BeanContainer<Integer, Producto> prodadicionales,Date fecha) {
+    public RepCuadrePistero(String empleado, String bomba, String turno, ArrayList<LitroCalibracion> calibracion, BeanContainer<Integer, DtoArqueo> arqueo, BeanContainer<Integer, DtoEfectivo> efectivo, BeanContainer<Integer, Mediopago> mediopago, BeanContainer<Integer, Producto> prodadicionales,Date fecha) {
         this.empleado = empleado;
         this.bomba = bomba;
         this.turno = turno;

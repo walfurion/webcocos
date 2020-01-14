@@ -223,7 +223,6 @@ public class MntHorario extends Panel implements View {
                 }
             }
         });
-
         //Importante
         binder.bindMemberFields(this);
         binder.setItemDataSource(horario);
