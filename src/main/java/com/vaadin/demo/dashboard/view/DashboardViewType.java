@@ -21,6 +21,7 @@ import com.fundamental.view.RptMTD2;
 import com.fundamental.view.RptControDeMediosDePago;
 import com.fundamental.view.RptVolumenes;
 import com.fundamental.view.RptWSM;
+import com.fundamental.view.RptWetStock;
 import com.fundamental.view.TurnoPr;
 import com.fundamental.view.maintenance.CambioClave;
 import com.fundamental.view.maintenance.MntEmpleado;
@@ -70,6 +71,7 @@ public enum DashboardViewType {
     RPT_VOLUMEN("RPT_VOLUMEN", RptVolumenes.class, FontAwesome.FILE, false),
 //    RPT_MTD("RPT_MTD", RptMTD.class, FontAwesome.FILE, false),
     RPT_MTD("RPT_MTD", RptMTD2.class, FontAwesome.FILE, false),
+    RPT_WET_STOCK("RPT_WET_STOCK", RptWetStock.class, FontAwesome.FILE, false),
     RPT_WSM("RPT_WSM", RptWSM.class, FontAwesome.FILE, false)
     ;
 
