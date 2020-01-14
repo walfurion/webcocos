@@ -208,11 +208,11 @@ public class ExcelGeneratorWetStock {
                                                         "Ajuste de Transferencias", "Inventario Teorico", "Inventario Fisico", "Nivel de Agua en Tanque", "Varianza en Volumen",
                                                         "Varianza en Volumen de Recepciones", "Varianza Acumulada en Volumen de Recepciones", "Varianza (%) Sobre Ventas", 
                                                         "Varianza Acumulada", "Venas Acumuladas", "Varianza Acumulada (%) sobre Ventas"};
-            List<String> titulosColumnasTanque2 = new ArrayList<String>();
-            String[] titulosHijosTanque2 = new String[]{"Fecha", "Inventario Inicial", "Volumen Facturado", "Volumen Recibido en Tanque", "Ventas", 
-                                                        "Ajuste de Transferencias", "Inventario Teorico", "Inventario Fisico", "Nivel de Agua en Tanque", "Varianza en Volumen",
-                                                        "Varianza en Volumen de Recepciones", "Varianza Acumulada en Volumen de Recepciones", "Varianza (%) Sobre Ventas", 
-                                                        "Varianza Acumulada", "Venas Acumuladas", "Varianza Acumulada (%) sobre Ventas"};
+//            List<String> titulosColumnasTanque2 = new ArrayList<String>();
+//            String[] titulosHijosTanque2 = new String[]{"Fecha", "Inventario Inicial", "Volumen Facturado", "Volumen Recibido en Tanque", "Ventas", 
+//                                                        "Ajuste de Transferencias", "Inventario Teorico", "Inventario Fisico", "Nivel de Agua en Tanque", "Varianza en Volumen",
+//                                                        "Varianza en Volumen de Recepciones", "Varianza Acumulada en Volumen de Recepciones", "Varianza (%) Sobre Ventas", 
+//                                                        "Varianza Acumulada", "Venas Acumuladas", "Varianza Acumulada (%) sobre Ventas"};
             /*como crear un objeto arrylist de tipo string*/
             ArrayList<String> tituloshojasHijosTanque = new ArrayList<String>();
             tituloshojasHijosTanque.add("TANQUE 1");
@@ -221,7 +221,7 @@ public class ExcelGeneratorWetStock {
             tituloshojasHijosTanque.add("TANQUE 4");
 
             titulosColumnasTanque1 = Arrays.asList(titulosHijosTanque1);
-            titulosColumnasTanque2 = Arrays.asList(titulosHijosTanque2);
+//            titulosColumnasTanque2 = Arrays.asList(titulosHijosTanque2);
 
             //TANQUE 1
             for (String tituloshojasHijosManualTanque : tituloshojasHijosTanque) {
@@ -260,8 +260,8 @@ public class ExcelGeneratorWetStock {
 
             //TANQUE 2
             /*Se setea el ancho de cada una de las columnas */
-            for (int vv = 0; vv < titulosColumnasTanque2.size() + 7; vv++) {
-                sheetTanque2.setColumnWidth(vv, 5500);
+            for (int v1 = 0; v1 < titulosColumnasTanque1.size() + 7; v1++) {
+                sheetTanque2.setColumnWidth(v1, 5500);
             }
 
             /*Se crean los titulos de columnas*/
@@ -269,11 +269,47 @@ public class ExcelGeneratorWetStock {
             XSSFCell subprincipalcell2;
             Integer t2;
             t2 = 0;
-            for (String string : titulosColumnasTanque2) {
+            for (String string : titulosColumnasTanque1) {
                 subprincipalcell2 = subprincipal2.createCell(t2);
                 subprincipalcell2.setCellValue(string);
                 subprincipalcell2.setCellStyle(subheaderStyle);
                 t2++;
+
+            }
+            //TANQUE 3
+            /*Se setea el ancho de cada una de las columnas */
+            for (int v1 = 0; v1 < titulosColumnasTanque1.size() + 7; v1++) {
+                sheetTanque2.setColumnWidth(v1, 5500);
+            }
+
+            /*Se crean los titulos de columnas*/
+            XSSFRow subprincipal3 = sheetTanque3.createRow(0);
+            XSSFCell subprincipalcell3;
+            Integer t3;
+            t3 = 0;
+            for (String string : titulosColumnasTanque1) {
+                subprincipalcell3 = subprincipal3.createCell(t3);
+                subprincipalcell3.setCellValue(string);
+                subprincipalcell3.setCellStyle(subheaderStyle);
+                t3++;
+
+            }
+            //TANQUE 4
+            /*Se setea el ancho de cada una de las columnas */
+            for (int v1 = 0; v1 < titulosColumnasTanque1.size() + 7; v1++) {
+                sheetTanque2.setColumnWidth(v1, 5500);
+            }
+
+            /*Se crean los titulos de columnas*/
+            XSSFRow subprincipal4 = sheetTanque4.createRow(0);
+            XSSFCell subprincipalcell4;
+            Integer t4;
+            t4 = 0;
+            for (String string : titulosColumnasTanque1) {
+                subprincipalcell4 = subprincipal4.createCell(t4);
+                subprincipalcell4.setCellValue(string);
+                subprincipalcell4.setCellStyle(subheaderStyle);
+                t4++;
 
             }
 
@@ -288,8 +324,22 @@ public class ExcelGeneratorWetStock {
             XSSFCell datoscellTanque2;
             Integer i2; //COLUMNAS
             Integer j2 = 1; //FILAS
-            j2 = 0;
+            i2 = 0;
             Integer filas2 = lista.size();
+            
+            XSSFRow datosTanque3;
+            XSSFCell datoscellTanque3;
+            Integer i3; //COLUMNAS
+            Integer j3 = 1; //FILAS
+            i3 = 0;
+            Integer filas3 = lista.size();
+            
+            XSSFRow datosTanque4;
+            XSSFCell datoscellTanque4;
+            Integer i4; //COLUMNAS
+            Integer j4 = 1; //FILAS
+            i4 = 0;
+            Integer filas4 = lista.size();
             
             String fecha = "";
             Double varianzaAcum = 0.0;
@@ -453,6 +503,163 @@ public class ExcelGeneratorWetStock {
 
                     /*Al Final*/
                     j2++;
+                }
+                if (itemId.getProducto_id() == 3) {
+                    datosTanque3 = sheetTanque3.createRow(j3);
+
+                    i3 = 0;
+                    fecha = itemId.getFecha().toString();
+                    varianzaAcum = varianzaAcum+itemId.getDiferencia();
+                    ventasAcum = ventasAcum+itemId.getVentas();
+                    porcentajeVarAcum = (varianzaAcum/ventasAcum)*100;
+                    
+                    
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(fecha.substring(8));
+                    datoscellTanque3.setCellStyle(styleFecha);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(itemId.getInicial());
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(itemId.getCompras());
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(itemId.getCompras());
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(itemId.getVentas());
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(itemId.getAjuste());
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(itemId.getInv_teorico());
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(itemId.getInv_fisico());
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(itemId.getNivel());
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(itemId.getDiferencia());//varianza en volumen
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(0);//varianza en volumen de Recepciones
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(0);//varianza acumulada en volumen de Recepciones
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(itemId.getVarianza());
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(varianzaAcum);
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(ventasAcum);
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+                    datoscellTanque3 = datosTanque3.createCell(i3);
+                    datoscellTanque3.setCellValue(porcentajeVarAcum);
+                    datoscellTanque3.setCellStyle(styleNumber);
+                    i3++;
+
+                    /*Al Final*/
+                    j3++;
+                }
+                if (itemId.getProducto_id() == 4) {
+                    datosTanque4 = sheetTanque4.createRow(j4);
+
+                    i4 = 0;
+                    fecha = itemId.getFecha().toString();
+                    varianzaAcum = varianzaAcum+itemId.getDiferencia();
+                    ventasAcum = ventasAcum+itemId.getVentas();
+                    porcentajeVarAcum = (varianzaAcum/ventasAcum)*100;
+                    
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(fecha.substring(8));
+                    datoscellTanque4.setCellStyle(styleFecha);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(itemId.getInicial());
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(itemId.getCompras());
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(itemId.getCompras());
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(itemId.getVentas());
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(itemId.getAjuste());
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(itemId.getInv_teorico());
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(itemId.getInv_fisico());
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(itemId.getNivel());
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(itemId.getDiferencia());//varianza en volumen
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(0);//varianza en volumen de Recepciones
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(0);//varianza acumulada en volumen de Recepciones
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(itemId.getVarianza());
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(varianzaAcum);
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(ventasAcum);
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+                    datoscellTanque4 = datosTanque4.createCell(i4);
+                    datoscellTanque4.setCellValue(porcentajeVarAcum);
+                    datoscellTanque4.setCellStyle(styleNumber);
+                    i4++;
+
+                    /*Al Final*/
+                    j4++;
                 }
             }                                                      
         return workbook;

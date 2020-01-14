@@ -62,7 +62,7 @@ public class SvcReporteWetStock extends Dao {
         return result;
     }
     
-    public ArrayList<GenericRptWetStock> getCtlWetStock(Date fec1, Date fec2) {
+    public ArrayList<GenericRptWetStock> getCtlWetStock(Date fec1, Date fec2, String idestacion) {
         ArrayList<GenericRptWetStock> result = new ArrayList<GenericRptWetStock>();
         String fecha1 = Constant.SDF_ddMMyyyy.format(fec1);
         String fecha2 = Constant.SDF_ddMMyyyy.format(fec2);
@@ -71,7 +71,7 @@ public class SvcReporteWetStock extends Dao {
             query = "select r.fecha, t.producto_id, r.inicial, r.compras, r.ventas, '' ajustes, r.inv_fisico, " +
                     " '' nivel, p.piloto, p.unidad, r.compartimiento, p.factura, r.compras comprasFact, r.lectura_veeder, r.varianza, r.diferencia " +
                     "from RECEPCION_INVENTARIO_DETALLE r, tanque t, recepcion_inventario p\n" +
-                    "where t.producto_id=r.producto_id and r.invrecepcion_id = p.invrecepcion_id and\n" +
+                    "where t.producto_id=r.producto_id and r.invrecepcion_id = p.invrecepcion_id and r.estacion_id in('"+idestacion+"') and \n" +
                     "r.fecha >= to_date('"+fecha1+"','dd/mm/yyyy') and r.fecha <= to_date('"+fecha2+"','dd/mm/yyyy')\n" +
                     "order by r.fecha, t.PRODUCTO_ID";
             System.out.println("QUERY " + query);

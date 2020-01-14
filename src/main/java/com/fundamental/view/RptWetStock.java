@@ -266,7 +266,7 @@ public class RptWetStock extends Panel implements View {
                             Seleccion = getSeleccion();                           
                             for (String string : Seleccion) {
 //                                svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim());
-                                sourceGeneric.addAll(svcmtd.getCtlWetStock(cmbFechaInicio.getValue(), cmbFechaFin.getValue()));
+                                sourceGeneric.addAll(svcmtd.getCtlWetStock(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim()));
                                 Estacion = svcmtd.getEstacion(Integer.parseInt(string.trim()));
                             }
                             System.out.println("seleccion "+Seleccion.length);
@@ -383,7 +383,7 @@ public class RptWetStock extends Panel implements View {
                             Object[] f = new Object[2];
                             sourceGeneric = new BeanItemContainer<GenericRptWetStock>(GenericRptWetStock.class);
 //                            svcmtd.generar_data(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim());
-                            sourceGeneric.addAll(svcmtd.getCtlWetStock(cmbFechaInicio.getValue(), cmbFechaFin.getValue()));
+                            sourceGeneric.addAll(svcmtd.getCtlWetStock(cmbFechaInicio.getValue(), cmbFechaFin.getValue(), string.trim()));
                             Estacion = svcmtd.getEstacion(Integer.parseInt(string.trim()));
                             
                             List<String> tituloscolumnas = new ArrayList<String>();

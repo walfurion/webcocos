@@ -33,7 +33,7 @@ public class Util {
             valor2 = (Math.ceil(valor2))/d;
             return valor2;
     }
-    public static double isNumber(String s){
+    public double isNumber(String s){
         double newD = 0;
         if(s.matches("\\d+")){
             newD = Double.parseDouble(s);

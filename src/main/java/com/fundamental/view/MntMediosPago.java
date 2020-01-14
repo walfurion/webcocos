@@ -11,6 +11,7 @@ import com.fundamental.model.dto.DtoGenericBean;
 import com.fundamental.services.SvcMaintenance;
 import com.fundamental.services.SvcMntMedioPago;
 import com.fundamental.utils.Constant;
+import com.fundamental.utils.Util;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Item;
@@ -94,6 +95,7 @@ public class MntMediosPago extends Panel implements View {
 //
     private final VerticalLayout vlRoot;
     private Utils utils = new Utils();
+    private Util ut = new Util();
     private Usuario user;
     String action;
     private List<DtoGenericBean> listStatus;
@@ -155,13 +157,26 @@ public class MntMediosPago extends Panel implements View {
 
     private void getAllData() {
         bcrMediopago.setBeanIdProperty("mediopagoId");
+        bcrMediopago.removeAllItems();
         SvcMaintenance service = new SvcMaintenance();
         paises = service.getAllPaises();
+        int idPais = 0;
+        if(cbxPais!=null){
+            Pais pais = new Pais();
+            pais = (Pais) cbxPais.getValue();
+            idPais = pais.getPaisId();
+            System.out.println("entra al combo "+idPais);
+        }else{
+            idPais = service.recuperaIdPais();
+            System.out.println("entra al else "+idPais);
+        }        
         productTypes = service.getAllTipoproducto(true);
-        bcrMediopago.addAll(service.getAllMediosPago(true));
+        bcrMediopago.addAll(service.getAllMediosPago(true,idPais));
         service.closeConnections();
-        int firstItemId = bcrMediopago.getItemIds().get(0);
-        mediopago = bcrMediopago.getItem(firstItemId).getBean();
+        if(bcrMediopago.size()>0){
+            int firstItemId = bcrMediopago.getItemIds().get(0);
+            mediopago = bcrMediopago.getItem(firstItemId).getBean();
+        }        
         listStatus = Arrays.asList(new DtoGenericBean("I", "Inactivo"), new DtoGenericBean("A", "Activo"));
     }
 
@@ -223,6 +238,12 @@ public class MntMediosPago extends Panel implements View {
 
         cbxPais = utils.buildCombobox("País:", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, new ListContainer<Pais>(Pais.class, paises));
         cbxPais.setItemIconPropertyId("flag");
+        cbxPais.addListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(final Property.ValueChangeEvent event) {
+                getAllData();
+            }
+        });
 
         cbxTipoproducto = utils.buildCombobox("Para producto:", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, new ListContainer<Tipoproducto>(Tipoproducto.class, productTypes));
 
@@ -281,8 +302,12 @@ public class MntMediosPago extends Panel implements View {
         btnSave.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                if (!nombre.isValid() || !cbxTipo.isValid() || !cbxPais.isValid() || !cbxStatus.isValid() || !tfdOrden.isValid()) {
+                if (!nombre.isValid() || !cbxTipo.isValid() || !cbxPais.isValid() || !cbxStatus.isValid()) {
                     Notification.show("Por favor, todos los campos son requeridos.", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
+                if(ut.isNumber(tfdOrden.getValue())==0){
+                    Notification.show("El campo Orden debe ser numerico.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
                 mediopago.setEstado(((DtoGenericBean) cbxStatus.getValue()).getStringId());

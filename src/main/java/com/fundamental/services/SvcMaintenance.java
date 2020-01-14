@@ -494,15 +494,16 @@ public class SvcMaintenance extends Dao {
         return result;
     }
 
-    public List<Mediopago> getAllMediosPago(boolean includeInactives) {
+    public List<Mediopago> getAllMediosPago(boolean includeInactives, int idPais) {
         List<Mediopago> result = new ArrayList();
         try {
             query = (includeInactives) ? "" : " AND m.estado = 'A' ";
             query = "SELECT m.mediopago_id, m.nombre, m.tipo, m.estado, m.orden, m.pais_id, m.tipoprod_id, p.nombre, m.partidacont_por, m.partidacont, m.is_tcredito, p.codigo " //12
                     + "FROM mediopago m, pais p "
-                    + "WHERE m.pais_id = p.pais_id "
+                    + "WHERE m.pais_id = p.pais_id and m.pais_id = "+idPais+" "
                     + query
                     + " ORDER BY p.nombre, m.nombre";
+            System.out.println("query.,.,., "+query);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             Mediopago mediopago;
@@ -836,5 +837,24 @@ public class SvcMaintenance extends Dao {
         }
         return result;
     }
-
+    public int recuperaIdPais() {
+        int paisId = 0;
+        miQuery = "SELECT pais_id FROM pais where rownum=1";
+        System.out.println("mi query "+miQuery);
+        ResultSet rst = null;
+        try {
+            rst = getConnection().prepareStatement(miQuery).executeQuery();
+            while (rst.next()) {
+                paisId = rst.getInt(1);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return paisId;
+    }
 }
