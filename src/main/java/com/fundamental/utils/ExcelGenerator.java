@@ -1143,7 +1143,7 @@ public class ExcelGenerator {
             sheet.setColumnWidth(4, 5000);
             sheet.setColumnWidth(5, 5000);
             sheet.setColumnWidth(6, 8000);
-            sheet.setColumnWidth(7, 5000);
+            sheet.setColumnWidth(7, 8000);
             sheet.setColumnWidth(8, 5000);
 
             /*Se adicionan lo estilos para los titulos*/
