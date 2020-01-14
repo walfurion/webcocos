@@ -71,8 +71,8 @@ public enum DashboardViewType {
     RPT_VOLUMEN("RPT_VOLUMEN", RptVolumenes.class, FontAwesome.FILE, false),
 //    RPT_MTD("RPT_MTD", RptMTD.class, FontAwesome.FILE, false),
     RPT_MTD("RPT_MTD", RptMTD2.class, FontAwesome.FILE, false),
-    RPT_WET_STOCK("RPT_WET_STOCK", RptWetStock.class, FontAwesome.FILE, false),
-    RPT_WSM("RPT_WSM", RptWSM.class, FontAwesome.FILE, false)
+//    RPT_WET_STOCK("RPT_WET_STOCK", RptWetStock.class, FontAwesome.FILE, false),
+    RPT_WSM("RPT_WSM", RptWetStock.class, FontAwesome.FILE, false)
     ;
 
     private final String viewName;
