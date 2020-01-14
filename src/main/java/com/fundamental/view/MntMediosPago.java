@@ -59,7 +59,7 @@ public class MntMediosPago extends Panel implements View {
     private Button btnAdd,
             btnSave,
             btnFilterClear;
-    
+
     private Table tblData;
     private TextField tfdFilter;
     @PropertyId("nombre")
@@ -134,7 +134,11 @@ public class MntMediosPago extends Panel implements View {
         vlCenter.setId("vlCenter");
         Responsive.makeResponsive(vlCenter);
 
-        VerticalLayout vlRight = new VerticalLayout(cbxPais, cbxTipoproducto, nombre, cbxTipo, tfdOrden, cbxStatus, chxPartidacont, tfdPartidacontPorc, chxTCredito, btnSave);
+        /*Se retira el cbxTipoProducto 
+          se retira chkpartida contable 
+          se retira porcentaje partida contable
+        ASG*/
+        VerticalLayout vlRight = new VerticalLayout(cbxPais, /*cbxTipoproducto ,*/ nombre, cbxTipo, tfdOrden, cbxStatus, /*chxPartidacont, tfdPartidacontPorc,*/ chxTCredito, btnSave);
         vlRight.setSpacing(true);
         vlRight.setMargin(false);
         vlRight.setSizeUndefined();
@@ -229,7 +233,8 @@ public class MntMediosPago extends Panel implements View {
         tfdPartidacontPorc.setVisible(false);
 
         chxPartidacont.setVisible(false);
-        chxTCredito.setVisible(false);
+//        chxTCredito.setVisible(false); //ASG
+        chxTCredito.setVisible(true);//ASG
 
         tfdOrden = utils.buildTextField("Orden:", "0", false, 2, true, ValoTheme.TEXTFIELD_SMALL);
         tfdOrden.addStyleName("align-right");
@@ -281,7 +286,7 @@ public class MntMediosPago extends Panel implements View {
                     return;
                 }
                 mediopago.setEstado(((DtoGenericBean) cbxStatus.getValue()).getStringId());
-                mediopago.setTipoprodId(((Tipoproducto) cbxTipoproducto.getValue()).getTipoId());
+//                mediopago.setTipoprodId(((Tipoproducto) cbxTipoproducto.getValue()).getTipoId());  //ASG 
                 mediopago.setTipo(((DtoGenericBean) cbxTipo.getValue()).getId());
                 mediopago.setCreadoPor(user.getUsername());
                 mediopago.setModificadoPor(user.getUsername());
@@ -383,58 +388,12 @@ public class MntMediosPago extends Panel implements View {
         });
 //        tblData.setHeight("400px");
 //        tblData.setWidth("350px");
-        tblData.setVisibleColumns(new Object[]{"nombrePais", "orden", "nombre", "colPorcentaje", "colTarjeta", "colEstado"});
-        tblData.setColumnHeaders(new String[]{"Pais", "Orden", "Medio pago", "Porcentaje en Part cont", "¿Es tarjeta de crédito?", "Estado"});
+//        tblData.setVisibleColumns(new Object[]{"nombrePais", "orden", "nombre", "colPorcentaje", "colTarjeta", "colEstado"});
+//        tblData.setColumnHeaders(new String[]{"Pais", "Orden", "Medio pago", "Porcentaje en Part cont", "¿Es tarjeta de crédito?", "Estado"});
+        tblData.setVisibleColumns(new Object[]{"nombrePais", "orden", "nombre", "colTarjeta", "colEstado"}); //ASG RETIRA %PARTIDA CONT
+        tblData.setColumnHeaders(new String[]{"Pais", "Orden", "Medio pago", "¿Es tarjeta de crédito?", "Estado"}); //ASG RETIRA %PARTIDA CONT
         tblData.setColumnAlignments(new Table.Align[]{
-            Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, Table.Align.CENTER, Table.Align.CENTER, Table.Align.LEFT});
-    }
-
-    private void buildTablePaises() {
-
-//        tablePaises = utils.buildTable("Paises:", 100f, 100f, bcrPais,
-//                new String[]{"nombre"},
-//                new String[]{"Nombre"});
-//        tablePaises.addStyleName(ValoTheme.TABLE_COMPACT);
-//        tablePaises.setSelectable(true);
-////        tablePaises.addGeneratedColumn("colSelected", new Table.ColumnGenerator() {
-////            @Override
-////            public Object generateCell(Table source, final Object itemId, Object columnId) {
-////                Property pro = source.getItem(itemId).getItemProperty("selected");  //Atributo del bean
-////                CheckBox cbxSelect = new CheckBox("", pro);
-////                return cbxSelect;
-////            }
-////        });
-//        tablePaises.addValueChangeListener(new Property.ValueChangeListener() {
-//            @Override
-//            public void valueChange(Property.ValueChangeEvent event) {
-//                if (tablePaises.getValue() != null) {
-//                    pais = bcrPais.getItem((Integer) tablePaises.getValue()).getBean();
-//                    bcrMediopago.removeAllItems();
-//                    SvcMntMedioPago service = new SvcMntMedioPago();
-//                    bcrMediopago.addAll(service.getMediospagoByPaisidTipoid(pais.getPaisId(), null));
-//                    service.closeConnections();
-//
-////                    Integer firstItemId = null;
-////                    if (bcrMediopago.getItemIds().size() > 0) {
-////                        firstItemId = bcrMediopago.getItemIds().get(0);
-////                    }
-//                    tblData.setValue((bcrMediopago.getItemIds().size() > 0) ? bcrMediopago.getItemIds().get(0) : null);
-//
-////                    binder.setItemDataSource(bcrMediopago.getItem(tblData.getValue()));
-////                    mediopago = bcrMediopago.getItem(tblData.getValue()).getBean();
-////                    defineSelectedPaises();
-////                    action = Dao.ACTION_UPDATE;
-////                    cbxTipo.setValue(tipos.get(mediopago.getTipo() - 1));
-//                }
-//            }
-//        });
-//        tablePaises.setVisibleColumns(new Object[]{//"colSelected", 
-//            "nombre"});
-//        tablePaises.setColumnHeaders(new String[]{//"", 
-//            "Nombre"});
-//        tablePaises.setHeight("200px");
-//        tablePaises.setWidth("200px");
-//        tablePaises.setValue(pais.getPaisId());
+            Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT, /*Table.Align.CENTER,*/ Table.Align.CENTER, Table.Align.LEFT});
     }
 
     @Override
