@@ -229,10 +229,8 @@ public class SvcDeposito extends Dao {
                         + "'" + bcrDeposito.getItem(itemId).getBean().getNoboleta() + "',"
                         + "'" + bcrDeposito.getItem(itemId).getBean().getComentarios() + "',"
                         + bcrDeposito.getItem(itemId).getBean().getMonto() + ","
-                        + montoDolar + ")";
-                
-                
-
+                        + montoDolar + ")";                               
+                System.out.println("query,.,.,. "+query);
                 pst = getConnection().prepareStatement(query);
                 pst.executeUpdate();
             }

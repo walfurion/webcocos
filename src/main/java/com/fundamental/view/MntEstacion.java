@@ -11,6 +11,7 @@ import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoGenericBean;
 import com.fundamental.services.SvcMntEstacion;
+import com.fundamental.utils.Util;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Item;
@@ -56,6 +57,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.vaadin.maddon.ListContainer;
+import org.vaadin.ui.NumberField;
 
 /**
  * @author Henry Barrientos
@@ -67,7 +69,7 @@ public final class MntEstacion extends Panel implements View {
             btnAdd = new Button("Agregar", FontAwesome.PLUS),
             btnSave = new Button("Guardar", FontAwesome.SAVE),
             btnLubsAll, btnLubsNone;
-    
+
     private CssLayout filtering;
     private Table tblStations, tblBombas, tblCombustibles, tblMiscelaneos;
     private CheckBox chkMuestraPOS = new CheckBox("¿Mostrar facturación POS?:", false);
@@ -89,6 +91,8 @@ public final class MntEstacion extends Panel implements View {
     private BeanContainer<Integer, Producto> bcrCombustibles = new BeanContainer<Integer, Producto>(Producto.class),
             //bcrLubricants = new BeanContainer<Integer, Producto>(Producto.class),
             bcrMiscelaneos = new BeanContainer<Integer, Producto>(Producto.class);
+
+    Double corPista = 0D;
 
 //    private FormLayout form = new FormLayout();
     private VerticalLayout form = new VerticalLayout();
@@ -342,7 +346,7 @@ Responsive.makeResponsive(vltLubs);*/
         tfdBU.addStyleName(ValoTheme.TEXTFIELD_SMALL);
         tfdDeposito.setNullRepresentation("");
         tfdDeposito.addStyleName(ValoTheme.TEXTFIELD_SMALL);
-        tfdCode = utils.buildTextField("Código E1:", "", false, 7, true, ValoTheme.TEXTAREA_SMALL);
+        tfdCode = utils.buildTextField("Código E1:", "", false, 6, true, ValoTheme.TEXTAREA_SMALL);
 //tfdName = utils.buildTextField("Nombre:", "", false, 100, true, ValoTheme.TEXTAREA_SMALL);
         tfdName = utils.buildTextArea("Nombre:", 15, 2, 100, true, false, "", ValoTheme.TEXTAREA_SMALL);
         tfdEnvoyCode = utils.buildTextField("Código envoy:", "", false, 7, true, ValoTheme.TEXTAREA_SMALL);
@@ -517,11 +521,17 @@ Responsive.makeResponsive(vltLubs);*/
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 binder.setItemDataSource(bcrStations.getItem(tblStations.getValue()));
-                estacion = bcrStations.getItem(tblStations.getValue()).getBean();
-                chkMuestraPOS.setValue(estacion.getFactElectronica().equals("S") ? true : false);
+                try {
+                    estacion = bcrStations.getItem(tblStations.getValue()).getBean();
+                    chkMuestraPOS.setValue(estacion.getFactElectronica().equals("S") ? true : false);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 defineSelectedBombas();
                 defineSelectedProducts();
                 action = Dao.ACTION_UPDATE;
+
             }
         });
         tblStations.addGeneratedColumn("colEstado", new Table.ColumnGenerator() {
@@ -562,6 +572,7 @@ Responsive.makeResponsive(vltLubs);*/
                 return cbxSelect;
             }
         });
+
         tblBombas.addGeneratedColumn("colCorrPista", new Table.ColumnGenerator() {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
@@ -571,9 +582,42 @@ Responsive.makeResponsive(vltLubs);*/
                 result.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 result.addStyleName("align-right");
                 result.setWidth(75f, Unit.PIXELS);
+                result.setRequired(true);
+                result.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+
+                        try {
+                            if (Util.isNumberEst(result.getValue()) == -1) {
+
+                                Notification.show("monto no valido.", Notification.Type.WARNING_MESSAGE);
+                                result.setValue("0");
+                                return;
+                            }
+                        } catch (Exception e) {
+
+                        }
+
+                        try {
+                            if (result.getValue().isEmpty()) {
+
+                                Notification.show("Debe ingresar un valor.", Notification.Type.WARNING_MESSAGE);
+                                result.setValue("0");
+                                return;
+                            }
+
+                        } catch (Exception e) {
+                            Notification.show("Debe ingresar un valor.", Notification.Type.WARNING_MESSAGE);
+                            result.setValue("0");
+                            return;
+                        }
+
+                    }
+                });
                 return result;
             }
         });
+
         tblBombas.setVisibleColumns(new Object[]{"colSelected", "nombre", "colCorrPista"});
         tblBombas.setColumnHeaders(new String[]{"", "Nombre", "Corr. pista"});
         tblBombas.setSizeUndefined();

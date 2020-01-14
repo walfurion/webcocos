@@ -140,4 +140,12 @@ public class Bomba {
         this.corrPista = corrPista;
     }
 
+    public int getItemProperty(String corrPista) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void setValue(Double valorCero) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
