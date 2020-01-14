@@ -40,6 +40,7 @@ import com.fundamental.utils.ExcelGenerator;
 import com.fundamental.utils.Util;
 import com.fundamental.utils.Zip;
 import com.sisintegrados.generic.bean.GenericTarjeta;
+import com.sisintegrados.generic.bean.LitroCalibracion;
 import com.sisintegrados.generic.bean.RepCuadrePistero;
 import com.sisintegrados.generic.bean.genericMedioTarjeta;
 import com.sisintegrados.view.form.FormDetalleVenta;
@@ -1232,7 +1233,7 @@ public class PrCuadre extends Panel implements View {
                         Empleado empleado = new Empleado();
                         empleado = (Empleado) cbxEmpleado.getValue();
                         String bomba = daoRep.getBombaByTurnoEmpleado(turno.getTurnoId(), empleado.getEmpleadoId());
-                        Integer calibracion = daoRep.getTotCalibraTurnoEmpleado(turno.getTurnoId(), empleado.getEmpleadoId());
+                        ArrayList<LitroCalibracion> calibracion = daoRep.getTotCalibraTurnoEmpleado(turno.getTurnoId(), empleado.getEmpleadoId());
                         sourceGeneric = new RepCuadrePistero(empleado.getNombre(), bomba, turno.getNombre(), calibracion, bcArqueo, bcEfectivo, bcrMediopago, bcrProducto,dfdFecha.getValue());
 
 //                        XSSFWorkbook workbook = new XSSFWorkbook();

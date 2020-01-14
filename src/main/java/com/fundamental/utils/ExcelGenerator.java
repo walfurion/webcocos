@@ -6,8 +6,11 @@
 package com.fundamental.utils;
 
 import com.fundamental.model.Mediopago;
+import com.fundamental.model.Producto;
 import com.fundamental.model.dto.DtoArqueo;
+import com.fundamental.model.dto.DtoEfectivo;
 import com.sisintegrados.generic.bean.GenericMTD;
+import com.sisintegrados.generic.bean.LitroCalibracion;
 import com.sisintegrados.generic.bean.RepCuadrePistero;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItemContainer;
@@ -35,6 +38,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  * @author Allan G.
  */
 public class ExcelGenerator {
+
+    CellRangeAddress cc;
 
     public XSSFWorkbook generar(Integer sheets, Integer nocols, List<String> colsname, String titulo1, String subtitulo1, String sheetname, BeanItemContainer<GenericMTD> lista, ArrayList<String> sheetsname) {
         XSSFWorkbook workbook = new XSSFWorkbook();
@@ -1138,13 +1143,15 @@ public class ExcelGenerator {
             sheet.setColumnWidth(4, 5000);
             sheet.setColumnWidth(5, 5000);
             sheet.setColumnWidth(6, 8000);
+            sheet.setColumnWidth(7, 5000);
+            sheet.setColumnWidth(8, 5000);
 
             /*Se adicionan lo estilos para los titulos*/
             XSSFCellStyle headerStyle = workbook.createCellStyle();
             XSSFFont font = workbook.createFont();
             font.setFontHeight(16);
             font.setBold(true);
-            font.setColor(IndexedColors.DARK_BLUE.getIndex());
+            font.setColor(IndexedColors.BLACK.getIndex());
             headerStyle.setBorderBottom(BorderStyle.MEDIUM);
             headerStyle.setBorderTop(BorderStyle.MEDIUM);
             headerStyle.setBorderRight(BorderStyle.MEDIUM);
@@ -1154,7 +1161,7 @@ public class ExcelGenerator {
             /*Se adicionan lo estilos para los Subtitulos*/
             XSSFCellStyle subheaderStyle = workbook.createCellStyle();
             XSSFFont subfont = workbook.createFont();
-            subfont.setColor(IndexedColors.DARK_BLUE.getIndex());
+            subfont.setColor(IndexedColors.BLACK.getIndex());
             subfont.setFontHeight(12);
             subfont.setBold(true);
             subheaderStyle.setBorderBottom(BorderStyle.MEDIUM);
@@ -1208,7 +1215,7 @@ public class ExcelGenerator {
             XSSFFont fontLecturaV = workbook.createFont();
             fontLecturaV.setFontHeight(14);
             fontLecturaV.setBold(true);
-            fontLecturaV.setColor(IndexedColors.DARK_BLUE.getIndex());
+            fontLecturaV.setColor(IndexedColors.BLACK.getIndex());
             headerStyleLecturaV.setBorderBottom(BorderStyle.MEDIUM);
             headerStyleLecturaV.setBorderTop(BorderStyle.MEDIUM);
             headerStyleLecturaV.setBorderRight(BorderStyle.MEDIUM);
@@ -1223,7 +1230,7 @@ public class ExcelGenerator {
             XSSFFont fontLecturaT = workbook.createFont();
             fontLecturaT.setFontHeight(14);
             fontLecturaT.setBold(true);
-            fontLecturaT.setColor(IndexedColors.DARK_BLUE.getIndex());
+            fontLecturaT.setColor(IndexedColors.BLACK.getIndex());
             headerStyleLecturaT.setBorderBottom(BorderStyle.MEDIUM);
             headerStyleLecturaT.setBorderTop(BorderStyle.MEDIUM);
             headerStyleLecturaT.setBorderRight(BorderStyle.MEDIUM);
@@ -1240,7 +1247,7 @@ public class ExcelGenerator {
             XSSFFont fontLectura = workbook.createFont();
             fontLectura.setFontHeight(14);
             fontLectura.setBold(true);
-            fontLectura.setColor(IndexedColors.DARK_BLUE.getIndex());
+            fontLectura.setColor(IndexedColors.BLACK.getIndex());
             headerStyleLectura.setBorderBottom(BorderStyle.MEDIUM);
             headerStyleLectura.setBorderTop(BorderStyle.MEDIUM);
             headerStyleLectura.setBorderRight(BorderStyle.MEDIUM);
@@ -1437,9 +1444,29 @@ public class ExcelGenerator {
             totalvntaCell.setCellValue("₡");
             totalvntaCell.setCellStyle(headerStyleLectura);
 
+            /*DETALLE DEPOSITOS*/
+            XSSFRow detDepo = sheet.createRow(13);
+            XSSFCell detDepoCel = detDepo.createCell(6);
+            setMerge(sheet, 13, 13, 6, 8, true);
+            detDepoCel.setCellValue("DETALLE DEPOSITOS");
+            detDepoCel.setCellStyle(headerStyleLectura);
+
+            XSSFRow detDepo1 = sheet.createRow(14);
+            XSSFCell detDepoCel1 = detDepo1.createCell(6);
+            detDepoCel1.setCellValue("ENTREGA");
+            detDepoCel1.setCellStyle(headerStyleLectura);
+
+            XSSFCell detDepoCel2 = detDepo1.createCell(7);
+            detDepoCel2.setCellValue("RECIBIDO Y HORA");
+            detDepoCel2.setCellStyle(headerStyleLectura);
+
+            XSSFCell detDepoCel3 = detDepo1.createCell(8);
+            detDepoCel3.setCellValue("MONTO");
+            detDepoCel3.setCellStyle(headerStyleLectura);
+
             /*VENTAS COMBUSTIBLES*/
-            XSSFRow ventaComb = sheet.createRow(12);
-            setMerge(sheet, 12, 12, 1, 3, false);
+            XSSFRow ventaComb = sheet.createRow(15);
+            setMerge(sheet, 15, 15, 1, 3, true);
             XSSFCell ventaCombCel = ventaComb.getCell(1);
             ventaCombCel.setCellValue("VENTA COMBUSTIBLES");
             ventaCombCel.setCellStyle(subheaderStyle);
@@ -1448,71 +1475,502 @@ public class ExcelGenerator {
             XSSFCell ventaCombCel1 = ventaComb.createCell(4);
             BeanContainer<Integer, DtoArqueo> arqueo;
             arqueo = lista.getArqueo();
-            Double total = 0.00;
+            Double totalVentaComb = 0.00;
             for (Integer itemId : arqueo.getItemIds()) {
-                total += (Double) arqueo.getItem(itemId).getItemProperty("venta").getValue();
-                System.out.println("PRECIO EXCEL GEN "+arqueo.getItem(itemId).getItemProperty("precio").getValue()+"ID ID"+arqueo.getItem(itemId).getItemProperty("productoId").getValue());
+                totalVentaComb += (Double) arqueo.getItem(itemId).getItemProperty("venta").getValue();
             }
-            ventaCombCel1.setCellValue(total);
+            ventaCombCel1.setCellValue(totalVentaComb);
             ventaCombCel1.setCellStyle(subheaderStyle);
-            
-            BeanContainer<Integer, Mediopago> medioPago; 
+
+            //aca
+            XSSFCell filaMedioCel21 = ventaComb.createCell(6);
+            filaMedioCel21.setCellValue("");
+            filaMedioCel21.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel31 = ventaComb.createCell(7);
+            filaMedioCel31.setCellValue("");
+            filaMedioCel31.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel41 = ventaComb.createCell(8);
+            filaMedioCel41.setCellValue("");
+            filaMedioCel41.setCellStyle(subheaderStyle);
+
+            BeanContainer<Integer, Mediopago> medioPago;
             medioPago = lista.getMediopago();
-            for (Integer itemId : medioPago.getItemIds()) {
-                System.out.println("MEDIO PAGO EXC GEN "+medioPago.getItem(itemId).getItemProperty("mediopagoId").getValue()); 
-                System.out.println("MEDIO PAGO EXC GEN "+medioPago.getItem(itemId).getItemProperty("nombre").getValue()); 
-                System.out.println("MEDIO PAGO EXC GEN "+medioPago.getItem(itemId).getItemProperty("value").getValue()); 
-            }
+
             /*Medio Pago*/
+            int ii = 16;
+            /*Total Medios PAgo*/
+            Double totalMedioPago = 0.00;
+            for (Integer itemId : medioPago.getItemIds()) {
+//                if (((Integer) medioPago.getItem(itemId).getItemProperty("mediopagoId").getValue() != 6) || ((Integer) medioPago.getItem(itemId).getItemProperty("mediopagoId").getValue()!=117) || ((Integer) medioPago.getItem(itemId).getItemProperty("mediopagoId").getValue()!=108) || ((Integer) medioPago.getItem(itemId).getItemProperty("mediopagoId").getValue()!=109)) {
+                if ((Integer) medioPago.getItem(itemId).getItemProperty("mediopagoId").getValue() != 6 && (Integer) medioPago.getItem(itemId).getItemProperty("mediopagoId").getValue() != 117 && (Integer) medioPago.getItem(itemId).getItemProperty("mediopagoId").getValue() != 108 && (Integer) medioPago.getItem(itemId).getItemProperty("mediopagoId").getValue() != 109) {
+                    XSSFRow filaMedio = sheet.createRow(ii);
+                    setMerge(sheet, ii, ii, 1, 3, true);
+                    XSSFCell filaMedioCel = filaMedio.getCell(1);
+                    filaMedioCel.setCellValue(medioPago.getItem(itemId).getItemProperty("nombre").getValue().toString());
+                    filaMedioCel.setCellStyle(subheaderStyle);
 
-            /*Contenido*/
- /*Estilo celdas registros*/
-            CreationHelper createHelper = workbook.getCreationHelper();
-            /*Para Numero*/
-            CellStyle styleNumber = workbook.createCellStyle();
-//            styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("#########.####"));
-            styleNumber.setWrapText(true);
+                    XSSFCell filaMedioCel1 = filaMedio.createCell(4);
+                    filaMedioCel1.setCellValue((Double) medioPago.getItem(itemId).getItemProperty("value").getValue());
+                    totalMedioPago += (Double) medioPago.getItem(itemId).getItemProperty("value").getValue();//SUMA TOTAL MEDIOPAGO
+                    filaMedioCel1.setCellStyle(subheaderStyle);
 
-            /*Para Fecha*/
-            CellStyle styleFecha = workbook.createCellStyle();
-            styleFecha.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy"));
-            styleFecha.setWrapText(true);
+                    XSSFCell filaMedioCel2 = filaMedio.createCell(6);
+                    filaMedioCel2.setCellValue("");
+                    filaMedioCel2.setCellStyle(subheaderStyle);
 
-            /*Para Porcentaje %*/
-            CellStyle stylePorcentaje = workbook.createCellStyle();
-            stylePorcentaje.setDataFormat(createHelper.createDataFormat().getFormat("##.##%"));
-            stylePorcentaje.setWrapText(true);
+                    XSSFCell filaMedioCel3 = filaMedio.createCell(7);
+                    filaMedioCel3.setCellValue("");
+                    filaMedioCel3.setCellStyle(subheaderStyle);
 
-            XSSFRow datos;
-            XSSFCell datoscell;
+                    XSSFCell filaMedioCel4 = filaMedio.createCell(8);
+                    filaMedioCel4.setCellValue("");
+                    filaMedioCel4.setCellStyle(subheaderStyle);
+                    ii++;
+                }
+            }
+            /*Calibraciones total colones*/
+            XSSFRow calibColon = sheet.createRow(ii);
+            setMerge(sheet, ii, ii, 1, 3, true);
+            XSSFCell calibColonCel = calibColon.getCell(1);
+            calibColonCel.setCellValue("Seraphines y Dev");
+            calibColonCel.setCellStyle(subheaderStyle);
 
-//            for (GenericMTD itemId : lista.getItemIds()) {
-//                datos = sheet.createRow(j);
-//                ii = 3;
-//                /*Fecha*/
-//                datoscell = datos.createCell(ii);
-//                datoscell.setCellValue(itemId.getFecha());
-//                datoscell.setCellStyle(styleFecha);
-//                ii++;
-//                /*Precio*/
-//                datoscell = datos.createCell(ii);
-//                datoscell.setCellValue(itemId.getP_super());
-//                datoscell.setCellStyle(styleNumber);
-//                ii++;
-//                datoscell = datos.createCell(ii);
-//                datoscell.setCellValue(itemId.getP_regular());
-//                datoscell.setCellStyle(styleNumber);
-//                ii++;
-//                datoscell = datos.createCell(ii);
-//                datoscell.setCellValue(itemId.getP_diesel());
-//                datoscell.setCellStyle(styleNumber);
-//                ii++;
+            ArrayList<LitroCalibracion> calibraciones = new ArrayList<LitroCalibracion>();
+            calibraciones = lista.getCalibracion();
+            Double colonCalibracion = 0.00;
+            for (LitroCalibracion calibracione : calibraciones) {
+                colonCalibracion += calibracione.getVentaColones();
+            }
+
+            XSSFCell calibColonCel1 = calibColon.createCell(4);
+            calibColonCel1.setCellValue(colonCalibracion);
+            calibColonCel1.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel2 = calibColon.createCell(6);
+            filaMedioCel2.setCellValue("");
+            filaMedioCel2.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel3 = calibColon.createCell(7);
+            filaMedioCel3.setCellValue("");
+            filaMedioCel3.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel4 = calibColon.createCell(8);
+            filaMedioCel4.setCellValue("");
+            filaMedioCel4.setCellStyle(subheaderStyle);
+
+            ii++;
+            /*MAS ACEITES O FRESCOS */
+            XSSFRow prodAdic = sheet.createRow(ii);
+            setMerge(sheet, ii, ii, 1, 3, true);
+            XSSFCell prodAdicCel = prodAdic.getCell(1);
+            prodAdicCel.setCellValue("Aceites o Frescos");
+            prodAdicCel.setCellStyle(subheaderStyle);
+
+            Double totalOtrosProd = 0.00;
+            BeanContainer<Integer, Producto> proAdicional;
+            proAdicional = lista.getProdadicionales();
+            for (Integer itemId : proAdicional.getItemIds()) {
+                totalOtrosProd += (Double) proAdicional.getItem(itemId).getItemProperty("value").getValue();
+            }
+
+            XSSFCell prodAdicCel1 = prodAdic.createCell(4);
+            prodAdicCel1.setCellValue(totalOtrosProd);
+            prodAdicCel1.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel22 = prodAdic.createCell(6);
+            filaMedioCel22.setCellValue("");
+            filaMedioCel22.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel33 = prodAdic.createCell(7);
+            filaMedioCel33.setCellValue("");
+            filaMedioCel33.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel44 = prodAdic.createCell(8);
+            filaMedioCel44.setCellValue("");
+            filaMedioCel44.setCellStyle(subheaderStyle);
+
+            ii++;
+            /*TOTAL EFECTIVO*/
+            BeanContainer<Integer, DtoEfectivo> efectivo;
+            efectivo = lista.getEfectivo();
+            Double totalEfectivo = 0.00;
+            for (Integer itemId : efectivo.getItemIds()) {
+                totalEfectivo += (Double) efectivo.getItem(itemId).getItemProperty("value").getValue();
+            }
+
+            /*TOTAL A ENTREGAR*/
+            XSSFRow totEntregar = sheet.createRow(ii);
+            setMerge(sheet, ii, ii, 1, 3, true);
+            XSSFCell totEntregarCel = totEntregar.getCell(1);
+            totEntregarCel.setCellValue("EFECTIVO ENTREGADO");
+            totEntregarCel.setCellStyle(subheaderStyle);
+
+            Double totalEntregar = 0.00;
+//            totalEntregar = (totalVentaComb + totalOtrosProd) - (colonCalibracion) - (totalMedioPago);
+            totalEntregar = totalEfectivo;
+            XSSFCell totEntregarCel1 = totEntregar.createCell(4);
+            totEntregarCel1.setCellValue(totalEntregar);
+            totEntregarCel1.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel222 = totEntregar.createCell(6);
+            filaMedioCel222.setCellValue("");
+            filaMedioCel222.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel333 = totEntregar.createCell(7);
+            filaMedioCel333.setCellValue("");
+            filaMedioCel333.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel444 = totEntregar.createCell(8);
+            filaMedioCel444.setCellValue("");
+            filaMedioCel444.setCellStyle(subheaderStyle);
+
+            ii++;
+            /*TOTAL ENTREGADO*/
+            XSSFRow totEntregado = sheet.createRow(ii);
+            setMerge(sheet, ii, ii, 1, 3, true);
+            XSSFCell totEntregadoCel = totEntregado.getCell(1);
+            totEntregadoCel.setCellValue("TOTAL ENTREGADO");
+            totEntregadoCel.setCellStyle(subheaderStyle);
+
+            Double totalEntregado = 0.00;
+            totalEntregado = totalMedioPago + totalEfectivo + totalOtrosProd;
+            XSSFCell totEntregadoCel1 = totEntregado.createCell(4);
+            totEntregadoCel1.setCellValue(totalEntregado);
+            totEntregadoCel1.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel2222 = totEntregado.createCell(6);
+            filaMedioCel2222.setCellValue("");
+            filaMedioCel2222.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel3333 = totEntregado.createCell(7);
+            filaMedioCel3333.setCellValue("");
+            filaMedioCel3333.setCellStyle(subheaderStyle);
+
+            XSSFCell filaMedioCel4444 = totEntregado.createCell(8);
+            filaMedioCel4444.setCellValue("");
+            filaMedioCel4444.setCellStyle(subheaderStyle);
+
+            ii++;
+            /*SOBRANTE FALTANTE*/
+            XSSFRow falsob = sheet.createRow(ii);
+            setMerge(sheet, ii, ii, 1, 3, true);
+            XSSFCell falsobCel = falsob.getCell(1);
+            falsobCel.setCellValue("SOBRANTE/FALTANTE");
+            falsobCel.setCellStyle(subheaderStyle);
+
+            Double faltantesob = 0.00;
+            faltantesob = totalEntregado-totalVentaComb;
+            XSSFCell falsobCel1 = falsob.createCell(4);
+            falsobCel1.setCellValue(faltantesob);
+            falsobCel1.setCellStyle(subheaderStyle);
+
+            /*TOTAL DETALLE DEPOSITOS*/
+            XSSFCell totalColonDet = falsob.createCell(6);
+            totalColonDet.setCellValue("TOTAL DEPOSITOS");
+            totalColonDet.setCellStyle(subheaderStyle);
+            setMerge(sheet, ii, ii, 6, 7, true);
+            
+
+            XSSFCell totalColonDet1 = falsob.createCell(7);
+            totalColonDet1.setCellValue("");
+            totalColonDet1.setCellStyle(subheaderStyle);
+
+            ii++;
+            ii++;
+
+            /*DEPOSITOS PREPAGOS*/
+            XSSFRow deppre = sheet.createRow(ii);
+            setMerge(sheet, ii, ii, 1, 4, true);
+            XSSFCell deppreCel = deppre.getCell(1);
+            deppreCel.setCellValue("DEPOSITOS (PREPAGOS)");
+            deppreCel.setCellStyle(subheaderStyle);
+
+            ii++;
+
+            /*CLIENTE Y MONTO*/
+            XSSFRow cliepre = sheet.createRow(ii);
+            setMerge(sheet, ii, ii, 1, 3, true);
+            XSSFCell cliepreCel = cliepre.getCell(1);
+            cliepreCel.setCellValue("CLIENTE");
+            cliepreCel.setCellStyle(subheaderStyle);
+
+            XSSFCell cliepreCel1 = cliepre.createCell(4);
+            cliepreCel1.setCellValue("MONTO");
+            cliepreCel1.setCellStyle(subheaderStyle);
+
+            ii++;
+
+            /*LINEAS VACIAS*/
+            XSSFRow clielin = sheet.createRow(ii);
+            setMerge(sheet, ii, ii, 1, 3, true);
+            XSSFCell clielinCel = clielin.getCell(1);
+            clielinCel.setCellValue("");
+            clielinCel.setCellStyle(subheaderStyle);
+
+            XSSFCell clielinCel1 = clielin.createCell(4);
+            clielinCel1.setCellValue("");
+            clielinCel1.setCellStyle(subheaderStyle);
+
+            ii++;
+
+            XSSFRow clielin1 = sheet.createRow(ii);
+            setMerge(sheet, ii, ii, 1, 3, true);
+            XSSFCell clielin1Cel = clielin1.getCell(1);
+            clielin1Cel.setCellValue("");
+            clielin1Cel.setCellStyle(subheaderStyle);
+
+            XSSFCell clielin1Cel1 = clielin1.createCell(4);
+            clielin1Cel1.setCellValue("");
+            clielin1Cel1.setCellStyle(subheaderStyle);
+
+            ii++;
+            ii++;
+
+            /*SERAPHINES Y DEVOLUCIONES*/
+            XSSFRow seradev = sheet.createRow(ii);
+            setMerge(sheet, ii, ii, 1, 4, true);
+            XSSFCell seradevCel = seradev.getCell(1);
+            seradevCel.setCellValue("SERAPHINES Y DEVOLUCIONES");
+            seradevCel.setCellStyle(subheaderStyle);
+
+            ii++;
+
+            /*SERAPHINES Y DEVOLUCIONES TITULOS*/
+            XSSFRow seratit = sheet.createRow(ii);
+            setMerge(sheet, ii, ii, 0, 1, true);
+            XSSFCell seratitCel = seratit.getCell(0);
+            seratitCel.setCellValue("HORA");
+            seratitCel.setCellStyle(subheaderStyle);
+
+            XSSFCell seratitCel1 = seratit.createCell(2);
+            seratitCel1.setCellValue("TIPO COMBUSTIBLE");
+            seratitCel1.setCellStyle(subheaderStyle);
+
+            XSSFCell seratitCel2 = seratit.createCell(3);
+            seratitCel2.setCellValue("LITROS");
+            seratitCel2.setCellStyle(subheaderStyle);
+
+            XSSFCell seratitCel3 = seratit.createCell(4);
+            seratitCel3.setCellValue("COLONES");
+            seratitCel3.setCellStyle(subheaderStyle);
+            ii++;
+
+            for (LitroCalibracion calibracione : calibraciones) {
+                XSSFRow seracont = sheet.createRow(ii);
+                setMerge(sheet, ii, ii, 0, 1, true);
+                XSSFCell seracontCel = seracont.getCell(0);
+                seracontCel.setCellValue("");
+                seracontCel.setCellStyle(subheaderStyle);
+
+                XSSFCell seracontCel1 = seracont.createCell(2);
+                seracontCel1.setCellValue(calibracione.getNombre());
+                seracontCel1.setCellStyle(subheaderStyle);
+
+                XSSFCell seracontCel2 = seracont.createCell(3);
+                seracontCel2.setCellValue(calibracione.getLitro());
+                seracontCel2.setCellStyle(subheaderStyle);
+
+                XSSFCell seracontCel3 = seracont.createCell(4);
+                seracontCel3.setCellValue(calibracione.getVentaColones());
+                seracontCel3.setCellStyle(subheaderStyle);
+                ii++;
+            }
+
+            /*TOTALES SERAPHINES Y DEVOLUCIONES*/
+            XSSFRow seratot = sheet.createRow(ii);
+            XSSFCell seratotCel = seratot.createCell(3);
+            seratotCel.setCellValue("TOTALES");
+            seratotCel.setCellStyle(subheaderStyle);
+
+            XSSFCell seratotCel1 = seratot.createCell(4);
+            seratotCel1.setCellValue(colonCalibracion);
+            seratotCel1.setCellStyle(subheaderStyle);
+
+            ii++;
+            ii++;
+
+            /*OBSERVACIONES*/
+            XSSFRow observaciones = sheet.createRow(ii);
+            setMerge(sheet, ii, ii, 1, 3, true);
+            XSSFCell observacionesCel = observaciones.getCell(1);
+            observacionesCel.setCellValue("OBSERVACIONES :");
+            observacionesCel.setCellStyle(subheaderStyle);
+
+            setMerge(sheet, ii, ii + 3, 4, 8, true);
+
+            ii = ii + 4;
+            ii++;
+
+            /*Estilos cuadro final*/
+            XSSFCellStyle bottomLine = crearStilo(workbook, true, false, false, false, true, false, true, null, 0, false, false, false, "");
+//            fontLecturaV.setColor(IndexedColors.BLACK.getIndex());
+
+            /*CUADRO FINAL*/
+            XSSFRow obserT = sheet.createRow(ii);
+            sheet.addMergedRegion(new CellRangeAddress(ii, ii, 1, 2));
+
+            XSSFCell obserTCel = obserT.createCell(3);
+            obserTCel.setCellValue("RECIBO CANTIDAD");
+            sheet.addMergedRegion(new CellRangeAddress(ii, ii, 3, 4));
+
+            XSSFCell obserTCel1 = obserT.createCell(5);
+            obserTCel1.setCellValue("ENTREGO CANTIDAD");
+            sheet.addMergedRegion(new CellRangeAddress(ii, ii, 5, 6));
+
+            ii++;
+
+            XSSFRow obser = sheet.createRow(ii);
+            XSSFCell obserCel = obser.createCell(1);
+            obserCel.setCellValue("1-                       ");
+            cc = new CellRangeAddress(ii, ii, 1, 2);
+            sheet.addMergedRegion(cc);
+//            setBorders(sheet, cc, false, false, false, true, 4);
+            cc = new CellRangeAddress(ii, ii, 3, 4);
+            sheet.addMergedRegion(cc);
+            setBorders(sheet, cc, false, false, false, true, 4);
+            cc = new CellRangeAddress(ii, ii, 5, 6);
+            sheet.addMergedRegion(cc);
+            setBorders(sheet, cc, false, false, false, true, 4);
+
+            ii++;
+
+            XSSFRow obser1 = sheet.createRow(ii);
+            XSSFCell obser1Cel = obser1.createCell(1);
+            obser1Cel.setCellValue("2-                       ");
+            cc = new CellRangeAddress(ii, ii, 1, 2);
+            sheet.addMergedRegion(cc);
+//            setBorders(sheet, cc, false, false, false, true, 4);
+            cc = new CellRangeAddress(ii, ii, 3, 4);
+            sheet.addMergedRegion(cc);
+            setBorders(sheet, cc, false, false, false, true, 4);
+            cc = new CellRangeAddress(ii, ii, 5, 6);
+            sheet.addMergedRegion(cc);
+            setBorders(sheet, cc, false, false, false, true, 4);
+
+            ii++;
+
+            XSSFRow obser2 = sheet.createRow(ii);
+            XSSFCell obser2Cel = obser2.createCell(1);
+            obser2Cel.setCellValue("3-                       ");
+            cc = new CellRangeAddress(ii, ii, 1, 2);
+            sheet.addMergedRegion(cc);
+//            setBorders(sheet, cc, false, false, false, true, 4);
+            cc = new CellRangeAddress(ii, ii, 3, 4);
+            sheet.addMergedRegion(cc);
+            setBorders(sheet, cc, false, false, false, true, 4);
+            cc = new CellRangeAddress(ii, ii, 5, 6);
+            sheet.addMergedRegion(cc);
+            setBorders(sheet, cc, false, false, false, true, 4);
+
+            ii++;
+
+            XSSFRow obser3 = sheet.createRow(ii);
+            XSSFCell obser3Cel = obser3.createCell(1);
+            obser3Cel.setCellValue("4-                       ");
+            cc = new CellRangeAddress(ii, ii, 1, 2);
+            sheet.addMergedRegion(cc);
+//            setBorders(sheet, cc, false, false, false, true, 4);
+            cc = new CellRangeAddress(ii, ii, 3, 4);
+            sheet.addMergedRegion(cc);
+            setBorders(sheet, cc, false, false, false, true, 4);
+            cc = new CellRangeAddress(ii, ii, 5, 6);
+            sheet.addMergedRegion(cc);
+            setBorders(sheet, cc, false, false, false, true, 4);
+
+            ii = ii + 2;
+
+            /*FIRMAS*/
+            XSSFRow firmas = sheet.createRow(ii);
+            XSSFCell firmasCel = firmas.createCell(1);
+            firmasCel.setCellValue("Firmo como recibido de los articulos arriba anotados los cuales se encuentran en buen estado y funcionando.");
+            sheet.addMergedRegion(new CellRangeAddress(ii, ii, 1, 6));
+            ii = ii + 3;
+
+            cc = new CellRangeAddress(ii, ii, 1, 5);
+            sheet.addMergedRegion(cc);
+            setBorders(sheet, cc, false, false, false, true, 3);
+
+            cc = new CellRangeAddress(ii, ii, 7, 12);
+            sheet.addMergedRegion(cc);
+            setBorders(sheet, cc, false, false, false, true, 3);
+
+            ii++;
+
+            XSSFRow firmas1 = sheet.createRow(ii);
+            XSSFCell firmas1Cel = firmas1.createCell(1);
+            firmas1Cel.setCellValue("Nombre y firma de persona que entrega:");
+            sheet.addMergedRegion(new CellRangeAddress(ii, ii, 1, 6));
+
+            XSSFCell firmas1Cel1 = firmas1.createCell(7);
+            firmas1Cel1.setCellValue("Nombre y firma de persona que recibe:");
+            sheet.addMergedRegion(new CellRangeAddress(ii, ii, 7, 12));
+
+////            obserCel.setCellStyle(subheaderStyle);            
+//            /*Contenido*/
+// /*Estilo celdas registros*/
+//            CreationHelper createHelper = workbook.getCreationHelper();
+//            /*Para Numero*/
+//            CellStyle styleNumber = workbook.createCellStyle();
+////            styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("#########.####"));
+//            styleNumber.setWrapText(true);
 //
-//                /*Al Final*/
-//                j++;
-//            }
+//            /*Para Fecha*/
+//            CellStyle styleFecha = workbook.createCellStyle();
+//            styleFecha.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy"));
+//            styleFecha.setWrapText(true);
+//
+//            /*Para Porcentaje %*/
+//            CellStyle stylePorcentaje = workbook.createCellStyle();
+//            stylePorcentaje.setDataFormat(createHelper.createDataFormat().getFormat("##.##%"));
+//            stylePorcentaje.setWrapText(true);
         }
         return workbook;
+    }
+
+    private XSSFCellStyle crearStilo(XSSFWorkbook workbook, boolean border, boolean leftb, boolean rigthb, boolean topb, boolean bottomb, boolean font, boolean negrita,
+            XSSFColor colorF, Integer sizeF, boolean vertical, boolean ajustar, boolean fondo, String fontTitle) {
+        XSSFCellStyle estilo = workbook.createCellStyle();
+        XSSFFont fontStilo = workbook.createFont();
+
+        if (border) {
+            if (bottomb) {
+                estilo.setBorderBottom(BorderStyle.MEDIUM);
+            }
+            if (topb) {
+                estilo.setBorderTop(BorderStyle.MEDIUM);
+            }
+            if (rigthb) {
+                estilo.setBorderRight(BorderStyle.MEDIUM);
+            }
+            if (leftb) {
+                estilo.setBorderLeft(BorderStyle.MEDIUM);
+            }
+        }
+
+        /*Asigna Fuente Personalizada*/
+        if (font) {
+            fontStilo.setFontHeight(sizeF);
+            fontStilo.setBold(negrita);
+//        fontStilo.setColor(IndexedColors.BLACK.getIndex());
+            fontStilo.setColor(colorF);
+            fontStilo.setFontName(fontTitle);
+        }
+        /*Ajustar texto*/
+        estilo.setWrapText(ajustar);
+
+        /*Fondo del texto*/
+        if (fondo) {
+            estilo.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            estilo.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
+            estilo.setFont(fontStilo);
+        }
+        /*Orientacion del texto*/
+        if (vertical) {
+            estilo.setRotation((short) 90);
+        }
+        return estilo;
     }
 
     protected void setMerge(XSSFSheet sheet, int numRow, int untilRow, int numCol, int untilCol, boolean border) {
@@ -1520,6 +1978,65 @@ public class ExcelGenerator {
         sheet.addMergedRegion(cellMerge);
         if (border) {
             setBordersToMergedCells(sheet, cellMerge);
+        }
+    }
+
+    protected void setBorders(XSSFSheet sheet, CellRangeAddress rangeAddress, boolean leftb, boolean rigthb, boolean topb, boolean bottomb, int tipo) {
+        if (tipo == 1) {
+            if (bottomb) {
+                RegionUtil.setBorderBottom(CellStyle.BORDER_HAIR, rangeAddress, sheet);
+            }
+            if (topb) {
+                RegionUtil.setBorderTop(CellStyle.BORDER_HAIR, rangeAddress, sheet);
+            }
+            if (rigthb) {
+                RegionUtil.setBorderRight(CellStyle.BORDER_HAIR, rangeAddress, sheet);
+            }
+            if (leftb) {
+                RegionUtil.setBorderLeft(CellStyle.BORDER_HAIR, rangeAddress, sheet);
+            }
+        }
+        if (tipo == 2) {
+            if (bottomb) {
+                RegionUtil.setBorderBottom(CellStyle.BORDER_MEDIUM, rangeAddress, sheet);
+            }
+            if (topb) {
+                RegionUtil.setBorderTop(CellStyle.BORDER_MEDIUM, rangeAddress, sheet);
+            }
+            if (rigthb) {
+                RegionUtil.setBorderRight(CellStyle.BORDER_MEDIUM, rangeAddress, sheet);
+            }
+            if (leftb) {
+                RegionUtil.setBorderLeft(CellStyle.BORDER_MEDIUM, rangeAddress, sheet);
+            }
+        }
+        if (tipo == 3) {
+            if (bottomb) {
+                RegionUtil.setBorderBottom(CellStyle.BORDER_DOUBLE, rangeAddress, sheet);
+            }
+            if (topb) {
+                RegionUtil.setBorderTop(CellStyle.BORDER_DOUBLE, rangeAddress, sheet);
+            }
+            if (rigthb) {
+                RegionUtil.setBorderRight(CellStyle.BORDER_DOUBLE, rangeAddress, sheet);
+            }
+            if (leftb) {
+                RegionUtil.setBorderLeft(CellStyle.BORDER_DOUBLE, rangeAddress, sheet);
+            }
+        }
+        if (tipo == 4) {
+            if (bottomb) {
+                RegionUtil.setBorderBottom(CellStyle.BORDER_DASH_DOT, rangeAddress, sheet);
+            }
+            if (topb) {
+                RegionUtil.setBorderTop(CellStyle.BORDER_DASH_DOT, rangeAddress, sheet);
+            }
+            if (rigthb) {
+                RegionUtil.setBorderRight(CellStyle.BORDER_DASH_DOT, rangeAddress, sheet);
+            }
+            if (leftb) {
+                RegionUtil.setBorderLeft(CellStyle.BORDER_DASH_DOT, rangeAddress, sheet);
+            }
         }
     }
 
