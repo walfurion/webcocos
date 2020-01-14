@@ -35,6 +35,14 @@ public class Util {
         valor2 = (Math.ceil(valor2)) / d;
         return valor2;
     }
+    
+     public static boolean isNumberRegex(String s) {
+        
+        if (s.matches("^-?\\d*\\.{0,1}\\d+$")) {
+            return true;
+        }
+        return false;
+    }
 
     public static double isNumber(String s) {
         double newD = 0;
@@ -42,6 +50,16 @@ public class Util {
             newD = Double.parseDouble(s);
         }
         return newD;
+    }
+    
+     public static boolean isPositiveRegex(String s) {
+        try {
+            if (s.matches("^\\d*\\.?\\d+$")) {
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return false;
     }
 
     public static boolean isDoublePositive(String s) {
