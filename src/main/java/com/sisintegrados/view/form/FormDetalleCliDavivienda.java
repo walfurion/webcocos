@@ -76,6 +76,7 @@ public class FormDetalleCliDavivienda extends Window {
         }
     };
     Utils utils = new Utils();
+    List<GenericLote> listaGen;
 
     public FormDetalleCliDavivienda(Estacion estacion, String currencySymbol, Integer idpais, BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliDavi, Turno turno) {
         this.estacion = estacion;
@@ -105,7 +106,8 @@ public class FormDetalleCliDavivienda extends Window {
         if (estacion != null) {
             ContEstacion.addAll(dao.getAllEstaciones(true, idpais));
             ContMediosPago.addAll(dao.getAllMediosPago(true, idpais));
-            ContLote.addAll(dao.getAllLotesbyMedioPago(115,turno.getTurnoId()));
+            listaGen = dao.getAllLotesbyMedioPago(115,turno.getTurnoId());
+            ContLote.addAll(listaGen);
         }
         detailsWrapper.addComponent(buildFields());
         content.addComponent(buildButtons());
@@ -202,7 +204,9 @@ public class FormDetalleCliDavivienda extends Window {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
-                ComboBox cmbLote = new ComboBox(null, ContLote);
+                BeanItemContainer<GenericLote> ContLote1 = new BeanItemContainer<GenericLote>(GenericLote.class);
+                ContLote1.addAll(listaGen);
+                ComboBox cmbLote = new ComboBox(null, ContLote1);
 //                cmbLote.setReadOnly(true);
                 cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
                 cmbLote.setItemCaptionPropertyId("lote");
