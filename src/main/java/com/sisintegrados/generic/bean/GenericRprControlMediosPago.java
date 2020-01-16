@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 
 public class GenericRprControlMediosPago {
     private Date fecha;
+    private Integer genericid;
     private Double mediopago_id;
     private Double lote;
     private Double monto_bruto;
@@ -36,7 +37,7 @@ public class GenericRprControlMediosPago {
     private String cod_cliente;
     private String tipo_cliente;
 
-    public GenericRprControlMediosPago(Date fecha, Double mediopago_id, Double lote, Double monto_bruto, Double comision, Double monto_neto, String comentarios, String codigo, String estacion, String banco, String nodeposito, Double montoch, Double montousd, String cliente,  String cod_cliente, String tipo_cliente) {
+    public GenericRprControlMediosPago(Integer genericid,Date fecha, Double mediopago_id, Double lote, Double monto_bruto, Double comision, Double monto_neto, String comentarios, String codigo, String estacion, String banco, String nodeposito, Double montoch, Double montousd, String cliente,  String cod_cliente, String tipo_cliente) {
         this.fecha = fecha;
         this.mediopago_id = mediopago_id;
         this.lote = lote;
@@ -51,6 +52,7 @@ public class GenericRprControlMediosPago {
         this.montoch = montoch;
         this.montousd = montousd;
         this.cliente = cliente;
+        this.genericid = genericid;
         
         this.cod_cliente = cod_cliente;
         this.tipo_cliente = tipo_cliente;

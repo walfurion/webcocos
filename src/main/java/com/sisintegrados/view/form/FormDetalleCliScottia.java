@@ -76,6 +76,8 @@ public class FormDetalleCliScottia extends Window {
         }
     };
     Utils utils = new Utils();
+    GenericDetalleFM dtaclie;
+    List<GenericLote> listaGen;
 
     public FormDetalleCliScottia(Estacion estacion, String currencySymbol, Integer idpais, BeanContainer<Integer, GenericDetalleFM> bcrDetalleCliScott, Turno turno) {
         this.estacion = estacion;
@@ -105,7 +107,8 @@ public class FormDetalleCliScottia extends Window {
         if (estacion != null) {
             ContEstacion.addAll(dao.getAllEstaciones(true, idpais));
             ContMediosPago.addAll(dao.getAllMediosPago(true, idpais));
-            ContLote.addAll(dao.getAllLotesbyMedioPago(116, turno.getTurnoId()));
+            listaGen = dao.getAllLotesbyMedioPago(116, turno.getTurnoId());
+            ContLote.addAll(listaGen);
         }
         detailsWrapper.addComponent(buildFields());
         content.addComponent(buildButtons());
@@ -126,7 +129,7 @@ public class FormDetalleCliScottia extends Window {
         btnasignar.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnasignar.addStyleName(ValoTheme.BUTTON_SMALL);
         btnasignar.addClickListener((Button.ClickListener) event -> {
-            GenericDetalleFM dtaclie = new GenericDetalleFM(utils.getRandomNumberInRange(1, 1000),  new Estacion(estacion.getEstacionId(),estacion.getNombre()), new GenericBeanMedioPago(116,"TARJETA FLEET MAGIC SB"), null, "", null, "");
+            dtaclie = new GenericDetalleFM(utils.getRandomNumberInRange(1, 1000), new Estacion(estacion.getEstacionId(), estacion.getNombre()), new GenericBeanMedioPago(116, "TARJETA FLEET MAGIC SB"), null, "", null, "");
             dtaclie.setVenta(0D);
             listDetallecli.add(dtaclie);
             bcrDetalleCliScott.addAll(listDetallecli);
@@ -200,7 +203,9 @@ public class FormDetalleCliScottia extends Window {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("genlote");  //Atributo del bean
-                ComboBox cmbLote = new ComboBox(null, ContLote);
+                BeanItemContainer<GenericLote> ContLote1 = new BeanItemContainer<GenericLote>(GenericLote.class);
+                ContLote1.addAll(listaGen);
+                ComboBox cmbLote = new ComboBox(null, ContLote1);
 //                cmbLote.setReadOnly(true);
                 cmbLote.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
                 cmbLote.setItemCaptionPropertyId("lote");

@@ -1504,7 +1504,7 @@ public class PrCuadre extends Panel implements View {
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
                 if ((Integer) proid.getValue() == 9 || (Integer) proid.getValue() == 10) {
-//                    tfdValue.setReadOnly(true); // ASG DESCOMENTAR CUANDO CORRIGAN LA DATA DE LUBRICANTES
+                    tfdValue.setReadOnly(true); // ASG DESCOMENTAR CUANDO CORRIGAN LA DATA DE LUBRICANTES
                 }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
@@ -1577,12 +1577,16 @@ public class PrCuadre extends Panel implements View {
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("value");  //Atributo del bean
                 Property desc = source.getItem(itemId).getItemProperty("mediopagoId");
+                Property mediopago = source.getItem(itemId).getItemProperty("isTCredito");
                 final TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
                 tfdValue.setValue("0.00");
                 tfdValue.setWidth("125px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
                 if ((Integer) desc.getValue() == 6 || (Integer) desc.getValue() == 5 || (Integer) desc.getValue() == 108) {
+                    tfdValue.setReadOnly(true);
+                }
+                if((boolean) mediopago.getValue()){
                     tfdValue.setReadOnly(true);
                 }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
