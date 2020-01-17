@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GenericRptWetStock {
     private Date fecha;
-    private int producto_id;
+    private int tanque_id;
     private Double inicial;
     private Double compras;
     private Double ventas;
@@ -32,10 +32,11 @@ public class GenericRptWetStock {
     private Double inv_teorico;
     private Double varianza;
     private Double diferencia;
+    private String descripcion;
 
-    public GenericRptWetStock(Date fecha, int producto_id, Double inicial, Double compras, Double ventas, Double inv_fisico, String piloto, String unidad, String compratimiento, String factura, Double comprasFact, Double inv_teorico, Double varianza, Double diferencia) {
+    public GenericRptWetStock(Date fecha, int tanque_id, Double inicial, Double compras, Double ventas, Double inv_fisico, String piloto, String unidad, String compratimiento, String factura, Double comprasFact, Double inv_teorico, Double varianza, Double diferencia, String descripcion) {
         this.fecha = fecha;
-        this.producto_id = producto_id;
+        this.tanque_id = tanque_id;
         this.inicial = inicial;
         this.compras = compras;
         this.ventas = ventas;
@@ -48,6 +49,7 @@ public class GenericRptWetStock {
         this.inv_teorico = inv_teorico;
         this.varianza = varianza;
         this.diferencia = diferencia;
+        this.descripcion = descripcion;
     }
     
     
