@@ -257,6 +257,7 @@ public class FormDetalleNacional extends Window {
                 Property pro = source.getItem(itemId).getItemProperty("comentario");  //Atributo del bean
                 final TextField nfd = new TextField(pro);
 //                nfd.setReadOnly(true);
+                nfd.setNullRepresentation("");
                 nfd.setWidth("150px");
                 nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
                 nfd.addStyleName("align-right");

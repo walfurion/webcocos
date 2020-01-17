@@ -256,6 +256,7 @@ public class FormDetalleDavivienda extends Window {
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("comentario");  //Atributo del bean
                 final TextField nfd = new TextField(pro);
+                nfd.setNullRepresentation("");
 //                nfd.setReadOnly(true);
                 nfd.setWidth("150px");
                 nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
