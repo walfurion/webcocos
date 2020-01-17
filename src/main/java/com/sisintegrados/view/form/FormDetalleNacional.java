@@ -79,6 +79,8 @@ public class FormDetalleNacional extends Window {
         }
     };
     Utils utils = new Utils();
+    
+    List<GenericBeanCliente> lista;
 
     public FormDetalleNacional(Estacion estacion, String currencySymbol, Integer idpais, BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliNacional, Turno turno) {
         this.estacion = estacion;
@@ -109,7 +111,8 @@ public class FormDetalleNacional extends Window {
             ContEstacion.addAll(dao.getAllEstaciones(true, idpais));
             ContMediosPago.addAll(dao.getAllMediosPago(true, idpais));
             ContLoteNacional.addAll(dao.getAllLotesbyMedioPago(7, turno.getTurnoId()));
-            ContCliGen.addAll(dao.getAllCustomers(true, estacion.getEstacionId()));
+            lista = dao.getAllCustomers(true, estacion.getEstacionId());
+            ContCliGen.addAll(lista);
         }
         detailsWrapper.addComponent(buildFields());
         content.addComponent(buildButtons());
@@ -218,7 +221,9 @@ public class FormDetalleNacional extends Window {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
-                ComboBox cmbCliente = new ComboBox(null, ContCliGen);
+                BeanItemContainer<GenericBeanCliente> ContCliGen2 = new BeanItemContainer<GenericBeanCliente>(GenericBeanCliente.class);
+                ContCliGen2.addAll(lista);
+                ComboBox cmbCliente = new ComboBox(null, ContCliGen2);
                 cmbCliente.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
                 cmbCliente.setItemCaptionPropertyId("nombre");
                 cmbCliente.setNullSelectionAllowed(false);
