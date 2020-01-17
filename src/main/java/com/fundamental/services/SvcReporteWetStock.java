@@ -68,9 +68,10 @@ public class SvcReporteWetStock extends Dao {
         String fecha2 = Constant.SDF_ddMMyyyy.format(fec2);
         GenericRptWetStock genctl = new GenericRptWetStock();
         try {
-            query = "select r.fecha, t.producto_id, r.inicial, r.compras, r.ventas, '' ajustes, r.inv_fisico, " +
-                    " '' nivel, p.piloto, p.unidad, r.compartimiento, p.factura, r.compras comprasFact, r.lectura_veeder, r.varianza, r.diferencia " +
-                    "from RECEPCION_INVENTARIO_DETALLE r, tanque t, recepcion_inventario p\n" +
+            query = "select r.fecha, t.idtanque, r.inicial, r.compras, r.ventas, '' ajustes, r.inv_fisico, " +
+                    " '' nivel, p.piloto, p.unidad, r.compartimiento, p.factura, r.compras comprasFact, " +
+                    "r.lectura_veeder, r.varianza, r.diferencia, t.descripcion " +
+                    "from RECEPCION_INVENTARIO_DETALLE r, tanque t, recepcion_inventario p \n" +
                     "where t.producto_id=r.producto_id and r.invrecepcion_id = p.invrecepcion_id and r.estacion_id in('"+idestacion+"') and \n" +
                     "r.fecha >= to_date('"+fecha1+"','dd/mm/yyyy') and r.fecha <= to_date('"+fecha2+"','dd/mm/yyyy')\n" +
                     "order by r.fecha, t.PRODUCTO_ID";
@@ -78,7 +79,7 @@ public class SvcReporteWetStock extends Dao {
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {
-                genctl = new GenericRptWetStock(rst.getDate(1), rst.getInt(2), rst.getDouble(3), rst.getDouble(4), rst.getDouble(5), rst.getDouble(7), rst.getString(9), rst.getString(10), rst.getString(11), rst.getString(12), rst.getDouble(13), rst.getDouble(14), rst.getDouble(15), rst.getDouble(16));
+                genctl = new GenericRptWetStock(rst.getDate(1), rst.getInt(2), rst.getDouble(3), rst.getDouble(4), rst.getDouble(5), rst.getDouble(7), rst.getString(9), rst.getString(10), rst.getString(11), rst.getString(12), rst.getDouble(13), rst.getDouble(14), rst.getDouble(15), rst.getDouble(16), rst.getString(17));
                 result.add(genctl);
             }
         } catch (Exception exc) {
