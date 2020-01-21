@@ -71,7 +71,7 @@ public class SvcMtd extends Dao {
                     + "                FLOTA_BAC_DIESEL, UNO_PLUS_SUPER, UNO_PLUS_REGULAR, UNO_PLUS_DIESEL, CUPON_SUPER, \n"
                     + "                CUPON_REGULAR, CUPON_DIESEL, PREPAGO_SUPER, PREPAGO_REGULAR, PREPAGO_DIESEL, \n"
                     + "                CREDITO_SUPER, CREDITO_REGULAR, CREDITO_DIESEL, EFECTIVO_USD_SUPER, EFECTIVO_USD_REGULAR, \n"
-                    + "                EFECTIVO_USD_DIESEL, DAVIVIENDA_SUPER, DAVIVIENDA_REGULAR, DAVIVIENDA_DIESEL "
+                    + "                EFECTIVO_USD_DIESEL, DAVIVIENDA_SUPER, DAVIVIENDA_REGULAR, DAVIVIENDA_DIESEL, EFE_USD_MONTO"
                     + "from PV_MTD order by fecha asc";
 //            System.out.println("QUERY "+query);
             pst = getConnection().prepareStatement(query);
@@ -198,7 +198,8 @@ public class SvcMtd extends Dao {
                         rst.getDouble(119),
                         rst.getDouble(120),
                         rst.getDouble(121),
-                        rst.getDouble(122)
+                        rst.getDouble(122),
+                        rst.getDouble(123) //CONTADO EN USD
                 );
                 result.add(genmtd);
             }

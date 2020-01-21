@@ -360,7 +360,7 @@ public class ExcelGenerator {
             CreationHelper createHelper = workbook.getCreationHelper();
             /*Para Numero*/
             CellStyle styleNumber = workbook.createCellStyle();
-//            styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("#########.####"));
+            styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("###,###,###,###.##"));
             styleNumber.setWrapText(true);
 
             /*Para Fecha*/
@@ -874,11 +874,16 @@ public class ExcelGenerator {
                 datoscell.setCellStyle(styleNumber);
                 ii++;
 
+                /*CONTADO EN USD*/
+                datoscell = datos.createCell(ii);
+                datoscell.setCellValue(itemId.getEfe_usd_monto());
+                datoscell.setCellStyle(styleNumber);
+                ii++;
+
                 if (ii == 95) {
                     ii = 99;
                 }
                 /*CAJA EFECTIVO*/
-//                System.out.println("FILA DEL DEMONIO "+ii);
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getEfe_super());
                 datoscell.setCellStyle(styleNumber);
@@ -1661,7 +1666,7 @@ public class ExcelGenerator {
             falsobCel.setCellStyle(subheaderStyle);
 
             Double faltantesob = 0.00;
-            faltantesob = totalEntregado-totalVentaComb;
+            faltantesob = totalEntregado - totalVentaComb;
             XSSFCell falsobCel1 = falsob.createCell(4);
             falsobCel1.setCellValue(faltantesob);
             falsobCel1.setCellStyle(subheaderStyle);
@@ -1671,7 +1676,6 @@ public class ExcelGenerator {
             totalColonDet.setCellValue("TOTAL DEPOSITOS");
             totalColonDet.setCellStyle(subheaderStyle);
             setMerge(sheet, ii, ii, 6, 7, true);
-            
 
             XSSFCell totalColonDet1 = falsob.createCell(7);
             totalColonDet1.setCellValue("");
