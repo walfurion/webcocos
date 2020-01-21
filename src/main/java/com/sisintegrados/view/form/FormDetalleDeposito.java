@@ -119,7 +119,7 @@ public class FormDetalleDeposito extends Window {
         btnasignar.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnasignar.addStyleName(ValoTheme.BUTTON_SMALL);
         btnasignar.addClickListener((Button.ClickListener) event -> {
-            GenericMedioPago genericTarjeta = new GenericMedioPago(utils.getRandomNumberInRange(1, 1000), null, null, null, null, null, null);
+            GenericMedioPago genericTarjeta = new GenericMedioPago(utils.getRandomNumberInRange(1, 1000), null, null, null, "", null, null);
             genericTarjeta.setMonto(0D);
             listTarjeta.add(genericTarjeta);
             bcrDeposito.addAll(listTarjeta);
