@@ -79,7 +79,7 @@ public class FormDetalleBCR extends Window {
         }
     };
     Utils utils = new Utils();
-
+    List<GenericBeanCliente> lista;
     public FormDetalleBCR(Estacion estacion, String currencySymbol, Integer idpais, BeanContainer<Integer, GenericDetalleBCR> bcrDetalleCliBCR, Turno turno) {
         this.estacion = estacion;
         this.currencySymbol = currencySymbol;
@@ -109,7 +109,8 @@ public class FormDetalleBCR extends Window {
             ContEstacion.addAll(dao.getAllEstaciones(true, idpais));
             ContMediosPago.addAll(dao.getAllMediosPago(true, idpais));
             ContLoteBCR.addAll(dao.getAllLotesbyMedioPago(118, turno.getTurnoId()));
-            ContCliGen.addAll(dao.getAllCustomers(true, estacion.getEstacionId()));
+            lista = dao.getAllCustomers(true, estacion.getEstacionId());
+            ContCliGen.addAll(lista);
         }
         detailsWrapper.addComponent(buildFields());
         content.addComponent(buildButtons());
@@ -218,7 +219,9 @@ public class FormDetalleBCR extends Window {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
-                ComboBox cmbCliente = new ComboBox(null, ContCliGen);
+                BeanItemContainer<GenericBeanCliente> ContCliGen2 = new BeanItemContainer<GenericBeanCliente>(GenericBeanCliente.class);
+                ContCliGen2.addAll(lista);
+                ComboBox cmbCliente = new ComboBox(null, ContCliGen2);
                 cmbCliente.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
                 cmbCliente.setItemCaptionPropertyId("nombre");
                 cmbCliente.setNullSelectionAllowed(false);
@@ -257,6 +260,7 @@ public class FormDetalleBCR extends Window {
                 Property pro = source.getItem(itemId).getItemProperty("comentario");  //Atributo del bean
                 final TextField nfd = new TextField(pro);
 //                nfd.setReadOnly(true);
+                nfd.setNullRepresentation("");
                 nfd.setWidth("150px");
                 nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
                 nfd.addStyleName("align-right");
