@@ -38,6 +38,7 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import org.vaadin.maddon.ListContainer;
@@ -59,9 +60,11 @@ public class FormDetalleLubricantes extends Window {
     Table tblPrepaid;
     Table tblLubricantes;
     BeanContainer<Integer, DtoProducto> bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+    BeanContainer<Integer, DtoProducto> bcrLubs_ant = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
     BeanContainer<Integer, Producto> bcrProducto = new BeanContainer<Integer, Producto>(Producto.class);
     Container contCustomerPrepaid = new ListContainer<>(Producto.class, new ArrayList());
     List<DtoProducto> listLubs = new ArrayList();
+    List<DtoProducto> listAnt = new ArrayList();
     Utils utils = new Utils();
     SvcCuadre dao = new SvcCuadre();
     Button btnAddLubs;
@@ -75,6 +78,7 @@ public class FormDetalleLubricantes extends Window {
     double diferencia;
     Date fechaQuery;
     
+    
     SvcCuadre daoDispInve = new SvcCuadre();
 DateField dfdFecha = new DateField("Fecha:");
     int tmpInt;
@@ -82,6 +86,7 @@ DateField dfdFecha = new DateField("Fecha:");
     int tmpIntNoUno;
     Container contLubs = new ListContainer<>(GenericProduct.class, new ArrayList());
     SvcCuadre service = new SvcCuadre();
+    
 
     public FormDetalleLubricantes(Integer idestacion, String currencySymbol, Integer idpais, BeanContainer<Integer, DtoProducto> bcrLubs, Date fechaQuery) {
         this.fechaQuery = fechaQuery;
@@ -89,6 +94,7 @@ DateField dfdFecha = new DateField("Fecha:");
         this.currencySymbol = currencySymbol;
         this.idpais = idpais;
         this.bcrLubs = bcrLubs;
+        this.bcrLubs_ant = bcrLubs;
         addStyleName(Constant.stylePopUps);
         Responsive.makeResponsive(this);
         setModal(true);
@@ -114,6 +120,7 @@ DateField dfdFecha = new DateField("Fecha:");
         }
         detailsWrapper.addComponent(buildFields());
         content.addComponent(buildButtons());
+        setProductsAnt();
     }
 
     private Component buildButtons() {
@@ -133,8 +140,19 @@ DateField dfdFecha = new DateField("Fecha:");
         btnguardar.addStyleName(ValoTheme.BUTTON_FRIENDLY);
         btnguardar.addStyleName(ValoTheme.BUTTON_SMALL);
         btnguardar.addClickListener((Button.ClickListener) event -> {
-
+//        int idPro = 0;
+        //retorna los valores guardados anteriormente
+            for (DtoProducto itemId : listAnt) {
+                itemId.getProductoId();
+                itemId.getCantidad();
+                //fechaQuery
+                SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();
+                daoVentaLubs.reversarVenta(itemId.getProductoId(), idpais, Double.valueOf(itemId.getCantidad()), fechaQuery);
+            }
             for (Integer itemId : bcrLubs.getItemIds()) {
+//                if(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId()==idPro){
+//                    bcrLubs.getItem(itemId).getBean().getProducto().setValue(cantidad+bcrLubs.getItem(itemId).getBean().getProducto().getValue());
+//                }
                 bcrLubs.getItem(itemId).getBean().getProducto().getProductoId();
                 bcrLubs.getItem(itemId).getBean().getCantidad(); //Venta
                 //fechaQuery
@@ -145,7 +163,10 @@ DateField dfdFecha = new DateField("Fecha:");
                 if(diferencia < 0){  
                     Notification.show("VENTA LUBRICANTE CON INVENTARIO NEGATIVO.\n", Notification.Type.ERROR_MESSAGE);
                 }
+//                idPro = bcrLubs.getItem(itemId).getBean().getProducto().getProductoId();
+//                cantidad = bcrLubs.getItem(itemId).getBean().getProducto().getValue();
             }
+            
             if (bcrLubs.size() <= 0) {
                 bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
                 VaadinSession.getCurrent().setAttribute("detalleProducto", bcrLubs);
@@ -155,6 +176,7 @@ DateField dfdFecha = new DateField("Fecha:");
             } else {
                 updateTableFooterLubs();
             }
+             
             close();
         });
 
@@ -176,13 +198,37 @@ DateField dfdFecha = new DateField("Fecha:");
         hl.addComponent(tblLubricantes);
         return hl;
     }
+    
+    private void setProductsAnt(){
+        
+      for (Integer itemId : bcrLubs_ant.getItemIds()) {
+//                if(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId()==idPro){
+//                    bcrLubs.getItem(itemId).getBean().getProducto().setValue(cantidad+bcrLubs.getItem(itemId).getBean().getProducto().getValue());
+//                }
+                bcrLubs_ant.getItem(itemId).getBean().getProducto().getProductoId();
+                bcrLubs_ant.getItem(itemId).getBean().getCantidad(); //Venta
+                //fechaQuery
+                System.out.println("datos "+bcrLubs_ant.getItem(itemId).getBean().getProducto().getProductoId()+" "+bcrLubs_ant.getItem(itemId).getBean().getCantidad());
+                DtoProducto p = new DtoProducto();
+                p.setProductoId(bcrLubs_ant.getItem(itemId).getBean().getProducto().getProductoId());
+                p.setCantidad(bcrLubs_ant.getItem(itemId).getBean().getCantidad()*-1);
+                System.out.println("cantidad.,.,., "+bcrLubs_ant.getItem(itemId).getBean().getCantidad()*+1);
+                listAnt.add(p);
+//                daoVentaLubs.insertVenta(bcrLubs_ant.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs_ant.getItem(itemId).getBean().getCantidad())*-1, fechaQuery);
+//                if(diferencia < 0){  
+//                    Notification.show("VENTA LUBRICANTE CON INVENTARIO NEGATIVO.\n", Notification.Type.ERROR_MESSAGE);
+//                }
+//                idPro = bcrLubs.getItem(itemId).getBean().getProducto().getProductoId();
+//                cantidad = bcrLubs.getItem(itemId).getBean().getProducto().getValue();
+            }
+    }
+            
 
     public void buildTablePrepago() {
 //        SvcCuadre service = new SvcCuadre();
 //        List<Producto> prodAdicionales = service.getProdAdicionalesByEstacionid(idestacion);
 //        bcrProducto.setBeanIdProperty("productoId");
 //        bcrProducto.addAll(prodAdicionales);
-
         bcrLubs.setBeanIdProperty("productoId");
         tblLubricantes = new Table();
         tblLubricantes.setContainerDataSource(bcrLubs);
@@ -199,19 +245,21 @@ DateField dfdFecha = new DateField("Fecha:");
                 Property pro = source.getItem(itemId).getItemProperty("producto");  //Atributo del bean
                 if (idestacion != null) {
                     contLubs = new ListContainer<Producto>(Producto.class, service.getLubricantsGenericsCountryStation(idpais, idestacion));
-                }
+                }                
                 final ComboBox cbxProducto = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, contLubs);
                 cbxProducto.setPropertyDataSource(pro);
-                cbxProducto.setFilteringMode(FilteringMode.CONTAINS);
+                cbxProducto.setFilteringMode(FilteringMode.CONTAINS);                
                 cbxProducto.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
-                    public void valueChange(Property.ValueChangeEvent event) {
+                    public void valueChange(Property.ValueChangeEvent event) {                        
                         bcrLubs.getItem(itemId).getItemProperty("valor").setValue(((Producto) cbxProducto.getValue()).getPrecio());
                         bcrLubs.getItem(itemId).getItemProperty("idmarca").setValue(((Producto) cbxProducto.getValue()).getIdMarca());
                     }
-                });
+                }); 
                 return cbxProducto;
             }
+            
+            
         });
         tblLubricantes.addGeneratedColumn("colCantidad", new Table.ColumnGenerator() {
             @Override
@@ -261,12 +309,14 @@ DateField dfdFecha = new DateField("Fecha:");
                 btnDelete.addClickListener(new Button.ClickListener() {
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
-                        SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();
-                        daoVentaLubs.reversarVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), fechaQuery);
+                        SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();      
+                        if(bcrLubs != null){
+                            daoVentaLubs.reversarVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), fechaQuery);
+                        }
                         bcrLubs.removeItem(itemId);
                         List<DtoProducto> tempList = new ArrayList();
                         for (DtoProducto deo : listLubs) {
-                            if (deo.getProductoId() != itemId) {
+                            if (deo.getProductoId() != itemId) {                                
                                 tempList.add(deo);                               
                             }
                         }
@@ -299,7 +349,6 @@ DateField dfdFecha = new DateField("Fecha:");
             tmpIntUno = 0;
             tmpLubsOtros = 0;
             tmpIntNoUno = 0;
-            System.out.println("MARCA " + bcrLubs.getItem(itemId).getBean().getIdmarca());
             if (bcrLubs.getItem(itemId).getBean().getIdmarca() == 100) {
                 tmpLubsUno = bcrLubs.getItem(itemId).getBean().getValor();
                 tmpIntUno = bcrLubs.getItem(itemId).getBean().getCantidad();
@@ -315,8 +364,6 @@ DateField dfdFecha = new DateField("Fecha:");
         tblLubricantes.setColumnFooter("colProducto", "Total:");
         tblLubricantes.setColumnFooter("colCantidad", Integer.toString(tmpInt));
         tblLubricantes.setColumnFooter("total", currencySymbol + numberFmt.format(totalUno + totalNoUno).trim());
-
-        System.out.println("TOTALES " + totalUno + " TOTAL NO UNO " + totalNoUno);
 
         VaadinSession.getCurrent().setAttribute("detalleProducto", bcrLubs);
         VaadinSession.getCurrent().setAttribute("totalProd", tmpDouble);
