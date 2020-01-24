@@ -50,6 +50,7 @@ import com.sisintegrados.view.form.FormClientesCredito;
 import com.sisintegrados.view.form.FormDetalleLubricantes;
 import com.sisintegrados.view.form.FormTarjetasCredito;
 import com.vaadin.data.Container;
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
@@ -102,6 +103,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -356,49 +358,6 @@ public class PrCuadre extends Panel implements View {
         cltEmpleado.setSizeUndefined();
         Responsive.makeResponsive(cltEmpleado);
 
-////Detalle ventas credito
-//        buildTableCxC();
-//        VerticalLayout vltCxC = utils.buildVertical("vltCxC", false, false, true, false, null);
-//        vltCxC.addComponents(tblCxC, btnAddCustomer);
-//        vltCxC.setComponentAlignment(btnAddCustomer, Alignment.TOP_CENTER);
-////Detalle venta lubricantes
-//        buildTableLubsDet();
-//        VerticalLayout vltLubs = utils.buildVertical("vltLubs", false, false, true, false, null);
-//        vltLubs.addComponents(tblLubricantes, btnAddLubs);
-//        vltLubs.setComponentAlignment(btnAddLubs, Alignment.TOP_CENTER);
-////Detalle venta lubricantes
-//        buildTablePrepago();
-//        VerticalLayout vltPrego = utils.buildVertical("vltPrego", false, false, true, false, null);
-//        vltPrego.addComponents(tblPrepaid, btnAddPrep);
-//        vltPrego.setComponentAlignment(btnAddPrep, Alignment.TOP_CENTER);
-////Detalle venta lubricantes
-//        buildTableCreditCard();
-//        VerticalLayout vltCreditCard = utils.buildVertical("vltCreditCard", false, false, true, false, null);
-//        vltCreditCard.addComponents(tblCreditCard, btnAddCreditC);
-//        vltCreditCard.setComponentAlignment(btnAddCreditC, Alignment.TOP_CENTER);
-//
-//        final CssLayout cltCxc = new CssLayout(utils.vlContainer(vltCxC), utils.vlContainer(vltPrego), utils.vlContainer(vltLubs), utils.vlContainer(vltCreditCard));
-//        cltCxc.setSizeUndefined();
-//        cltCxc.setVisible(false);
-//        Responsive.makeResponsive(cltCxc);
-//        Panel pnlDetalles = new Panel("Detalles de venta", cltCxc);
-//        pnlDetalles.setSizeFull();
-//        pnlDetalles.addClickListener(new MouseEvents.ClickListener() {
-//            @Override
-//            public void click(MouseEvents.ClickEvent event) {
-//                cltCxc.setVisible(!cltCxc.isVisible());
-//            }
-//        });
-//        btnDetalles = new Button("Detalle venta"/**, cltCxc**/);
-//        btnDetalles.setIcon(FontAwesome.EDIT);
-//        btnDetalles.addClickListener(clickEvent -> formLubricantes("Nuevo"));
-////        btnDetalles.addClickListener((final Button.ClickEvent event) -> {
-//          //FormDetalleVenta.open();
-////            @Override
-////           public void click(MouseEvents.ClickEvent event) {
-//          //    cltCxc.setVisible(!cltCxc.isVisible());
-////           }
-////       });
         CssLayout cltMain = new CssLayout(hlLabels, hlCombo, cltEmpleado, cltVentas, cltMedios, //utils.vlContainer(tblPartida), 
                 //cltUpload,
                 cltTaDiff);
@@ -409,6 +368,7 @@ public class PrCuadre extends Panel implements View {
         root.setExpandRatio(tabsheet, 1);
 
         defineInitialCountryStation();
+        setInfoTable();
     }
 
     private CssLayout toolbarContainerCmbLubricantes;
@@ -766,63 +726,6 @@ public class PrCuadre extends Panel implements View {
             }
         });
 
-//        tfdNameSeller = utils.buildTextField("Pistero:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
-//
-//        tfdNameChief = utils.buildTextField("Jefe de pista:", "", false, 50, true, ValoTheme.TEXTFIELD_SMALL);
-//        upload = new Upload("Selección:", new Upload.Receiver() {
-//            @Override
-//            public OutputStream receiveUpload(String filename, String mimeType) {
-//                //Validaciones
-//                try {
-//                    Constant constant = new Constant();
-//                    if (constant.MAP_MIMETYPES_EXT.containsKey(mimeType)) {
-//                        tmpString = "Faltante" + user.getEstacionLogin().getNombre().replaceAll(" ", "-").concat(Constant.SDF_yyyyMMddHHmmss.format(new Date()));
-//                        tempFile = File.createTempFile(tmpString, constant.MAP_MIMETYPES_EXT.get(mimeType));
-//                        return new FileOutputStream(tempFile);
-//                    } else {
-//                        Notification.show("ERROR", "Tipo de documento NO reconocido", Notification.Type.ERROR_MESSAGE);
-//                        return null;
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    return null;
-//                }
-//            }
-//        });
-//        upload.addFinishedListener(new Upload.FinishedListener() {
-//            @Override
-//            public void uploadFinished(Upload.FinishedEvent finishedEvent) {
-//                try {
-//                    System.out.println("uploadFinished::: " + finishedEvent.getFilename() + "; " + finishedEvent.getMIMEType() + "; " + finishedEvent.getLength() + "; " + finishedEvent.toString());
-//                    if (tempFile != null && tempFile.exists()) {
-////                        XlsxReader(tempFile, true);
-//                    }
-//                } catch (Exception ex) {
-////                    Notification.show("Fila: " + line + "; " + ex.getMessage(), Notification.Type.ERROR_MESSAGE);
-//                }
-//            }
-//        });
-//        upload.addSucceededListener(new Upload.SucceededListener() {
-//            @Override
-//            public void uploadSucceeded(Upload.SucceededEvent event) {
-//                System.out.println("uploadSucceeded::: ");
-//            }
-//        });
-//        upload.addProgressListener(new Upload.ProgressListener() {
-//            @Override
-//            public void updateProgress(long readBytes, long contentLength) {
-//                System.out.println("updateProgress::: " + new Date());
-//            }
-//        });
-//        upload.addFailedListener(new Upload.FailedListener() {
-//            @Override
-//            public void uploadFailed(Upload.FailedEvent event) {
-//                System.out.println("uploadFailed::: ");
-//            }
-//        });
-//        upload.setButtonCaption("Cargar comprobante");
-//        upload.addStyleName(ValoTheme.BUTTON_SMALL);
-//        determinarPermisos();
     }
 
     private void determinarPermisos() {
@@ -1214,7 +1117,7 @@ public class PrCuadre extends Panel implements View {
         /*Asigno Nombre Reporte*/
         name.set("COCOs_CDRE_PISTERO_" + estacion.getNombre().concat(new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime())).concat(".xlsx"));
         makeZip.set(false);
-        
+
         /*Devulevo una lista de string seleccionados*/
         StreamResource.StreamSource source = new StreamResource.StreamSource() {
             public InputStream getStream() {
@@ -1234,7 +1137,7 @@ public class PrCuadre extends Panel implements View {
                         empleado = (Empleado) cbxEmpleado.getValue();
                         String bomba = daoRep.getBombaByTurnoEmpleado(turno.getTurnoId(), empleado.getEmpleadoId());
                         ArrayList<LitroCalibracion> calibracion = daoRep.getTotCalibraTurnoEmpleado(turno.getTurnoId(), empleado.getEmpleadoId());
-                        sourceGeneric = new RepCuadrePistero(empleado.getNombre(), bomba, turno.getNombre(), calibracion, bcArqueo, bcEfectivo, bcrMediopago, bcrProducto,dfdFecha.getValue());
+                        sourceGeneric = new RepCuadrePistero(empleado.getNombre(), bomba, turno.getNombre(), calibracion, bcArqueo, bcEfectivo, bcrMediopago, bcrProducto, dfdFecha.getValue());
 
 //                        XSSFWorkbook workbook = new XSSFWorkbook();
                         /*Generar Reporte en XLS*/
@@ -1586,7 +1489,7 @@ public class PrCuadre extends Panel implements View {
                 if ((Integer) desc.getValue() == 6 || (Integer) desc.getValue() == 5 || (Integer) desc.getValue() == 108) {
                     tfdValue.setReadOnly(true);
                 }
-                if((boolean) mediopago.getValue()){
+                if ((boolean) mediopago.getValue()) {
                     tfdValue.setReadOnly(true);
                 }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {
@@ -1701,6 +1604,13 @@ public class PrCuadre extends Panel implements View {
                 combo.setPropertyDataSource(pro);
                 combo.setNullSelectionAllowed(false);
                 combo.addStyleName(ValoTheme.COMBOBOX_SMALL);
+
+                /*Bloqueo de combo cuando el Medio de pago es USD*/
+                Mediopago medioPagoSeleccionado = (Mediopago) pro.getValue();
+                if (medioPagoSeleccionado != null && medioPagoSeleccionado.getMediopagoId() == 8) {
+                    /*USD*/
+                    combo.setEnabled(false);
+                }
                 combo.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
@@ -1708,6 +1618,8 @@ public class PrCuadre extends Panel implements View {
                         if (((Mediopago) combo.getValue()).getMediopagoId().equals(Constant.MP_CRI_EFECTIVO_DOLARES)) {
                             double tasa = (tasacambio.getTasa() != null) ? tasacambio.getTasa() : 0D;
                             final TextField tfdMonto = new TextField("Monto en dólares (tasa = " + numberFmt3D.format(tasa) + "):");
+//                            Property pvalue = source.getItem(itemId).getItemProperty("value");
+//                             final TextField vvalue = new TextField(utils.getPropertyFormatterDouble(pvalue));
                             tfdMonto.addStyleName("align-right");
                             tfdMonto.focus();
                             MessageBox
@@ -1718,10 +1630,18 @@ public class PrCuadre extends Panel implements View {
                                         public void run() {
                                             String value = tfdMonto.getValue().trim();
                                             if (value.matches("(\\d+(\\.\\d+)?)|(\\.\\d+)")) {
+
                                                 double tasa = (tasacambio.getTasa() != null) ? tasacambio.getTasa() : 0D;
                                                 bcEfectivo.getItem(itemId).getItemProperty("value").setValue(tasa * Double.parseDouble(value));
+//                                                System.out.println("vvalue "+ vvalue.getValue());
+
+                                                bcEfectivo.getItem(itemId).getItemProperty("value").getType();
+                                                bcEfectivo.getItem(itemId).getItemProperty("value").getValue();
                                                 bcEfectivo.getItem(itemId).getItemProperty("tasa").setValue(tasa);
+                                                bcEfectivo.getItem(itemId).getItemProperty("value").setReadOnly(false);
                                                 bcEfectivo.getItem(itemId).getItemProperty("monExtranjera").setValue(Double.parseDouble(value));
+
+//                                                 vvalue.setEnabled(false);
                                             }
                                         }
                                     },
@@ -1730,11 +1650,13 @@ public class PrCuadre extends Panel implements View {
                                         public void apply(MessageBox mb, Button button) {
 //                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                                         }
+
                                     }
                                     )
                                     .withCancelButton()
                                     .open();
                             //Fin MessageBox
+                            combo.setEnabled(false);
                         }
                     }
                 });
@@ -1769,7 +1691,23 @@ public class PrCuadre extends Panel implements View {
                 nfd.setWidth("100px");
                 nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
                 nfd.addStyleName("align-right");
-//                nfd.setEnabled(bcEfectivo.getItem(itemId).getBean().getMedioPago().getMediopagoId().equals(MP_DOLARES_EFECTIVO));
+
+                /*Bloqueo de combo cuando el Medio de pago es USD*/
+                Property proMedioPago = source.getItem(itemId).getItemProperty("medioPago");
+                Mediopago medioPagoSeleccionado = (Mediopago) proMedioPago.getValue();
+                if (medioPagoSeleccionado != null && medioPagoSeleccionado.getMediopagoId() == 8) {
+                    /*USD*/
+                    nfd.setEnabled(false);
+                } else {
+                    nfd.setEnabled(true);
+                }
+
+//                System.out.println("MEDIOPAGOID " + medio.getMediopagoId());
+//                if (medio.getMediopagoId() == 8) {
+//                    nfd.setReadOnly(true); // ASG DESCOMENTAR CUANDO CORRIGAN LA DATA DE LUBRICANTES
+//                }
+                //nfd.setEnabled(false);
+//                nfd.setEnabled(bcEfectivo.getItem(itemId).getItemProperty(mediosPagoEfectivo));
                 nfd.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
@@ -1797,6 +1735,12 @@ public class PrCuadre extends Panel implements View {
                             return;
                         }
                         sumarEfectivo();
+                        System.out.println("id " + itemId + " = " + bcEfectivo.getItem(itemId).getBean().getMedioPago().getMediopagoId());
+                        if (bcEfectivo.getItem(itemId).getBean().getMedioPago().getMediopagoId() == 8) {
+                            nfd.setEnabled(false);
+                        } else {
+                            nfd.setEnabled(true);
+                        }
 //                        } else {
 //                            bcEfectivo.getItem(itemId).getItemProperty("value").setValue(0D);
 //                        }
@@ -1844,6 +1788,7 @@ public class PrCuadre extends Panel implements View {
                         updateTotalPagos(totalMediosPago + totalEfectivo);
 
                         updateDiferencia((totalMediosPago + totalEfectivo) - (totalArqueoElectronico + totalProducto));
+                        setInfoTable();
                     }
                 });
                 return btnDelete;
@@ -1866,6 +1811,14 @@ public class PrCuadre extends Panel implements View {
         tblEfectivo.setColumnFooter("colMPname", "Total:");
         tblEfectivo.setColumnFooter("colMonto", currencySymbol + numberFmt.format(totalEfectivo));
 
+//        tblEfectivo.addItemSetChangeListener(new Container.ItemSetChangeListener() {
+//            @Override
+//            public void containerItemSetChange(Container.ItemSetChangeEvent event) {
+//                System.out.println("****************** ME MODIFICARON - TABLE EFECTIVO ******************************");
+//                event.getContainer().
+//               
+//            }
+//        });
         btnAdd = new Button("Agregar", FontAwesome.PLUS);
         btnAdd.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnAdd.addStyleName(ValoTheme.BUTTON_SMALL);
@@ -1880,8 +1833,17 @@ public class PrCuadre extends Panel implements View {
                 bcEfectivo.removeAllItems();
                 listaEfectivo.add(new DtoEfectivo(itemId, null, 0D));
                 bcEfectivo.addAll(listaEfectivo);
+                setInfoTable();
             }
         });
+//         tblEfectivo.addValueChangeListener(new Property.ValueChangeListener() {
+//            @Override
+//            public void valueChange(Property.ValueChangeEvent event) {
+////                System.out.println("table "+bcEfectivo.getItem(itemId).getBean().getValue());
+//                System.out.println("table "+tblEfectivo.getValue());
+//                System.out.println("tablwwww "+tblEfectivo.getItem(tblEfectivo.getValue()).getItemProperty("medioPago"));
+//            }
+//        });
 
     }
 
@@ -2331,111 +2293,6 @@ public class PrCuadre extends Panel implements View {
         });
     }
 
-//    public void buildTableCreditCard() {
-//
-//        tblCreditCard = utils.buildTable("Detalle tarjetas de crédito:", 100f, 100f, bcrCreditC,
-//                new String[]{"nombre"},
-//                new String[]{"Nombre"}
-//        );
-//        tblCreditCard.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
-//        tblCreditCard.addStyleName(ValoTheme.TABLE_COMPACT);
-//        tblCreditCard.addStyleName(ValoTheme.TABLE_SMALL);
-//        tblCreditCard.setImmediate(true);
-//        tblCreditCard.addGeneratedColumn("colCliente", new Table.ColumnGenerator() {
-//            @Override
-//            public Object generateCell(Table source, final Object itemId, Object columnId) {
-//                Property pro = source.getItem(itemId).getItemProperty("cliente");  //Atributo del bean
-//                ComboBox cbxCliente = utils.buildCombobox("", "nombre", false, true, ValoTheme.COMBOBOX_SMALL, contCreditC);
-//                cbxCliente.setPropertyDataSource(pro);
-//                cbxCliente.setFilteringMode(FilteringMode.CONTAINS);
-//                return cbxCliente;
-//            }
-//        });
-//        tblCreditCard.addGeneratedColumn("colMonto", new Table.ColumnGenerator() {
-//            @Override
-//            public Object generateCell(Table source, final Object itemId, Object columnId) {
-//                Property pro = source.getItem(itemId).getItemProperty("valor");  //Atributo del bean
-//                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
-//                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
-//                nfd.setValue(numberFmt.format(value));
-//                nfd.setWidth("100px");
-//                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
-//                nfd.addStyleName("align-right");
-//                nfd.addValueChangeListener(new Property.ValueChangeListener() {
-//                    @Override
-//                    public void valueChange(Property.ValueChangeEvent event) {
-////                        updateTableFooterPrepaid();
-//                    }
-//                });
-//                return nfd;
-//            }
-//        });
-//        tblCreditCard.addGeneratedColumn("colLote", new Table.ColumnGenerator() {
-//            @Override
-//            public Object generateCell(Table source, final Object itemId, Object columnId) {
-//                Property pro = source.getItem(itemId).getItemProperty("presentacion");  //Atributo del bean
-////                final TextField nfd = new TextField(utils.getPropertyFormatterDouble(pro));
-////                Double value = (pro != null && pro.getValue() != null) ? Double.parseDouble(pro.getValue().toString()) : 0D;
-////                nfd.setValue(numberFmt.format(value));
-//                final TextField nfd = new TextField(pro);
-//                nfd.setNullRepresentation("");
-//                nfd.setWidth("100px");
-//                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
-//                nfd.addStyleName("align-right");
-//                nfd.addValueChangeListener(new Property.ValueChangeListener() {
-//                    @Override
-//                    public void valueChange(Property.ValueChangeEvent event) {
-////                        updateTableFooterPrepaid();
-//                    }
-//                });
-//                return nfd;
-//            }
-//        });
-//        tblCreditCard.addGeneratedColumn("colDelete", new Table.ColumnGenerator() {
-//            @Override
-//            public Object generateCell(Table source, final Object itemId, Object columnId) {
-//                Button btnDelete = new Button(FontAwesome.TRASH);
-//                btnDelete.addStyleName(ValoTheme.BUTTON_DANGER);
-//                btnDelete.addStyleName(ValoTheme.BUTTON_SMALL);
-//                btnDelete.addClickListener(new Button.ClickListener() {
-//                    @Override
-//                    public void buttonClick(Button.ClickEvent event) {
-//                        bcrCreditC.removeItem(itemId);
-//                        List<DtoProducto> tempList = new ArrayList();
-//                        for (DtoProducto deo : listPrepaid) {
-//                            if (deo.getProductoId() != itemId) {
-//                                tempList.add(deo);
-//                            }
-//                        }
-//                        listPrepaid = tempList;
-//                        updateTableFooterPrepaid();
-//                    }
-//                });
-//                return btnDelete;
-//            }
-//        });
-//        tblCreditCard.setVisibleColumns(new Object[]{"colCliente", "colLote", "colMonto", "colDelete"});
-//        tblCreditCard.setColumnHeaders(new String[]{"Tarjeta", "Lote", "Monto", "Borrar"});
-//        tblCreditCard.setColumnAlignments(Align.LEFT, Align.RIGHT, Align.RIGHT, Align.CENTER);
-//        tblCreditCard.setSizeUndefined();
-//        tblCreditCard.setHeight(200f, Unit.PIXELS);
-//
-//        btnAddCreditC = new Button("Agregar", FontAwesome.PLUS);
-//        btnAddCreditC.addStyleName(ValoTheme.BUTTON_PRIMARY);
-//        btnAddCreditC.addStyleName(ValoTheme.BUTTON_SMALL);
-//        btnAddCreditC.addClickListener(new Button.ClickListener() {
-//            @Override
-//            public void buttonClick(Button.ClickEvent event) {
-////                bcrCreditC.removeAllItems();
-//                DtoProducto dtoprod = new DtoProducto(utils.getRandomNumberInRange(1, 1000), null, null);
-//                dtoprod.setValor(0D);
-//                bcrCreditC.addBean(dtoprod);
-//                tblCreditCard.refreshRowCache();
-////                listPrepaid.add(dtoprod);
-////                bcrCreditC.addAll(listPrepaid);
-//            }
-//        });
-//    }
     public void updateTableFooterCxC() {
         tmpDouble = 0;
         for (Integer itemId : bcrClientes.getItemIds()) {
@@ -2728,5 +2585,30 @@ public class PrCuadre extends Panel implements View {
             crear = false;
             btnSave.setEnabled(false);
         }
+    }
+
+    public void setInfoTable() {
+        Iterator<?> i = tblEfectivo.getContainerDataSource().getItemIds().iterator();
+        Item item;
+        while (i.hasNext()) {
+            Object key = i.next();
+            item = tblEfectivo.getContainerDataSource().getItem(key);
+
+            Object v1 = item.getItemProperty("medioPago").getValue();
+
+            Object v2 = item.getItemProperty("value").getValue();
+            if (v1 != null) {
+                Mediopago m = (Mediopago) v1;
+                System.out.println("m " + m.getMediopagoId());
+                System.out.println("v1 " + v1);
+                System.out.println("v2 " + v2);
+
+                if (m.getMediopagoId() == 8) /*USD MONEDA*/ {
+
+                }
+            }
+
+        }
+
     }
 }
