@@ -571,4 +571,30 @@ public class SvcTurnoCierre extends Dao {
         return result;
     }
 
+    public int recuperaToleranciaEfectivo() {
+        ResultSet rst = null;
+        int valor = 0;
+        try {
+            query = "select valor from parametro "
+                    + "where PARAMETRO_ID =30";
+            System.out.println("query " + query);
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            while (rst.next()) {
+                valor = rst.getInt(1);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                if(rst != null){
+                    rst.close();
+                }
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+
+        return valor;
+    }
 }
