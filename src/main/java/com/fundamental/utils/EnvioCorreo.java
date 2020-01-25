@@ -6,6 +6,8 @@
 package com.fundamental.utils;
 
 import com.fundamental.services.Dao;
+import com.fundamental.services.SvcMaintenance;
+import com.sisintegrados.generic.bean.GenericSMTP;
 import com.sisintegrados.generic.bean.UnoConfiguraciones;
 import java.util.Date;
 import java.util.Properties;
@@ -22,120 +24,100 @@ import javax.mail.internet.MimeMessage;
  */
 public class EnvioCorreo {
 
-    UnoConfiguraciones obj;
-    Dao dao ;
-    private String host;
-    private String port;
-    private String tipoSMTP;
-    private String userAuth;
-    private String passAuth;
-    private String mailFrom;
+    SvcMaintenance main = new SvcMaintenance();
+    GenericSMTP sm = new GenericSMTP();
 
-    public EnvioCorreo() {
-        try {
-//            for (UnoConfiguraciones uc : dao.getConfiguracionesSMTP()) {
-//                if (uc.getLlave().indexOf("smtp.host") != -1) {
-//                    setHost(uc.getValor());
+//    public EnvioCorreo() {
+//        try {
+//            System.out.println("entra al envioCorreo");
+//            for (GenericSMTP smtp : main.getSMTP()) {
+//                System.out.println("smtp.getLlave().indexOf(\"smtp.host\") "+smtp.getLlave().indexOf("smtp.host"));
+//                System.out.println("smtp.getValor() "+smtp.getValor());
+//                
+//                System.out.println("smtp.getLlave().indexOf(\"smtp.port\") "+smtp.getLlave().indexOf("smtp.port"));
+//                System.out.println("smtp.getValor() "+smtp.getValor());
+//                if (smtp.getLlave().indexOf("smtp.host") != -1) {
+//                    sm.setHost(smtp.getValor());
 //                }
-//                if (uc.getLlave().indexOf("smtp.port") != -1) {
-//                    setPort(uc.getValor());
+//                if (smtp.getLlave().indexOf("smtp.port") != -1) {
+//                    sm.setPort(smtp.getValor());
 //                }
-//                if (uc.getLlave().indexOf("smtp.user") != -1) {
-//                    setUserAuth(uc.getValor());
+//                if (smtp.getLlave().indexOf("smtp.user") != -1) {
+//                    sm.setUserAuth(smtp.getValor());
 //                }
-//                if (uc.getLlave().indexOf("smtp.pass") != -1) {
-//                    setPassAuth(uc.getValor());
+//                if (smtp.getLlave().indexOf("smtp.pass") != -1) {
+//                    sm.setPassAuth(smtp.getValor());
 //                }
-//                if (uc.getLlave().indexOf("smtp.tipo") != -1) {
-//                    setTipoSMTP(uc.getValor());
+//                if (smtp.getLlave().indexOf("smtp.tipo") != -1) {
+//                    sm.setTipoSMTP(smtp.getValor());
 //                }
-//                if (uc.getLlave().indexOf("smtp.mailfrom") != -1) {
-//                    setMailFrom(uc.getValor());
+//                if (smtp.getLlave().indexOf("smtp.mailfrom") != -1) {
+//                    sm.setMailFrom(smtp.getValor());
 //                }
 //            }
-            
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public String getPort() {
-        return port;
-    }
-
-    public void setPort(String port) {
-        this.port = port;
-    }
-
-    public String getTipoSMTP() {
-        return tipoSMTP;
-    }
-
-    public void setTipoSMTP(String tipoSMTP) {
-        this.tipoSMTP = tipoSMTP;
-    }
-
-    public String getUserAuth() {
-        return userAuth;
-    }
-
-    public void setUserAuth(String userAuth) {
-        this.userAuth = userAuth;
-    }
-
-    public String getPassAuth() {
-        return passAuth;
-    }
-
-    public void setPassAuth(String passAuth) {
-        this.passAuth = passAuth;
-    }
-
-    public String getMailFrom() {
-        return mailFrom;
-    }
-
-    public void setMailFrom(String mailFrom) {
-        this.mailFrom = mailFrom;
-    }
+//            
+//
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//    }
 
     public boolean enviarMail(String correoDestino, String mensaje, String subject) {
         boolean regresa = false;
-        String lsTiposeg = this.tipoSMTP;
+//        String lsTiposeg = sm.getTipoSMTP();
         try {
+            for (GenericSMTP smtp : main.getSMTP()) {
+                System.out.println("smtp.getLlave().indexOf(\"smtp.host\") "+smtp.getLlave().indexOf("smtp.host"));
+                System.out.println("smtp.getValor() "+smtp.getValor());
+                
+                System.out.println("smtp.getLlave().indexOf(\"smtp.port\") "+smtp.getLlave().indexOf("smtp.port"));
+                System.out.println("smtp.getValor() "+smtp.getValor());
+                if (smtp.getLlave().indexOf("smtp.host") != -1) {
+                    sm.setHost(smtp.getValor());
+                }
+                if (smtp.getLlave().indexOf("smtp.port") != -1) {
+                    sm.setPort(smtp.getValor());
+                }
+                if (smtp.getLlave().indexOf("smtp.user") != -1) {
+                    sm.setUserAuth(smtp.getValor());
+                }
+                if (smtp.getLlave().indexOf("smtp.pass") != -1) {
+                    sm.setPassAuth(smtp.getValor());
+                }
+                if (smtp.getLlave().indexOf("smtp.tipo") != -1) {
+                    sm.setTipoSMTP(smtp.getValor());
+                }
+                if (smtp.getLlave().indexOf("smtp.mailfrom") != -1) {
+                    sm.setMailFrom(smtp.getValor());
+                }
+            }
+            
+            
             Properties props = new Properties();
             props.setProperty("mail.transport.protocol", "smtp");
-            props.put("mail.smtp.host", this.host);
+            System.out.println("getHost "+sm.getHost());
+            props.put("mail.smtp.host", sm.getHost());
             props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.port", this.port);
+            props.put("mail.smtp.port", sm.getPort());
             props.put("mail.smtp.starttls.enable", "true");
 
 //            if (lsTiposeg.equals("TLS")) {
 //                props.put("mail.smtp.starttls.enable", "true");
 //            } else {
 ////            SSL
-//                props.put("mail.smtp.socketFactory.port", this.port);
+//                props.put("mail.smtp.socketFactory.port", sm.getPort());
 //                props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 //            }
 
             Session session = Session.getInstance(props,
                     new javax.mail.Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(getUserAuth(), getPassAuth());
+                    return new PasswordAuthentication(sm.getUserAuth(), sm.getPassAuth());
                 }
             });
 
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(this.mailFrom));
+            message.setFrom(new InternetAddress(sm.getMailFrom()));
             message.setRecipients(Message.RecipientType.TO,
                     InternetAddress.parse(correoDestino));
             message.setSubject(subject);
