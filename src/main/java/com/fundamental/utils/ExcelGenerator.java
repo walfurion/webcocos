@@ -869,11 +869,6 @@ public class ExcelGenerator {
                 datoscell.setCellStyle(stylePorcentaje);
                 ii++;
 
-                datoscell = datos.createCell(ii);
-                datoscell.setCellValue(0);
-                datoscell.setCellStyle(styleNumber);
-                ii++;
-
                 /*CONTADO EN USD*/
                 datoscell = datos.createCell(ii);
                 datoscell.setCellValue(itemId.getEfe_usd_monto());

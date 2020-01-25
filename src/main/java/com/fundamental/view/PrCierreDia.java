@@ -103,6 +103,9 @@ public class PrCierreDia extends Panel implements View {
 
     Double totalEfectivo = 0D;
     Double totalDepositos = 0D;
+    
+    int toleranciaEfectivo;
+    SvcTurnoCierre svcTC = new SvcTurnoCierre();
 
     //double totalEfectivo;
     //double totalDepositos;
@@ -497,7 +500,7 @@ public class PrCierreDia extends Panel implements View {
         buildLabelInfo();
 
         //TODO: Los controles de pais y estacion se deben mostrar solo a los usuarios de rol de oficina.
-        SvcTurnoCierre svcTC = new SvcTurnoCierre();
+        //SvcTurnoCierre svcTC = new SvcTurnoCierre();
         contPais = new BeanItemContainer<Pais>(Pais.class);
         contPais.addAll(svcTC.getAllPaises());
 //        cbxPais = new ComboBox("País:", new ListContainer<Pais>(Pais.class, svcTC.getAllPaises()));
@@ -1117,12 +1120,14 @@ public class PrCierreDia extends Panel implements View {
     public boolean validaDetalleEfectivo(Double totalEfectivo, Double totalDepositos) {
         boolean result = true;
         /*Valida los totales en medios pago*/
-           if (Math.abs(totalEfectivo - totalDepositos) > 0.009) {
+           if (Math.abs(totalEfectivo - totalDepositos) > svcTC.recuperaToleranciaEfectivo()) {
                     result = false;
                 }
         return result;
     }
-
+    
+    
+    
     private void buildButtons() {
 
         btnDetalleDeposito = new Button("Detalle Efectivo", FontAwesome.PLUS);
@@ -1197,7 +1202,8 @@ public class PrCierreDia extends Panel implements View {
                         .withOkButton(new Runnable() {
                             public void run() {
 
-                                SvcTurnoCierre svcTC = new SvcTurnoCierre();
+                                //SvcTurnoCierre svcTC = new SvcTurnoCierre();
+                                
                                 boolean invNuevo = (dia.getEstadoId() == 1);
                                 dia.setModificadoPersona(user.getNombreLogin());
                                 dia.setModificadoPor(user.getUsername());
@@ -1300,7 +1306,7 @@ public class PrCierreDia extends Panel implements View {
     }
 
     private void refreshAllData() {
-        SvcTurnoCierre svcTC = new SvcTurnoCierre();
+       // SvcTurnoCierre svcTC = new SvcTurnoCierre();
         SvcDeposito svcDep = new SvcDeposito();
 //                        String arqueosIds = "";
 //                        //Determinar bombas

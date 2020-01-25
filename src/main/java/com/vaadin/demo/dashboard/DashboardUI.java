@@ -44,20 +44,16 @@ public final class DashboardUI extends UI {
     @Override
     protected void init(final VaadinRequest request) {
         setLocale(Locale.US);
-        LogManager.getLogManager().getLogger("com.vaadin").setLevel(Level.OFF);
-        LogManager.getLogManager().getLogger("org.apache").setLevel(Level.OFF);
-        LogManager.getLogManager().getLogger("org.apache").setLevel(Level.SEVERE);
-        LogManager.getLogManager().getLogger("com.vaadin").setLevel(Level.SEVERE);
-        LogManager.getLogManager().getLogger("com.vaadin").setLevel(Level.WARNING);
-
+//        LogManager.getLogManager().getLogger("com.vaadin").setLevel(Level.OFF);
+//        LogManager.getLogManager().getLogger("org.apache").setLevel(Level.OFF);
+//        LogManager.getLogManager().getLogger("org.apache").setLevel(Level.SEVERE);
+//        LogManager.getLogManager().getLogger("com.vaadin").setLevel(Level.SEVERE);
+//        LogManager.getLogManager().getLogger("com.vaadin").setLevel(Level.WARNING);
         DashboardEventBus.register(this);
         Responsive.makeResponsive(this);
         addStyleName(ValoTheme.UI_WITH_MENU);
 
         updateContent();
-
-        // Some views need to be aware of browser resize events so a
-        // BrowserResizeEvent gets fired to the event bus on every occasion.
         Page.getCurrent().addBrowserWindowResizeListener(
                 new BrowserWindowResizeListener() {
                     @Override
