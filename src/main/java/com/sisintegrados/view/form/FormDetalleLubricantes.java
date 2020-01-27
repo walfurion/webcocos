@@ -310,7 +310,7 @@ DateField dfdFecha = new DateField("Fecha:");
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
                         SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();      
-                        if(bcrLubs != null){
+                        if(bcrLubs.getItem(itemId).getBean().getProducto()!= null){
                             daoVentaLubs.reversarVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), fechaQuery);
                         }
                         bcrLubs.removeItem(itemId);

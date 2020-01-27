@@ -10,6 +10,7 @@ import com.fundamental.model.Rol;
 import com.fundamental.model.Tipoproducto;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.dto.DtoGenericBean;
+import com.sisintegrados.generic.bean.GenericSMTP;
 import com.sisintegrados.generic.bean.Tanque;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -57,6 +58,15 @@ public class SvcMaintenance extends Dao {
                 query = "UPDATE usuario "
                         + "SET username = ?, clave = ?, nombre = ?, apellido = ?, modificado_por = ?, modificado_el = SYSDATE, pais_id = ?, estado = ?, correo = ? "
                         + "WHERE usuario_id = ?";
+                System.out.println("usuario.getUsername() "+usuario.getUsername());
+                System.out.println("usuario.getClave() "+usuario.getClave());
+                System.out.println("usuario.getNombre() "+usuario.getNombre());
+                System.out.println("usuario.getApellido() "+usuario.getApellido());
+                System.out.println("usuario.getModificadoPor() "+usuario.getModificadoPor());
+                System.out.println("usuario.getPaisId() "+usuario.getPaisId());
+                System.out.println("usuario.getEstado() "+usuario.getEstado());
+                System.out.println("usuario.getCorreo() "+usuario.getCorreo());
+                System.out.println("usuario.getUsuarioId() "+usuario.getUsuarioId());
                 pst = getConnection().prepareStatement(query);
                 pst.setString(1, usuario.getUsername());
                 pst.setString(2, usuario.getClave());
@@ -355,15 +365,13 @@ public class SvcMaintenance extends Dao {
         return result;
     }
 
-    public Usuario getUserByUsernameEmail(String username, String email) {
+    public Usuario getUserByUsernameEmail(String username) {
         Usuario result = null;
         try {
             query = "SELECT usuario_id, username, clave, nombre, apellido, estado, pais_id, correo "
                     + "FROM usuario "
-                    + "WHERE username = ? AND correo = ?";
+                    + "WHERE username = '"+username+"' OR correo = '"+username+"' ";
             pst = getConnection().prepareStatement(query);
-            pst.setObject(1, username);
-            pst.setObject(2, email);
             ResultSet rst = pst.executeQuery();
             if (rst.next()) {
                 result = new Usuario(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getString(6), null);
@@ -856,5 +864,72 @@ public class SvcMaintenance extends Dao {
             }
         }
         return paisId;
+    }
+    public boolean updateUsuario(int usuarioId, String clave) {
+        boolean result = true;
+        ResultSet rst = null;
+        try {             
+            miQuery = "update usuario set clave = '"+clave+"' WHERE usuario_id="+usuarioId+"";
+            System.out.println("update " + miQuery);
+            pst = getConnection().prepareStatement(miQuery);
+            pst.executeUpdate();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+            return false;
+        } finally {
+
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+    
+    public List<GenericSMTP> getSMTP() {
+        List<GenericSMTP> result = new ArrayList();
+        try {
+            miQuery = "select nombre,valor from PARAMETRO";
+            System.out.println("MiQuery   " + miQuery);
+            pst = getConnection().prepareStatement(miQuery);
+            ResultSet rst = pst.executeQuery();
+            GenericSMTP ec;
+            while (rst.next()) {
+                ec = new GenericSMTP(rst.getString(1),rst.getString(2));
+                result.add(ec);
+            }
+            closePst();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+    
+    public String getMensaje() {
+        String mensaje = "";
+        try {
+            miQuery = "select valor from parametro where nombre='MENSAJE'";
+            System.out.println("MiQuery   " + miQuery);
+            pst = getConnection().prepareStatement(miQuery);
+            ResultSet rst = pst.executeQuery();
+            while (rst.next()) {
+                mensaje = rst.getString(1);
+            }
+            closePst();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+        return mensaje;
     }
 }
