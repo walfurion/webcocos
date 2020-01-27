@@ -176,9 +176,9 @@ public class ExcelGeneratorCrlMediosPago {
 
         sheetUNO_PLUS = workbook.createSheet("UNO PLUS");
         sheetTC_FLOTA_BAC = workbook.createSheet("TC FLOTA BAC");
-        sheetTARJETA_BANCO_NACIONAL = workbook.createSheet("TARJETA BANCO NACIONAL");
-        sheetTARJETA_BCR = workbook.createSheet("TARJETA BCR");
-        sheetTARJETA_CREDOMATIC = workbook.createSheet("TARJETA CREDOMATIC");
+        sheetTARJETA_BANCO_NACIONAL = workbook.createSheet("TC BANCO NACIONAL");
+        sheetTARJETA_BCR = workbook.createSheet("TC BCR");
+        sheetTARJETA_CREDOMATIC = workbook.createSheet("BAC");
         sheetTC_FLOTA_BCR = workbook.createSheet("TC FLOTA BCR");
         sheetVERSATEC = workbook.createSheet("VERSATEC");
         sheetTC_DAVIVIENDA = workbook.createSheet("TC DAVIVIENDA");
