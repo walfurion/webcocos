@@ -390,12 +390,12 @@ public class ExcelGeneratorWetStock {
         String[] titulosHijosTanque1 = new String[]{"Fecha", "Inventario Inicial", "Volumen Facturado", "Volumen Recibido en Tanque", "Ventas",
             "Ajuste de Transferencias", "Inventario Teorico", "Inventario Fisico", "Nivel de Agua en Tanque", "Varianza en Volumen",
             "Varianza en Volumen de Recepciones", "Varianza Acumulada en Volumen de Recepciones", "Varianza (%) Sobre Ventas",
-            "Varianza Acumulada", "Venas Acumuladas", "Varianza Acumulada (%) sobre Ventas"};
+            "Varianza Acumulada", "Ventas Acumuladas", "Varianza Acumulada (%) sobre Ventas"};
 //            List<String> titulosColumnasTanque2 = new ArrayList<String>();
 //            String[] titulosHijosTanque2 = new String[]{"Fecha", "Inventario Inicial", "Volumen Facturado", "Volumen Recibido en Tanque", "Ventas", 
 //                                                        "Ajuste de Transferencias", "Inventario Teorico", "Inventario Fisico", "Nivel de Agua en Tanque", "Varianza en Volumen",
 //                                                        "Varianza en Volumen de Recepciones", "Varianza Acumulada en Volumen de Recepciones", "Varianza (%) Sobre Ventas", 
-//                                                        "Varianza Acumulada", "Venas Acumuladas", "Varianza Acumulada (%) sobre Ventas"};
+//                                                        "Varianza Acumulada", "Ventas Acumuladas", "Varianza Acumulada (%) sobre Ventas"};
         /*como crear un objeto arrylist de tipo string*/
         ArrayList<String> tituloshojasHijosTanque = new ArrayList<String>();
         tituloshojasHijosTanque.add("TANQUE 1");
@@ -525,9 +525,18 @@ public class ExcelGeneratorWetStock {
         Integer filas4 = lista.size();
 
         String fecha = "";
-        Double varianzaAcum = 0.0;
-        Double ventasAcum = 0.0;
-        Double porcentajeVarAcum = 0.0;
+        Double varianzaAcum1 = 0.0;
+        Double varianzaAcum2 = 0.0;
+        Double varianzaAcum3 = 0.0;
+        Double varianzaAcum4 = 0.0;
+        Double ventasAcum1 = 0.0;
+        Double ventasAcum2 = 0.0;
+        Double ventasAcum3 = 0.0;
+        Double ventasAcum4 = 0.0;
+        Double porcentajeVarAcum1 = 0.0;
+        Double porcentajeVarAcum2 = 0.0;
+        Double porcentajeVarAcum3 = 0.0;
+        Double porcentajeVarAcum4 = 0.0;
 
         for (GenericRptWetStock itemId : lista.getItemIds()) {
             if (itemId.getTanque_id() == 1) {
@@ -535,9 +544,9 @@ public class ExcelGeneratorWetStock {
 
                 i1 = 0;
                 fecha = itemId.getFecha().toString();
-                varianzaAcum = varianzaAcum + itemId.getDiferencia();
-                ventasAcum = ventasAcum + itemId.getVentas();
-                porcentajeVarAcum = (varianzaAcum / ventasAcum) * 100;
+                varianzaAcum1 = varianzaAcum1 + itemId.getDiferencia();
+                ventasAcum1 = ventasAcum1 + itemId.getVentas();
+                porcentajeVarAcum1 = (varianzaAcum1 / ventasAcum1) * 100;
 
                 datoscellTanque1 = datosTanque1.createCell(i1);
                 datoscellTanque1.setCellValue(fecha.substring(8));
@@ -593,15 +602,15 @@ public class ExcelGeneratorWetStock {
                 i1++;
 
                 datoscellTanque1 = datosTanque1.createCell(i1);
-                datoscellTanque1.setCellValue(varianzaAcum);
+                datoscellTanque1.setCellValue(varianzaAcum1);
                 datoscellTanque1.setCellStyle(styleNumber);
                 i1++;
                 datoscellTanque1 = datosTanque1.createCell(i1);
-                datoscellTanque1.setCellValue(ventasAcum);
+                datoscellTanque1.setCellValue(ventasAcum1);
                 datoscellTanque1.setCellStyle(styleNumber);
                 i1++;
                 datoscellTanque1 = datosTanque1.createCell(i1);
-                datoscellTanque1.setCellValue(porcentajeVarAcum);
+                datoscellTanque1.setCellValue(porcentajeVarAcum1);
                 datoscellTanque1.setCellStyle(styleNumber);
                 i1++;
 
@@ -613,9 +622,9 @@ public class ExcelGeneratorWetStock {
 
                 i2 = 0;
                 fecha = itemId.getFecha().toString();
-                varianzaAcum = varianzaAcum + itemId.getDiferencia();
-                ventasAcum = ventasAcum + itemId.getVentas();
-                porcentajeVarAcum = (varianzaAcum / ventasAcum) * 100;
+                varianzaAcum2 = varianzaAcum2 + itemId.getDiferencia();
+                ventasAcum2 = ventasAcum2 + itemId.getVentas();
+                porcentajeVarAcum2 = (varianzaAcum2 / ventasAcum2) * 100;
 
                 datoscellTanque2 = datosTanque2.createCell(i2);
                 datoscellTanque2.setCellValue(fecha.substring(8));
@@ -671,15 +680,15 @@ public class ExcelGeneratorWetStock {
                 i2++;
 
                 datoscellTanque2 = datosTanque2.createCell(i2);
-                datoscellTanque2.setCellValue(varianzaAcum);
+                datoscellTanque2.setCellValue(varianzaAcum2);
                 datoscellTanque2.setCellStyle(styleNumber);
                 i2++;
                 datoscellTanque2 = datosTanque2.createCell(i2);
-                datoscellTanque2.setCellValue(ventasAcum);
+                datoscellTanque2.setCellValue(ventasAcum2);
                 datoscellTanque2.setCellStyle(styleNumber);
                 i2++;
                 datoscellTanque2 = datosTanque2.createCell(i2);
-                datoscellTanque2.setCellValue(porcentajeVarAcum);
+                datoscellTanque2.setCellValue(porcentajeVarAcum2);
                 datoscellTanque2.setCellStyle(styleNumber);
                 i2++;
 
@@ -691,9 +700,9 @@ public class ExcelGeneratorWetStock {
 
                 i3 = 0;
                 fecha = itemId.getFecha().toString();
-                varianzaAcum = varianzaAcum + itemId.getDiferencia();
-                ventasAcum = ventasAcum + itemId.getVentas();
-                porcentajeVarAcum = (varianzaAcum / ventasAcum) * 100;
+                varianzaAcum3 = varianzaAcum3 + itemId.getDiferencia();
+                ventasAcum3 = ventasAcum3 + itemId.getVentas();
+                porcentajeVarAcum3 = (varianzaAcum3 / ventasAcum3) * 100;
 
                 datoscellTanque3 = datosTanque3.createCell(i3);
                 datoscellTanque3.setCellValue(fecha.substring(8));
@@ -749,15 +758,15 @@ public class ExcelGeneratorWetStock {
                 i3++;
 
                 datoscellTanque3 = datosTanque3.createCell(i3);
-                datoscellTanque3.setCellValue(varianzaAcum);
+                datoscellTanque3.setCellValue(varianzaAcum3);
                 datoscellTanque3.setCellStyle(styleNumber);
                 i3++;
                 datoscellTanque3 = datosTanque3.createCell(i3);
-                datoscellTanque3.setCellValue(ventasAcum);
+                datoscellTanque3.setCellValue(ventasAcum3);
                 datoscellTanque3.setCellStyle(styleNumber);
                 i3++;
                 datoscellTanque3 = datosTanque3.createCell(i3);
-                datoscellTanque3.setCellValue(porcentajeVarAcum);
+                datoscellTanque3.setCellValue(porcentajeVarAcum3);
                 datoscellTanque3.setCellStyle(styleNumber);
                 i3++;
 
@@ -769,9 +778,9 @@ public class ExcelGeneratorWetStock {
 
                 i4 = 0;
                 fecha = itemId.getFecha().toString();
-                varianzaAcum = varianzaAcum + itemId.getDiferencia();
-                ventasAcum = ventasAcum + itemId.getVentas();
-                porcentajeVarAcum = (varianzaAcum / ventasAcum) * 100;
+                varianzaAcum4 = varianzaAcum4 + itemId.getDiferencia();
+                ventasAcum4 = ventasAcum4 + itemId.getVentas();
+                porcentajeVarAcum4 = (varianzaAcum4 / ventasAcum4) * 100;
 
                 datoscellTanque4 = datosTanque4.createCell(i4);
                 datoscellTanque4.setCellValue(fecha.substring(8));
@@ -827,15 +836,15 @@ public class ExcelGeneratorWetStock {
                 i4++;
 
                 datoscellTanque4 = datosTanque4.createCell(i4);
-                datoscellTanque4.setCellValue(varianzaAcum);
+                datoscellTanque4.setCellValue(varianzaAcum4);
                 datoscellTanque4.setCellStyle(styleNumber);
                 i4++;
                 datoscellTanque4 = datosTanque4.createCell(i4);
-                datoscellTanque4.setCellValue(ventasAcum);
+                datoscellTanque4.setCellValue(ventasAcum4);
                 datoscellTanque4.setCellStyle(styleNumber);
                 i4++;
                 datoscellTanque4 = datosTanque4.createCell(i4);
-                datoscellTanque4.setCellValue(porcentajeVarAcum);
+                datoscellTanque4.setCellValue(porcentajeVarAcum4);
                 datoscellTanque4.setCellStyle(styleNumber);
                 i4++;
 
