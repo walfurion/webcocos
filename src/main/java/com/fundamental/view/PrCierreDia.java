@@ -566,6 +566,7 @@ public class PrCierreDia extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (dfdFecha.getValue() != null) {
+                    btnDetalleDeposito.setEnabled(true);
                     bcrTurnos.removeAllItems();
                     bcrVentas.removeAllItems();
                     bcrProducto.removeAllItems();
@@ -1131,6 +1132,7 @@ public class PrCierreDia extends Panel implements View {
     private void buildButtons() {
 
         btnDetalleDeposito = new Button("Detalle Efectivo", FontAwesome.PLUS);
+        btnDetalleDeposito.setEnabled(false);
         btnDetalleDeposito.addStyleName(ValoTheme.BUTTON_PRIMARY);
         btnDetalleDeposito.addStyleName(ValoTheme.BUTTON_SMALL);
         btnDetalleDeposito.addClickListener(clickEvent -> formDeposito(estacion.getEstacionId(), currencySymbol, pais.getPaisId(), dfdFecha.getValue()));
