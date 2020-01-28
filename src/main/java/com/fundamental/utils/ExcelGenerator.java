@@ -1255,6 +1255,38 @@ public class ExcelGenerator {
             headerStyleLectura.setFont(font);
             headerStyleLectura.setWrapText(true);
 
+            /*Contenido*/
+ /*Estilo celdas registros*/
+            CreationHelper createHelper = workbook.getCreationHelper();
+            /*Se adiciona para formatos*/
+            XSSFCellStyle subheaderFormatStyle = workbook.createCellStyle();
+            XSSFFont subfontFormatStyle = workbook.createFont();
+            subfontFormatStyle.setColor(IndexedColors.BLACK.getIndex());
+            subfontFormatStyle.setFontHeight(12);
+            subfontFormatStyle.setBold(true);
+            subheaderFormatStyle.setBorderBottom(BorderStyle.MEDIUM);
+            subheaderFormatStyle.setBorderTop(BorderStyle.MEDIUM);
+            subheaderFormatStyle.setBorderRight(BorderStyle.MEDIUM);
+            subheaderFormatStyle.setBorderLeft(BorderStyle.MEDIUM);
+            subheaderFormatStyle.setDataFormat(createHelper.createDataFormat().getFormat("###,###,###,###.##"));
+            subheaderFormatStyle.setFont(subfont);
+            subheaderFormatStyle.setAlignment(HorizontalAlignment.CENTER);
+
+
+            /*Para Numero*/
+            CellStyle styleNumber = workbook.createCellStyle();
+            styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("###,###,###,###.##"));
+            styleNumber.setWrapText(true);
+
+            /*Para Fecha*/
+            CellStyle styleFecha = workbook.createCellStyle();
+            styleFecha.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy"));
+            styleFecha.setWrapText(true);
+
+            /*Para textos*/
+            CellStyle styleString = workbook.createCellStyle();
+            styleString.setWrapText(true);
+
             XSSFRow header4 = sheet.createRow(4);
 //            setMerge(sheet, 3, 3, 2, 8);
             XSSFCell header4Cell = header4.createCell(1);
@@ -1470,6 +1502,7 @@ public class ExcelGenerator {
             XSSFCell ventaCombCel = ventaComb.getCell(1);
             ventaCombCel.setCellValue("VENTA COMBUSTIBLES");
             ventaCombCel.setCellStyle(subheaderStyle);
+            //ventaCombCel.setCellStyle(styleNumber);
 
             /*Arqueos Manuales*/
             XSSFCell ventaCombCel1 = ventaComb.createCell(4);
@@ -1480,7 +1513,7 @@ public class ExcelGenerator {
                 totalVentaComb += (Double) arqueo.getItem(itemId).getItemProperty("venta").getValue();
             }
             ventaCombCel1.setCellValue(totalVentaComb);
-            ventaCombCel1.setCellStyle(subheaderStyle);
+            ventaCombCel1.setCellStyle(subheaderFormatStyle);
 
             //aca
             XSSFCell filaMedioCel21 = ventaComb.createCell(6);
@@ -1514,7 +1547,7 @@ public class ExcelGenerator {
                     XSSFCell filaMedioCel1 = filaMedio.createCell(4);
                     filaMedioCel1.setCellValue((Double) medioPago.getItem(itemId).getItemProperty("value").getValue());
                     totalMedioPago += (Double) medioPago.getItem(itemId).getItemProperty("value").getValue();//SUMA TOTAL MEDIOPAGO
-                    filaMedioCel1.setCellStyle(subheaderStyle);
+                    filaMedioCel1.setCellStyle(subheaderFormatStyle);
 
                     XSSFCell filaMedioCel2 = filaMedio.createCell(6);
                     filaMedioCel2.setCellValue("");
@@ -1547,6 +1580,7 @@ public class ExcelGenerator {
             XSSFCell calibColonCel1 = calibColon.createCell(4);
             calibColonCel1.setCellValue(colonCalibracion);
             calibColonCel1.setCellStyle(subheaderStyle);
+            calibColonCel1.setCellStyle(subheaderFormatStyle);
 
             XSSFCell filaMedioCel2 = calibColon.createCell(6);
             filaMedioCel2.setCellValue("");
@@ -1578,6 +1612,7 @@ public class ExcelGenerator {
             XSSFCell prodAdicCel1 = prodAdic.createCell(4);
             prodAdicCel1.setCellValue(totalOtrosProd);
             prodAdicCel1.setCellStyle(subheaderStyle);
+            prodAdicCel1.setCellStyle(subheaderFormatStyle);
 
             XSSFCell filaMedioCel22 = prodAdic.createCell(6);
             filaMedioCel22.setCellValue("");
@@ -1613,6 +1648,7 @@ public class ExcelGenerator {
             XSSFCell totEntregarCel1 = totEntregar.createCell(4);
             totEntregarCel1.setCellValue(totalEntregar);
             totEntregarCel1.setCellStyle(subheaderStyle);
+            totEntregarCel1.setCellStyle(subheaderFormatStyle);
 
             XSSFCell filaMedioCel222 = totEntregar.createCell(6);
             filaMedioCel222.setCellValue("");
@@ -1639,6 +1675,7 @@ public class ExcelGenerator {
             XSSFCell totEntregadoCel1 = totEntregado.createCell(4);
             totEntregadoCel1.setCellValue(totalEntregado);
             totEntregadoCel1.setCellStyle(subheaderStyle);
+            totEntregadoCel1.setCellStyle(subheaderFormatStyle);
 
             XSSFCell filaMedioCel2222 = totEntregado.createCell(6);
             filaMedioCel2222.setCellValue("");
@@ -1665,6 +1702,7 @@ public class ExcelGenerator {
             XSSFCell falsobCel1 = falsob.createCell(4);
             falsobCel1.setCellValue(faltantesob);
             falsobCel1.setCellStyle(subheaderStyle);
+            falsobCel1.setCellStyle(subheaderFormatStyle);
 
             /*TOTAL DETALLE DEPOSITOS*/
             XSSFCell totalColonDet = falsob.createCell(6);
@@ -1774,6 +1812,7 @@ public class ExcelGenerator {
                 XSSFCell seracontCel3 = seracont.createCell(4);
                 seracontCel3.setCellValue(calibracione.getVentaColones());
                 seracontCel3.setCellStyle(subheaderStyle);
+                seracontCel3.setCellStyle(subheaderFormatStyle);
                 ii++;
             }
 
@@ -1786,6 +1825,7 @@ public class ExcelGenerator {
             XSSFCell seratotCel1 = seratot.createCell(4);
             seratotCel1.setCellValue(colonCalibracion);
             seratotCel1.setCellStyle(subheaderStyle);
+            seratotCel1.setCellStyle(subheaderFormatStyle);
 
             ii++;
             ii++;
