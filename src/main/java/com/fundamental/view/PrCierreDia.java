@@ -424,8 +424,11 @@ public class PrCierreDia extends Panel implements View {
                     bcrRecepcion.addAll(listRec);
                     recepcion = bcrRecepcion.getItem(bcrRecepcion.getItemIds().get(0)).getBean();
                     tfdDriver.setValue(recepcion.getPiloto());
+                    tfdDriver.setNullRepresentation("");
                     tfdUnit.setValue(recepcion.getUnidad());
+                    tfdUnit.setNullRepresentation("");
                     tfdBill.setValue(recepcion.getFactura());
+                    tfdBill.setNullRepresentation("");
                 }
                 List<InventarioRecepcion> listTmpInv = service.getInventarioByFechaEstacion(dia.getFecha(), estacion.getEstacionId());
                 if (!listTmpInv.isEmpty()) {    //cubre el caso cuando se olvido ingresar inventario dia anterior.

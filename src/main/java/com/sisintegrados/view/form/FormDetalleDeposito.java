@@ -249,10 +249,11 @@ public class FormDetalleDeposito extends Window {
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("comentarios");  //Atributo del bean
                 final TextField nfd = new TextField(pro);
-                nfd.setNullRepresentation("");
+                
                 nfd.setWidth("85px");
-                nfd.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+                nfd.addStyleName(ValoTheme.TEXTFIELD_TINY);
                 nfd.addStyleName("align-right");
+                nfd.setNullRepresentation("");
                 nfd.addValueChangeListener(new Property.ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent event) {
