@@ -150,7 +150,7 @@ public class ExcelGeneratorWetStock {
         setBorders(sheet, cc, true, true, true, false, 2);
         
         XSSFCell subinfo = pro.createCell(7);
-        subinfo.setCellValue("Informacion de Recepcion y Descarga");
+        subinfo.setCellValue("Informacion de Recepcion y Descarga - Tanque 1");
         subinfo.setCellStyle(subheaderStyle);
 //        subIfon1.setCellStyle(stilo1);
         cc = new CellRangeAddress(4, 4, 7, 11);
@@ -158,21 +158,21 @@ public class ExcelGeneratorWetStock {
         setBorders(sheet, cc, true, true, false, true, 2);
         
         XSSFCell subinfo1 = pro.createCell(19);
-        subinfo1.setCellValue("Informacion de Recepcion y Descarga");
+        subinfo1.setCellValue("Informacion de Recepcion y Descarga - Tanque 2");
         subinfo1.setCellStyle(subheaderStyle);
         cc = new CellRangeAddress(4, 4, 19, 23);
         sheet.addMergedRegion(cc);
         setBorders(sheet, cc, true, true, false, true, 2);
         
         XSSFCell subinfo2 = pro.createCell(31);
-        subinfo2.setCellValue("Informacion de Recepcion y Descarga");
+        subinfo2.setCellValue("Informacion de Recepcion y Descarga - Tanque 3");
         subinfo2.setCellStyle(subheaderStyle);
         cc = new CellRangeAddress(4, 4, 31, 35);
         sheet.addMergedRegion(cc);
         setBorders(sheet, cc, true, true, false, true, 2);
         
         XSSFCell subinfo3 = pro.createCell(43);
-        subinfo3.setCellValue("Informacion de Recepcion y Descarga");
+        subinfo3.setCellValue("Informacion de Recepcion y Descarga - Tanque 4");
         subinfo3.setCellStyle(subheaderStyle);
         cc = new CellRangeAddress(4, 4, 43, 47);
         sheet.addMergedRegion(cc);
