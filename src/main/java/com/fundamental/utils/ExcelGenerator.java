@@ -360,7 +360,7 @@ public class ExcelGenerator {
             CreationHelper createHelper = workbook.getCreationHelper();
             /*Para Numero*/
             CellStyle styleNumber = workbook.createCellStyle();
-            styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("###,###,###,###.##"));
+            styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("###,###,###,##0.00"));
             styleNumber.setWrapText(true);
 
             /*Para Fecha*/
@@ -370,7 +370,7 @@ public class ExcelGenerator {
 
             /*Para Porcentaje %*/
             CellStyle stylePorcentaje = workbook.createCellStyle();
-            stylePorcentaje.setDataFormat(createHelper.createDataFormat().getFormat("##.##%"));
+            stylePorcentaje.setDataFormat(createHelper.createDataFormat().getFormat("#0.00%"));
             stylePorcentaje.setWrapText(true);
 
             XSSFRow datos;
