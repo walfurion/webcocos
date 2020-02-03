@@ -240,7 +240,7 @@ public class ExcelGeneratorWetStock {
         CreationHelper createHelper = workbook.getCreationHelper();
         /*Para Numero*/
         CellStyle styleNumber = workbook.createCellStyle();
-        styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("#########.####"));
+        styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("###,###,###,##0.00"));
         styleNumber.setWrapText(true);
 
         /*Para Fecha*/

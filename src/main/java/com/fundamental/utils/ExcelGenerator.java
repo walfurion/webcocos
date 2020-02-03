@@ -1268,14 +1268,14 @@ public class ExcelGenerator {
             subheaderFormatStyle.setBorderTop(BorderStyle.MEDIUM);
             subheaderFormatStyle.setBorderRight(BorderStyle.MEDIUM);
             subheaderFormatStyle.setBorderLeft(BorderStyle.MEDIUM);
-            subheaderFormatStyle.setDataFormat(createHelper.createDataFormat().getFormat("###,###,###,###.##"));
+            subheaderFormatStyle.setDataFormat(createHelper.createDataFormat().getFormat("###,###,###,##0.00"));
             subheaderFormatStyle.setFont(subfont);
             subheaderFormatStyle.setAlignment(HorizontalAlignment.CENTER);
 
 
             /*Para Numero*/
             CellStyle styleNumber = workbook.createCellStyle();
-            styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("###,###,###,###.##"));
+            styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("###,###,###,##0.00"));
             styleNumber.setWrapText(true);
 
             /*Para Fecha*/
