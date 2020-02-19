@@ -142,7 +142,7 @@ public class RptMTD2 extends Panel implements View {
                 if (cmbPais.getValue() != null) {
                     Pais pais = new Pais();
                     pais = (Pais) cmbPais.getValue();
-                    checkestaciones.addAll(svcmtd.getCheckEstaciones(pais.getPaisId()));
+                    checkestaciones.addAll(svcmtd.getCheckEstaciones(pais.getPaisId(),usuario.getUsuarioId()));
                     toolbarContainerTables.removeAllComponents();
                     VerticalLayout vl = new VerticalLayout();
                     HorizontalLayout hl = new HorizontalLayout();
@@ -195,6 +195,8 @@ public class RptMTD2 extends Panel implements View {
                     hlroot.addComponent(hl);
                     toolbarContainerTables.addComponent(hlroot);
                 }
+                
+                
             }
         });
 

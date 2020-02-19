@@ -19,6 +19,7 @@ import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoPrecio;
 import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcReading;
+import com.fundamental.services.SvcRepCuadrePistero;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.utils.Constant;
 import com.vaadin.data.Container;
@@ -125,6 +126,7 @@ public class PrReading extends VerticalLayout implements View {
     public TextField txtNumeroCaso;
     Double cantCalibrar;
     Acceso acceso = new Acceso();
+    SvcRepCuadrePistero daoRep = new SvcRepCuadrePistero();
 
     public PrReading() {
         setSizeFull();
@@ -430,6 +432,16 @@ public class PrReading extends VerticalLayout implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (dfdFecha.getValue() != null) {
+                    /*VALIDACION ADICIONAL */
+                    if (daoRep.getStadoDia(dfdFecha.getValue(), estacion.getEstacionId()) > 0) {
+                        btnSave.setEnabled(false);
+                        if (daoRep.getIdRol(user.getUsuarioId()) == 1) {
+                            btnSave.setEnabled(true);
+                        }
+                    }else{
+                            btnSave.setEnabled(true);
+                    }
+                    
                     SvcTurno svcTurno = new SvcTurno();
                     //se obtiene de base de datos pues necesitamos saber el estado.
                     dia = svcTurno.getDiaByEstacionidFecha(estacion.getEstacionId(), dfdFecha.getValue());
@@ -480,7 +492,6 @@ public class PrReading extends VerticalLayout implements View {
     }
 
 //    boolean editar = false;
-
     private void determinarPermisos() {
 //        boolean explorar = false, crearLectura = false;
 //        editar = false;
@@ -730,7 +741,7 @@ public class PrReading extends VerticalLayout implements View {
                     if (crearNuevaLectura) {
                         lectura.setNumeroCaso(txtNumeroCaso.getValue());
 //                        if (crear) { //ASG Matriz seguridad
-                            lectura = svcLectura.doActionLectura(Dao.ACTION_ADD, lectura);
+                        lectura = svcLectura.doActionLectura(Dao.ACTION_ADD, lectura);
 //                        }
                     } else {
                         //ASG
@@ -738,27 +749,27 @@ public class PrReading extends VerticalLayout implements View {
                         lectura.setNumeroCaso(txtNumeroCaso.getValue());
                         //FIN ASG
 //                        if (modificar) {//ASG Matriz seguridad
-                            lectura = svcLectura.doActionLectura(Dao.ACTION_UPDATE, lectura);
+                        lectura = svcLectura.doActionLectura(Dao.ACTION_UPDATE, lectura);
 //                        }
                     }
                     for (LecturaDetalle lde : lectura.getLecturaDetalle()) {
                         if (lde.getEsNueva()) {
                             lde.setLecturaId(lectura.getLecturaId());
 //                            if (crear) { //ASG Matriz seguridad
-                                svcLectura.doActionLecturaDetalle(Dao.ACTION_ADD, lde);
+                            svcLectura.doActionLecturaDetalle(Dao.ACTION_ADD, lde);
 //                            }
                         } else {
 //                            if (modificar) {  //ASG Matriz seguridad
-                                svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, lde);
-                                //Si existe una lectura siguiente, se actualiza la lectura inicial de esa siguiente.
-                                LecturaDetalle ldeNext = svcLectura.getLecturaDetalleSiguiente(lde.getEstacionId(), lde.getLecturaId(), lde.getBombaId(), lde.getProductoId());
-                                if (ldeNext.getLecturaId() != null) {
-                                    ldeNext.setLecturaInicial(lde.getLecturaFinal());
-                                    svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, ldeNext);
-                                } else {
-                                    Lecturafinal lfinal = new Lecturafinal(lde.getEstacionId(), lde.getBombaId(), lde.getProductoId(), lde.getTipo(), lde.getLecturaInicial(), lde.getLecturaFinal(), user.getUsername(), user.getNombreLogin());
-                                    svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfinal);
-                                }
+                            svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, lde);
+                            //Si existe una lectura siguiente, se actualiza la lectura inicial de esa siguiente.
+                            LecturaDetalle ldeNext = svcLectura.getLecturaDetalleSiguiente(lde.getEstacionId(), lde.getLecturaId(), lde.getBombaId(), lde.getProductoId());
+                            if (ldeNext.getLecturaId() != null) {
+                                ldeNext.setLecturaInicial(lde.getLecturaFinal());
+                                svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, ldeNext);
+                            } else {
+                                Lecturafinal lfinal = new Lecturafinal(lde.getEstacionId(), lde.getBombaId(), lde.getProductoId(), lde.getTipo(), lde.getLecturaInicial(), lde.getLecturaFinal(), user.getUsername(), user.getNombreLogin());
+                                svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfinal);
+                            }
 //                            }
                         }
                         contador++;
@@ -776,11 +787,11 @@ public class PrReading extends VerticalLayout implements View {
                         }
                         if (existeMecanica) {
 //                            if (modificar) {//ASG Matriz seguridad
-                                svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+                            svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
 //                            }
                         } else {
 //                            if (crear) { //ASG Matriz seguridad
-                                svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+                            svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
 //                            }
                         }
                     }
@@ -797,11 +808,11 @@ public class PrReading extends VerticalLayout implements View {
                         }
                         if (existeElectronica) {
 //                            if (modificar) {//ASG Matriz seguridad
-                                svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+                            svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
 //                            }
                         } else {
 //                            if (crear) { //ASG Matriz seguridad
-                                svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+                            svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
 //                            }
                         }
                     }
@@ -819,11 +830,11 @@ public class PrReading extends VerticalLayout implements View {
 
 //                    if (lectura.getLecturaId() != null) {
 //                        Notification.show("La lectura se ha creado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
-                            Notification notif = new Notification("ÉXITO:", "Operación realizada con éxito.", Notification.Type.HUMANIZED_MESSAGE);
-                            notif.setDelayMsec(3000);
-                            notif.setPosition(Position.MIDDLE_CENTER);
-                            notif.show(Page.getCurrent());
-                            UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_READING.getViewName());
+                        Notification notif = new Notification("ÉXITO:", "Operación realizada con éxito.", Notification.Type.HUMANIZED_MESSAGE);
+                        notif.setDelayMsec(3000);
+                        notif.setPosition(Position.MIDDLE_CENTER);
+                        notif.show(Page.getCurrent());
+                        UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_READING.getViewName());
                     } else {
                         Notification.show("ERROR:", "Ocurrió un error al guardar la lectura.\n" + lectura.getDescError(), Notification.Type.ERROR_MESSAGE);
                         return;
@@ -1538,9 +1549,9 @@ public class PrReading extends VerticalLayout implements View {
     }
 
     private void onChangeCheckboxBomba(Object itemId, boolean isselected) {
-        System.out.println("item "+itemId);
-        System.out.println("isselected "+isselected);
-        System.out.println("action "+action);
+        System.out.println("item " + itemId);
+        System.out.println("isselected " + isselected);
+        System.out.println("action " + action);
         if (action.equals(Dao.ACTION_UPDATE)) {
             bcrElectronicas.removeAllItems();
             bcrManuales.removeAllItems();

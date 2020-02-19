@@ -35,6 +35,7 @@ public class ComInventarioFisico {
     private String productoNombre;
     private String presentacion;
     private Double precio;
+    private Integer estacionid;
 
     public ComInventarioFisico(int producto_id, int numero, Double inv_final, String productoNombre, String presentacion, Double precio) {
         this.producto_id = producto_id;

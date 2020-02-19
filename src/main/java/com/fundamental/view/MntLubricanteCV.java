@@ -148,7 +148,7 @@ public class MntLubricanteCV extends Panel implements View {
         SvcComVenLubricantes service = new SvcComVenLubricantes();
         int countryId = ((Pais) cmbPais.getValue()).getPaisId();
         int brandId = ((Marca) cmbMarca.getValue()).getIdMarca();
-        listProducts = service.getComVenLub(countryId, brandId, cmbFecha.getValue());            
+        listProducts = service.getComVenLub(countryId, brandId, cmbFecha.getValue(),usuario.getEstacionid());//ASG ESTACION            
         contLub.addAll(listProducts);  
     }
 
@@ -364,6 +364,7 @@ public class MntLubricanteCV extends Panel implements View {
                     comVenLub.setMarcaId(((Marca)cmbMarca.getValue()).getIdMarca());
                     comVenLub.setPaisId(((Pais)cmbPais.getValue()).getPaisId());
                     comVenLub.setCreadopor(usuario.getUsername());
+                    comVenLub.setEstacionid(usuario.getEstacionid());
                     if(comVenLub.getInvInicial()>0.0){
                         service.insertCompra(comVenLub);
                         service.closeConnections();

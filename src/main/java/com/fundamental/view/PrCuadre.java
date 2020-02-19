@@ -249,6 +249,8 @@ public class PrCuadre extends Panel implements View {
     SvcRepCuadrePistero daoRep = new SvcRepCuadrePistero();
     RepCuadrePistero sourceGeneric = new RepCuadrePistero();
 
+    Integer tolerancia;
+
     /*FIN*/
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -256,6 +258,7 @@ public class PrCuadre extends Panel implements View {
         DashboardEventBus.register(this);
 
         user = (Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName());
+        tolerancia = daoRep.getTolerancia(38); //Recupera Tolerancia Para cuadres. ASG
         currencySymbol = (user.getPaisLogin() == null) ? "" : user.getPaisLogin().getMonedaSimbolo() + ". ";
         volumenSymbol = "L"; //MG volSimbolo
 
@@ -580,6 +583,16 @@ public class PrCuadre extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (dfdFecha.getValue() != null) {
+                    /*VALIDACION ADICIONAL */
+                    if (daoRep.getStadoDia(dfdFecha.getValue(), estacion.getEstacionId()) > 0) {
+                        btnSave.setEnabled(false);
+                        if (daoRep.getIdRol(user.getUsuarioId()) == 1) {
+                            btnSave.setEnabled(true);
+                        }
+                    }else{
+                            btnSave.setEnabled(true);
+                    }
+
                     SvcTurno svcTurno = new SvcTurno();
                     //se obtiene de base de datos pues necesitamos saber el estado.
                     dia = svcTurno.getDiaByEstacionidFecha(estacion.getEstacionId(), dfdFecha.getValue());
@@ -902,18 +915,24 @@ public class PrCuadre extends Panel implements View {
                             bcrProducto.getItem(itemId).getItemProperty("value").setValue(diferencia);
                         }
                     }
+                    /*VALIDA TOLERANCIA PERMITIDA  ASG*/
+                    if (Math.abs(diferencia) > tolerancia) {
+                        Notification.show("La diferencia excede el maximo permitido, Favor validar los datos.", Notification.Type.ERROR_MESSAGE);
+                        return;
+                    }
                 } else {
                     // Notification.show("DIFERENCIA",Double.toString(diferencia),Notification.Type.ERROR_MESSAGE);
                     messageComp = (diferencia < -0.009 || diferencia > 0.009)
                             ? "<h3>El turno tiene diferencia de: <strong>" + lblDiferencia + "</strong></h3>\n" : "";
-                    if (diferencia < -0.009 || diferencia > 0.009) {
-                        Notification.show("Existe diferencia, asociela con el medio de pago correspondiente.", Notification.Type.ERROR_MESSAGE);
+//                    if (diferencia < -0.009 || diferencia > 0.009) { // OLD ASG
+                    if (Math.abs(diferencia) > tolerancia) {  //NEW ASG
+                        Notification.show("La diferencia excede el maximo permitido, Favor validar los datos.", Notification.Type.ERROR_MESSAGE);
                         return;
                     }
-                    if (diferencia < 0.00 && tempFile != null) {
-                        Notification.show("ADVERTENCIA:", "Existe diferencia en sus calculos, debe adjuntar un documento", Notification.Type.WARNING_MESSAGE);
-                        return;
-                    }
+//                    if (diferencia < 0.00 && tempFile != null) {
+//                        Notification.show("ADVERTENCIA:", "Existe diferencia en sus calculos, debe adjuntar un documento", Notification.Type.WARNING_MESSAGE);
+//                        return;
+//                    }
                 }
 
                 MessageBox
@@ -1406,7 +1425,8 @@ public class PrCuadre extends Panel implements View {
                 tfdValue.setWidth("100px");
                 tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
                 tfdValue.addStyleName("align-right");
-                if ((Integer) proid.getValue() == 9 || (Integer) proid.getValue() == 10) {
+//                if ((Integer) proid.getValue() == 9 || (Integer) proid.getValue() == 10) {
+                if ((Integer) proid.getValue() == 10) { //ASG TEMPORAL A PETICION DE JVILLAR
                     tfdValue.setReadOnly(true); // ASG DESCOMENTAR CUANDO CORRIGAN LA DATA DE LUBRICANTES
                 }
                 tfdValue.addValueChangeListener(new Property.ValueChangeListener() {

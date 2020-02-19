@@ -548,7 +548,7 @@ public class SvcTurno extends Dao {
                 pst.setString(3, dia.getCreadoPersona());
                 pst.setInt(4, dia.getEstacionId());
                 pst.setDate(5, new java.sql.Date(dia.getFecha().getTime()));
-                pst.executeQuery();
+                pst.executeUpdate();
                 closePst();
             }
 

@@ -1671,7 +1671,8 @@ public class ExcelGenerator {
             totEntregadoCel.setCellStyle(subheaderStyle);
 
             Double totalEntregado = 0.00;
-            totalEntregado = totalMedioPago + totalEfectivo + totalOtrosProd;
+//            totalEntregado = totalMedioPago + totalEfectivo + totalOtrosProd; //ASG PARA CORRECION
+            totalEntregado = totalMedioPago + totalEfectivo;
             XSSFCell totEntregadoCel1 = totEntregado.createCell(4);
             totEntregadoCel1.setCellValue(totalEntregado);
             totEntregadoCel1.setCellStyle(subheaderStyle);
@@ -1698,7 +1699,8 @@ public class ExcelGenerator {
             falsobCel.setCellStyle(subheaderStyle);
 
             Double faltantesob = 0.00;
-            faltantesob = totalEntregado - totalVentaComb;
+//            faltantesob = totalEntregado - totalVentaComb; //ASG CUADRE PISTERO
+            faltantesob = totalEntregado - totalVentaComb - totalOtrosProd; 
             XSSFCell falsobCel1 = falsob.createCell(4);
             falsobCel1.setCellValue(faltantesob);
             falsobCel1.setCellStyle(subheaderStyle);

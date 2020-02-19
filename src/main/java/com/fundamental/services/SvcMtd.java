@@ -21,11 +21,17 @@ public class SvcMtd extends Dao {
 
     private String query;
 
-    public ArrayList<GenericEstacion> getCheckEstaciones(Integer idpais) {
+    public ArrayList<GenericEstacion> getCheckEstaciones(Integer idpais,Integer idusuario) {
         ArrayList<GenericEstacion> result = new ArrayList<GenericEstacion>();
         GenericEstacion genestacion = new GenericEstacion();
         try {
-            query = "Select estacion_id,nombre from estacion where pais_id =" + idpais;
+//            query = "Select estacion_id,nombre from estacion where pais_id =" + idpais;
+            query = "Select a.estacion_id,a.nombre \n"
+                    + "from estacion a , \n"
+                    + "     estacion_usuario b \n"
+                    + "where a.ESTACION_ID = b.ESTACION_ID \n"
+                    + "and a.pais_id = " + idpais
+                    + " and b.USUARIO_ID = "+idusuario;
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             while (rst.next()) {

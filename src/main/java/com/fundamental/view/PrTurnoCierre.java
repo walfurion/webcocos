@@ -16,6 +16,7 @@ import com.fundamental.model.dto.DtoArqueo;
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcDetalleTcClientes;
 import com.fundamental.services.SvcEstacion;
+import com.fundamental.services.SvcRepCuadrePistero;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.sisintegrados.generic.bean.ArqueoTC;
@@ -312,12 +313,15 @@ public class PrTurnoCierre extends Panel implements View {
 
 //    Container estacionContainer;
     BeanItemContainer<Estacion> estacionContainer = new BeanItemContainer<Estacion>(Estacion.class);
+    SvcRepCuadrePistero daoRep = new SvcRepCuadrePistero();
+    Integer tolerancia;
 
     public PrTurnoCierre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
         DashboardEventBus.register(this);
         usuario = VaadinSession.getCurrent().getAttribute(Usuario.class);
+        tolerancia = daoRep.getTolerancia(39); //Recupera Tolerancia Para cuadres. ASG
         root = new VerticalLayout();
         root.setSizeFull();
         root.setMargin(true);
@@ -438,7 +442,7 @@ public class PrTurnoCierre extends Panel implements View {
                 }
             }
         }
-        if (estacionContainer.size()>0) {
+        if (estacionContainer.size() > 0) {
             int i = 0;
             for (i = 0; i < estacionContainer.size(); i++) {
                 Estacion ss = new Estacion();
@@ -832,6 +836,16 @@ public class PrTurnoCierre extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (dfdFecha.getValue() != null) {
+                    /*VALIDACION ADICIONAL */
+                    if (daoRep.getStadoDia(dfdFecha.getValue(), estacion.getEstacionId()) > 0) {
+                        btnGuardar.setEnabled(false);
+                        if (daoRep.getIdRol(user.getUsuarioId()) == 1) {
+                            btnGuardar.setEnabled(true);
+                        }
+                    }else{
+                            btnGuardar.setEnabled(true);
+                    }
+
                     SvcTurno svcTurno = new SvcTurno();
                     //se obtiene de base de datos pues necesitamos saber el estado.
                     dia = svcTurno.getDiaByEstacionidFecha(estacion.getEstacionId(), dfdFecha.getValue());
@@ -1003,6 +1017,12 @@ public class PrTurnoCierre extends Panel implements View {
                     return;
                 }
                 /*FIN DESCUADRE ASG*/
+
+                if (Math.abs(totalDinero - totalVentas) > tolerancia) {
+                    Notification.show("AVISO:", "La diferencia excede el maximo permitido, Favor validar los datos.", Notification.Type.ERROR_MESSAGE);
+                    return;
+                }
+
                 if (bcrArqueocaja.getItemIds().isEmpty()) {
                     Notification.show("AVISO:", "NO existen cuadres qué procesar.", Notification.Type.WARNING_MESSAGE);
                     return;

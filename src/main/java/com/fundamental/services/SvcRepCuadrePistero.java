@@ -7,8 +7,11 @@ package com.fundamental.services;
 
 import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.LitroCalibracion;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -84,5 +87,88 @@ public class SvcRepCuadrePistero extends Dao {
             }
         }
         return calibracion;
+    }
+
+    public Integer getTolerancia(Integer idparametro) {
+        Integer result = 0;
+        ResultSet rst = null;
+        try {
+            query = "Select valor from parametro where parametro_id = " + idparametro;
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            while (rst.next()) {
+                result = rst.getInt(1);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+
+        return result;
+    }
+
+    public Integer getIdRol(Integer iduser) {
+        Integer result = 0;
+        ResultSet rst = null;
+        try {
+            query = "select b.rol_id,username \n"
+                    + "from usuario a, \n"
+                    + "     rol_usuario b \n"
+                    + "where a.USUARIO_ID = b.USUARIO_ID \n"
+                    + "and a.usuario_id = "+iduser;
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            while (rst.next()) {
+                result = rst.getInt(1);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+
+        return result;
+    }
+
+    public Integer getStadoDia(Date fecha, Integer idestacion) {
+        Integer result = 0;
+        ResultSet rst = null;
+
+        try {
+            java.sql.Date sqlDateIni = new java.sql.Date(fecha.getTime());
+
+            query = "Select count(*) cantidad\n"
+                    + "from dia \n"
+                    + "where estado_id = 2 \n"
+                    + " and fecha = TO_DATE('"+sqlDateIni+"','yyyy/mm/dd') and estacion_id = "+idestacion;
+
+            PreparedStatement cst = getConnection().prepareStatement(query);
+
+            System.out.println("SQL DATE " + query);
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            while (rst.next()) {
+                result = rst.getInt(1);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+            } catch (Exception ignore) {
+            }
+        }
+
+        return result;
     }
 }

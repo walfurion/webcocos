@@ -3,6 +3,7 @@ package com.fundamental.view;
 import com.fundamental.model.Dia;
 import com.fundamental.model.Turno;
 import com.fundamental.model.Utils;
+import com.fundamental.services.SvcMtd;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcUsuario;
 import com.fundamental.utils.Constant;
@@ -75,6 +76,7 @@ public class RptControDeMediosDePago extends Panel implements View {
     Utils utils = new Utils();
     SvcTurno dao = new SvcTurno();
     SvcReporteControlMediosPago SvcReporteControlMediosPago = new SvcReporteControlMediosPago();
+    SvcMtd svcmtd = new SvcMtd();
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
     Button btnGenerar = new Button("Generar Reporte");
     Button btnExportar = new Button("Exportar a Excel", FontAwesome.EDIT);
@@ -141,7 +143,7 @@ public class RptControDeMediosDePago extends Panel implements View {
                 if (cmbPais.getValue() != null) {
                     Pais pais = new Pais();
                     pais = (Pais) cmbPais.getValue();
-                    checkestacionesm.addAll(SvcReporteControlMediosPago.getCheckEstacionesM(pais.getPaisId()));
+                    checkestacionesm.addAll(svcmtd.getCheckEstaciones(pais.getPaisId(),usuario.getUsuarioId()));
                     toolbarContainerTables.removeAllComponents();
                     VerticalLayout vl = new VerticalLayout();
                     HorizontalLayout hl = new HorizontalLayout();

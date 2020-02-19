@@ -84,6 +84,7 @@ public class RptWetStock extends Panel implements View {
     Utils utils = new Utils();
     SvcTurno dao = new SvcTurno();
     SvcReporteWetStock svcmtd = new SvcReporteWetStock();
+    SvcMtd svcmtd2 = new SvcMtd();
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
     Button btnGenerar = new Button("Generar Reporte");
     Button btnExportar = new Button("Exportar a Excel", FontAwesome.EDIT);
@@ -147,7 +148,7 @@ public class RptWetStock extends Panel implements View {
                 if (cmbPais.getValue() != null) {
                     Pais pais = new Pais();
                     pais = (Pais) cmbPais.getValue();
-                    checkestaciones.addAll(svcmtd.getCheckEstaciones(pais.getPaisId()));
+                    checkestaciones.addAll(svcmtd2.getCheckEstaciones(pais.getPaisId(),usuario.getUsuarioId()));
                     toolbarContainerTables.removeAllComponents();
                     VerticalLayout vl = new VerticalLayout();
                     HorizontalLayout hl = new HorizontalLayout();

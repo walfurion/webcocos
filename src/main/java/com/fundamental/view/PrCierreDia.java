@@ -15,6 +15,7 @@ import com.fundamental.model.dto.DtoArqueo;
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcDeposito;
 import com.fundamental.services.SvcEstacion;
+import com.fundamental.services.SvcRepCuadrePistero;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
@@ -103,13 +104,12 @@ public class PrCierreDia extends Panel implements View {
 
     Double totalEfectivo = 0D;
     Double totalDepositos = 0D;
-    
+
     int toleranciaEfectivo;
     SvcTurnoCierre svcTC = new SvcTurnoCierre();
 
     //double totalEfectivo;
     //double totalDepositos;
-
     Table tableVentas = new Table() {
         @Override
         protected String formatPropertyValue(Object rowId, Object colId, Property property) {
@@ -199,12 +199,15 @@ public class PrCierreDia extends Panel implements View {
     Usuario usuario = new Usuario();
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
     BeanItemContainer<Estacion> estacionContainer = new BeanItemContainer<Estacion>(Estacion.class);
+    SvcRepCuadrePistero daoRep = new SvcRepCuadrePistero();
+    Integer tolerancia;
 
     public PrCierreDia() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
         setSizeFull();
         DashboardEventBus.register(this);
         usuario = VaadinSession.getCurrent().getAttribute(Usuario.class);
+        tolerancia = daoRep.getTolerancia(39); //Recupera Tolerancia Para cuadres. ASG
         root = new VerticalLayout();
         root.setSizeFull();
         root.setMargin(true);
@@ -522,7 +525,7 @@ public class PrCierreDia extends Panel implements View {
                 pais = (Pais) cbxPais.getValue();
                 SvcEstacion svcEstacion = new SvcEstacion();
 //                estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));
-                estacionContainer = new BeanItemContainer<Estacion>(Estacion.class,svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));;
+                estacionContainer = new BeanItemContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));;
                 svcEstacion.closeConnections();
                 cbxEstacion.setContainerDataSource(estacionContainer);
                 currencySymbol = pais.getMonedaSimbolo() + " ";
@@ -569,6 +572,16 @@ public class PrCierreDia extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (dfdFecha.getValue() != null) {
+                    /*VALIDACION ADICIONAL */
+                    if (daoRep.getStadoDia(dfdFecha.getValue(), estacion.getEstacionId()) > 0) {
+                        btnGuardar.setEnabled(false);
+                        if (daoRep.getIdRol(user.getUsuarioId()) == 1) {
+                            btnGuardar.setEnabled(true);
+                        }
+                    }else{
+                            btnGuardar.setEnabled(true);
+                    }
+
                     btnDetalleDeposito.setEnabled(true);
                     bcrTurnos.removeAllItems();
                     bcrVentas.removeAllItems();
@@ -1120,18 +1133,16 @@ public class PrCierreDia extends Panel implements View {
         tblInventory.setColumnAlignments(Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.LEFT);
          */
     }
-    
+
     public boolean validaDetalleEfectivo(Double totalEfectivo, Double totalDepositos) {
         boolean result = true;
         /*Valida los totales en medios pago*/
-           if (Math.abs(totalEfectivo - totalDepositos) > svcTC.recuperaToleranciaEfectivo()) {
-                    result = false;
-                }
+        if (Math.abs(totalEfectivo - totalDepositos) > tolerancia) {
+            result = false;
+        }
         return result;
     }
-    
-    
-    
+
     private void buildButtons() {
 
         btnDetalleDeposito = new Button("Detalle Efectivo", FontAwesome.PLUS);
@@ -1171,7 +1182,7 @@ public class PrCierreDia extends Panel implements View {
             @Override
             public void buttonClick(final Button.ClickEvent event) {
 
-                if (!validaDetalleEfectivo(totalEfectivo, totalDepositos)){
+                if (!validaDetalleEfectivo(totalEfectivo, totalDepositos)) {
                     Notification.show("ERROR:", "El detalle de efectivo no coincide con el registro de Depósitos", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
@@ -1208,7 +1219,6 @@ public class PrCierreDia extends Panel implements View {
                             public void run() {
 
                                 //SvcTurnoCierre svcTC = new SvcTurnoCierre();
-                                
                                 boolean invNuevo = (dia.getEstadoId() == 1);
                                 dia.setModificadoPersona(user.getNombreLogin());
                                 dia.setModificadoPor(user.getUsername());
@@ -1277,8 +1287,6 @@ public class PrCierreDia extends Panel implements View {
         });
 
     }
-    
-    
 
     private HorizontalLayout buildDetalleMontos() {
         Label label3 = new Label("Diferencia: ");
@@ -1311,7 +1319,7 @@ public class PrCierreDia extends Panel implements View {
     }
 
     private void refreshAllData() {
-       // SvcTurnoCierre svcTC = new SvcTurnoCierre();
+        // SvcTurnoCierre svcTC = new SvcTurnoCierre();
         SvcDeposito svcDep = new SvcDeposito();
 //                        String arqueosIds = "";
 //                        //Determinar bombas

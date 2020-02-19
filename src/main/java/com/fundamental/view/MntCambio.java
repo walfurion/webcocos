@@ -157,9 +157,10 @@ public class MntCambio extends Panel implements View {
         bcrChangeRate.setBeanIdProperty("tasacambioId");
 
         SvcMntTasaCambio service = new SvcMntTasaCambio();
-        List<TasaCambio> tasasc = service.getAllRates();
+//        List<TasaCambio> tasasc = service.getAllRates2(user.getPaisId()); //ASG CAMBIO
+        List<TasaCambio> tasasc = service.getAllRates(); //ASG CAMBIO
         bcrChangeRate.addAll(tasasc);
-        paises = service.getAllPaises();
+        paises = service.getAllPaises2(user.getUsuarioId()); //ASG CAMBIO
         service.closeConnections();
     }
 

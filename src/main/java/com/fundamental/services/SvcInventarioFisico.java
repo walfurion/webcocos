@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class SvcInventarioFisico extends Dao {
     private String query;
-    public List<ComInventarioFisico> getLubricantes(int brandId, Date fecha) {
+    public List<ComInventarioFisico> getLubricantes(int brandId, Date fecha,Integer ESTACIONID) {
         List<ComInventarioFisico> result = new ArrayList();
         String fecha1 = Constant.SDF_ddMMyyyy.format(fecha);
         String fecha2 = Constant.SDF_ddMMyyyy.format(fecha);
@@ -41,8 +41,8 @@ public class SvcInventarioFisico extends Dao {
                     "(select COMENTARIO from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as Comentario "
                     + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p, LUBRICANTEPRECIO lp "
                     + "where l.PRODUCTO_ID = p.PRODUCTO_ID and l.PRODUCTO_ID = lp.PRODUCTO_ID "
-                    + "and l.MARCA_ID="+brandId+" "
-                    + "and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.MARCA_ID="+brandId+" and "+fecha1+"=extract(MONTH from b.fecha)" 
+                    + "and l.MARCA_ID = "+brandId+" AND l.ESTACION_ID = "+ESTACIONID  /*asg adiciona estacion*/
+                    + " and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.MARCA_ID="+brandId+" and "+fecha1+"=extract(MONTH from b.fecha)" 
                     + "AND "+fecha2+"=extract(YEAR from b.fecha))  order by numero ";
             System.out.println("query "+query);
             System.out.println("brandId "+brandId);
@@ -71,12 +71,12 @@ public class SvcInventarioFisico extends Dao {
         ComInventarioFisico result = new ComInventarioFisico();
         ResultSet rst = null;  
         try {
-            int val = countLub(lub.getProducto_id(),lub.getFecha());
+            int val = countLub(lub.getProducto_id(),lub.getFecha(),lub.getEstacionid()); //asg estacion id 
             if(val>0){
                 miQuery = "UPDATE INVENTARIO_FISICO_LUB "
                     + "SET INV_FINAL=?,UNIDAD_FIS_TIENDA=?, UNIDAD_FIS_BODEGA=?,UNIDAD_FIS_PISTA=?, TOTAL_UNIDAD_FISICA=?, "
                     + "DIFERENCIA_INV=?, COMENTARIO=?, MODIFICADO_POR=?, MODIFICADO_EL=SYSDATE "
-                    + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy') ";
+                    + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy') AND ESTACION_ID = ?"; //asg estacion id
                 pst = getConnection().prepareStatement(miQuery);
                 pst.setDouble(1, lub.getInv_final());
                 pst.setDouble(2, lub.getUnidad_fis_tienda());
@@ -88,12 +88,13 @@ public class SvcInventarioFisico extends Dao {
                 pst.setString(8, lub.getModificado_por());
                 pst.setInt(9, lub.getProducto_id());
                 pst.setString(10,Constant.SDF_ddMMyyyy.format(lub.getFecha()));
+                pst.setInt(10,lub.getEstacionid()); //asg
                 pst.executeUpdate();
                 result = lub;
             }else{
                 miQuery = "INSERT INTO INVENTARIO_FISICO_LUB(INVENTARIO_ID,PRODUCTO_ID,FECHA,INV_FINAL,UNIDAD_FIS_TIENDA,UNIDAD_FIS_BODEGA, "
-                    + "UNIDAD_FIS_PISTA,TOTAL_UNIDAD_FISICA,DIFERENCIA_INV,COMENTARIO,CREADO_POR,CREADO_EL) "
-                    + "VALUES(INVENTARIO_FISICO_LUB_SEQ.NEXTVAL, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, SYSDATE)";
+                    + "UNIDAD_FIS_PISTA,TOTAL_UNIDAD_FISICA,DIFERENCIA_INV,COMENTARIO,CREADO_POR,CREADO_EL,ESTACION_ID) "
+                    + "VALUES(INVENTARIO_FISICO_LUB_SEQ.NEXTVAL, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, SYSDATE,?)";
                 pst = getConnection().prepareStatement(miQuery);
                 Double fisTienda = lub.getUnidad_fis_tienda()==null?0.0:lub.getUnidad_fis_tienda();
                 Double fisBodega = lub.getUnidad_fis_bodega()==null?0.0:lub.getUnidad_fis_bodega();
@@ -110,6 +111,7 @@ public class SvcInventarioFisico extends Dao {
                 pst.setDouble(8, diferencia);
                 pst.setString(9, lub.getComentario());
                 pst.setString(10, lub.getCreado_por());
+                pst.setInt(11, lub.getEstacionid());
                 pst.executeQuery();
                 result = lub;
             }
@@ -127,12 +129,12 @@ public class SvcInventarioFisico extends Dao {
         return result;
     }  
     
-    public int countLub(int idProducto, Date fecha) {
+    public int countLub(int idProducto, Date fecha, Integer ESTACIONID) {
         int result = 0;
         String dateString = Constant.SDF_ddMMyyyy.format(fecha);
         try {
             miQuery = "SELECT count(*) FROM INVENTARIO_FISICO_LUB where PRODUCTO_ID="+idProducto+" "
-                    + "and FECHA =  to_date('"+dateString+"','dd/mm/yyyy')";
+                    + "and FECHA =  to_date('"+dateString+"','dd/mm/yyyy') AND ESTACION_ID = "+ESTACIONID;  //ASG ESATACION
             System.out.println("mi ueryryry "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
             ResultSet rst = pst.executeQuery();
@@ -147,13 +149,13 @@ public class SvcInventarioFisico extends Dao {
         return result;
     }
     
-    private int recuperaFecha(int paisId,int marcaId,int productId, Date fecha) throws SQLException{
+    private int recuperaFecha(int paisId,int marcaId,int productId, Date fecha, Integer ESTACIONID) throws SQLException{
         ResultSet rst = null;
         int valor = 0;
             try{        
                 query = "select FECHA from COMPRA_VENTA_LUBRICANTE "
-                      + "where PAIS_ID=? and MARCA_ID=? and PRODUCTO_ID=?  "
-                      + "and FECHA >= trunc((to_date(?,'dd/mm/yyyy')),'month') and FECHA <= last_day(to_date(?,'dd/mm/yyyy')) "
+                      + "where PAIS_ID=? and MARCA_ID=? and PRODUCTO_ID=? AND ESTACION_ID = "+ESTACIONID  /*ASG ESTACIONID*/
+                      + " and FECHA >= trunc((to_date(?,'dd/mm/yyyy')),'month') and FECHA <= last_day(to_date(?,'dd/mm/yyyy')) "
                       + "and rownum=1 order by COMPRA_ID desc ";
                 pst = getConnection().prepareStatement(query);
                 pst.setInt(1, productId);

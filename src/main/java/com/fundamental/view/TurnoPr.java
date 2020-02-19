@@ -14,6 +14,7 @@ import com.fundamental.model.Turno;
 import com.fundamental.model.Utils;
 import com.fundamental.services.Dao;
 import com.fundamental.services.SvcEstacion;
+import com.fundamental.services.SvcRepCuadrePistero;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcUsuario;
 import com.fundamental.utils.Constant;
@@ -65,7 +66,7 @@ import java.util.Locale;
  * @author Allan G.
  */
 public class TurnoPr extends Panel implements View {
-    
+
     CreateComponents components = new CreateComponents();
     Label lblUltimoDia = new Label();
     Label lblUltimoTurno = new Label();
@@ -115,14 +116,15 @@ public class TurnoPr extends Panel implements View {
     CheckBox chkBomba10 = new CheckBox();
     CheckBox chkBomba11 = new CheckBox();
     CheckBox chkBomba12 = new CheckBox();
-    
+
     Button addEmpleado = new Button();
     Button editEmpleado = new Button();
     FormEmpleado frmEmpleado;
     Empleado empleado = new Empleado();
     Integer varMaxBomba = 0;
     Integer bombaMasAltaOld = 0;
-    
+    SvcRepCuadrePistero daoRep = new SvcRepCuadrePistero();
+
     public TurnoPr() {
         super.setLocale(VaadinSession.getCurrent().getAttribute(Locale.class));
         super.addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -132,11 +134,11 @@ public class TurnoPr extends Panel implements View {
         super.setContent(components.createVertical(Constant.styleTransactions, "100%", false, true, true, new Component[]{buildForm()}));
         cargaInfoSesion();
     }
-    
+
     private Component buildForm() {
         return components.createVertical(Constant.styleLogin, "100%", false, false, true, new Component[]{buildTitle(), buildHeader(), buildToolbar2(), buildButtons()});
     }
-    
+
     private Component buildTitle() {
         Label title = new Label("Turno");
         title.setSizeUndefined();
@@ -145,15 +147,15 @@ public class TurnoPr extends Panel implements View {
         Component toolBar = components.createHorizontal(Constant.styleToolbar, Constant.sizeUndefined, true, false, false, new Component[]{buildToolbar()});
         return components.createHorizontal(Constant.styleViewheader, Constant.sizeUndefined, true, false, false, new Component[]{title, toolBar});
     }
-    
+
     private CssLayout toolBar2;
-    
+
     private Component buildToolbar() {
         toolBar2 = new CssLayout();
         VerticalLayout v = new VerticalLayout(toolBar2);
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{v});
     }
-    
+
     private void cargaUltTurnoDia() {
         SvcUsuario svu = new SvcUsuario();
         usuario = svu.getLastTurnLastDay(usuario);
@@ -164,32 +166,32 @@ public class TurnoPr extends Panel implements View {
             lblUltimoDia.setValue("Último día: " + usuario.getDia().getDia() + " (" + usuario.getDia().getEstado() + ")");
             lblUltimoTurno.setValue("Último turno: " + usuario.getTurno().getTurno() + " (" + usuario.getTurno().getEstado() + ")");
         }
-        
+
         lblUltimoDia.addStyleName(ValoTheme.LABEL_BOLD);
         lblUltimoDia.addStyleName(ValoTheme.LABEL_H3);
         lblUltimoDia.addStyleName(ValoTheme.LABEL_COLORED);
         lblUltimoDia.setWidth("35%");
-        
+
         lblUltimoTurno.addStyleName(ValoTheme.LABEL_BOLD);
         lblUltimoTurno.addStyleName(ValoTheme.LABEL_H3);
         lblUltimoTurno.addStyleName(ValoTheme.LABEL_COLORED);
         lblUltimoTurno.setSizeUndefined();
-        
+
         toolBar2.removeAllComponents();
         toolBar2.addComponent(utils.vlContainer2(lblUltimoDia));
         toolBar2.addComponent(utils.vlContainer2(lblUltimoTurno));
     }
-    
+
     private Component buildHeader() {
         bcrPrecios.setBeanIdProperty("productoId");
         bcrPrecios.removeAllItems();
         cargaTablaPrecios();
         contPais = new BeanItemContainer<Pais>(Pais.class);
         contPais.addAll(dao.getAllPaises());
-        
+
         BeanItemContainer<Horario> contHorario = new BeanItemContainer<Horario>(Horario.class);
         BeanItemContainer<Estacion> contEstacion = new BeanItemContainer<Estacion>(Estacion.class);
-        
+
         cmbPais = new ComboBox("País:", contPais);
         cmbPais.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
         cmbPais.setItemCaptionPropertyId("nombre");
@@ -218,7 +220,7 @@ public class TurnoPr extends Panel implements View {
                 bcrPrecios.removeAllItems();
             }
         });
-        
+
         cmbEstacion = new ComboBox("Estación:");
         cmbEstacion.setItemCaptionPropertyId("nombre");
         cmbEstacion.setNullSelectionAllowed(false);
@@ -233,10 +235,10 @@ public class TurnoPr extends Panel implements View {
                 if (cmbEstacion.getValue() != null) {
                     cargaUltTurnoDia();
                 }
-                
+
             }
         });
-        
+
         cmbFecha.setWidth("120px");
         cmbFecha.setDateFormat("dd-MM-yyyy");
         cmbFecha.setRangeEnd(Date.from(Instant.now()));
@@ -256,20 +258,33 @@ public class TurnoPr extends Panel implements View {
                     cmbHorario.setValue(null);
                     contHorario.addAll(dao.getHorarioByEstacionid2(estacion.getEstacionId(), pais.getPaisId()));
                     cmbHorario.setContainerDataSource(contHorario);
-                    
+
+                    /*VALIDACION ADICIONAL */
+                    if(daoRep.getStadoDia(cmbFecha.getValue(),estacion.getEstacionId())>0){
+                        btnGuardar.setEnabled(false);
+                        btnModificar.setEnabled(false);
+                        if(daoRep.getIdRol(usuario.getUsuarioId())==1){
+                            btnGuardar.setEnabled(true);
+                            btnModificar.setEnabled(true);
+                        }
+                    }else{
+                            btnGuardar.setEnabled(true);
+                            btnModificar.setEnabled(true);
+                    }
+
                     ultimoDia = dao.getUltimoDiaByEstacionid(estacion.getEstacionId());
                     if (dia == null || dia.getFecha() == null) {    //La primera vez
                         dia = dao.getDiaActivoByEstacionid(estacion.getEstacionId());
                         dia = (dia.getEstadoId() == null) ? ultimoDia : dia;
                     }
-                    
+
                     ultimoTurno = dao.getUltimoTurnoByEstacionid2(estacion.getEstacionId(), cmbFecha.getValue());
                     //Solo puede haber un turno activo para cada estacion
                     if (turno == null || turno.getTurnoId() == null) {
                         turno = dao.getTurnoActivoByEstacionid(estacion.getEstacionId());
                         turno = (turno.getEstadoId() == null) ? ultimoTurno : turno;
                     }
-                    
+
                     if (turno.getHorario() != null || ultimoTurno.getHorario() != null) {
                         Horario h = (turno.getHorario() != null) ? turno.getHorario() : ultimoTurno.getHorario();
                         int i = 0;
@@ -293,7 +308,7 @@ public class TurnoPr extends Panel implements View {
 //                        turno = (Turno) ((ArrayList) ctrTurnos.getItemIds()).get(listTurno.size() - 1);
                         turno = contTurno.getIdByIndex(contTurno.size() - 1);
                         cmbTurno.setValue(turno);
-                        
+
                     } else {
                         //La siguiente validacion es importante pues permite a un usuario crear un nuevo turno cuando es la PRIMERISIMA vez que este se crea para una estacion.
                         if (ultimoDia.getFecha() != null) {
@@ -323,7 +338,7 @@ public class TurnoPr extends Panel implements View {
 //                toolbarContainerTables.addComponent(buildTables());
             }
         });
-        
+
         cmbHorario = new ComboBox("Horarios:");
         cmbHorario.setItemCaptionPropertyId("nombreHoras");
         cmbHorario.setNullSelectionAllowed(false);
@@ -358,7 +373,7 @@ public class TurnoPr extends Panel implements View {
                             bcrEmpPump.removeAllItems();
                         }
                     }
-                    
+
                     nuevoMetodoConfhead(configs.get(0));    //solo traera 1
                     /*Agrego la tabla de precios y Empleados y sus Bombas*/
                     toolbarContainerTables.removeAllComponents();
@@ -366,7 +381,7 @@ public class TurnoPr extends Panel implements View {
                 }
             }
         });
-        
+
         cmbTurno = new ComboBox("Turno:");
         cmbTurno.setItemCaptionPropertyId("nombre");
         cmbTurno.setWidth("115px");
@@ -394,18 +409,18 @@ public class TurnoPr extends Panel implements View {
                 }
             }
         });
-        
+
         Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(cmbPais), utils.vlContainer(cmbEstacion), utils.vlContainer(cmbFecha), utils.vlContainer(cmbHorario), utils.vlContainer(cmbTurno)});
         VerticalLayout v = new VerticalLayout(toolBar);
         return components.createHorizontal(Constant.styleViewheader, Constant.sizeFull, false, false, true, new Component[]{v});
     }
     private CssLayout toolbarContainerTables;
-    
+
     private Component buildToolbar2() {
         toolbarContainerTables = new CssLayout();
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarContainerTables)});
     }
-    
+
     private void formEmpleados(String tipo) {
         if (tipo.equals("Editar")) {
             if (cmbEmpleado.getValue() != null) {
@@ -453,10 +468,10 @@ public class TurnoPr extends Panel implements View {
             frmEmpleado.focus();
         }
     }
-    
+
     private CssLayout toolbarContainerCmbEmpleados;
     private CssLayout toolbarContainerTableAsignacion;
-    
+
     private Component buildTables() {
         VerticalLayout v = new VerticalLayout();
         HorizontalLayout h = new HorizontalLayout();
@@ -471,13 +486,13 @@ public class TurnoPr extends Panel implements View {
         cmbEmpleado.setRequired(true);
         cmbEmpleado.setRequiredError("Debe Seleccionar Empleado");
         cmbEmpleado.setNullSelectionAllowed(false);
-        
+
         addEmpleado = new Button(FontAwesome.PLUS_CIRCLE);
         addEmpleado.addStyleName(ValoTheme.BUTTON_TINY);
         addEmpleado.addStyleName(ValoTheme.BUTTON_ICON_ONLY);
         addEmpleado.setDescription("Nuevo Empleado");
         addEmpleado.addClickListener(clickEvent -> formEmpleados("Nuevo"));
-        
+
         editEmpleado = new Button(FontAwesome.EDIT);
         editEmpleado.addStyleName(ValoTheme.BUTTON_TINY);
         editEmpleado.addStyleName(ValoTheme.BUTTON_ICON_ONLY);
@@ -501,15 +516,15 @@ public class TurnoPr extends Panel implements View {
         toolbarContainerTableAsignacion.removeAllComponents();
         ConstruyeTablaAsignacion();
         toolbarContainerTableAsignacion.addComponent(tablaAsignacion);
-        
+
         if (bcrEmpPump.size() > 0) {
             /*Carga Tabla Asignaciones*/
             validaExistentes();
         }
-        
+
         return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tablaPrecio), utils.vlContainerTable(v)});
     }
-    
+
     private void ConstruyeTablaAsignacion() {
         tablaAsignacion = new Table();
         tablaAsignacion.addStyleName(ValoTheme.TABLE_COMPACT);
@@ -710,16 +725,16 @@ public class TurnoPr extends Panel implements View {
                     return btnDelete;
                 }
             });
-            
+
             for (EmpleadoBombaTurno empturno : bcrEmpPump.getItemIds()) {
                 maxBomba = empturno.getMaxBombas();
             }
-            
+
             List<Object> columnas = new ArrayList<Object>();
             List<String> encabezados = new ArrayList<String>();
             columnas.add("colNombre");
             encabezados.add("Pistero");
-            
+
             if (maxBomba > varMaxBomba) {
                 if (maxBomba > 0) {
                     for (int i = 1; i <= maxBomba; i++) {
@@ -735,17 +750,17 @@ public class TurnoPr extends Panel implements View {
                     }
                 }
             }
-            
+
             columnas.add("colDelete");
             encabezados.add("Accion");
             Object[] colCols = columnas.toArray(new Object[0]);
             String[] colheads = encabezados.toArray(new String[0]);
-            
+
             tablaAsignacion.setVisibleColumns(colCols);
             tablaAsignacion.setColumnHeaders(colheads);
             tablaAsignacion.setHeight("220px");
             Responsive.makeResponsive(tablaAsignacion);
-            
+
         } else {
             tablaAsignacion.setContainerDataSource(bcrEmpPump);
             tablaAsignacion.addGeneratedColumn("colNombre", new Table.ColumnGenerator() {
@@ -934,13 +949,13 @@ public class TurnoPr extends Panel implements View {
                             toolbarContainerTableAsignacion.removeAllComponents();
                             ConstruyeTablaAsignacion();
                             toolbarContainerTableAsignacion.addComponent(tablaAsignacion);
-                            
+
                         }
                     });
                     return btnDelete;
                 }
             });
-            
+
             List<Object> columnas = new ArrayList<Object>();
             List<String> encabezados = new ArrayList<String>();
             columnas.add("colNombre");
@@ -955,21 +970,21 @@ public class TurnoPr extends Panel implements View {
             encabezados.add("Accion");
             Object[] colCols = columnas.toArray(new Object[0]);
             String[] colheads = encabezados.toArray(new String[0]);
-            
+
             tablaAsignacion.setVisibleColumns(colCols);
             tablaAsignacion.setColumnHeaders(colheads);
             tablaAsignacion.setHeight("220px");
             Responsive.makeResponsive(tablaAsignacion);
-            
+
         }
     }
-    
+
     private void validaExistentes() {
 //        System.out.println("TAMAÑO COLECCION " + bcrEmpPump.size());
 //        varMaxBomba = 0;
 //        Integer bombaMasAlta = 0;
         bcrEmpPump.sort(new Object[]{"empleadoid"}, new boolean[]{true});
-        
+
         for (EmpleadoBombaTurno empleado : bcrEmpPump.getItemIds()) {
             if (empleado.isBomba1()) {
 //                varMaxBomba++;
@@ -1021,13 +1036,13 @@ public class TurnoPr extends Panel implements View {
 //                bombaMasAlta = 10;
                 chkBomba10.setEnabled(false);
             }
-            
+
             if (empleado.isBomba11()) {
 //                varMaxBomba++;
 //                bombaMasAlta = 11;
                 chkBomba11.setEnabled(false);
             }
-            
+
             if (empleado.isBomba12()) {
 //                varMaxBomba++;
 //                bombaMasAlta = 12;
@@ -1035,13 +1050,13 @@ public class TurnoPr extends Panel implements View {
             }
         }
     }
-    
+
     private void validaBombas(String val) {
         System.out.println("TAMAÑO COLECCION " + bcrEmpPump.size());
         varMaxBomba = 0;
         Integer bombaMasAlta = 0;
         bcrEmpPump.sort(new Object[]{"empleadoid"}, new boolean[]{true});
-        
+
         for (EmpleadoBombaTurno empleado : bcrEmpPump.getItemIds()) {
             if (empleado.isBomba1()) {
                 varMaxBomba++;
@@ -1093,13 +1108,13 @@ public class TurnoPr extends Panel implements View {
                 bombaMasAlta = 10;
                 chkBomba10.setEnabled(false);
             }
-            
+
             if (empleado.isBomba11()) {
                 varMaxBomba++;
                 bombaMasAlta = 11;
                 chkBomba11.setEnabled(false);
             }
-            
+
             if (empleado.isBomba12()) {
                 varMaxBomba++;
                 bombaMasAlta = 12;
@@ -1110,7 +1125,7 @@ public class TurnoPr extends Panel implements View {
         System.out.println("VARMAXBOMBA " + varMaxBomba);
         System.out.println("BOMBA MAS ALTA " + bombaMasAlta);
         System.out.println("BOMBA MAS ALTA OLD" + bombaMasAltaOld);
-        
+
         if (val.equals("A")) {
             if (bombaMasAlta > bombaMasAltaOld) {
                 bombaMasAltaOld = bombaMasAlta;
@@ -1126,9 +1141,9 @@ public class TurnoPr extends Panel implements View {
                 varMaxBomba = bombaMasAltaOld;
             }
         }
-        
+
     }
-    
+
     private void reactivaBombas(EmpleadoBombaTurno accion) {
         if (accion.isBomba1()) {
             chkBomba1.setEnabled(true);
@@ -1160,7 +1175,7 @@ public class TurnoPr extends Panel implements View {
         if (accion.isBomba10()) {
             chkBomba10.setEnabled(true);
         }
-        
+
         if (accion.isBomba11()) {
             chkBomba11.setEnabled(true);
         }
@@ -1168,14 +1183,14 @@ public class TurnoPr extends Panel implements View {
             chkBomba12.setEnabled(true);
         }
     }
-    
+
     private Component buildCheckBoxPumps() {
         HorizontalLayout h = new HorizontalLayout();
         ArrayList<CheckBox> bombasChk = new ArrayList<CheckBox>();
         contBomba = new BeanItemContainer<Bomba>(Bomba.class);
         Horario hh = new Horario();
         hh = (Horario) cmbHorario.getValue();
-        
+
         if (hh != null) {
             contBomba.addAll(dao.getBombasByEstacionConfheadId(hh.getEstacionconfheadId(), estacion.getEstacionId()));
             chkBomba1 = new CheckBox("1");
@@ -1229,7 +1244,7 @@ public class TurnoPr extends Panel implements View {
             for (Bomba bomba : contBomba.getItemIds()) {
                 h.addComponent(bombasChk.get(bomba.getId() - 1));
             }
-            
+
             nuevo = new Button("Asignar");
             nuevo.setIcon(FontAwesome.CHECK_SQUARE_O);
             nuevo.addStyleName(ValoTheme.BUTTON_TINY);
@@ -1269,14 +1284,14 @@ public class TurnoPr extends Panel implements View {
                     }
                 }
             });
-            
+
             h.addComponent(nuevo);
             h.setSpacing(true);
             h.setResponsive(true);
         }
         return h;
     }
-    
+
     private void reiniciaCheckBox() {
         chkBomba1.setValue(false);
         chkBomba2.setValue(false);
@@ -1291,7 +1306,7 @@ public class TurnoPr extends Panel implements View {
         chkBomba11.setValue(false);
         chkBomba12.setValue(false);
     }
-    
+
     private void cargaTablaPrecios() {
         tablaPrecio.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
         tablaPrecio.addStyleName(ValoTheme.TABLE_COMPACT);
@@ -1328,7 +1343,7 @@ public class TurnoPr extends Panel implements View {
                 return tfdAS;
             }
         });
-        
+
         Object[] visCols = new Object[]{"nombre", "colSC"};
         String[] colHeads = new String[]{"Producto", "Servicio completo"};
         if (showAutoservicio) {
@@ -1340,7 +1355,7 @@ public class TurnoPr extends Panel implements View {
         tablaPrecio.setHeight("160px");
         Responsive.makeResponsive(tablaPrecio);
     }
-    
+
     private void getDataPrecios() {
         /*Los productos tipo 1 son del tipo combustible y estan asociados a la estacion*/
         combustibles = dao.getCombustiblesByEstacionid(estacion.getEstacionId());
@@ -1367,13 +1382,13 @@ public class TurnoPr extends Panel implements View {
         }
         bcrPrecios.removeAllItems();
         bcrPrecios.addAll(combustibles);
-        
+
         bcrEmpPump = new BeanItemContainer<EmpleadoBombaTurno>(EmpleadoBombaTurno.class);
         bcrEmpPump.removeAllItems();
         bcrEmpPump.addAll(dao.getTurnoEmpBombaByTurnoid2(turnoId));
-        
+
     }
-    
+
     private void nuevoMetodoConfhead(EstacionConfHead echSelected) {
         Integer[] showAutoFull = new Integer[]{0, 0};
         showAutoservicio = false;
@@ -1385,7 +1400,7 @@ public class TurnoPr extends Panel implements View {
                 showAutoFull[1] = 1;
             }
         }
-        
+
         Object[] visCols = new Object[]{""};
         String[] colHeads = new String[]{""};
         if (showAutoFull[0] == 1 && showAutoFull[1] == 1) {
@@ -1401,7 +1416,7 @@ public class TurnoPr extends Panel implements View {
         tablaPrecio.setVisibleColumns(visCols);
         tablaPrecio.setColumnHeaders(colHeads);
     }
-    
+
     private Component buildButtons() {
         btnGuardar.addStyleName(ValoTheme.BUTTON_FRIENDLY);
         btnGuardar.setIcon(FontAwesome.SAVE);
@@ -1439,7 +1454,7 @@ public class TurnoPr extends Panel implements View {
                         return;
                     }
                 }
-                
+
                 boolean crearDia = false;
                 Turno turno = new Turno(null, usuario.getEstacionid(), usuario.getUsuarioId(), 1, usuario.getUsername(), cmbFecha.getValue(), usuario.getUsername());
                 turno.setEstacionconfheadId(estConfHead.getEstacionconfheadId());
@@ -1451,7 +1466,7 @@ public class TurnoPr extends Panel implements View {
                     }
                 }
                 turno.setFecha(cmbFecha.getValue());
-                
+
                 Precio precio;
                 int conExito = 0;
                 List<Precio> listPrecio = new ArrayList();
@@ -1467,15 +1482,15 @@ public class TurnoPr extends Panel implements View {
                     conExito = (precio.getTurnoId() != null) ? conExito + 1 : conExito;
                 }
                 turno.setHorarioId(((Horario) cmbHorario.getValue()).getHorarioId());
-                
+
                 int count = dao.countTurnOpen(estacion.getEstacionId());
                 if (count > 5) {
                     Notification.show("ERROR:", "No puede haber mas de 5 dias abiertos.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
-                
+
                 boolean everythingOk = dao.doCreateTurn2(crearDia, dia, turno, listPrecio, bcrEmpPump, usuario.getUsername());  //Descomentar
-                dao.closeConnections();                                
+                dao.closeConnections();
 
                 /*TODO EL IF DESCOMENTAR*/
                 if (everythingOk) {
@@ -1491,7 +1506,7 @@ public class TurnoPr extends Panel implements View {
                 }
             }
         });
-        
+
         btnModificar.setStyleName(ValoTheme.BUTTON_PRIMARY);
         btnModificar.addClickListener(new Button.ClickListener() {
             @Override
@@ -1515,14 +1530,14 @@ public class TurnoPr extends Panel implements View {
                     }
                 }
                 service.closeConnections();
-                
+
                 try {
                     /*Actualiza Empleado Bomba Turno*/
                     dao.modificarTurno(turno.getTurnoId(), bcrEmpPump, usuario.getUsername());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-                
+
                 if (bcrPrecios.getItemIds().size() == counter) {
                     Notification notif = new Notification("ÉXITO:", "El registro se ha actualizado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);
@@ -1535,15 +1550,15 @@ public class TurnoPr extends Panel implements View {
                 }
             }
         });
-        
+
         HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnGuardar, btnModificar});
-        
+
         footer.setComponentAlignment(btnGuardar, Alignment.TOP_RIGHT);
         footer.setWidth(
                 100.0f, Unit.PERCENTAGE);
         return footer;
     }
-    
+
     private void cargaInfoSesion() {
         if (usuario.getPaisId() != null) {
             int i = 0;
@@ -1556,7 +1571,7 @@ public class TurnoPr extends Panel implements View {
             }
         }
     }
-    
+
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         Dao dao = new Dao();

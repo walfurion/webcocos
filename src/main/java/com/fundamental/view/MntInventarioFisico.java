@@ -148,7 +148,7 @@ public class MntInventarioFisico extends Panel implements View {
         SvcInventarioFisico service = new SvcInventarioFisico();
         int countryId = ((Pais) cmbPais.getValue()).getPaisId();
         int brandId = ((Marca) cmbMarca.getValue()).getIdMarca();        
-        contLub.addAll(service.getLubricantes(brandId, cmbFecha.getValue()));  
+        contLub.addAll(service.getLubricantes(brandId, cmbFecha.getValue(),usuario.getEstacionid())); //ASG ESTACION ID  
 //        ComInventarioFisico fis;
 //        for(ComInventarioFisico c: list){
 //            fis.setProductoNombre(c.getProductoNombre());
@@ -395,6 +395,7 @@ public class MntInventarioFisico extends Panel implements View {
                     comInv.setDiferencia_inv(lub.getDiferencia_inv());
                     comInv.setTotal_unidad_fisica(lub.getTotal_unidad_fisica());
                     comInv.setComentario(lub.getComentario());
+                    comInv.setEstacionid(usuario.getEstacionid());
                     System.out.println("total unidad fisica "+comInv.getDiferencia_inv());
                     if (comInv.getDiferencia_inv()>=0.0) {
                         service.insertCompra(comInv);
