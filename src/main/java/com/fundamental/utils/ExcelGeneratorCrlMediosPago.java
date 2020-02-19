@@ -269,6 +269,11 @@ public class ExcelGeneratorCrlMediosPago {
         CellStyle styleNumber = workbook.createCellStyle();
         styleNumber.setDataFormat(createHelper.createDataFormat().getFormat("###,###,###,##0.00"));
         styleNumber.setWrapText(true);
+        
+        /*Para solo numero*/
+        CellStyle styleNumber2 = workbook.createCellStyle();
+        styleNumber2.setDataFormat(createHelper.createDataFormat().getFormat("###,###,###,###.##"));
+        styleNumber2.setWrapText(true);
 
         /*Para Fecha*/
         CellStyle styleFecha = workbook.createCellStyle();
@@ -399,7 +404,7 @@ public class ExcelGeneratorCrlMediosPago {
                 ii++;
                 datoscellVERSATEC = datosVERSATEC.createCell(ii);
                 datoscellVERSATEC.setCellValue(itemId.getLote());
-                datoscellVERSATEC.setCellStyle(styleNumber);
+                //datoscellVERSATEC.setCellStyle(styleNumber);
                 ii++;
                 datoscellVERSATEC = datosVERSATEC.createCell(ii);
                 datoscellVERSATEC.setCellValue(itemId.getMonto_bruto());
@@ -435,7 +440,7 @@ public class ExcelGeneratorCrlMediosPago {
                 aa++;
                 datoscellTC_FLOTA_BCR = datosTC_FLOTA_BCR.createCell(aa);
                 datoscellTC_FLOTA_BCR.setCellValue(itemId.getLote());
-                datoscellTC_FLOTA_BCR.setCellStyle(styleNumber);
+                //datoscellTC_FLOTA_BCR.setCellStyle(styleNumber);
                 aa++;
                 datoscellTC_FLOTA_BCR = datosTC_FLOTA_BCR.createCell(aa);
                 datoscellTC_FLOTA_BCR.setCellValue(itemId.getMonto_bruto());
@@ -470,7 +475,7 @@ public class ExcelGeneratorCrlMediosPago {
                 hh++;
                 datoscellUNO_PLUS = datosUNO_PLUS.createCell(hh);
                 datoscellUNO_PLUS.setCellValue(itemId.getLote());
-                datoscellUNO_PLUS.setCellStyle(styleNumber);
+                //datoscellUNO_PLUS.setCellStyle(styleNumber);
                 hh++;
                 datoscellUNO_PLUS = datosUNO_PLUS.createCell(hh);
                 datoscellUNO_PLUS.setCellValue(itemId.getMonto_bruto());
@@ -628,7 +633,7 @@ public class ExcelGeneratorCrlMediosPago {
                 MAG++;
                 datoscellFF_MAGIC_DAV = datosFF_MAGIC_DAV.createCell(MAG);
                 datoscellFF_MAGIC_DAV.setCellValue(itemId.getLote());
-                datoscellFF_MAGIC_DAV.setCellStyle(styleNumber);
+                //datoscellFF_MAGIC_DAV.setCellStyle(styleNumber);
                 MAG++;
                 datoscellFF_MAGIC_DAV = datosFF_MAGIC_DAV.createCell(MAG);
                 datoscellFF_MAGIC_DAV.setCellValue(itemId.getCliente());
@@ -658,7 +663,7 @@ public class ExcelGeneratorCrlMediosPago {
                 SCO++;
                 datoscellFF_MAGIC_SCOTTIA = datosFF_MAGIC_SCOTTIA.createCell(SCO);
                 datoscellFF_MAGIC_SCOTTIA.setCellValue(itemId.getLote());
-                datoscellFF_MAGIC_SCOTTIA.setCellStyle(styleNumber);
+                //datoscellFF_MAGIC_SCOTTIA.setCellStyle(styleNumber);
                 SCO++;
                 datoscellFF_MAGIC_SCOTTIA = datosFF_MAGIC_SCOTTIA.createCell(SCO);
                 datoscellFF_MAGIC_SCOTTIA.setCellValue(itemId.getCliente());
@@ -976,7 +981,7 @@ public class ExcelGeneratorCrlMediosPago {
                 bb++;
                 datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
                 datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getLote());
-                datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
+                //datoscellTARJETA_BANCO_NACIONAL.setCellStyle(styleNumber);
                 bb++;
                 datoscellTARJETA_BANCO_NACIONAL = datosTARJETA_BANCO_NACIONAL.createCell(bb);
                 datoscellTARJETA_BANCO_NACIONAL.setCellValue(itemId.getMonto_bruto());
@@ -1031,7 +1036,7 @@ public class ExcelGeneratorCrlMediosPago {
                 cc++;
                 datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
                 datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getLote());
-                datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
+                //datoscellTARJETA_CREDOMATIC.setCellStyle(styleNumber);
                 cc++;
                 datoscellTARJETA_CREDOMATIC = datosTARJETA_CREDOMATIC.createCell(cc);
                 datoscellTARJETA_CREDOMATIC.setCellValue(itemId.getMonto_bruto());
@@ -1086,7 +1091,7 @@ public class ExcelGeneratorCrlMediosPago {
                 ff++;
                 datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
                 datoscellTARJETA_BCR.setCellValue(itemId.getLote());
-                datoscellTARJETA_BCR.setCellStyle(styleNumber);
+                //datoscellTARJETA_BCR.setCellStyle(styleNumber);
                 ff++;
                 datoscellTARJETA_BCR = datosTARJETA_BCR.createCell(ff);
                 datoscellTARJETA_BCR.setCellValue(itemId.getMonto_bruto());
@@ -1141,7 +1146,7 @@ public class ExcelGeneratorCrlMediosPago {
                 gg++;
                 datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
                 datoscellTC_FLOTA_BAC.setCellValue(itemId.getLote());
-                datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
+                //datoscellTC_FLOTA_BAC.setCellStyle(styleNumber);
                 gg++;
                 datoscellTC_FLOTA_BAC = datosTC_FLOTA_BAC.createCell(gg);
                 datoscellTC_FLOTA_BAC.setCellValue(itemId.getMonto_bruto());
@@ -1196,7 +1201,7 @@ public class ExcelGeneratorCrlMediosPago {
                 jj++;
                 datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
                 datoscellTC_DAVIVIENDA.setCellValue(itemId.getLote());
-                datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
+              //  datoscellTC_DAVIVIENDA.setCellStyle(styleNumber);
                 jj++;
                 datoscellTC_DAVIVIENDA = datosTC_DAVIVIENDA.createCell(jj);
                 datoscellTC_DAVIVIENDA.setCellValue(itemId.getMonto_bruto());
