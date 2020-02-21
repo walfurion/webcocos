@@ -187,7 +187,7 @@ public class SvcDeposito extends Dao {
             /*Envio parametros necesarios*/
             pst.setString(1, String.valueOf(estacionid));
             pst.setDate(2, sqlDateIni);
-            ResultSet rst = pst.executeQuery();
+            pst.executeUpdate();
             closePst();
             System.out.println("delete exitoso");
             respuesta = 1;
