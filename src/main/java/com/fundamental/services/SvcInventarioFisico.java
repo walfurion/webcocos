@@ -36,16 +36,16 @@ public class SvcInventarioFisico extends Dao {
                     "(select UNIDAD_FIS_TIENDA from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as uniTienda, " +
                     "(select UNIDAD_FIS_BODEGA from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as uniBodega, " +
                     "(select UNIDAD_FIS_PISTA from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as uniPista, "
-                    + "(select TOTAL_UNIDAD_FISICA from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('31/10/2019','dd/mm/yyyy')) as totalFis, " +
+                    + "(select TOTAL_UNIDAD_FISICA from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as totalFis, " +
                     "(select DIFERENCIA_INV from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as difInv, " +
                     "(select COMENTARIO from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('"+fechaString+"','dd/mm/yyyy')) as Comentario "
                     + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p, LUBRICANTEPRECIO lp "
                     + "where l.PRODUCTO_ID = p.PRODUCTO_ID and l.PRODUCTO_ID = lp.PRODUCTO_ID "
-                    + "and l.MARCA_ID = "+brandId+" AND l.ESTACION_ID = "+ESTACIONID  /*asg adiciona estacion*/
-                    + " and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.MARCA_ID="+brandId+" and "+fecha1+"=extract(MONTH from b.fecha)" 
-                    + "AND "+fecha2+"=extract(YEAR from b.fecha))  order by numero ";
-            System.out.println("query "+query);
-            System.out.println("brandId "+brandId);
+                    + "and l.MARCA_ID = "+brandId+" and l.ESTACION_ID = "+ESTACIONID+" "  /*asg adiciona estacion*/
+                    + "and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.MARCA_ID="+brandId+" and b.ESTACION_ID = "+ESTACIONID+" and "+fecha1+"=extract(MONTH from b.fecha)" 
+                    + "and "+fecha2+"=extract(YEAR from b.fecha))  order by numero ";
+//            System.out.println("query "+query);
+//            System.out.println("brandId "+brandId);
             pst = getConnection().prepareStatement(query);
             ResultSet rst = pst.executeQuery();
             ComInventarioFisico inv;
@@ -112,7 +112,7 @@ public class SvcInventarioFisico extends Dao {
                 pst.setString(9, lub.getComentario());
                 pst.setString(10, lub.getCreado_por());
                 pst.setInt(11, lub.getEstacionid());
-                pst.executeQuery();
+                pst.executeUpdate();
                 result = lub;
             }
             

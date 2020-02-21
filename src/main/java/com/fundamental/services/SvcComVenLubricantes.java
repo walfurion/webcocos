@@ -119,7 +119,7 @@ public class SvcComVenLubricantes extends Dao{
                 pst.setString(7, lub.getCreadopor());
                 pst.setInt(8, lub.getPaisId());
                 pst.setInt(9, lub.getEstacionid()); //ASG ESTACION
-                pst.executeQuery();
+                pst.executeUpdate();
                 result = lub;
             }
             
@@ -174,7 +174,7 @@ public class SvcComVenLubricantes extends Dao{
                 pst.setDouble(6, (valFinalAnt-venta));
                 pst.setInt(7, paisId);
                 pst.setInt(8, ESTACIONID);  //ASG ESTACION
-                pst.executeQuery();
+                pst.executeUpdate();
             }
             
         } catch (Exception exc) {
