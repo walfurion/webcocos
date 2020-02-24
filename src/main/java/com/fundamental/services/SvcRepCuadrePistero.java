@@ -5,6 +5,8 @@
  */
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.LitroCalibracion;
 import java.sql.CallableStatement;
@@ -18,7 +20,7 @@ import java.util.List;
  *
  * @author Allan G.
  */
-public class SvcRepCuadrePistero extends Dao {
+public class SvcRepCuadrePistero extends DaoImp {
 
     private String query;
 
@@ -40,10 +42,10 @@ public class SvcRepCuadrePistero extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -79,10 +81,10 @@ public class SvcRepCuadrePistero extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -105,6 +107,7 @@ public class SvcRepCuadrePistero extends Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -120,7 +123,7 @@ public class SvcRepCuadrePistero extends Dao {
                     + "from usuario a, \n"
                     + "     rol_usuario b \n"
                     + "where a.USUARIO_ID = b.USUARIO_ID \n"
-                    + "and a.usuario_id = "+iduser;
+                    + "and a.usuario_id = " + iduser;
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             while (rst.next()) {
@@ -132,6 +135,7 @@ public class SvcRepCuadrePistero extends Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -149,7 +153,7 @@ public class SvcRepCuadrePistero extends Dao {
             query = "Select count(*) cantidad\n"
                     + "from dia \n"
                     + "where estado_id = 2 \n"
-                    + " and fecha = TO_DATE('"+sqlDateIni+"','yyyy/mm/dd') and estacion_id = "+idestacion;
+                    + " and fecha = TO_DATE('" + sqlDateIni + "','yyyy/mm/dd') and estacion_id = " + idestacion;
 
             PreparedStatement cst = getConnection().prepareStatement(query);
 
@@ -165,10 +169,10 @@ public class SvcRepCuadrePistero extends Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
-
         return result;
     }
 }

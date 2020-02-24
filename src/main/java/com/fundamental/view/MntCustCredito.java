@@ -7,10 +7,11 @@ import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoGenericBean;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcConfBombaEstacion;
 import com.fundamental.services.SvcGeneral;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.view.form.FormUploadClientes;
 import com.vaadin.addon.tableexport.DefaultTableHolder;
 import com.vaadin.addon.tableexport.ExcelExport;
@@ -79,7 +80,7 @@ public class MntCustCredito extends Panel implements View {
     List<Estacion> listStations = new ArrayList();
     List<DtoGenericBean> listStatus = Arrays.asList(new DtoGenericBean("A", "Activo"), new DtoGenericBean("I", "Inactivo"));
     List<DtoGenericBean> listType = Arrays.asList(new DtoGenericBean("C", "Crédito"), new DtoGenericBean("P", "Prepago"));
-    String tmpString, action = Dao.ACTION_ADD;
+    String tmpString, action = DaoImp.ACTION_ADD;
     File tempFile;
     int line;
 
@@ -163,8 +164,8 @@ public class MntCustCredito extends Panel implements View {
         listCountries = service.getAllPaises();
         bcrCustomer.addAll(service.getCustomersByStationidType(null)); //todos
 //        bcrCustomer.addAll(service.getCustomersByStationidType("P")); //Prepago
-        service.closeConnections();
-    }
+//        service.closeConnections(); //ASG
+    } 
 
     private void buildControls() {
         tfdCode = utils.buildTextField("Código E1:", "", false, 6, true, ValoTheme.TEXTFIELD_SMALL);
@@ -233,7 +234,7 @@ public class MntCustCredito extends Panel implements View {
                 if (cbxCountry.getValue() != null) {
                     SvcConfBombaEstacion service = new SvcConfBombaEstacion();
                     listStations = service.getStationsByCountry(((Pais) cbxCountry.getValue()).getPaisId(), true);
-                    service.closeConnections();
+//                    service.closeConnections(); //ASG
                     cbxStation.setContainerDataSource(new ListContainer<Estacion>(Estacion.class, listStations));
                 }
             }
@@ -258,7 +259,7 @@ public class MntCustCredito extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (tblCustomer.getValue() != null) {
-                    action = Dao.ACTION_UPDATE;
+                    action = DaoImp.ACTION_UPDATE;
                     int itemid = Integer.parseInt(tblCustomer.getValue().toString());
                     Cliente cliente = bcrCustomer.getItem(itemid).getBean();
                     tfdCode.setValue(cliente.getCodigo());
@@ -330,7 +331,7 @@ public class MntCustCredito extends Panel implements View {
         btnAdd.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                action = Dao.ACTION_ADD;
+                action = DaoImp.ACTION_ADD;
                 tblCustomer.setValue(null);
                 tfdCode.setValue(null);
                 tfdName.setValue(null);
@@ -347,7 +348,7 @@ public class MntCustCredito extends Panel implements View {
         btnSave.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                int custId = (action.equals(Dao.ACTION_ADD)) ? 0 : Integer.parseInt(tblCustomer.getValue().toString());
+                int custId = (action.equals(DaoImp.ACTION_ADD)) ? 0 : Integer.parseInt(tblCustomer.getValue().toString());
                 if (!cbxCountry.isValid() || !cbxStation.isValid() 
                         || !tfdCode.isValid() || tfdCode.getValue().trim().isEmpty()
                         || !tfdName.isValid() || tfdName.getValue().trim().isEmpty()
@@ -371,13 +372,13 @@ public class MntCustCredito extends Panel implements View {
                 tmpString = ((DtoGenericBean)cbxType.getValue()).getStringId();
                 cliente = new Cliente(custId, tfdCode.getValue(), tfdName.getValue(), ((Estacion) cbxStation.getValue()).getEstacionId(), ((DtoGenericBean) cbxStatus.getValue()).getStringId(), user.getUsername(), new java.util.Date(), tmpString, tfdCodigoEnvoy.getValue(), tfdCedulaJuridica.getValue());
                 SvcGeneral service = new SvcGeneral();
-                if (action.equals(Dao.ACTION_ADD) && service.existeCodEnvoy(cliente.getCodigoEnvoy())) {
+                if (action.equals(DaoImp.ACTION_ADD) && service.existeCodEnvoy(cliente.getCodigoEnvoy())) {
                     Notification.show("El código ENVOY ingresado ya fue utilizado en otro cliente.");
-                    service.closeConnections();
+//                    service.closeConnections(); //ASG
                     return;
                 }
                 boolean everythingOk = service.doActionCustomer(action, cliente);
-                service.closeConnections();
+//                service.closeConnections(); //ASG
                 if (everythingOk) {
                     Notification.show("La acción se ha ejecutado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                     UI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_CUST_CREDITO.getViewName());
@@ -466,7 +467,7 @@ public class MntCustCredito extends Panel implements View {
 
         if (!insertList.isEmpty()) {
             String result = service.doBulkInsert(insertList);
-            service.closeConnections();
+//            service.closeConnections(); //ASG
             if (result.matches("\\d+") && Integer.parseInt(result) > 0) {
                 Notification notif = new Notification("¡EXITO!", "Acción finalizada con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                 notif.setStyleName(ValoTheme.NOTIFICATION_SUCCESS);
@@ -477,14 +478,14 @@ public class MntCustCredito extends Panel implements View {
             } else {
                 Notification.show("Ocurrió un error al insertar los datos: \n" + result, Notification.Type.ERROR_MESSAGE);
             }
-            service.closeConnections();
+//            service.closeConnections(); //ASG
         }
 
     }
     
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnAdd.setEnabled(acceso.isAgregar());

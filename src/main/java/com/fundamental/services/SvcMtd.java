@@ -5,6 +5,8 @@
  */
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.GenericEstacion;
 import com.sisintegrados.generic.bean.GenericMTD;
 import java.sql.CallableStatement;
@@ -17,13 +19,14 @@ import java.util.Date;
  *
  * @author Allan G.
  */
-public class SvcMtd extends Dao {
+public class SvcMtd extends DaoImp {
 
     private String query;
 
     public ArrayList<GenericEstacion> getCheckEstaciones(Integer idpais,Integer idusuario) {
         ArrayList<GenericEstacion> result = new ArrayList<GenericEstacion>();
         GenericEstacion genestacion = new GenericEstacion();
+        ResultSet rst = null;
         try {
 //            query = "Select estacion_id,nombre from estacion where pais_id =" + idpais;
             query = "Select a.estacion_id,a.nombre \n"
@@ -33,7 +36,7 @@ public class SvcMtd extends Dao {
                     + "and a.pais_id = " + idpais
                     + " and b.USUARIO_ID = "+idusuario;
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 genestacion = new GenericEstacion();
                 genestacion.setEstacionid(rst.getInt(1));
@@ -44,7 +47,9 @@ public class SvcMtd extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -54,6 +59,7 @@ public class SvcMtd extends Dao {
     public ArrayList<GenericMTD> getMTD() {
         ArrayList<GenericMTD> result = new ArrayList<GenericMTD>();
         GenericMTD genmtd = new GenericMTD();
+        ResultSet rst = null;
         try {
             query = "Select FECHA, P_SUPER, P_REGULAR, P_DIESEL, \n"
                     + "                L_SUPER, L_REGULAR, L_DIESEL, C_DIESEL, C_SUPER, \n"
@@ -81,7 +87,7 @@ public class SvcMtd extends Dao {
                     + "from PV_MTD order by fecha asc";
 //            System.out.println("QUERY "+query);
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 genmtd = new GenericMTD(rst.getDate(1),
                         rst.getDouble(2),
@@ -213,7 +219,9 @@ public class SvcMtd extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -223,9 +231,10 @@ public class SvcMtd extends Dao {
     public String getEstacion(Integer idestacion) {
         String result = "";
         query = "SELECT NOMBRE FROM ESTACION WHERE ESTACION_ID =" + idestacion;
+        ResultSet rst = null;
         try {
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result = rst.getString(1);
             }
@@ -233,7 +242,9 @@ public class SvcMtd extends Dao {
             ex.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -252,6 +263,7 @@ public class SvcMtd extends Dao {
         cst.setDate(2, sqlDateFin);
         cst.setString(3, idestacion);
         cst.execute();
+        cst.close();
+        closeConnections();
     }
-
 }

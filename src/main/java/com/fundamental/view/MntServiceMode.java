@@ -10,11 +10,12 @@ import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoBean;
 import com.fundamental.model.dto.DtoGenericBean;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcConfBombaEstacion;
 import com.fundamental.services.SvcMaintenance;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.Util;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
@@ -158,7 +159,7 @@ public class MntServiceMode extends Panel implements View {
         bcrConfiguraciones.removeAllItems();
         bcrConfiguraciones.addAll(service.getAllConfiguracionHead(true));
         bcrEstaciones.setBeanIdProperty("estacionId");
-        service.closeConnections();
+//        service.closeConnections();
     }
 
     private void buildFilters() {
@@ -181,7 +182,7 @@ public class MntServiceMode extends Panel implements View {
                     List<Estacion> estaciones;
                     SvcConfBombaEstacion service = new SvcConfBombaEstacion();
                     estaciones = service.getStationsByCountry(((Pais) cbxPais.getValue()).getPaisId(), true);
-                    service.closeConnections();
+//                    service.closeConnections();
                     bcrEstaciones.addAll(estaciones);
                 }
             }
@@ -231,7 +232,7 @@ public class MntServiceMode extends Panel implements View {
                     } catch (Exception ignore) {
                     }
                     configuracion = bcrConfiguraciones.getItem(itemid).getBean();
-                    action = Dao.ACTION_UPDATE;
+                    action = DaoImp.ACTION_UPDATE;
                 }
 
                 if (tblConfiguracion.getValue() != null && tblStations != null && tblStations.getValue() != null) {
@@ -239,7 +240,7 @@ public class MntServiceMode extends Panel implements View {
 //                    bcrEstConf.addAll(estConfHead.getEstacionConf());
 //                    estacion = bcrEstaciones.getItem(tblStations.getValue()).getBean();
                     tblStations.setValue(null);
-                    action = Dao.ACTION_UPDATE;
+                    action = DaoImp.ACTION_UPDATE;
                 }
             }
         });
@@ -326,8 +327,8 @@ public class MntServiceMode extends Panel implements View {
                                 cbxPais.setEnabled(true);
                                 tfdNombre.setEnabled(true);
                                 cbxEstado.setEnabled(true);
-                                configuracion = service.doAction(Dao.ACTION_DELETE, configuracion);
-                                service.closeConnections();
+                                configuracion = service.doAction(DaoImp.ACTION_DELETE, configuracion);
+//                                service.closeConnections();
                                 if (configuracion.getEstacionId() != null) {
                                     Notification.show("La acción se ha ejecutado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                                     UI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_CONF_BOMBA_ESTACION.getViewName());
@@ -381,7 +382,7 @@ public class MntServiceMode extends Panel implements View {
                 cbxEstado.setValue(estados.get(0));
 //                    dfdHoraInicio.setValue(new Date());
 //                    dfdHoraFin.setValue(new Date());
-                action = Dao.ACTION_ADD;
+                action = DaoImp.ACTION_ADD;
 //                } else {
 //                    Notification.show("Primero elija una estación.", Notification.Type.ERROR_MESSAGE);
 //                    return;
@@ -428,7 +429,7 @@ public class MntServiceMode extends Panel implements View {
                     return;
                 }
                 for (Integer itemid : bcrConfiguraciones.getItemIds()) {
-                    if (action.equals(Dao.ACTION_ADD) && bcrConfiguraciones.getItem(itemid).getBean().getNombre().toUpperCase().equals(nombre)) {
+                    if (action.equals(DaoImp.ACTION_ADD) && bcrConfiguraciones.getItem(itemid).getBean().getNombre().toUpperCase().equals(nombre)) {
                         Notification.show("El nombre de configuracion ya existe, elija otro.", Notification.Type.ERROR_MESSAGE);
                         return;
                     }
@@ -456,7 +457,7 @@ public class MntServiceMode extends Panel implements View {
                 configuracion.setHoraFin(Constant.SDF_HHmm.format(new Date()));
                 SvcConfBombaEstacion service = new SvcConfBombaEstacion();
                 configuracion = service.doAction(action, configuracion);
-                service.closeConnections();
+//                service.closeConnections();
                 if (configuracion.getEstacionconfheadId() > 0) {
                     Notification notif = new Notification("ÉXITO:", "El registro de configuración se realizó con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);
@@ -498,7 +499,7 @@ public class MntServiceMode extends Panel implements View {
                     if (bcrEstConf.size() == 0) {  //Cuando no haya configuraciones asociadas.
                         SvcMaintenance service = new SvcMaintenance();
                         List<Bomba> pumps = service.getBombasByEstacionid(Integer.parseInt(tblStations.getValue().toString()));
-                        service.closeConnections();
+//                        service.closeConnections();
                         EstacionConf ecf;
                         int index = 1;
                         for (Bomba b : pumps) {
@@ -516,11 +517,11 @@ public class MntServiceMode extends Panel implements View {
                     cbxPais.setEnabled(true);
                     tfdNombre.setEnabled(true);
                     cbxEstado.setEnabled(true);
-                    action = Dao.ACTION_UPDATE;
-                } else if (action.equals(Dao.ACTION_ADD) && tblConfiguracion.getValue() == null && tblStations.getValue() != null) {
+                    action = DaoImp.ACTION_UPDATE;
+                } else if (action.equals(DaoImp.ACTION_ADD) && tblConfiguracion.getValue() == null && tblStations.getValue() != null) {
                     SvcMaintenance service = new SvcMaintenance();
                     List<Bomba> pumps = service.getBombasByEstacionid(Integer.parseInt(tblStations.getValue().toString()));
-                    service.closeConnections();
+//                    service.closeConnections();
                     EstacionConf ecf;
                     int index = 1;
                     for (Bomba b : pumps) {
@@ -539,7 +540,7 @@ public class MntServiceMode extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnAdd.setEnabled(acceso.isAgregar());

@@ -12,13 +12,13 @@ import com.fundamental.model.Precio;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Turno;
 import com.fundamental.model.Utils;
-import com.fundamental.services.Dao;
-import com.fundamental.services.SvcEstacion;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcRepCuadrePistero;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcUsuario;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.view.form.FormEmpleado;
 import com.sisintegrados.generic.bean.EmpleadoBombaTurno;
 import com.sisintegrados.generic.bean.Pais;
@@ -208,11 +208,11 @@ public class TurnoPr extends Panel implements View {
                 cmbHorario.removeAllItems();
                 cmbTurno.removeAllItems();
                 cmbFecha.setValue(null);
-                SvcEstacion svcEstacion = new SvcEstacion();
+                Dao svcEstacion = new DaoImp();
                 Pais pais = new Pais();
                 pais = (Pais) cmbPais.getValue();
                 contEstacion.addAll(svcEstacion.getStationsByCountryUser(pais.getPaisId(), usuario.getUsuarioId()));
-                svcEstacion.closeConnections();
+//                svcEstacion.closeConnections();
                 cmbEstacion.setContainerDataSource(contEstacion);
                 if (contEstacion.size() == 1) {
                     cmbEstacion.setValue(contEstacion.getIdByIndex(0));
@@ -235,7 +235,6 @@ public class TurnoPr extends Panel implements View {
                 if (cmbEstacion.getValue() != null) {
                     cargaUltTurnoDia();
                 }
-
             }
         });
 
@@ -260,16 +259,16 @@ public class TurnoPr extends Panel implements View {
                     cmbHorario.setContainerDataSource(contHorario);
 
                     /*VALIDACION ADICIONAL */
-                    if(daoRep.getStadoDia(cmbFecha.getValue(),estacion.getEstacionId())>0){
+                    if (daoRep.getStadoDia(cmbFecha.getValue(), estacion.getEstacionId()) > 0) {
                         btnGuardar.setEnabled(false);
                         btnModificar.setEnabled(false);
-                        if(daoRep.getIdRol(usuario.getUsuarioId())==1){
+                        if (daoRep.getIdRol(usuario.getUsuarioId()) == 1) {
                             btnGuardar.setEnabled(true);
                             btnModificar.setEnabled(true);
                         }
-                    }else{
-                            btnGuardar.setEnabled(true);
-                            btnModificar.setEnabled(true);
+                    } else {
+                        btnGuardar.setEnabled(true);
+                        btnModificar.setEnabled(true);
                     }
 
                     ultimoDia = dao.getUltimoDiaByEstacionid(estacion.getEstacionId());
@@ -302,7 +301,7 @@ public class TurnoPr extends Panel implements View {
                     dia = dao.getDiaByEstacionidFecha(estacion.getEstacionId(), cmbFecha.getValue());
                     dia.setFecha((dia.getFecha() == null) ? cmbFecha.getValue() : dia.getFecha());  //Para las validaciones iniciales de buildControls()
                     contTurno.addAll(dao.getTurnosByEstacionidDiaNolectura(estacion.getEstacionId(), cmbFecha.getValue()));
-                    dao.closeConnections();
+//                    dao.closeConnections();
                     cmbTurno.setContainerDataSource(contTurno);
                     if (contTurno.size() > 0) {
 //                        turno = (Turno) ((ArrayList) ctrTurnos.getItemIds()).get(listTurno.size() - 1);
@@ -351,7 +350,7 @@ public class TurnoPr extends Panel implements View {
                     bombaMasAltaOld = 0;
                     List<EstacionConfHead> configs = dao.getConfiguracionHeadByEstacionidHorario(estacion.getEstacionId(), ((Horario) cmbHorario.getValue()).getHorarioId());
                     estConfHead = configs.get(0);
-                    dao.closeConnections();
+//                    dao.closeConnections();//ASG PRUEBA
                     for (EstacionConfHead ech : configs) {
                         for (EstacionConf ecf : ech.getEstacionConf()) {
                             if (ecf.getTipodespachoId() == 1) { //autoservicio
@@ -396,7 +395,7 @@ public class TurnoPr extends Panel implements View {
                     /*Agrego la tabla de precios y Empleados y sus Bombas*/
                     toolbarContainerTables.removeAllComponents();
                     toolbarContainerTables.addComponent(buildTables());
-                    dao.closeConnections();
+//                    dao.closeConnections(); //ASG PRUEBA
                     Integer h = dao.getIdHorario(turno.getTurnoId());
                     int i = 0;
                     for (i = 0; i < contHorario.size(); i++) {
@@ -1362,7 +1361,7 @@ public class TurnoPr extends Panel implements View {
         //La siguiente funcion, si el idTurno es null, entonces devuelve los ultimos precios de la estacion
         Integer turnoId = (turno.getTurnoId() != null) ? turno.getTurnoId() : ultimoTurno.getTurnoId();
         precios = dao.getPreciosByTurnoid(turnoId);
-        dao.closeConnections();
+//        dao.closeConnections();
         for (Producto p : combustibles) {
             for (Precio pre : precios) {
                 if (p.getProductoId().equals(pre.getProductoId())) {
@@ -1490,7 +1489,7 @@ public class TurnoPr extends Panel implements View {
                 }
 
                 boolean everythingOk = dao.doCreateTurn2(crearDia, dia, turno, listPrecio, bcrEmpPump, usuario.getUsername());  //Descomentar
-                dao.closeConnections();
+//                dao.closeConnections();
 
                 /*TODO EL IF DESCOMENTAR*/
                 if (everythingOk) {
@@ -1501,7 +1500,7 @@ public class TurnoPr extends Panel implements View {
                     UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_TURN.getViewName());
                 } else {
                     Notification.show("ERROR:", "Ocurrió un error al guardar el precio.\n", Notification.Type.ERROR_MESSAGE);
-                    turno = dao.doActionTurno(Dao.ACTION_DELETE, turno);
+                    turno = dao.doActionTurno(DaoImp.ACTION_DELETE, turno);
                     return;
                 }
             }
@@ -1520,16 +1519,16 @@ public class TurnoPr extends Panel implements View {
                     precio = new Precio(turno.getTurnoId(), prod.getProductoId(), 2, prod.getPriceSC(), null, null);  //ServicioCompleto
                     precio.setModificadoPor(usuario.getUsername());
                     precio.setModificadoPersona(usuario.getNombreLogin());
-                    precio = service.doActionPrecio(Dao.ACTION_UPDATE, precio);
+                    precio = service.doActionPrecio(DaoImp.ACTION_UPDATE, precio);
                     counter += (precio.getTurnoId() != null) ? 1 : 0;
                     if (showAutoservicio) {   //Guatemala
                         precio = new Precio(turno.getTurnoId(), prod.getProductoId(), 1, prod.getPriceAS(), null, null);   //Autoservicio
                         precio.setModificadoPor(usuario.getUsername());
                         precio.setModificadoPersona(usuario.getNombreLogin());
-                        precio = service.doActionPrecio(Dao.ACTION_UPDATE, precio);
+                        precio = service.doActionPrecio(DaoImp.ACTION_UPDATE, precio);
                     }
                 }
-                service.closeConnections();
+//                service.closeConnections();
 
                 try {
                     /*Actualiza Empleado Bomba Turno*/
@@ -1574,7 +1573,7 @@ public class TurnoPr extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         addEmpleado.setEnabled(acceso.isAgregar());

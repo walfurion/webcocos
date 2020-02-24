@@ -8,9 +8,10 @@ import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoGenericBean;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcGeneral;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -84,7 +85,7 @@ public class MntHorario extends Panel implements View {
     List<Estacion> listStations = new ArrayList();
     List<EstacionConfHead> listEstConfHead, allEstConfHead;
     Horario horario;
-    String action = Dao.ACTION_ADD;
+    String action = DaoImp.ACTION_ADD;
 
 //template
     private VerticalLayout vlRoot;
@@ -165,7 +166,7 @@ public class MntHorario extends Panel implements View {
         bcrStations.addAll(listStations);
         listEstConfHead = service.getAllConfiguracionHead(false);
         allEstConfHead = service.getAllConfiguracionheadPais();
-        service.closeConnections();
+//        service.closeConnections();
     }
 
     private void buildControls() {
@@ -274,7 +275,7 @@ public class MntHorario extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (tblSchedules.getValue() != null) {
-                    action = Dao.ACTION_UPDATE;
+                    action = DaoImp.ACTION_UPDATE;
                     horario = bcrSchedule.getItem(tblSchedules.getValue()).getBean();
                     Calendar cal = Calendar.getInstance();
                     cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(horario.getHoraInicio().split(":")[0]));
@@ -319,7 +320,7 @@ public class MntHorario extends Panel implements View {
                         tfdName.setEnabled(true);
                         cbxStatus.setEnabled(true);
                         txaDescription.setEnabled(true);
-                action = Dao.ACTION_ADD;
+                action = DaoImp.ACTION_ADD;
                 horario = new Horario();
                 horario.setListStations(new ArrayList());
                 binder.setItemDataSource(horario);
@@ -365,7 +366,7 @@ public class MntHorario extends Panel implements View {
 //                horario.setPaisestacionId( ((Pais)cbxCountry.getValue()).getPaisId() );
                 SvcGeneral service = new SvcGeneral();
                 horario = service.doActionHorario(action, horario);
-                service.closeConnections();
+//                service.closeConnections();
                 if (horario.getHorarioId() > 0) {
                     Notification notif = new Notification("¡Exito!", "La acción se ha ejecutado correctamente.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);
@@ -382,7 +383,7 @@ public class MntHorario extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnAdd.setEnabled(acceso.isAgregar());

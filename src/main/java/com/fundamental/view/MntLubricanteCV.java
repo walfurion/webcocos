@@ -10,13 +10,13 @@ import com.fundamental.model.Lubricanteprecio;
 import com.fundamental.model.Marca;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Utils;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcComVenLubricantes;
-import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcGeneral;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.ComVenLubricantes;
 import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.Pais;
@@ -174,11 +174,11 @@ public class MntLubricanteCV extends Panel implements View {
             public void valueChange(final Property.ValueChangeEvent event) {
 //                cmbEstacion.removeAllItems();
                 cmbFecha.setValue(null);
-                SvcEstacion svcEstacion = new SvcEstacion();
+                Dao svcEstacion = new DaoImp();
                 Pais pais = new Pais();
                 pais = (Pais) cmbPais.getValue();
                 contEstacion.addAll(svcEstacion.getStationsByCountryUser(pais.getPaisId(), usuario.getUsuarioId()));
-                svcEstacion.closeConnections();
+//                svcEstacion.closeConnections();
 //                cmbEstacion.setContainerDataSource(contEstacion);
 //                if (contEstacion.size() == 1) {
 //                    cmbEstacion.setValue(contEstacion.getIdByIndex(0));
@@ -217,7 +217,7 @@ public class MntLubricanteCV extends Panel implements View {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
                 if (cmbMarca.getValue() != null) {
-                    Dao dao = new Dao();
+                    Dao dao = new DaoImp();
                     allLubricants = dao.getAllProducts();
                 }
             }
@@ -367,7 +367,7 @@ public class MntLubricanteCV extends Panel implements View {
                     comVenLub.setEstacionid(usuario.getEstacionid());
                     if(comVenLub.getInvInicial()>0.0){
                         service.insertCompra(comVenLub);
-                        service.closeConnections();
+//                        service.closeConnections();
                     }
                     
                 }                
@@ -423,7 +423,7 @@ public class MntLubricanteCV extends Panel implements View {
     
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnGuardar.setEnabled(acceso.isAgregar());

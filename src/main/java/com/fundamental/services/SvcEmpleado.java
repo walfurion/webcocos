@@ -5,6 +5,8 @@
  */
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.Empleado;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,7 +20,7 @@ import java.util.logging.Logger;
  *
  * @author 50230
  */
-public class SvcEmpleado extends Dao {
+public class SvcEmpleado extends DaoImp {
 
     private String query;
 
@@ -27,11 +29,12 @@ public class SvcEmpleado extends Dao {
 
     public List<Empleado> getEmpleados() {
         List<Empleado> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT empleado_id, nombre, estado "
                     + "FROM EMPLEADO";
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Empleado(rst.getInt(1), rst.getString(2), rst.getString(3)));
             }
@@ -40,6 +43,7 @@ public class SvcEmpleado extends Dao {
         } finally {
             try {
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -47,14 +51,18 @@ public class SvcEmpleado extends Dao {
     }
 
     public Empleado doAction(String action, Empleado empleado) {
+        ResultSet rst = null;
         try {
-            if (action.equals(Dao.ACTION_ADD)) {
+            if (action.equals(ACTION_ADD)) {
                 query = "SELECT empleado_seq.NEXTVAL FROM DUAL";
                 pst = getConnection().prepareStatement(query);
-                ResultSet rst = pst.executeQuery();
+                rst = pst.executeQuery();
                 Integer estacionId = (rst.next()) ? rst.getInt(1) : null;
                 empleado.setEmpleadoId(estacionId);
+                rst.close();
                 closePst();
+                closeConnections(); //asg
+
                 query = "INSERT INTO empleado (empleado_id, nombre, estado, creado_por, creado_el) "
                         + "VALUES (?, ?, ?, ?,SYSDATE)";
                 pst = getConnection().prepareStatement(query);
@@ -63,7 +71,9 @@ public class SvcEmpleado extends Dao {
                 pst.setString(3, empleado.getEstado());
                 pst.setString(4, empleado.getCreadoPor());
                 pst.executeUpdate();
-            } else if (action.equals(Dao.ACTION_UPDATE)) {
+                pst.close();
+                closeConnections(); //asg
+            } else if (action.equals(ACTION_UPDATE)) {
                 query = "UPDATE empleado "
                         + "SET nombre = ?, estado = ?, modificado_por = ?, modificado_el = SYSDATE "
                         + "WHERE empleado_id = ?";
@@ -73,11 +83,19 @@ public class SvcEmpleado extends Dao {
                 pst.setString(3, empleado.getCreadoPor());
                 pst.setInt(4, empleado.getEmpleadoId());
                 pst.executeUpdate();
+                pst.close();
+                closeConnections(); //asg
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcEmpleado.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return empleado;
     }
@@ -97,6 +115,7 @@ public class SvcEmpleado extends Dao {
         } finally {
             if (pst != null) {
                 pst.close();
+                closeConnections(); //asg
             }
         }
     }
@@ -112,6 +131,7 @@ public class SvcEmpleado extends Dao {
         } finally {
             if (pst != null) {
                 pst.close();
+                closeConnections(); //asg
             }
         }
     }

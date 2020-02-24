@@ -2,7 +2,8 @@ package com.vaadin.demo.dashboard;
 
 import com.fundamental.model.Acceso;
 import com.sisintegrados.generic.bean.Usuario;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
+import com.sisintegrados.daoimp.DaoImp;
 import org.vaadin.googleanalytics.tracking.GoogleAnalyticsTracker;
 
 import com.vaadin.demo.dashboard.event.DashboardEvent.BrowserResizeEvent;
@@ -60,7 +61,7 @@ public class DashboardNavigator extends Navigator {
                 //TODO: Aplicar segurida aca para accesos NO autorizados.
                 //Para evitar accesos NO autorizados via URL.
                 boolean exists = false;
-                 Dao servicio = new Dao();
+                 Dao servicio = new DaoImp();
                 if(servicio.getAccess(event.getViewName()).isVer()){
                     exists = true;
                 }

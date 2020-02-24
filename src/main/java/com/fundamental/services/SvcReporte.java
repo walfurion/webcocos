@@ -1,8 +1,11 @@
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.Mediopago;
 import com.fundamental.model.Producto;
+import com.sisintegrados.daoimp.DaoImp;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,11 +15,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Henry Barrientos
  */
-public class SvcReporte extends Dao {
+public class SvcReporte extends DaoImp {
 
     String query;
     SimpleDateFormat sdf_ddmmyyyy = new SimpleDateFormat("dd/MM/yyyy");
@@ -24,6 +29,7 @@ public class SvcReporte extends Dao {
 
     private String getMTDTurnosValidos(Date fechaInicial, Date fechaFinal, String estacionId) { //Integer estacionId) {
         String result = "";
+        ResultSet rst = null;
         try {
             query = "SELECT d.fecha, t.turno_id, e.nombre "
                     + "FROM dia d, turno t, estacion e "
@@ -32,7 +38,7 @@ public class SvcReporte extends Dao {
                     + "ORDER BY 3, 1, 2";   //es importante el orden
 
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             String uFecha = "", lFecha = "", lTurno = "";
             while (rst.next()) {
                 if (!uFecha.equals( rst.getString(3).concat(rst.getString(1)) )) {
@@ -48,13 +54,19 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Producto> getMTDProductos(Date fechaInicial, Date fechaFinal, String estacionId) { //Integer estacionId) {
         List<Producto> result = new ArrayList();
+        ResultSet rst = null;
         try {
 //            String turnos = getMTDTurnosValidos(fechaInicial, fechaFinal, estacionId);
             query = "SELECT DISTINCT pro.producto_id, pro.nombre, pro.codigo, pro.estado, pro.orden_pos "
@@ -73,7 +85,7 @@ public class SvcReporte extends Dao {
 //            pst.setString(1, estacionId);
             pst.setString(1, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(2, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Producto product;
             while (rst.next()) {
                 product = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), null, rst.getInt(5));
@@ -84,7 +96,12 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -92,6 +109,7 @@ public class SvcReporte extends Dao {
 //    public List<String[]> getMTDPrecios(Date fechaInicial, Date fechaFinal, Integer estacionId, String productsIds, Integer tipodespachoId) {
     public List<String[]> getMTDPrecios(Date fechaInicial, Date fechaFinal, String estacionId, String productsIds, Integer tipodespachoId) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             //La siguiente funcion trae el primer turno de cada dia, es necesario mantener esta llamada
             //Se toma el precio del primer turno de cada dia
@@ -141,7 +159,7 @@ public class SvcReporte extends Dao {
 //            pst.setInt(4, estacionId);
             pst.setString(3, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(4, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new String[]{
                     rst.getString(1), //fecha
@@ -153,13 +171,19 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<String[]> getMTDVolumenes(Date fechaInicial, Date fechaFinal, String estacionId, String productsIds) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT TO_CHAR(d.fecha, 'dd/mm/yyyy') fecha, pro.producto_id, pro.nombre, SUM(ld.lectura_finaL - ld.lectura_inicial - ld.calibracion), e.nombre "
                     + "FROM dia d, turno t, producto pro, lectura l, lectura_detalle ld, estacion e "
@@ -182,7 +206,7 @@ public class SvcReporte extends Dao {
 //            pst.setInt(4, estacionId);
             pst.setString(3, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(4, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Double total = 0D, lastTotal = 0D, diff = 0D;
 //            int itemNum = 0;
             String fecha = "";
@@ -215,13 +239,20 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcReporte.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return result;
     }
 
     public List<String[]> getMTDMonetario(Date fechaInicial, Date fechaFinal, String estacionId, String productsIds) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT TO_CHAR(d.fecha, 'dd/mm/yyyy') fecha, pro.producto_id, pro.nombre, SUM(p.precio * (ld.lectura_final - ld.lectura_inicial - ld.calibracion)), e.nombre "
                     + "FROM dia d, turno t, producto pro, lectura l, lectura_detalle ld, precio p, estacion e "
@@ -245,7 +276,7 @@ public class SvcReporte extends Dao {
 //            pst.setInt(4, estacionId);
             pst.setString(3, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(4, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new String[]{
                     rst.getString(5).concat(rst.getString(1)), //fecha
@@ -257,13 +288,19 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<String[]> getMTDVentasMiscelaneos(Date fechaInicial, Date fechaFinal, Integer estacionId) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT TO_CHAR(d.fecha, 'dd/mm/yyyy') fecha, SUM(ap.monto) "
                     + "FROM dia d, producto p, estacion_producto ep, arqueocaja a, arqueocaja_producto ap "
@@ -284,7 +321,7 @@ public class SvcReporte extends Dao {
             pst.setInt(4, estacionId);
             pst.setString(5, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(6, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new String[]{
                     rst.getString(1), //fecha
@@ -294,7 +331,13 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcReporte.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return result;
     }
@@ -302,6 +345,7 @@ public class SvcReporte extends Dao {
     //Venta exenta
     public List<String[]> getMTDVentaByProducto(Date fechaInicial, Date fechaFinal, Integer estacionId, Integer productoId) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT TO_CHAR(d.fecha, 'dd/mm/yyyy') fecha, SUM(ap.monto) "
                     + "FROM dia d, producto p, estacion_producto ep, arqueocaja a, arqueocaja_producto ap "
@@ -324,7 +368,7 @@ public class SvcReporte extends Dao {
             pst.setString(6, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(7, sdf_ddmmyyyy.format(fechaFinal));
             pst.setInt(8, productoId);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new String[]{
                     rst.getString(1), //fecha
@@ -334,13 +378,19 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<String[]> getMTDVentaOtrosProductos(Date fechaInicial, Date fechaFinal, String estacionId, boolean totalXdia) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             List<Producto> otrosProductos = getOtrosProductosByEstacionid(fechaInicial, fechaFinal, estacionId);
             String otrosProductosIds = "";
@@ -371,7 +421,7 @@ public class SvcReporte extends Dao {
 //                pst.setInt(4, estacionId);
                 pst.setString(3, sdf_ddmmyyyy.format(fechaInicial));
                 pst.setString(4, sdf_ddmmyyyy.format(fechaFinal));
-                ResultSet rst = pst.executeQuery();
+                rst = pst.executeQuery();
                 while (rst.next()) {
                     diff = (totalAnt > 0 && rst.getDouble(2) > 0) ? (rst.getDouble(2) - totalAnt) / totalAnt : 0D;
                     result.add(new String[]{
@@ -403,7 +453,7 @@ public class SvcReporte extends Dao {
 //                pst.setInt(4, estacionId);
                 pst.setString(3, sdf_ddmmyyyy.format(fechaInicial));
                 pst.setString(4, sdf_ddmmyyyy.format(fechaFinal));
-                ResultSet rst = pst.executeQuery();
+                rst = pst.executeQuery();
                 List<String> datamap = new ArrayList<String>();
                 Map<Integer, Double> mapTotal = new HashMap();
                 String uFecha = "";
@@ -430,13 +480,19 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Producto> getOtrosProductosByEstacionid(Date fechaInicial, Date fechaFinal, String estacionId) { //Integer estacionId) {
         List<Producto> result = new ArrayList();
+        ResultSet rst = null;
         try {
             //los distintos de tipo combustible (1)
             miQuery = "SELECT DISTINCT p.producto_id, p.nombre, p.codigo, p.estado, p.creado_por, p.orden_pos "
@@ -449,20 +505,26 @@ public class SvcReporte extends Dao {
 //            pst.setInt(1, estacionId);
             pst.setString(1, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(2, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getInt(6)));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public Integer getCantidadTurnos(Date fechaInicial, Date fechaFinal, String estacionId) { //Integer estacionId) {
         Integer result = 0;
+        ResultSet rst = null;
         try {
             query = "SELECT TO_CHAR(d.fecha, 'dd/mm/yyyy') fecha, COUNT(t.turno_id) "
                     + "FROM dia d, turno t "
@@ -473,12 +535,17 @@ public class SvcReporte extends Dao {
 //            pst.setInt(1, estacionId);
             pst.setString(1, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(2, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             result = (rst.next()) ? rst.getInt(2) : 0;
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -486,6 +553,7 @@ public class SvcReporte extends Dao {
     //Venta por turno
     public List<String[]> getMTDVentaTurnoByFechaEstacion(Date fechaInicial, Date fechaFinal, String estacionId) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             int cantTurnos = getCantidadTurnos(fechaInicial, fechaFinal, estacionId.toString());
 
@@ -525,7 +593,7 @@ public class SvcReporte extends Dao {
             pst.setString(3, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(4, sdf_ddmmyyyy.format(fechaFinal));
 
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             String fecha = "";
             List<String> tmplist = new ArrayList();
             int mysize = 0;
@@ -555,13 +623,19 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public String getMTDIslasIds(Date fechaInicial, Date fechaFinal, String estacionId) { //Integer estacionId) {
         String result = "";
+        ResultSet rst = null;
         try {
             query = "SELECT distinct b.isla "
                     + "FROM dia d, turno t, lectura l, lectura_detalle ld, estacion e, bomba b "
@@ -570,20 +644,26 @@ public class SvcReporte extends Dao {
                     + "GROUP BY TO_CHAR(d.fecha, 'dd/mm/yyyy'), b.isla "
                     + "ORDER BY 1";
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result += (result.isEmpty()) ? rst.getString(1) : ", ".concat(rst.getString(1));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<String[]> getMTDVentaIslaByFechaEstacion(Date fechaInicial, Date fechaFinal, String estacionId) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             String islasIds = getMTDIslasIds(fechaInicial, fechaFinal, estacionId);
             query = "SELECT TO_CHAR(d.fecha, 'dd/mm/yyyy') fecha, b.isla, SUM(ld.lectura_finaL - ld.lectura_inicial - ld.calibracion), e.nombre "
@@ -608,7 +688,7 @@ public class SvcReporte extends Dao {
 //            pst.setInt(4, estacionId);
             pst.setString(3, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(4, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             String fecha = "";
             List<String> tmplist = new ArrayList();
             while (rst.next()) {
@@ -629,13 +709,19 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Mediopago> getMTDMediospagoByFechaEstacion_distintos(Date fechaInicial, Date fechaFinal, String estacionId) { //Integer estacionId) {
         List<Mediopago> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT DISTINCT m.mediopago_id, m.nombre, m.tipo "
                     + "FROM arqueocaja_detalle ad, dia d, arqueocaja a, mediopago m "
@@ -646,20 +732,26 @@ public class SvcReporte extends Dao {
 //            pst.setInt(1, estacionId);
             pst.setString(1, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(2, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Mediopago(rst.getInt(1), rst.getString(2), rst.getInt(3), null, 0, null, false, null));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Mediopago> getMTDMediospagoEfectivoByFechaEstacion_distintos(Date fechaInicial, Date fechaFinal, String estacionId) { //Integer estacionId) {
         List<Mediopago> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT DISTINCT m.mediopago_id, m.nombre, m.tipo "
                     + "FROM efectivo ad, dia d, arqueocaja a, mediopago m "
@@ -670,20 +762,26 @@ public class SvcReporte extends Dao {
 //            pst.setInt(1, estacionId);
             pst.setString(1, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(2, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Mediopago(rst.getInt(1), rst.getString(2), rst.getInt(3), null, 0, null, false, null));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     private Map<String, Double> getTotalxDia(Date fechaInicial, Date fechaFinal, String estacionId) {
         Map<String, Double> result = new HashMap();
+        ResultSet rst =null;
         try {
             //determinar monto total por dia
             query = "SELECT fecha, SUM(monto), nombre "
@@ -725,7 +823,7 @@ public class SvcReporte extends Dao {
 //            pst.setInt(10, estacionId);
             pst.setString(7, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(8, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 query = rst.getString(3).concat(rst.getString(1));
                 result.put(query, rst.getDouble(2));
@@ -733,20 +831,25 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<String[]> getMTDMediospagoByFechaEstacion(Date fechaInicial, Date fechaFinal, String estacionId) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             List<Mediopago> mediospago = getMTDMediospagoByFechaEstacion_distintos(fechaInicial, fechaFinal, estacionId);
             String mediospagoIds = "";
             for (Mediopago m : mediospago) {
                 mediospagoIds += (mediospagoIds.isEmpty()) ? m.getMediopagoId() : ",".concat(m.getMediopagoId().toString());
             }
-            ResultSet rst;
             Map<String, Double> totalXdia = getTotalxDia(fechaInicial, fechaFinal, estacionId);
             query = "SELECT TO_CHAR(d.fecha, 'dd/mm/yyyy') fecha, m.nombre, SUM(ad.monto), e.nombre "
                     + "FROM dia d, arqueocaja a, arqueocaja_detalle ad, mediopago m, estacion e " //, mediopago_pais mp "
@@ -798,13 +901,19 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<String[]> getMTDEfectivoByFechaEstacion(Date fechaInicial, Date fechaFinal, String estacionId) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             List<Mediopago> mediospagoE = getMTDMediospagoEfectivoByFechaEstacion_distintos(fechaInicial, fechaFinal, estacionId);
             String mediospagoIds = "";
@@ -836,7 +945,7 @@ public class SvcReporte extends Dao {
 //            pst.setInt(4, estacionId);
             pst.setString(3, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(4, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             String fecha = "";
             List<String> tmplist = new ArrayList();
             Double percent;
@@ -864,13 +973,19 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<String[]> getMTDInventarioByFechaEstacion(Date fechaInicial, Date fechaFinal, String estacionId, String invType) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             String productosIds = "";
             List<Producto> productos = getMTDProductos(fechaInicial, fechaFinal, estacionId);
@@ -901,7 +1016,7 @@ public class SvcReporte extends Dao {
 //            pst.setInt(4, estacionId);
             pst.setString(3, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(4, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             String fecha = "";
             List<String> tmplist = new ArrayList();
             Double total = 0D, diff = 0D, lastTotal = 0D;
@@ -932,13 +1047,19 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<String[]> getMTDCalibraciones(Date fechaInicial, Date fechaFinal, String estacionId, String productsIds) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT TO_CHAR(d.fecha, 'dd/mm/yyyy') fecha, pro.producto_id, SUM(ld.calibracion), e.nombre "
                     + "FROM dia d, turno t, producto pro, lectura l, lectura_detalle ld, estacion e "
@@ -961,7 +1082,7 @@ public class SvcReporte extends Dao {
 //            pst.setInt(4, estacionId);
             pst.setString(3, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(4, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             String fecha = "";
             List<String> tmplist = new ArrayList();
             Double total = 0D, diff = 0D, lastTotal = 0D;
@@ -992,13 +1113,19 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<String[]> getMTDFaltanteSobrante(Date fechaInicial, Date fechaFinal, String estacionId, String productsIds) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             //Ventas
             query = "SELECT dummy.fecha, SUM(dummy.monto), dummy.nombre  "
@@ -1035,14 +1162,14 @@ public class SvcReporte extends Dao {
 //            pst.setInt(7, estacionId);
             pst.setString(5, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(6, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Map<String, Double> ventas = new HashMap();
             while (rst.next()) {
                 query = rst.getString(3).concat(rst.getString(1));
                 ventas.put(query, rst.getDouble(2));
             }
-            try { pst.close(); } catch (Exception ignore) { }
 
+            closePst();
             //Ingresos
             query = "SELECT dtable.fecha, SUM(dtable.monto), dtable.nombre "
                     + "FROM ( "
@@ -1102,13 +1229,19 @@ public class SvcReporte extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<String[]> getMTDFaltanteSobranteVol(Date fechaInicial, Date fechaFinal, String estacionId, String productsIds) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT dummy.fecha, dummy.producto_id, SUM(dummy.monto), dummy.nombre "
                     + "FROM ( "
@@ -1159,7 +1292,7 @@ public class SvcReporte extends Dao {
             pst.setString(7, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(8, sdf_ddmmyyyy.format(fechaFinal));
 
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             String fecha = "", prodSS;
 //            Map<Integer, Double> prodVals = new HashMap();
             Map<String, Double> prodVals = new HashMap();
@@ -1189,13 +1322,19 @@ prodSS = rst.getString(2).concat(rst.getString(4));
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<String[]> getDataMovimiento(Date fechaInicial, Date fechaFinal, Integer paisId) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
 //            List<String[]> dataVolumen = getMTDVolumenes(fechaInicial, fechaFinal, estacionId, productsIds);
             List<String[]> dataVolumen = new ArrayList();
@@ -1209,13 +1348,14 @@ prodSS = rst.getString(2).concat(rst.getString(4));
             pst.setInt(1, paisId);
             pst.setString(2, sdf_ddmmyyyy.format(fechaInicial));
             pst.setString(3, sdf_ddmmyyyy.format(fechaFinal));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 //fecha; estacion; producto_id; venta
                 dataVolumen.add(new String[]{rst.getString(1), rst.getString(2), rst.getString(3), rst.getString(4)});
             }
-            try { pst.close(); } catch (Exception ignore) { }
 
+            closePst();
+                    
             query = "SELECT e.deposito, e.nombre, p.nombre, TO_CHAR(ic.fecha, 'dd/mm/yyyy'), ic.inicial, ic.compras, 0, ic.final"
                     + ", p.producto_id "
                     + "FROM inventario_coco ic, estacion e, producto p "
@@ -1248,9 +1388,13 @@ prodSS = rst.getString(2).concat(rst.getString(4));
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
-
 }

@@ -8,12 +8,13 @@ package com.sisintegrados.view.form;
 import com.fundamental.model.Lubricanteprecio;
 import com.fundamental.model.Marca;
 import com.fundamental.model.Producto;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcGeneral;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
 import com.jain.addon.resource.DefaultI18NResourceProvider;
 import com.jain.addon.resource.I18NProvider;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.GenericLubricantePrecio;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
@@ -166,7 +167,7 @@ public class FormUploadTarjetas extends Window {
                                 lubPrecio.setModificadoPor(usuario.getNombre());
                                 pr.setModificadoPor(usuario.getNombre());
                                 System.out.println("fila a enviar update " + lubPrecio.toString());
-                                Lubricanteprecio p = service.doActionLubprecioCarga(Dao.ACTION_UPDATE, lubPrecio, pr);
+                                Lubricanteprecio p = service.doActionLubprecioCarga(DaoImp.ACTION_UPDATE, lubPrecio, pr);
                                 System.out.println("p " + p.toString());
 
                             }
@@ -199,7 +200,7 @@ public class FormUploadTarjetas extends Window {
                                     //lubPrecio.setModificadoPor(usuario.getNombre());
                                     lubPrecio.setCreadoPor(usuario.getNombre());
                                     System.out.println("fila a enviar create " + lubPrecio.toString());
-                                    Lubricanteprecio p = service.doActionLubprecioCarga(Dao.ACTION_ADD, lubPrecio, lubPrecio);
+                                    Lubricanteprecio p = service.doActionLubprecioCarga(DaoImp.ACTION_ADD, lubPrecio, lubPrecio);
                                     System.out.println("p " + p.toString());
 
                                 }

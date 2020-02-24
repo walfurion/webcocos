@@ -5,9 +5,10 @@ import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcMedioPago;
 import com.fundamental.utils.XlsxReportGenerator;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -150,7 +151,7 @@ public class RptMediopago extends Panel implements View {
         } else {
             paises = svcMP.getAllPaises();
         }
-        svcMP.closeConnections();
+//        svcMP.closeConnections();
     }
 
     private void buildButtons() {
@@ -201,7 +202,7 @@ public class RptMediopago extends Panel implements View {
 //                allMediosEfectivo = svcMP.getMediospagoByPaisidTipoid(pais.getPaisId(), 2);
                     Integer paisId = (cbxPais != null && cbxPais.getValue() != null) ? ((Pais) cbxPais.getValue()).getPaisId() : null;
                     midata = svcMP.getMediospagoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-                    svcMP.closeConnections();
+//                    svcMP.closeConnections();
 
                     Map<Integer, Integer> mapPosTitle = new HashMap();
                     int index, colIniciales = 5;
@@ -348,7 +349,7 @@ public class RptMediopago extends Panel implements View {
                     midata = svcMP.getMediospagoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
 //                    midata1 = svcMP.getEfectivoReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
                     List<String[]> dataVol = svcMP.getVolumenesReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-                    svcMP.closeConnections();
+//                    svcMP.closeConnections();
 
 //Quitamos la columna mediopago_id
                     List<String[]> data = new ArrayList();
@@ -395,7 +396,7 @@ public class RptMediopago extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnGenerar.setEnabled(acceso.isAgregar());

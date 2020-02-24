@@ -2,9 +2,10 @@ package com.vaadin.demo.dashboard.view;
 
 import com.fundamental.model.Acceso;
 import com.sisintegrados.generic.bean.Usuario;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 
 import com.google.common.eventbus.Subscribe;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.demo.dashboard.event.DashboardEvent.NotificationsCountUpdatedEvent;
 import com.vaadin.demo.dashboard.event.DashboardEvent.PostViewChangeEvent;
 import com.vaadin.demo.dashboard.event.DashboardEvent.ProfileUpdatedEvent;
@@ -146,7 +147,7 @@ public final class DashboardMenu extends CustomComponent {
 
 //        menuItemsLayout.addComponent(new ValoMenuItemButton(DashboardViewType.HOME));
         Usuario user = ((Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName()));
-        Dao servicio = new Dao();
+        Dao servicio = new DaoImp();
         List<Acceso> misAccessos = servicio.getAccesosByUsuarioid(user.getUsuarioId(), user.isSysadmin());
         servicio.closeConnections();
         

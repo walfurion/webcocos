@@ -13,12 +13,12 @@ import com.fundamental.model.Turno;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoArqueo;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcDetalleTcClientes;
-import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcRepCuadrePistero;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.ArqueoTC;
 import com.sisintegrados.generic.bean.GenericBeanCliente;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
@@ -761,7 +761,7 @@ public class PrTurnoCierre extends Panel implements View {
 
         bcrArqueocaja.addAll(service.getArqueocajaByTurnoidDia(turno.getTurnoId(), dia.getFecha()));
 
-        service.closeConnections();
+//        service.closeConnections();
 
         lblTotalVentas.addStyleName(ValoTheme.LABEL_BOLD);
         lblTotalVentas.setSizeUndefined();
@@ -786,10 +786,10 @@ public class PrTurnoCierre extends Panel implements View {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
                 pais = (Pais) cbxPais.getValue();
-                SvcEstacion svcEstacion = new SvcEstacion();
+                Dao svcEstacion = new DaoImp();
 //                estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));
                 estacionContainer = new BeanItemContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId())); //ASG
-                svcEstacion.closeConnections();
+//                svcEstacion.closeConnections();
                 cbxEstacion.setContainerDataSource(estacionContainer);
                 //limpiar
                 dfdFecha.setValue(null);
@@ -824,7 +824,7 @@ public class PrTurnoCierre extends Panel implements View {
                 ultimoTurno = (ultimoTurno.getTurnoId() == null) ? service.getUltimoTurnoByEstacionid(estacion.getEstacionId()) : ultimoTurno;
                 turno = service.getTurnoActivoByEstacionid(estacion.getEstacionId());
 //            turno = (turno.getEstadoId() == null) ? ultimoTurno : turno;
-                service.closeConnections();
+//                service.closeConnections();
             }
         });
 
@@ -851,7 +851,7 @@ public class PrTurnoCierre extends Panel implements View {
                     dia = svcTurno.getDiaByEstacionidFecha(estacion.getEstacionId(), dfdFecha.getValue());
                     dia.setFecha((dia.getFecha() == null) ? dfdFecha.getValue() : dia.getFecha());  //dia es siempre el mismo que lo seleccionado en el control
                     List<Turno> listTurno = svcTurno.getTurnosByEstacionidDiaNolectura(estacion.getEstacionId(), dfdFecha.getValue());
-                    svcTurno.closeConnections();
+//                    svcTurno.closeConnections();
                     contTurnos = new ListContainer<Turno>(Turno.class, listTurno);
                     cbxTurno.setContainerDataSource(contTurnos);
                     cbxTurno.setValue(null);
@@ -967,7 +967,7 @@ public class PrTurnoCierre extends Panel implements View {
             bcrArqueocaja.removeAllItems();
             SvcTurnoCierre service = new SvcTurnoCierre();
             bcrArqueocaja.addAll(service.getArqueocajaByTurnoidDia(turno.getTurnoId(), dia.getFecha()));
-            service.closeConnections();
+//            service.closeConnections();
             for (Integer tid : bcrArqueocaja.getItemIds()) {
                 bcrArqueocaja.getItem(tid).getItemProperty("selected").setValue(Boolean.TRUE);
             }
@@ -1059,8 +1059,8 @@ public class PrTurnoCierre extends Panel implements View {
                                 turno.setEstadoId(2);   //cerrado
                                 turno.setModificadoPor(user.getUsername());
                                 turno.setModificadoPersona(user.getNombreLogin());
-                                turno = svcTC.doActionTurno(Dao.ACTION_UPDATE, turno);
-                                svcTC.closeConnections();
+                                turno = svcTC.doActionTurno(DaoImp.ACTION_UPDATE, turno);
+//                                svcTC.closeConnections();
                                 if (turno.getTurnoId() != null) {
                                     //*Registro detalle de clientes*// ASG
                                     try {
@@ -1152,7 +1152,7 @@ public class PrTurnoCierre extends Panel implements View {
                             bcrEfectivo.addAll(svcTC.getEfectivoByArqueoid(arqueosIds));
                             bcrTarjeta.addAll(svcTC.getArqueoTC(arqueosIds));
                         }
-                        svcTC.closeConnections();
+//                        svcTC.closeConnections();
                         calcularSumas();
 //                        determinarSumatorias();
                         lblTotalVentas.setValue(numberFmt.format(totalVentas));
@@ -1840,7 +1840,7 @@ public class PrTurnoCierre extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         if (acceso.isCambiar() || acceso.isAgregar()) {

@@ -5,12 +5,14 @@
  */
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.Cliente;
 import com.fundamental.model.Dia;
 import com.fundamental.model.Precio;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Turno;
 import com.fundamental.model.dto.DtoProducto;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.EmpleadoBombaTurno;
 import com.sisintegrados.generic.bean.GenericTarjeta;
 import com.sisintegrados.generic.bean.Tarjeta;
@@ -21,12 +23,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Allan G.
  */
-public class SvcTarjetaCredito extends Dao {
+public class SvcTarjetaCredito extends DaoImp {
 
     private String query;
 
@@ -35,6 +39,7 @@ public class SvcTarjetaCredito extends Dao {
 
     public List<Tarjeta> getTarjetas(Integer idpais) {
         List<Tarjeta> result = new ArrayList();
+        ResultSet rst = null;
         try {
             miQuery = "select mediopago_id,nombre"
                     + " from mediopago"
@@ -42,7 +47,7 @@ public class SvcTarjetaCredito extends Dao {
                     + " and pais_id = " + idpais 
                     + " and estado = 'A'";
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Tarjeta(rst.getInt(1), rst.getString(2)));
             }
@@ -50,7 +55,13 @@ public class SvcTarjetaCredito extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcTarjetaCredito.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return result;
     }
@@ -68,6 +79,8 @@ public class SvcTarjetaCredito extends Dao {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        pst.close();
+        closeConnections(); //asg
 
         /*Asigna detalle clientes prepago al arqueo*/
         try {
@@ -90,6 +103,7 @@ public class SvcTarjetaCredito extends Dao {
         } finally {
             if (pst != null) {
                 pst.close();
+                closeConnections(); //asg
             }
         }
         return result;
@@ -120,6 +134,14 @@ public class SvcTarjetaCredito extends Dao {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+        }finally{
+            try {
+                rst.close();
+                pst.close();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcTarjetaCredito.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return bcrTarjetaCredito;
     }

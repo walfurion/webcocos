@@ -5,10 +5,11 @@ import com.fundamental.model.TasaCambio;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
-import com.fundamental.services.Dao;
 import com.fundamental.services.SvcMntTasaCambio;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.XlsxReportGenerator;
+import com.sisintegrados.dao.Dao;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Item;
@@ -59,7 +60,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.vaadin.maddon.ListContainer;
@@ -161,7 +161,7 @@ public class MntCambio extends Panel implements View {
         List<TasaCambio> tasasc = service.getAllRates(); //ASG CAMBIO
         bcrChangeRate.addAll(tasasc);
         paises = service.getAllPaises2(user.getUsuarioId()); //ASG CAMBIO
-        service.closeConnections();
+//        service.closeConnections(); // ASG
     }
 
     private void initControls() {
@@ -228,7 +228,7 @@ public class MntCambio extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (tblChangeRate.getValue()!=null) {
-                action = Dao.ACTION_UPDATE;
+                action = DaoImp.ACTION_UPDATE;
                 binder.setItemDataSource(bcrChangeRate.getItem(tblChangeRate.getValue()));
                 tasaCambio = bcrChangeRate.getItem(tblChangeRate.getValue()).getBean();
                 for (Pais p : paises) {
@@ -266,7 +266,7 @@ public class MntCambio extends Panel implements View {
         btnAdd.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                action = Dao.ACTION_ADD;
+                action = DaoImp.ACTION_ADD;
                 tasaCambio = new TasaCambio();
                 binder.setItemDataSource(tasaCambio);
             }
@@ -288,7 +288,7 @@ public class MntCambio extends Panel implements View {
                 TasaCambio tco;
                 for (Integer itemId : bcrChangeRate.getItemIds()) {
                     tco = bcrChangeRate.getItem(itemId).getBean();
-                    if (  action.equals(Dao.ACTION_ADD) &&
+                    if (  action.equals(DaoImp.ACTION_ADD) &&
                             tco.getPaisId().equals(((Pais) cbxPais.getValue()).getPaisId())
                             && (
                                tco.getFechaInicio().equals(pdfDateStart.getValue())
@@ -314,7 +314,7 @@ public class MntCambio extends Panel implements View {
 
                 SvcMntTasaCambio service = new SvcMntTasaCambio();
                 tasaCambio = service.doAction(action, tasaCambio);
-                service.closeConnections();
+//                service.closeConnections(); //ASG
                 if (tasaCambio.getTasacambioId() > 0) {
                     Notification notif = new Notification("¡Exito!", "La acción se ha ejecutado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);
@@ -338,7 +338,7 @@ public class MntCambio extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnAdd.setEnabled(acceso.isAgregar());

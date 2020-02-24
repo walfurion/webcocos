@@ -8,9 +8,10 @@ import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoBean;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcConfBombaEstacion;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
@@ -145,7 +146,7 @@ public class MntConfBombaEstacion extends Panel implements View {
         bcrEstConf.setBeanIdProperty("idDto");
         SvcConfBombaEstacion service = new SvcConfBombaEstacion();
         paises = service.getAllPaises();
-        service.closeConnections();
+//        service.closeConnections(); //ASG
     }
 
     private void buildFilters() {
@@ -162,7 +163,7 @@ public class MntConfBombaEstacion extends Panel implements View {
                 List<Estacion> estaciones;
                 SvcConfBombaEstacion service = new SvcConfBombaEstacion();
                 estaciones = service.getStationsByCountry(((Pais) cbxPais.getValue()).getPaisId(), true);
-                service.closeConnections();
+//                service.closeConnections();  //ASG
                 cbxEstacion.setContainerDataSource(new ListContainer<Estacion>(Estacion.class, estaciones));
                 bcrConfiguraciones.removeAllItems();
                 bcrEstConf.removeAllItems();
@@ -182,7 +183,7 @@ public class MntConfBombaEstacion extends Panel implements View {
                 bcrConfiguraciones.removeAllItems();
                 SvcConfBombaEstacion service = new SvcConfBombaEstacion();
                 bcrConfiguraciones.addAll(service.getConfiguracionHeadByEstacionid(((Estacion) cbxEstacion.getValue()).getEstacionId(), true));
-                service.closeConnections();
+//                service.closeConnections(); //ASG
                 if (bcrConfiguraciones.size() > 0) {
                     int kkk = bcrConfiguraciones.firstItemId();
                     tableConfiguracion.setValue(bcrConfiguraciones.getItem(kkk));
@@ -269,7 +270,7 @@ public class MntConfBombaEstacion extends Panel implements View {
 //                    btnGuardar.setEnabled(false);
 //                    tfdNombre.setEnabled(false);
                     configuracion = bcrConfiguraciones.getItem(itemid).getBean();
-                    action = Dao.ACTION_UPDATE;
+                    action = DaoImp.ACTION_UPDATE;
                 }
             }
         });
@@ -325,8 +326,8 @@ public class MntConfBombaEstacion extends Panel implements View {
                                 configuracion.setEstado("I");
                                 configuracion.setModificadoPor(user.getUsername());
                                 SvcConfBombaEstacion service = new SvcConfBombaEstacion();
-                                configuracion = service.doAction(Dao.ACTION_DELETE, configuracion);
-                                service.closeConnections();
+                                configuracion = service.doAction(DaoImp.ACTION_DELETE, configuracion);
+//                                service.closeConnections(); //ASG
                                 if (configuracion.getEstacionId() != null) {
                                     Notification.show("La acción se ha ejecutado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                                     UI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_CONF_BOMBA_ESTACION.getViewName());
@@ -357,7 +358,7 @@ public class MntConfBombaEstacion extends Panel implements View {
                     configuracion = new EstacionConfHead();
                     SvcConfBombaEstacion service = new SvcConfBombaEstacion();
                     List<Bomba> bombas = service.getBombasByEstacionid(((Estacion) cbxEstacion.getValue()).getEstacionId());
-                    service.closeConnections();
+//                    service.closeConnections(); //ASG
                     EstacionConf ecf;
                     int index = 1;
                     bcrEstConf.removeAllItems();
@@ -375,7 +376,7 @@ public class MntConfBombaEstacion extends Panel implements View {
                     cbxEstado.setValue(estados.get(0));
                     dfdHoraInicio.setValue(new Date());
                     dfdHoraFin.setValue(new Date());
-                    action = Dao.ACTION_ADD;
+                    action = DaoImp.ACTION_ADD;
                 } else {
                     Notification.show("Primero elija una estación.", Notification.Type.ERROR_MESSAGE);
                     return;
@@ -394,7 +395,7 @@ public class MntConfBombaEstacion extends Panel implements View {
                     return;
                 }
                 for (Integer itemid : bcrConfiguraciones.getItemIds()) {
-                    if (action.equals(Dao.ACTION_ADD) && bcrConfiguraciones.getItem(itemid).getBean().getNombre().toUpperCase().equals(nombre)) {
+                    if (action.equals(DaoImp.ACTION_ADD) && bcrConfiguraciones.getItem(itemid).getBean().getNombre().toUpperCase().equals(nombre)) {
                         Notification.show("El nombre de configuracion ya existe, elija otro.", Notification.Type.ERROR_MESSAGE);
                         return;
                     }
@@ -412,7 +413,7 @@ public class MntConfBombaEstacion extends Panel implements View {
                 configuracion.setHoraFin(Constant.SDF_HHmm.format(dfdHoraFin.getValue()));
                 SvcConfBombaEstacion service = new SvcConfBombaEstacion();
                 configuracion = service.doAction(action, configuracion);
-                service.closeConnections();
+//                service.closeConnections(); //ASG
                 if (configuracion.getEstacionconfheadId() > 0) {
                     Notification notif = new Notification("ÉXITO:", "El registro de configuración se realizó con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);

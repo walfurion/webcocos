@@ -1,21 +1,27 @@
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.TasaCambio;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.Pais;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author ifred
  */
-public class SvcMntTasaCambio extends Dao {
+public class SvcMntTasaCambio extends DaoImp {
 
     private String query;
 
     public List<TasaCambio> getAllRates2(Integer paisid) {
         List<TasaCambio> result = new ArrayList();
+        ResultSet rst = null;
         query = "SELECT t.tasacambio_id, t.pais_id, t.fecha_inicio, t.fecha_fin, t.tasa, t.creado_por, p.nombre "
                 + "FROM tasacambio t, pais p WHERE t.pais_id = p.pais_id AND t.fecha_inicio >= ?"
                 +" AND p.pais_id = "+paisid;
@@ -24,7 +30,7 @@ public class SvcMntTasaCambio extends Dao {
             todayMinusSix.add(Calendar.MONTH, -6);
             pst = getConnection().prepareStatement(query);
             pst.setDate(1, new java.sql.Date(todayMinusSix.getTimeInMillis()));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             TasaCambio cambio;
             while (rst.next()) {
                 cambio = new TasaCambio(rst.getInt(1), rst.getInt(2), new java.util.Date(rst.getDate(3).getTime()), new java.util.Date(rst.getDate(4).getTime()), rst.getDouble(5), rst.getString(6));
@@ -34,7 +40,12 @@ public class SvcMntTasaCambio extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -42,12 +53,13 @@ public class SvcMntTasaCambio extends Dao {
         List<TasaCambio> result = new ArrayList();
         query = "SELECT t.tasacambio_id, t.pais_id, t.fecha_inicio, t.fecha_fin, t.tasa, t.creado_por, p.nombre "
                 + "FROM tasacambio t, pais p WHERE t.pais_id = p.pais_id AND t.fecha_inicio >= ?";
+        ResultSet rst = null;
         try {
             Calendar todayMinusSix = Calendar.getInstance();
             todayMinusSix.add(Calendar.MONTH, -6);
             pst = getConnection().prepareStatement(query);
             pst.setDate(1, new java.sql.Date(todayMinusSix.getTimeInMillis()));
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             TasaCambio cambio;
             while (rst.next()) {
                 cambio = new TasaCambio(rst.getInt(1), rst.getInt(2), new java.util.Date(rst.getDate(3).getTime()), new java.util.Date(rst.getDate(4).getTime()), rst.getDouble(5), rst.getString(6));
@@ -57,7 +69,12 @@ public class SvcMntTasaCambio extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -83,6 +100,7 @@ public class SvcMntTasaCambio extends Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -135,11 +153,12 @@ public class SvcMntTasaCambio extends Dao {
 //    }
     public TasaCambio doAction(String action, TasaCambio tasa) {
         TasaCambio result = new TasaCambio();
+        ResultSet rst = null;
         try {
-            if (action.equals(Dao.ACTION_ADD)) {
+            if (action.equals(ACTION_ADD)) {
                 query = "SELECT tasacambio_seq.NEXTVAL FROM DUAL";
                 pst = getConnection().prepareStatement(query);
-                ResultSet rst = pst.executeQuery();
+                rst = pst.executeQuery();
                 int changeRateId = (rst.next()) ? rst.getInt(1) : 0;
                 tasa.setTasacambioId(changeRateId);
                 closePst();
@@ -155,7 +174,7 @@ public class SvcMntTasaCambio extends Dao {
                 pst.setDate(6, new java.sql.Date(tasa.getFechaFin().getTime()));
                 pst.executeUpdate();
                 result = tasa;
-            } else if (action.equals(Dao.ACTION_UPDATE)) {
+            } else if (action.equals(ACTION_UPDATE)) {
                 query = "UPDATE tasacambio "
                         + "SET tasa = ?, modificado_por = ?, pais_id = ?, modificado_el = SYSDATE, fecha_inicio = ?, fecha_fin = ? "
                         + "WHERE tasacambio_id = ?";
@@ -168,15 +187,20 @@ public class SvcMntTasaCambio extends Dao {
                 pst.setInt(6, tasa.getTasacambioId());
                 pst.executeUpdate();
                 result = tasa;
-            } else if (action.equals(Dao.ACTION_DELETE)) {
+            } else if (action.equals(ACTION_DELETE)) {
             }
         } catch (Exception exc) {
             exc.printStackTrace();
             tasa.setDescError(exc.getMessage());
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcMntTasaCambio.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return result;
     }
-
 }

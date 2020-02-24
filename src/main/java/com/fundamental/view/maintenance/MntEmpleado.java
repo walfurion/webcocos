@@ -9,8 +9,9 @@ import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoBean;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcEmpleado;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
@@ -148,7 +149,7 @@ public class MntEmpleado extends Panel implements View{
                 empleado =  bcrEmpleado.getItem(tblEmpleado.getValue()).getBean();
                 tfdNombre.setValue(empleado.getNombre());
                 cbxEstado.setValue(empleado.getEstado().equals("A")?estados.get(0):estados.get(1));
-                action = Dao.ACTION_UPDATE;
+                action = DaoImp.ACTION_UPDATE;
             }
         });
         tblEmpleado.addGeneratedColumn("colEstado", new Table.ColumnGenerator() {
@@ -176,7 +177,7 @@ public class MntEmpleado extends Panel implements View{
                     tblEmpleado.setValue(null);
                     tfdNombre.setValue("");
                     cbxEstado.setValue(estados.get(0));
-                    action = Dao.ACTION_ADD;
+                    action = DaoImp.ACTION_ADD;
             }
         });
 

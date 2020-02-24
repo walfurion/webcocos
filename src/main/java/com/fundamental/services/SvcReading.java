@@ -1,25 +1,26 @@
 package com.fundamental.services;
 
 import com.fundamental.model.Bomba;
-import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Estacion;
-import static com.fundamental.services.Dao.ACTION_ADD;
-import static com.fundamental.services.Dao.ACTION_UPDATE;
 import com.sisintegrados.generic.bean.Lectura;
 import com.fundamental.model.LecturaDetalle;
 import com.fundamental.model.Lecturafinal;
 import com.fundamental.model.dto.DtoLectura;
 import com.fundamental.model.dto.DtoPrecio;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.ui.CheckBox;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Henry Barrientos
  */
-public class SvcReading extends Dao {
+public class SvcReading extends DaoImp {
 
     private String query;
 
@@ -28,6 +29,7 @@ public class SvcReading extends Dao {
 
     public List<Bomba> getBombasConLectura(Integer estacionId, Integer turnoId) {
         List<Bomba> result = new ArrayList<Bomba>();
+        ResultSet rst = null;
         try {
             query = "SELECT DISTINCT b.bomba_id, b.nombre "
                     + "FROM estacion e, bomba_estacion be, bomba b, estacion_conf_head ech, estacion_conf ec, tipodespacho td, turno t, lectura l, lectura_detalle ld "
@@ -40,7 +42,7 @@ public class SvcReading extends Dao {
             pst = getConnection().prepareStatement(query);
             pst.setObject(1, estacionId);
             pst.setObject(2, turnoId);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Bomba bomba;
             while (rst.next()) {
                 bomba = new Bomba(rst.getInt(1), rst.getString(2), null, null, null, new CheckBox("", false));
@@ -49,7 +51,13 @@ public class SvcReading extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcReading.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return result;
     }
@@ -59,8 +67,8 @@ public class SvcReading extends Dao {
      */
     public List<DtoPrecio> getPrecioByTurnoid(Integer turnoId) {
         List<DtoPrecio> result = new ArrayList();
+        ResultSet rst = null;
         try {
-            ResultSet rst;
             query = "SELECT pro.producto_id, pro.nombre, tp.tipodespacho_id, tp.nombre, p.precio "
                     + "FROM precio p, producto pro, tipodespacho tp "
                     + "WHERE p.producto_id = pro.producto_id AND p.tipodespacho_id = tp.tipodespacho_id AND p.turno_id = " + turnoId
@@ -97,13 +105,19 @@ public class SvcReading extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<DtoLectura> getLecturasByTurnoid(Integer turnoId, String tipo) {
         List<DtoLectura> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT ld.bomba_id, ld.producto_id, ld.tipo, ld.lectura_inicial, ld.lectura_final, ld.total, ld.tipodespacho_id, l.creado_persona, ld.calibracion, ld.lectura_id, l.nombre_pistero, l.nombre_jefe, l.NUMEROCASO "
                     + "FROM turno t, lectura l, lectura_detalle ld "
@@ -111,7 +125,7 @@ public class SvcReading extends Dao {
             pst = getConnection().prepareStatement(query);
             pst.setObject(1, turnoId);  //puede ser null
             pst.setString(2, tipo);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             DtoLectura dla;
             while (rst.next()) {
                 dla = new DtoLectura(0, rst.getInt(1), null, rst.getInt(2), null);
@@ -131,18 +145,24 @@ public class SvcReading extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public Lectura doActionLectura(String action, Lectura lectura) {
         Lectura result = new Lectura();
+        ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
                 query = "SELECT lectura_seq.NEXTVAL FROM DUAL";
                 pst = getConnection().prepareStatement(query);
-                ResultSet rst = pst.executeQuery();
+                rst = pst.executeQuery();
                 Integer lecturaId = (rst.next()) ? rst.getInt(1) : 0;
                 lectura.setLecturaId(lecturaId);
                 closePst();
@@ -208,13 +228,19 @@ public class SvcReading extends Dao {
             result.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public LecturaDetalle doActionLecturaDetalle(String action, LecturaDetalle lecturaDet) {
         LecturaDetalle result = new LecturaDetalle();
+        ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
                 //TODO: En esta tabla se deben guardar el dato de la configuracion que tiene en ese momento la bomba, basado en la que se eligio al crear el turno.
@@ -266,7 +292,7 @@ public class SvcReading extends Dao {
                 //Se borran las lecturas que ya no tienen detalle
                 query = "SELECT COUNT(*) FROM lectura l, lectura_detalle ld WHERE l.lectura_id = ld.lectura_id AND l.lectura_id = " + lecturaDet.getLecturaId();
                 pst = getConnection().prepareStatement(query);
-                ResultSet rst = pst.executeQuery();
+                rst = pst.executeQuery();
                 if (rst.next() && rst.getInt(1) > 0) {
                     query = "DELETE FROM lectura l WHERE l.lectura_id = " + lecturaDet.getLecturaId();
                     pst = getConnection().prepareStatement(query);
@@ -279,13 +305,19 @@ public class SvcReading extends Dao {
             result.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public Lecturafinal doActionLecturaFinal(String action, Lecturafinal objeto) {
         Lecturafinal result = new Lecturafinal();
+        ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
                 query = "INSERT INTO lecturafinal (estacion_id, bomba_id, producto_id, tipo, lectura_final, modificado_por, modificado_el, modificado_persona, lectura_inicial) "
@@ -321,7 +353,13 @@ public class SvcReading extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcReading.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return result;
     }
@@ -331,42 +369,55 @@ public class SvcReading extends Dao {
         query = "SELECT DISTINCT(ld.bomba_id) FROM lectura la, lectura_detalle ld "
                 + "WHERE la.lectura_id = ld.lectura_id AND la.estacion_id = ld.estacion_id "
                 + "AND la.estacion_id = ? AND la.turno_id = ? AND ld.bomba_id IN (" + bombas + ") ";
+        ResultSet rst = null;
         try {
             pst = getConnection().prepareStatement(query);
             pst.setInt(1, estacionId);
             pst.setInt(2, turnoId);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result += (result.isEmpty()) ? rst.getString(1) : ", " + rst.getString(1);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public Estacion getStationById(Integer estacionId) {
         Estacion result = new Estacion();
+        ResultSet rst = null;
         try {
             query = "SELECT estacion_id, nombre, codigo, pais_id, estado, fact_electronica "
                     + "FROM estacion "
                     + "WHERE estacion_id = " + estacionId;
-            ResultSet rst = getConnection().prepareStatement(query).executeQuery();
+            rst = getConnection().prepareStatement(query).executeQuery();
             if (rst.next()) {
                 result = new Estacion(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5), rst.getString(6));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public LecturaDetalle getLecturaDetalleSiguiente(Integer estacionId, Integer lecturaId, Integer bombaId, Integer productoId) {
         LecturaDetalle result = new LecturaDetalle();
+        ResultSet rst = null;
         try {
             query = "SELECT ld.lectura_id, ld.estacion_id, ld.bomba_id, ld.producto_id, ld.tipodespacho_id, ld.tipo, ld.lectura_inicial, ld.lectura_final, ld.total, ld.calibracion "
                     + "FROM lectura l, lectura_detalle ld "
@@ -377,31 +428,43 @@ public class SvcReading extends Dao {
             pst.setInt(2, lecturaId);
             pst.setInt(3, bombaId);
             pst.setInt(4, productoId);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             if (rst.next()) {
                 result = new LecturaDetalle(rst.getInt(1), rst.getInt(2), rst.getInt(3), rst.getInt(4), rst.getInt(5), rst.getString(6), rst.getDouble(7), rst.getDouble(8), rst.getDouble(9), rst.getDouble(10));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public Integer getLecturaID(Integer idempleado, Integer turnoid) {
         Integer result = -1;
+        ResultSet rst = null;
         try {
             query = "select lectura_id from lectura where turno_id = " + turnoid + " and empleado_id = " + idempleado;
             System.out.println("QUERY "+query);
-            ResultSet rst = getConnection().prepareStatement(query).executeQuery();
+            rst = getConnection().prepareStatement(query).executeQuery();
             if (rst.next()) {
                 result = rst.getInt(1);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcReading.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return result;
     }

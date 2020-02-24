@@ -5,6 +5,7 @@
  */
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.Producto;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItemContainer;
@@ -14,12 +15,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import com.fundamental.model.dto.DtoProducto;
+import com.sisintegrados.daoimp.DaoImp;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author jjosue
  */
-public class SvcDetalleLubricantes extends Dao {
+public class SvcDetalleLubricantes extends DaoImp {
 
     private String query;
 
@@ -38,6 +42,9 @@ public class SvcDetalleLubricantes extends Dao {
             closePst();
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+            pst.close();
+            closeConnections(); //asg
         }
 
         /*Asigna detalle productos al arqueo*/
@@ -61,6 +68,7 @@ public class SvcDetalleLubricantes extends Dao {
         } finally {
             if (pst != null) {
                 pst.close();
+                closeConnections(); //asg
             }
         }
         return result;
@@ -85,14 +93,22 @@ public class SvcDetalleLubricantes extends Dao {
                 DtoProducto dto = new DtoProducto();
                 dto.setValor(rst.getDouble(2));
                 dto.setCantidad(rst.getInt(3)); //ASG CANTIDAD
-                dto.setTotal(dto.getCantidad()*dto.getValor()); //ASG TOTAL
+                dto.setTotal(dto.getCantidad() * dto.getValor()); //ASG TOTAL
                 dto.setIdmarca(rst.getInt(8)); //ASG
-                System.out.println("ID MARCA SVCDETALLELUBRICANTES "+rst.getInt(8));
+                System.out.println("ID MARCA SVCDETALLELUBRICANTES " + rst.getInt(8));
                 dto.setProducto(new Producto(rst.getInt(6), rst.getString(7), null, rst.getInt(8), null, rst.getDouble(2), null));
                 bcrLubs.addItem(id, dto);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+                closeConnections(); //asg;
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcDetalleLubricantes.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return bcrLubs;
     }

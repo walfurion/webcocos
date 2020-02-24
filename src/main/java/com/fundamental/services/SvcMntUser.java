@@ -1,18 +1,23 @@
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Rol;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.dto.DtoGenericBean;
+import com.sisintegrados.daoimp.DaoImp;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Henry Barrientos
  */
-public class SvcMntUser extends Dao {
+public class SvcMntUser extends DaoImp {
     
     private String query;
     public SvcMntUser() {}
@@ -95,8 +100,9 @@ public class SvcMntUser extends Dao {
             exc.printStackTrace();
         } finally {
             try {
-//                rst.close();
-                pst.close();
+                rst.close();
+                closePst();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -110,16 +116,22 @@ public class SvcMntUser extends Dao {
                 + "FROM rol " 
                 + query
                 + "ORDER BY nombre";
+        ResultSet rst = null;
         try {
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Rol(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5) ));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -129,9 +141,10 @@ public class SvcMntUser extends Dao {
         query = "SELECT e.estacion_id, e.nombre, e.codigo, e.bu, e.deposito, e.pais_id, e.codigo_envoy, e.fact_electronica, e.estado, e.id_marca, eu.usuario_id "
                 + "FROM estacion e, estacion_usuario eu "
                 + "WHERE e.estacion_id = eu.estacion_id";
+        ResultSet rst = null;
         try {
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Estacion estacion;
             while (rst.next()) {
                 estacion = new Estacion(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(6), rst.getString(9), rst.getString(8));
@@ -141,9 +154,13 @@ public class SvcMntUser extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
-     
 }

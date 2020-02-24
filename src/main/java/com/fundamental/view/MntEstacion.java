@@ -2,7 +2,7 @@ package com.fundamental.view;
 
 import com.fundamental.model.Acceso;
 import com.fundamental.model.Bomba;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Marca;
 import com.sisintegrados.generic.bean.Pais;
@@ -12,6 +12,7 @@ import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoGenericBean;
 import com.fundamental.services.SvcMntEstacion;
 import com.fundamental.utils.Util;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Item;
@@ -211,7 +212,7 @@ Responsive.makeResponsive(vltLubs);*/
         listLubricants = service.getAllProductosByTypeMarca(2, true, null);  //lubricants
         listMiscelaneos = service.getAllProductosByTypeMarca(3, true, null);
         ctrBrand = new ListContainer<Marca>(Marca.class, service.getAllBrands(false));
-        service.closeConnections();
+//        service.closeConnections(); //ASG
 
         if (bcrStations.getItemIds().size() > 0) {
             int firstItemId = bcrStations.getItemIds().get(0);
@@ -377,7 +378,7 @@ Responsive.makeResponsive(vltLubs);*/
                 estacion.setEstado("A");
 //                binder.bindMemberFields(this);
                 binder.setItemDataSource(estacion);
-                action = Dao.ACTION_ADD;
+                action = DaoImp.ACTION_ADD;
                 chkMuestraPOS.setValue(Boolean.FALSE);
                 for (Integer bombaId : bcrBombas.getItemIds()) {
                     bcrBombas.getItem(bombaId).getItemProperty("selected").setValue(false);
@@ -450,19 +451,19 @@ Responsive.makeResponsive(vltLubs);*/
                 }
 
                 SvcMntEstacion service = new SvcMntEstacion();
-                if (action.equals(Dao.ACTION_ADD) && service.existeBU(estacion.getBu())) {
+                if (action.equals(DaoImp.ACTION_ADD) && service.existeBU(estacion.getBu())) {
                     Notification.show("El código BU ingresado ya fue utilizado por otra estación.");
-                    service.closeConnections();
+//                    service.closeConnections(); 
                     return;
-                } else if (action.equals(Dao.ACTION_ADD) && service.existeCodEnvoy(estacion.getCodigoEnvoy())) {
+                } else if (action.equals(DaoImp.ACTION_ADD) && service.existeCodEnvoy(estacion.getCodigoEnvoy())) {
                     Notification.show("El código ENVOY ingresado ya fue utilizado por otra estación.");
-                    service.closeConnections();
+//                    service.closeConnections(); 
                     return;
                 }
                 //TODO: Completar guardado/modificado de productos asociados
                 //TODO: Bombas y productos son obligatorias
                 estacion = service.doAction(action, estacion);
-                service.closeConnections();
+//                service.closeConnections(); 
                 if (estacion.getEstacionId() != null) {
                     Notification notif = new Notification("¡Exito!", "La acción se ha ejecutado correctamente.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);
@@ -530,7 +531,7 @@ Responsive.makeResponsive(vltLubs);*/
 
                 defineSelectedBombas();
                 defineSelectedProducts();
-                action = Dao.ACTION_UPDATE;
+                action = DaoImp.ACTION_UPDATE;
 
             }
         });
@@ -700,7 +701,7 @@ Responsive.makeResponsive(vltLubs);*/
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnAdd.setEnabled(acceso.isAgregar());

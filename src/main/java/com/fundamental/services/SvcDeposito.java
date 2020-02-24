@@ -5,22 +5,24 @@
  */
 package com.fundamental.services;
 
-import com.fundamental.model.Mediopago;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
-import com.sisintegrados.generic.bean.GenericDepositoDet;
 import com.sisintegrados.generic.bean.GenericMedioPago;
 import com.vaadin.data.util.BeanContainer;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author jjosu
  */
-public class SvcDeposito extends Dao {
+public class SvcDeposito extends DaoImp {
 
     private String miQuery;
 
@@ -53,7 +55,7 @@ public class SvcDeposito extends Dao {
 //    }
     public List<GenericMedioPago> getDepositoByEstacion(String idestacion, Date date) {
         List<GenericMedioPago> result = new ArrayList();
-
+        ResultSet rst = null;
         try {
             miQuery = "SELECT A.IDDEPOSITODET, A.MONTO, A.COMENTARIOS, A.NOBOLETA,\n"
                     + "        B.ESTACION_ID,B.NOMBRE,\n"
@@ -71,7 +73,7 @@ public class SvcDeposito extends Dao {
             /*Envio parametros necesarios*/
             pst.setString(1, idestacion);
             pst.setDate(2, sqlDateIni);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
 
             while (rst.next()) {
                 result.add(new GenericMedioPago(rst.getInt(1), new Estacion(rst.getInt(5), rst.getString(6)), new GenericBeanMedioPago(rst.getInt(7), rst.getString(8)), rst.getString(4), rst.getString(3), rst.getDouble(2), rst.getDouble(9)));
@@ -81,7 +83,9 @@ public class SvcDeposito extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -114,6 +118,7 @@ public class SvcDeposito extends Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -122,6 +127,7 @@ public class SvcDeposito extends Dao {
 
     public List<GenericBeanMedioPago> getAllMediosPago(boolean includeInactives, int idpais) {
         List<GenericBeanMedioPago> result = new ArrayList();
+        ResultSet rst = null;
         try {
             String query = (includeInactives) ? "" : " AND m.estado = 'A' ";
             query = "SELECT m.mediopago_id, m.nombre "
@@ -132,7 +138,7 @@ public class SvcDeposito extends Dao {
                     + query
                     + " ORDER BY m.nombre";
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             GenericBeanMedioPago mediopago;
             while (rst.next()) {
                 mediopago = new GenericBeanMedioPago(rst.getInt(1), rst.getString(2));
@@ -142,7 +148,9 @@ public class SvcDeposito extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -152,13 +160,14 @@ public class SvcDeposito extends Dao {
     public double getTasaCambio(int paisid) {
         double result = 0;
         String query = "";
+        ResultSet rst = null;
         try {
 
             query = "select TASA FROM TASACAMBIO "
                     + "WHERE "
                     + "PAIS_ID = " + paisid;
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
 
             while (rst.next()) {
                 result = rst.getDouble(1);
@@ -167,7 +176,9 @@ public class SvcDeposito extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -187,7 +198,7 @@ public class SvcDeposito extends Dao {
             /*Envio parametros necesarios*/
             pst.setString(1, String.valueOf(estacionid));
             pst.setDate(2, sqlDateIni);
-            ResultSet rst = pst.executeQuery();
+            pst.executeUpdate();
             closePst();
             System.out.println("delete exitoso");
             respuesta = 1;
@@ -196,6 +207,7 @@ public class SvcDeposito extends Dao {
         } finally {
             try {
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -239,6 +251,12 @@ public class SvcDeposito extends Dao {
         } catch (Exception e) {
             e.printStackTrace();
             respuesta = 0;
+        }finally{
+            try {
+                pst.close();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
 
         return bcrDeposito;
@@ -246,6 +264,7 @@ public class SvcDeposito extends Dao {
     
     public List<GenericBeanMedioPago> getAllMediosPago(boolean includeInactives) {
         List<GenericBeanMedioPago> result = new ArrayList();
+        ResultSet rst = null;
         try {
             String query = (includeInactives) ? "" : " AND m.estado = 'A' ";
             query = "SELECT m.mediopago_id, m.nombre "
@@ -256,7 +275,7 @@ public class SvcDeposito extends Dao {
                     + query
                     + " ORDER BY m.nombre";
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             GenericBeanMedioPago mediopago;
             while (rst.next()) {
                 mediopago = new GenericBeanMedioPago(rst.getInt(1), rst.getString(2));
@@ -266,7 +285,9 @@ public class SvcDeposito extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }

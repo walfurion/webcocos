@@ -1,32 +1,46 @@
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.EstacionConf;
 import com.fundamental.model.EstacionConfHead;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.daoimp.DaoImp;
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Henry Barrientos
  */
-public class SvcConfBombaEstacion extends Dao {
-    
+public class SvcConfBombaEstacion extends DaoImp {
+
     String query;
+
     public SvcConfBombaEstacion() {
     }
-    
+
     public EstacionConfHead doAction(String action, EstacionConfHead conf) {
         EstacionConfHead result = new EstacionConfHead();
+        ResultSet rst = null;
+        Connection cnn = null;
         try {
-                getConnection().setAutoCommit(false);
-            if (action.equals(Dao.ACTION_ADD)) {
+//            getConnection().setAutoCommit(false);
+              cnn = getConnection();
+              cnn.setAutoCommit(false);
+            if (action.equals(ACTION_ADD)) {
                 query = "SELECT estacion_conf_head_seq.NEXTVAL FROM DUAL";
-                pst = getConnection().prepareStatement(query);
-                ResultSet rst = pst.executeQuery();
-                conf.setEstacionconfheadId( (rst.next()) ? rst.getInt(1) : 0 );
-                try { pst.close(); } catch (Exception ignore) { }
+                pst = cnn.prepareStatement(query);
+                rst = pst.executeQuery();
+                conf.setEstacionconfheadId((rst.next()) ? rst.getInt(1) : 0);
+                rst.close();
+                pst.close();
+                
+
                 query = "INSERT INTO estacion_conf_head (estacionconfhead_id, nombre, estacion_id, estado, creado_por, creado_el, hora_inicio, hora_fin) "
                         + "VALUES (?, ?, ?, ?, ?, SYSDATE, ?, ?)";
-                pst = getConnection().prepareStatement(query);
+                pst = cnn.prepareStatement(query);
                 pst.setInt(1, conf.getEstacionconfheadId());
                 pst.setString(2, conf.getNombre());
 //                pst.setInt(3, conf.getEstacionId());
@@ -37,11 +51,12 @@ public class SvcConfBombaEstacion extends Dao {
                 pst.setObject(7, conf.getHoraFin());
                 pst.executeUpdate();
                 closePst();
+
                 int tipoDespacho;
                 for (EstacionConf ecf : conf.getEstacionConf()) {
                     query = "INSERT INTO estacion_conf (estacionconfhead_id, bomba_id, tipodespacho_id, creado_por, creado_el, estacion_id) "
                             + "VALUES (?, ?, ?, ?, SYSDATE, ?)";
-                    pst = getConnection().prepareStatement(query);
+                    pst = cnn.prepareStatement(query);
                     pst.setInt(1, conf.getEstacionconfheadId());
                     pst.setInt(2, ecf.getBombaId());
                     tipoDespacho = ecf.getTypeServ().getId();   //(ecf.getAutoService()) ? 1 : 2;
@@ -49,15 +64,15 @@ public class SvcConfBombaEstacion extends Dao {
                     pst.setString(4, conf.getCreadoPor());
                     pst.setInt(5, ecf.getEstacionId());
                     pst.executeUpdate();
-                closePst();
+                    closePst();
                 }
                 result = conf;
-            } else if (action.equals(Dao.ACTION_UPDATE)) {
-                
+            } else if (action.equals(ACTION_UPDATE)) {
+
                 query = "UPDATE estacion_conf_head "
                         + "SET nombre = ?, estado = ?, modificado_por = ?, modificado_el = SYSDATE, hora_inicio = ?, hora_fin = ? "
                         + "WHERE estacionconfhead_id = ?";// AND estacion_id = ?";
-                pst = getConnection().prepareStatement(query);
+                pst = cnn.prepareStatement(query);
                 pst.setString(1, conf.getNombre());
                 pst.setString(2, conf.getEstado());
                 pst.setString(3, conf.getCreadoPor());
@@ -68,20 +83,23 @@ public class SvcConfBombaEstacion extends Dao {
 //                pst.setObject(7, null);
                 pst.executeUpdate();
                 closePst();
+
                 int tipoDespacho;
-                
-                query = "select * from estacion_conf where estacionconfhead_id = " + conf.getEstacionconfheadId()+ " AND estacion_id = " + conf.getEstacionConf().get(0).getEstacionId();
-                pst = getConnection().prepareStatement(query);
-                ResultSet rst = pst.executeQuery();
+
+                query = "select * from estacion_conf where estacionconfhead_id = " + conf.getEstacionconfheadId() + " AND estacion_id = " + conf.getEstacionConf().get(0).getEstacionId();
+                pst = cnn.prepareStatement(query);
+                rst = pst.executeQuery();
                 tipoDespacho = (rst.next()) ? 1 : 0;
-                
-                if (tipoDespacho==1) {  //ya tiene datos
-                
+                rst.close();
+                pst.close();
+
+                if (tipoDespacho == 1) {  //ya tiene datos
+
                     for (EstacionConf ecf : conf.getEstacionConf()) {
                         query = "UPDATE estacion_conf "
                                 + "SET tipodespacho_id = ? "
                                 + "WHERE estacionconfhead_id = ? AND bomba_id = ? AND estacion_id = ?";
-                        pst = getConnection().prepareStatement(query);
+                        pst = cnn.prepareStatement(query);
                         tipoDespacho = ecf.getTypeServ().getId(); //(ecf.getAutoService()) ? 1 : 2;
                         pst.setInt(1, tipoDespacho);
                         pst.setInt(2, conf.getEstacionconfheadId());
@@ -95,7 +113,7 @@ public class SvcConfBombaEstacion extends Dao {
                     for (EstacionConf ecf : conf.getEstacionConf()) {
                         query = "INSERT INTO estacion_conf (estacionconfhead_id, bomba_id, tipodespacho_id, creado_por, creado_el, estacion_id) "
                                 + "VALUES (?, ?, ?, ?, SYSDATE, ?)";
-                        pst = getConnection().prepareStatement(query);
+                        pst = cnn.prepareStatement(query);
                         pst.setInt(1, conf.getEstacionconfheadId());
                         pst.setInt(2, ecf.getBombaId());
                         tipoDespacho = ecf.getTypeServ().getId();   //(ecf.getAutoService()) ? 1 : 2;
@@ -103,7 +121,7 @@ public class SvcConfBombaEstacion extends Dao {
                         pst.setString(4, conf.getCreadoPor());
                         pst.setInt(5, ecf.getEstacionId());
                         pst.executeUpdate();
-                    closePst();
+                        closePst();
                     }
                     result = conf;
                 }
@@ -118,14 +136,23 @@ public class SvcConfBombaEstacion extends Dao {
 //                pst.executeUpdate();
 //                result = conf;
             }
-            getConnection().commit();
+//            getConnection().commit();
         } catch (Exception exc) {
-            try { getConnection().rollback(); } catch(Exception ignore) {}
+            try {
+                cnn.rollback();
+            } catch (Exception ignore) {
+            }
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+                cnn.close(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
-    
+
 }

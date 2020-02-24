@@ -5,7 +5,7 @@
  */
 package com.fundamental.utils;
 
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcMaintenance;
 import com.sisintegrados.generic.bean.GenericSMTP;
 import com.sisintegrados.generic.bean.UnoConfiguraciones;

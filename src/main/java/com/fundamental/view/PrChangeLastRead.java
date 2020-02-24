@@ -2,7 +2,7 @@ package com.fundamental.view;
 
 import com.fundamental.model.Acceso;
 import com.fundamental.model.Bomba;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.Lectura;
 import com.fundamental.model.LecturaDetalle;
@@ -13,6 +13,7 @@ import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.services.SvcChangeLastRead;
 import com.fundamental.services.SvcReading;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
@@ -136,7 +137,7 @@ public class PrChangeLastRead extends Panel implements View {
         } else {
             SvcChangeLastRead svcCLR = new SvcChangeLastRead();
             paises = svcCLR.getAllPaises();
-            svcCLR.closeConnections();
+//            svcCLR.closeConnections();
         }
 
         bcBombas = new BeanContainer<Integer, Bomba>(Bomba.class);
@@ -212,7 +213,7 @@ public class PrChangeLastRead extends Panel implements View {
                 List<LecturaDetalle> lecturas = (puedeEditar)
                         ? svcCLT.getUltimaLecturaByEstacionTurnoBomba(estacionId, turno.getTurnoId(), bombaId) : new ArrayList();
                 lecturasManualesActuales = svcCLT.getLecturasfinales(estacionId, "M");
-                svcCLT.closeConnections();
+//                svcCLT.closeConnections();
 
                 int count = 0;
                 for (LecturaDetalle ld : lecturas) {
@@ -310,7 +311,7 @@ public class PrChangeLastRead extends Panel implements View {
                 } else {
                     SvcChangeLastRead svcCLR = new SvcChangeLastRead();
                     estaciones = svcCLR.getStationsByCountry(((Pais) cbxPais.getValue()).getPaisId(), true);
-                    svcCLR.closeConnections();
+//                    svcCLR.closeConnections();
                 }
                 cbxEstacion.setContainerDataSource(new ListContainer<Estacion>(Estacion.class, estaciones));
                 cbxEstacion.setValue((user.getEstacionLogin() != null) ? user.getEstacionLogin() : null);
@@ -330,7 +331,7 @@ public class PrChangeLastRead extends Panel implements View {
                 List<Bomba> bombas = svcCLR.getBombasByEstacionid(((Estacion) cbxEstacion.getValue()).getEstacionId());
                 bcBombas.removeAllItems();
                 bcBombas.addAll(bombas);
-                svcCLR.closeConnections();
+//                svcCLR.closeConnections();
             }
         });
 
@@ -366,7 +367,7 @@ public class PrChangeLastRead extends Panel implements View {
                     ldetail.setLecturaFinal(ldetail.getNewFinalReading());
                     lectura.getLecturaDetalle().add(ldetail);
 
-                    svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, ldetail);
+                    svcLectura.doActionLecturaDetalle(DaoImp.ACTION_UPDATE, ldetail);
 
                     lectura.setLecturaId(ldetail.getLecturaId());
                     lectura.getLecturafinal().add(
@@ -385,13 +386,13 @@ public class PrChangeLastRead extends Panel implements View {
                         }
                     }
                     if (existe) {
-                        svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+                        svcLectura.doActionLecturaFinal(DaoImp.ACTION_UPDATE, lfl);
                     } else {
-                        svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+                        svcLectura.doActionLecturaFinal(DaoImp.ACTION_ADD, lfl);
                     }
                 }
 
-                svcLectura.closeConnections();
+//                svcLectura.closeConnections();
                 if (lectura.getLecturaId() != null) {
 //                    Notification.show("Operación realizada con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                     Notification notif = new Notification("ÉXITO:", "Operación realizada con éxito.", Notification.Type.HUMANIZED_MESSAGE);
@@ -426,7 +427,7 @@ public class PrChangeLastRead extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnSave.setEnabled(acceso.isAgregar());

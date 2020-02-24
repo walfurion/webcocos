@@ -2,7 +2,7 @@ package com.vaadin.demo.dashboard.view;
 
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcMaintenance;
 import com.fundamental.utils.EnvioCorreo;
 import com.fundamental.utils.Mail;

@@ -7,11 +7,11 @@ import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoGenericBean;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcMaintenance;
 import com.fundamental.services.SvcMntUser;
 import com.fundamental.utils.Constant;
-import com.google.gwt.user.client.ui.ListBox;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Item;
@@ -41,7 +41,6 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.OptionGroup;
@@ -54,7 +53,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.Entity;
 import org.vaadin.maddon.ListContainer;
 
 /**
@@ -94,7 +92,7 @@ public class MntUser extends Panel implements View {
     private Usuario usuario;
     private List<Rol> allRoles;
     List<Pais> paises;
-    String action = Dao.ACTION_UPDATE;
+    String action = DaoImp.ACTION_UPDATE;
 
     //template
     private final VerticalLayout vlRoot;
@@ -163,11 +161,12 @@ public class MntUser extends Panel implements View {
 
         SvcMntUser service = new SvcMntUser();
         bcrUsuarios.addAll(service.getAllUsuarios(false));
+        System.out.println("TAMAÑO BCR USUARIO MNTUSER "+bcrUsuarios.size());
         allRoles = service.getAllRoles(true);
         paises = service.getAllPaises();
         allStations = service.getAllEstaciones(false);
         bcrStations.addAll(allStations);
-        service.closeConnections();
+//        service.closeConnections();
 
         usuario = bcrUsuarios.getItem(bcrUsuarios.getItemIds().get(0)).getBean();
 //        if (usuario.getEstacionLogin() != null) {
@@ -259,7 +258,7 @@ public class MntUser extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (tblUser.getValue() != null) {
-                    action = Dao.ACTION_UPDATE;
+                    action = DaoImp.ACTION_UPDATE;
                     usuario = bcrUsuarios.getItem(tblUser.getValue()).getBean();
                     binder.setItemDataSource(usuario);
 //TODO: hacer que al seleccionar un usuario, se coloque el valor correcto de pais de usuario.
@@ -358,7 +357,7 @@ public class MntUser extends Panel implements View {
                 usuario.setEstado("A");
                 
                 binder.setItemDataSource(usuario);
-                action = Dao.ACTION_ADD;
+                action = DaoImp.ACTION_ADD;
                 for (Integer bombaId : bcrRoles.getItemIds()) {
                     bcrRoles.getItem(bombaId).getItemProperty("selected").setValue(false);
                 }
@@ -417,7 +416,7 @@ public class MntUser extends Panel implements View {
 //                if (!codeStation.isEmpty() && !username.getValue().contains(codeStation)) {
 //                    newUsername = username.getValue().concat(codeStation);
 //                }
-                if (action.equals(Dao.ACTION_ADD)) {
+                if (action.equals(DaoImp.ACTION_ADD)) {
                     for (Integer uid : bcrUsuarios.getItemIds()) {
                         if (newUsername.equals(bcrUsuarios.getItem(uid).getItemProperty("username").getValue())) {
                             Notification.show("El nombre de usuario ya existe", Notification.Type.ERROR_MESSAGE);
@@ -462,7 +461,7 @@ public class MntUser extends Panel implements View {
                 usuario.setEstado(usuario.getStatus().getStringId());
                 SvcMaintenance service = new SvcMaintenance();
                 usuario = service.doActionUser(action, usuario);
-                service.closeConnections();
+//                service.closeConnections();
                 if (usuario.getUsuarioId() != null) {
                     Notification notif = new Notification("¡Exito!", "La acción se ha ejecutado correctamente.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);
@@ -572,7 +571,7 @@ public class MntUser extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnAdd.setEnabled(acceso.isAgregar());

@@ -1,22 +1,28 @@
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.dto.DtoLectura;
+import com.sisintegrados.daoimp.DaoImp;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Henry Barrientos
  */
-public class SvcBomba extends Dao {
+public class SvcBomba extends DaoImp {
 
     private String query;
-    
+
     public SvcBomba() {
     }
- 
+
     public List<DtoLectura> getUltimaLecturaByBomba(String tipo, Integer bombaId, Integer estacionId, Integer turnoId) {
         List<DtoLectura> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT b.bomba_id, b.nombre, p.producto_id, p.nombre, ld.lectura_inicial, ld.lectura_final, ld.total, ld.tipodespacho_id "
                     + "FROM lectura_detalle ld, bomba b, producto p, lectura l "
@@ -27,7 +33,7 @@ public class SvcBomba extends Dao {
             pst.setInt(2, bombaId);
             pst.setInt(3, estacionId);
             pst.setInt(4, turnoId);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             DtoLectura dtoLec;
             int count = 0;
             while (rst.next()) {
@@ -47,9 +53,13 @@ public class SvcBomba extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                pst.close();
+                rst.close();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
-
 }

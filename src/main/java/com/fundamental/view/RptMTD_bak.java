@@ -124,7 +124,7 @@ public class RptMTD_bak extends Panel implements View {
         } else {
             paises = svcMP.getAllPaises();
         }
-        svcMP.closeConnections();
+//        svcMP.closeConnections();
     }
 
     private void buildButtons() {
@@ -153,7 +153,7 @@ public class RptMTD_bak extends Panel implements View {
                 } else {
                     SvcChangeLastRead svcCLR = new SvcChangeLastRead();
                     estaciones = svcCLR.getStationsByCountry(((Pais) cbxPais.getValue()).getPaisId(), true);
-                    svcCLR.closeConnections();
+//                    svcCLR.closeConnections();
                 }
                 cbxEstacion.setContainerDataSource(new ListContainer<Estacion>(Estacion.class, estaciones));
                 cbxEstacion.setValue((user.getEstacionLogin() != null) ? user.getEstacionLogin() : null);
@@ -250,7 +250,7 @@ public class RptMTD_bak extends Panel implements View {
 //                    midataFaltSobVol = service.getMTDFaltanteSobranteVol(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), estacionId, productosIds);
                     
                     System.out.println("coco's Obtener datos MTD END: " + new Date());
-                    service.closeConnections();
+//                    service.closeConnections();
 
                     List<String> lTitles = new ArrayList();
                     List<Integer> lTypes = new ArrayList();

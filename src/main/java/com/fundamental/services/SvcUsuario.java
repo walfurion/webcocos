@@ -1,17 +1,19 @@
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.Rol;
 import com.sisintegrados.generic.bean.Usuario;
 import com.sisintegrados.generic.bean.GenericDia;
 import com.sisintegrados.generic.bean.GenericTurno;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.daoimp.DaoImp;
 import java.sql.ResultSet;
 import java.util.List;
 
 /**
  * @author Henry Barrientos
  */
-public class SvcUsuario extends Dao {
+public class SvcUsuario extends DaoImp {
 
     public SvcUsuario() {
     }
@@ -59,7 +61,6 @@ public class SvcUsuario extends Dao {
             }
             rst.close();
             pst.close();
-
             result = getLastTurnLastDay(result);
 
         } catch (Exception exc) {
@@ -68,6 +69,7 @@ public class SvcUsuario extends Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections();//ASG
             } catch (Exception ignore) {
             }
         }
@@ -101,6 +103,7 @@ public class SvcUsuario extends Dao {
 
             rst.close();
             pst.close();
+            closeConnections();//ASG
 
             /*Recupera datos ultimo dia*/
             query = "Select to_char(d.fecha,'dd/mm/yyyy') DIA,\n"
@@ -121,6 +124,7 @@ public class SvcUsuario extends Dao {
             }
             rst.close();
             pst.close();
+            closeConnections();//ASG
 
             /*Recupera datos ultimo turno*/
             query = "select h.NOMBRE ||'   '||h.HORA_INICIO||'-'|| h.HORA_FIN TURNO,\n"
@@ -144,6 +148,7 @@ public class SvcUsuario extends Dao {
             }
             rst.close();
             pst.close();
+            closeConnections();//ASG
 
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -151,7 +156,10 @@ public class SvcUsuario extends Dao {
             try {
                 rst.close();
                 pst.close();
-            } catch (Exception ignore) {}
+                closeConnections();//ASG
+            } catch (Exception ignore) {
+            }
         }
-        return user; }
+        return user;
+    }
 }

@@ -8,8 +8,9 @@ import com.fundamental.model.Tipoproducto;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoGenericBean;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcMaintenance;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Item;
@@ -257,7 +258,7 @@ public class MntProducto extends Panel implements View {
         tblProduct.addValueChangeListener(new Property.ValueChangeListener() {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
-                action = Dao.ACTION_UPDATE;
+                action = DaoImp.ACTION_UPDATE;
                 product = bcrProduct.getItem(tblProduct.getValue()).getBean();
                 binder.setItemDataSource(product);
                 SvcMaintenance service = new SvcMaintenance();
@@ -298,7 +299,7 @@ public class MntProducto extends Panel implements View {
         btnAdd.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                action = Dao.ACTION_ADD;
+                action = DaoImp.ACTION_ADD;
                 product = new Producto();
                 binder.setItemDataSource(product);
                 SvcMaintenance service = new SvcMaintenance();
@@ -330,11 +331,11 @@ public class MntProducto extends Panel implements View {
                 product.setCreadoPor(user.getUsername());
                 product.setModificadoPor(user.getUsername());
                 SvcMaintenance service = new SvcMaintenance();
-                if (action.equals(Dao.ACTION_ADD)&&service.existeE1Producto(product.getCodigo())) {
+                if (action.equals(DaoImp.ACTION_ADD)&&service.existeE1Producto(product.getCodigo())) {
                      Notification.show("El código E1 ingresado ya fue utilizado por otro producto.");
                      service.closeConnections();
                      return;
-                }else if (action.equals(Dao.ACTION_ADD)&&service.existeCodEnvoyProducto(product.getCodigoEnvoy())) {
+                }else if (action.equals(DaoImp.ACTION_ADD)&&service.existeCodEnvoyProducto(product.getCodigoEnvoy())) {
                     Notification.show("El código ENVOY ingresado ya fue utilizado en otro producto.");
                     service.closeConnections();
                     return;
@@ -362,7 +363,7 @@ public class MntProducto extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnAdd.setEnabled(acceso.isAgregar());

@@ -4,10 +4,11 @@ import com.fundamental.model.Acceso;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcMedioPago;
 import com.fundamental.services.SvcReporte;
 import com.fundamental.utils.XlsxReportGenerator;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Property;
 import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import com.vaadin.navigator.View;
@@ -133,7 +134,7 @@ public class RptVolumenes extends Panel implements View {
         } else {
             paises = svcMP.getAllPaises();
         }
-        svcMP.closeConnections();
+//        svcMP.closeConnections();
     }
 
     private void buildButtons() {
@@ -229,7 +230,7 @@ public class RptVolumenes extends Panel implements View {
                     SvcMedioPago svcMP = new SvcMedioPago();
                     Integer paisId = (cbxPais != null && cbxPais.getValue() != null) ? ((Pais) cbxPais.getValue()).getPaisId() : null;
                     List<String[]> data = svcMP.getVolumenesReporte(dfdFechaInicial.getValue(), dfdFechaFinal.getValue(), paisId);
-                    svcMP.closeConnections();
+//                    svcMP.closeConnections();
 
                     XlsxReportGenerator xrg = new XlsxReportGenerator();
                     XSSFWorkbook workbook = xrg.generate(null, "Volumenes", new HashMap(), lTitles.toArray(new String[lTitles.size()]), data, lTypes.toArray(new Integer[lTypes.size()]));
@@ -280,7 +281,7 @@ public class RptVolumenes extends Panel implements View {
 //                        productosIds += productosIds.isEmpty() ? p.getProductoId() : ",".concat(p.getProductoId().toString());
 //                    }
                     List<String[]> data = service.getDataMovimiento(dfdFechaInicialMov.getValue(), dfdFechaFinalMov.getValue(), paisId);//, estacionId);//, productosIds);
-                    service.closeConnections();
+//                    service.closeConnections();
 
                     XlsxReportGenerator xrg = new XlsxReportGenerator();
                     XSSFWorkbook workbook = xrg.generate(null, "Movimiento producto", new HashMap(), lTitles.toArray(new String[lTitles.size()]), data, lTypes.toArray(new Integer[lTypes.size()]));
@@ -307,7 +308,7 @@ public class RptVolumenes extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnGenerar.setEnabled(acceso.isAgregar());    

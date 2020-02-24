@@ -1,22 +1,28 @@
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.Mediopago;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.GenericMedioPago;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Henry Barrientos
  */
-public class SvcMedioPago extends Dao {
+public class SvcMedioPago extends DaoImp {
 
     private String query;
 
     public List<String[]> getMediospagoReporte(Date fechaInicial, Date fechaFinal, Integer paisId) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             SimpleDateFormat sdf_ddmmyyyy = new SimpleDateFormat("dd/MM/yyyy");
             query = (paisId != null) ? " AND e.pais_id = " + paisId : "";
@@ -39,7 +45,7 @@ public class SvcMedioPago extends Dao {
                     + "ORDER BY 1, 5"
                     ;
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new String[]{
                     rst.getString(1), //fecha
@@ -55,13 +61,19 @@ public class SvcMedioPago extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<String[]> getVolumenesReporte(Date fechaInicial, Date fechaFinal, Integer paisId) {
         List<String[]> result = new ArrayList();
+        ResultSet rst = null;
         try {
             SimpleDateFormat sdf_ddmmyyyy = new SimpleDateFormat("dd/MM/yyyy");
             query = (paisId != null) ? " AND e.pais_id = " + paisId : "";
@@ -86,7 +98,7 @@ public class SvcMedioPago extends Dao {
                     + "ORDER BY 4, 5, 8 DESC"
                     ;
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new String[]{
                     rst.getString(1), //
@@ -104,49 +116,13 @@ public class SvcMedioPago extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try { pst.close(); } catch (Exception ignore) { }
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
-    
-//    public List<GenericMedioPago> getMedioPagoByCountry(Integer idpais) {
-//        List<GenericMedioPago> result = new ArrayList();
-//        try {
-//            miQuery = "SELECT MEDIOPAGO_ID, NOMBRE FROM MEDIOPAGO WHERE ESTADO = 'A' AND MEDIOPAGO.PAIS_ID = " + idpais + " and " +
-//                      " MEDIOPAGO.TIPO = 2   ORDER BY MEDIOPAGO_ID";
-//            pst = getConnection().prepareStatement(miQuery);
-//            ResultSet rst = pst.executeQuery();
-//            while (rst.next()) {
-//                result.add(new GenericMedioPago(rst.getInt(1), rst.getString(2)));
-//            }
-//            closePst();
-//        } catch (Exception exc) {
-//            exc.printStackTrace();
-//        } finally {
-//            closePst();
-//        }
-//        return result;
-//    }
-    
-    
-    
-//    public List<GenericMedioPago> getMedioPagoByCountry(Integer idpais) {
-//        List<GenericMedioPago> result = new ArrayList();
-//        try {
-//            miQuery = "SELECT MEDIOPAGO_ID, NOMBRE FROM MEDIOPAGO WHERE ESTADO = 'A' AND MEDIOPAGO.PAIS_ID = " + idpais + " and " +
-//                      " MEDIOPAGO.TIPO = 2   ORDER BY MEDIOPAGO_ID";
-//            pst = getConnection().prepareStatement(miQuery);
-//            ResultSet rst = pst.executeQuery();
-//            while (rst.next()) {
-//                result.add(new GenericMedioPago(rst.getInt(1), rst.getString(2)));
-//            }
-//            closePst();
-//        } catch (Exception exc) {
-//            exc.printStackTrace();
-//        } finally {
-//            closePst();
-//        }
-//        return result;
-//    }
-
 }

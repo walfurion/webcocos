@@ -12,12 +12,12 @@ import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoArqueo;
 
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcDeposito;
-import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcRepCuadrePistero;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.services.SvcTurnoCierre;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
 
 import com.sisintegrados.generic.bean.GenericMedioPago;
@@ -491,7 +491,7 @@ public class PrCierreDia extends Panel implements View {
         bcrInventario.removeAllItems();
         bcrInventario.addAll(inventarioHoy);
 
-        service.closeConnections();
+//        service.closeConnections();
 
         lblTotalVentas.addStyleName(ValoTheme.LABEL_BOLD);
         lblTotalVentas.setSizeUndefined();
@@ -511,7 +511,7 @@ public class PrCierreDia extends Panel implements View {
         contPais.addAll(svcTC.getAllPaises());
 //        cbxPais = new ComboBox("País:", new ListContainer<Pais>(Pais.class, svcTC.getAllPaises()));
         cbxPais = new ComboBox("País:", contPais);
-        svcTC.closeConnections();
+//        svcTC.closeConnections();
 
         cbxPais.setItemCaptionPropertyId("nombre");
         cbxPais.setItemIconPropertyId("flag");
@@ -523,10 +523,10 @@ public class PrCierreDia extends Panel implements View {
             public void valueChange(final Property.ValueChangeEvent event) {
                 pais = new Pais();
                 pais = (Pais) cbxPais.getValue();
-                SvcEstacion svcEstacion = new SvcEstacion();
+                Dao svcEstacion = new DaoImp();
 //                estacionContainer = new ListContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));
                 estacionContainer = new BeanItemContainer<Estacion>(Estacion.class, svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId()));;
-                svcEstacion.closeConnections();
+//                svcEstacion.closeConnections();
                 cbxEstacion.setContainerDataSource(estacionContainer);
                 currencySymbol = pais.getMonedaSimbolo() + " ";
             }
@@ -557,7 +557,7 @@ public class PrCierreDia extends Panel implements View {
                 ultimoDia = (ultimoDia.getFecha() == null) ? service.getUltimoDiaByEstacionid(estacion.getEstacionId()) : ultimoDia;
                 dia = service.getDiaActivoByEstacionid(estacion.getEstacionId());
 //            dia = (dia.getEstadoId() == null) ? ultimoDia : dia;
-                service.closeConnections();
+//                service.closeConnections();
                 calculosInventario();
             }
         });
@@ -593,7 +593,7 @@ public class PrCierreDia extends Panel implements View {
                     //se obtiene de base de datos pues necesitamos saber el estado.
                     dia = svcTurno.getDiaByEstacionidFecha(estacion.getEstacionId(), dfdFecha.getValue());
                     dia.setFecha((dia.getFecha() == null) ? dfdFecha.getValue() : dia.getFecha());  //dia es siempre el mismo que lo seleccionado en el control
-                    svcTurno.closeConnections();
+//                    svcTurno.closeConnections();
                     getAllData();
                     for (Integer tid : bcrTurnos.getItemIds()) {
                         bcrTurnos.getItem(tid).getItemProperty("selected").setValue(Boolean.TRUE);
@@ -1222,12 +1222,12 @@ public class PrCierreDia extends Panel implements View {
                                 boolean invNuevo = (dia.getEstadoId() == 1);
                                 dia.setModificadoPersona(user.getNombreLogin());
                                 dia.setModificadoPor(user.getUsername());
-                                dia = svcTC.doActionDia(Dao.ACTION_UPDATE, dia);
+                                dia = svcTC.doActionDia(DaoImp.ACTION_UPDATE, dia);
 
                                 if (tfdDriver.getValue() != null && tfdUnit.getValue() != null && tfdBill.getValue() != null) {
                                     RecepcionInventario recepcion = new RecepcionInventario(null, dia.getFecha(), estacion.getPaisId(), estacion.getEstacionId(), tfdDriver.getValue(), tfdUnit.getValue(), tfdBill.getValue());
                                     recepcion.setCreado_por(user.getUsername());
-                                    svcTC.doActionInvRecepcion(Dao.ACTION_ADD, recepcion);
+                                    svcTC.doActionInvRecepcion(DaoImp.ACTION_ADD, recepcion);
                                 }
 
                                 InventarioRecepcion inventario;
@@ -1251,10 +1251,10 @@ public class PrCierreDia extends Panel implements View {
                                     inventario.setCalibracion(bcrInventario.getItem(id).getBean().getCalibracion());
 //                                    svcTC.doActionInventario( (invNuevo ? Dao.ACTION_ADD : Dao.ACTION_UPDATE), 
                                     inventario.setVolFacturado(id);
-                                    svcTC.doActionInventario((inventario.getEsNuevo() ? Dao.ACTION_ADD : Dao.ACTION_UPDATE), inventario);
+                                    svcTC.doActionInventario((inventario.getEsNuevo() ? DaoImp.ACTION_ADD : DaoImp.ACTION_UPDATE), inventario);
                                 }
 
-                                svcTC.closeConnections();
+//                                svcTC.closeConnections();
                                 if (dia.getFecha() != null) {
 //                                    Notification.show("El dia se ha cerrado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                                     Notification notif = new Notification("ÉXITO:", "El dia se ha cerrado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
@@ -1358,7 +1358,7 @@ public class PrCierreDia extends Panel implements View {
                 bcrDeposito.addAll(svcDep.getDepositoByEstacion(estacion.getEstacionId().toString(), dfdFecha.getValue()));
             }
         }
-        svcTC.closeConnections();
+//        svcTC.closeConnections();
         calcularSumas();
         lblTotalVentas.setValue(numberFmt.format(totalVentas));
         lblTotalDinero.setValue(numberFmt.format(totalDinero));
@@ -1497,12 +1497,12 @@ public class PrCierreDia extends Panel implements View {
         bcrInventario.removeAllItems();
         bcrInventario.addAll(inventarioHoy);
 
-        service.closeConnections();
+//        service.closeConnections();
     }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         //btnGuardar.setEnabled(acceso.isAgregar());

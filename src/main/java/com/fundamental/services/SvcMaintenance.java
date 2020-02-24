@@ -1,5 +1,6 @@
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.Acceso;
 import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.Marca;
@@ -10,8 +11,10 @@ import com.fundamental.model.Rol;
 import com.fundamental.model.Tipoproducto;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.dto.DtoGenericBean;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.GenericSMTP;
 import com.sisintegrados.generic.bean.Tanque;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,7 +25,7 @@ import java.util.logging.Logger;
 /**
  * @author Henry Barrientos
  */
-public class SvcMaintenance extends Dao {
+public class SvcMaintenance extends DaoImp {
 
     String query, tmpString;
 
@@ -31,19 +34,23 @@ public class SvcMaintenance extends Dao {
 
     public Usuario doActionUser(String action, Usuario usuario) {
         Usuario result = new Usuario();
+        ResultSet rst = null;
+        Connection cnn = null;
+        cnn = getConnection();
+
         try {
-            getConnection().setAutoCommit(false);
-            if (action.equals(Dao.ACTION_ADD)) {
+            cnn.setAutoCommit(false);
+            if (action.equals(ACTION_ADD)) {
                 query = "SELECT usuario_seq.NEXTVAL FROM DUAL";
-                pst = getConnection().prepareStatement(query);
-                ResultSet rst = pst.executeQuery();
+                pst = cnn.prepareStatement(query);
+                rst = pst.executeQuery();
                 Integer userId = (rst.next()) ? rst.getInt(1) : 0;
                 usuario.setUsuarioId(userId);
                 closePst();
 
                 query = "INSERT INTO usuario (username, clave, nombre, apellido, creado_por, usuario_id, pais_id, correo) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                pst = getConnection().prepareStatement(query);
+                pst = cnn.prepareStatement(query);
                 pst.setString(1, usuario.getUsername());
                 pst.setString(2, usuario.getClave());
                 pst.setString(3, usuario.getNombre());
@@ -54,20 +61,12 @@ public class SvcMaintenance extends Dao {
                 pst.setObject(8, usuario.getCorreo());
                 pst.executeUpdate();
                 result = usuario;
-            } else if (action.equals(Dao.ACTION_UPDATE)) {
+                closePst();
+            } else if (action.equals(ACTION_UPDATE)) {
                 query = "UPDATE usuario "
                         + "SET username = ?, clave = ?, nombre = ?, apellido = ?, modificado_por = ?, modificado_el = SYSDATE, pais_id = ?, estado = ?, correo = ? "
                         + "WHERE usuario_id = ?";
-                System.out.println("usuario.getUsername() "+usuario.getUsername());
-                System.out.println("usuario.getClave() "+usuario.getClave());
-                System.out.println("usuario.getNombre() "+usuario.getNombre());
-                System.out.println("usuario.getApellido() "+usuario.getApellido());
-                System.out.println("usuario.getModificadoPor() "+usuario.getModificadoPor());
-                System.out.println("usuario.getPaisId() "+usuario.getPaisId());
-                System.out.println("usuario.getEstado() "+usuario.getEstado());
-                System.out.println("usuario.getCorreo() "+usuario.getCorreo());
-                System.out.println("usuario.getUsuarioId() "+usuario.getUsuarioId());
-                pst = getConnection().prepareStatement(query);
+                pst = cnn.prepareStatement(query);
                 pst.setString(1, usuario.getUsername());
                 pst.setString(2, usuario.getClave());
                 pst.setString(3, usuario.getNombre());
@@ -79,24 +78,26 @@ public class SvcMaintenance extends Dao {
                 pst.setInt(9, usuario.getUsuarioId());
                 pst.executeUpdate();
                 result = usuario;
-            } else if (action.equals(Dao.ACTION_DELETE)) {
+                closePst();
+            } else if (action.equals(ACTION_DELETE)) {
                 query = "UPDATE usuario "
                         + "SET estado = ?, modificado_por = ?, modificado_el = SYSDATE "
                         + "WHERE usuario_id = ?";
-                pst = getConnection().prepareStatement(query);
+                pst = cnn.prepareStatement(query);
                 pst.setString(1, usuario.getEstado());
                 pst.setString(2, usuario.getModificadoPor());
                 pst.setInt(3, usuario.getUsuarioId());
                 pst.executeUpdate();
                 result = usuario;
+                closePst();
             }
             closePst();
 
-            if ((action.equals(Dao.ACTION_ADD) || action.equals(Dao.ACTION_UPDATE)) //&& usuario.getEstacionLogin() != null
+            if ((action.equals(ACTION_ADD) || action.equals(ACTION_UPDATE)) //&& usuario.getEstacionLogin() != null
                     ) {
                 query = "DELETE FROM estacion_usuario "
                         + "WHERE usuario_id = ?"; // AND estacion_id != ?";
-                pst = getConnection().prepareStatement(query);
+                pst = cnn.prepareStatement(query);
                 pst.setInt(1, usuario.getUsuarioId());
 //                pst.setInt(2, usuario.getEstacionLogin().getEstacionId());
                 pst.executeUpdate();
@@ -105,7 +106,7 @@ public class SvcMaintenance extends Dao {
                 query = "INSERT INTO estacion_usuario (estacion_id, usuario_id, creado_por, creado_el) "
                         + "VALUES (?, ?, ?, SYSDATE)";
                 for (Estacion stn : usuario.getStations()) {
-                    pst = getConnection().prepareStatement(query);
+                    pst = cnn.prepareStatement(query);
                     pst.setInt(1, stn.getEstacionId()); // usuario.getEstacionLogin().getEstacionId());
                     pst.setInt(2, usuario.getUsuarioId());
                     pst.setString(3, usuario.getCreadoPor());
@@ -115,21 +116,21 @@ public class SvcMaintenance extends Dao {
                     }
                     closePst();
                 }
-            } else if (action.equals(Dao.ACTION_DELETE) && usuario.getEstacionLogin() != null) {
+            } else if (action.equals(ACTION_DELETE) && usuario.getEstacionLogin() != null) {
                 query = "DELETE FROM estacion_usuario "
                         + "WHERE usuario = ?";
-                pst = getConnection().prepareStatement(query);
+                pst = cnn.prepareStatement(query);
                 pst.setInt(1, usuario.getUsuarioId());
                 pst.executeUpdate();
                 closePst();
             }
 
-            if (action.equals(Dao.ACTION_ADD) || action.equals(Dao.ACTION_UPDATE)) {
+            if (action.equals(ACTION_ADD) || action.equals(ACTION_UPDATE)) {
                 String rolesIds = "";
                 query = "INSERT INTO rol_usuario (rol_id, usuario_id, creado_por, creado_el) "
                         + "VALUES (?, ?, ?, SYSDATE)";
                 for (Rol rol : usuario.getRoles()) {
-                    pst = getConnection().prepareStatement(query);
+                    pst = cnn.prepareStatement(query);
                     pst.setInt(1, rol.getRolId());
                     pst.setInt(2, usuario.getUsuarioId());
                     pst.setString(3, usuario.getCreadoPor());
@@ -143,35 +144,43 @@ public class SvcMaintenance extends Dao {
                 if (!rolesIds.isEmpty()) {
                     query = "DELETE FROM rol_usuario "
                             + "WHERE usuario_id = ? AND rol_id NOT IN (" + rolesIds + ")";
-                    pst = getConnection().prepareStatement(query);
+                    pst = cnn.prepareStatement(query);
                     pst.setInt(1, usuario.getUsuarioId());
                     pst.executeUpdate();
                     closePst();
                 }
-            } else if (action.equals(Dao.ACTION_DELETE)) {
+            } else if (action.equals(ACTION_DELETE)) {
                 query = "DELETE FROM rol_usuario "
                         + "WHERE usuario = ?";
-                pst = getConnection().prepareStatement(query);
+                pst = cnn.prepareStatement(query);
                 pst.setInt(1, usuario.getUsuarioId());
                 pst.executeUpdate();
                 closePst();
             }
 
-            getConnection().commit();
+            cnn.commit();
         } catch (Exception exc) {
             try {
-                getConnection().rollback();
+                cnn.rollback();
             } catch (Exception ignore) {
             }
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                cnn.close();
+                closeConnections(); //ASG
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Rol> getAllRoles(boolean includeInactive) {
         List<Rol> result = new ArrayList();
+        ResultSet rst = null;
+
         try {
 //            query = "SELECT acceso_id, titulo, padre, orden, recurso_interno, descripcion, estado "
 //                    + "FROM acceso "
@@ -182,7 +191,7 @@ public class SvcMaintenance extends Dao {
                     + query
                     + "ORDER BY nombre";
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Rol rol;
             while (rst.next()) {
                 rol = new Rol(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5));
@@ -196,12 +205,20 @@ public class SvcMaintenance extends Dao {
             }
         } catch (Exception exc) {
             exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Acceso> getAccessByRolid(int rolId) {
         List<Acceso> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = " SELECT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, a.estado,ar.ver,ar.cambiar,ar.agregar,ar.eliminar"
                     + " FROM acceso a, acceso_rol ar "
@@ -209,7 +226,7 @@ public class SvcMaintenance extends Dao {
                     + " ORDER BY a.padre, a.orden DESC";
 //            System.out.println("getAccesByRolinid "+query);
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Acceso access;
             while (rst.next()) {
 //                result.add(new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7)));
@@ -230,12 +247,20 @@ public class SvcMaintenance extends Dao {
             }
         } catch (Exception exc) {
             exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Acceso> getAllAccess(boolean includeInactive) {
         List<Acceso> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = " SELECT a.acceso_id, a.titulo, a.padre, a.orden, a.recurso_interno, a.descripcion, "
                     + "a.estado, ap.titulo,0 as \"ver\" ,0 as \"cambiar\",0 as \"agregar\" ,0 as \"eliminar\" "
@@ -243,7 +268,7 @@ public class SvcMaintenance extends Dao {
                     + "WHERE a.padre = ap.acceso_id ORDER BY a.padre, a.orden DESC ";
 //            System.out.println("query = "+query);
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Acceso access;
             while (rst.next()) {
 //                access = new Acceso(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getInt(4), rst.getString(5), rst.getString(6), rst.getString(7));
@@ -264,23 +289,33 @@ public class SvcMaintenance extends Dao {
             }
         } catch (Exception exc) {
             exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public Rol doActionRol(String action, Rol rol) {
         Rol result = new Rol();
+        ResultSet rst = null;
+        Connection cnn = null;
+        cnn = getConnection();
         try {
-            getConnection().setAutoCommit(false);
-            if (action.equals(Dao.ACTION_ADD)) {
+            cnn.setAutoCommit(false);
+            if (action.equals(ACTION_ADD)) {
                 query = "SELECT rol_seq.NEXTVAL FROM DUAL";
-                pst = getConnection().prepareStatement(query);
-                ResultSet rst = pst.executeQuery();
+                pst = cnn.prepareStatement(query);
+                rst = pst.executeQuery();
                 rol.setRolId(rst.next() ? rst.getInt(1) : 0);
                 closePst();
                 query = "INSERT INTO rol (nombre, descripcion, estado, creado_por, rol_id) "
                         + "VALUES (?, ?, ?, ?, ?)";
-                pst = getConnection().prepareStatement(query);
+                pst = cnn.prepareStatement(query);
                 pst.setObject(1, rol.getNombre());
                 pst.setObject(2, rol.getDescripcion());
                 pst.setObject(3, rol.getEstado());
@@ -292,7 +327,7 @@ public class SvcMaintenance extends Dao {
                         + "VALUES (?, ?, ?, ?, ?, ?, ?)";
                 for (Acceso item : rol.getAccesos()) {
 //                    System.out.println("add = "+item.isVer()+" "+item.isCambiar()+" "+item.isAgregar());
-                    pst = getConnection().prepareStatement(query);
+                    pst = cnn.prepareStatement(query);
                     pst.setObject(1, item.getAccesoId());
                     pst.setObject(2, rol.getRolId());
                     pst.setObject(3, rol.getCreadoPor());
@@ -304,11 +339,11 @@ public class SvcMaintenance extends Dao {
                     closePst();
                 }
                 result = rol;
-            } else if (action.equals(Dao.ACTION_UPDATE)) {
+            } else if (action.equals(ACTION_UPDATE)) {
                 query = "UPDATE rol "
                         + "SET nombre = ?, descripcion = ?, estado = ?, modificado_por = ?, modificado_el = SYSDATE "
                         + "WHERE rol_id = ?";
-                pst = getConnection().prepareStatement(query);
+                pst = cnn.prepareStatement(query);
                 pst.setObject(1, rol.getNombre());
                 pst.setObject(2, rol.getDescripcion());
                 pst.setObject(3, rol.getEstado());
@@ -324,7 +359,7 @@ public class SvcMaintenance extends Dao {
                 if (!tmpString.isEmpty()) {
 //                    query = "DELETE FROM acceso_rol WHERE rol_id = ? AND acceso_id NOT IN (" + tmpString + ")";
                     query = "DELETE FROM acceso_rol WHERE rol_id = ? ";
-                    pst = getConnection().prepareStatement(query);
+                    pst = cnn.prepareStatement(query);
                     pst.setObject(1, rol.getRolId());
                     try {
                         pst.executeUpdate();
@@ -337,7 +372,7 @@ public class SvcMaintenance extends Dao {
                         + "VALUES (?, ?, ?, ?, ?, ?, ?)";
                 for (Acceso item : rol.getAccesos()) {
 //                     System.out.println("ed = "+item.isVer()+" "+item.isCambiar()+" "+item.isAgregar());
-                    pst = getConnection().prepareStatement(query);
+                    pst = cnn.prepareStatement(query);
                     pst.setObject(1, item.getAccesoId());
                     pst.setObject(2, rol.getRolId());
                     pst.setObject(3, rol.getCreadoPor());
@@ -354,25 +389,34 @@ public class SvcMaintenance extends Dao {
                 }
                 result = rol;
             }
-            getConnection().commit();
+            cnn.commit();
         } catch (Exception exc) {
             try {
-                getConnection().rollback();
+                cnn.rollback();
             } catch (Exception ignore) {
             }
             exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                closePst();
+                cnn.close();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public Usuario getUserByUsernameEmail(String username) {
         Usuario result = null;
+        ResultSet rst = null;
         try {
             query = "SELECT usuario_id, username, clave, nombre, apellido, estado, pais_id, correo "
                     + "FROM usuario "
-                    + "WHERE username = '"+username+"' OR correo = '"+username+"' ";
+                    + "WHERE username = '" + username + "' OR correo = '" + username + "' ";
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             if (rst.next()) {
                 result = new Usuario(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getString(6), null);
                 result.setPaisId(rst.getInt(7));
@@ -381,6 +425,13 @@ public class SvcMaintenance extends Dao {
         } catch (Exception exc) {
             System.out.println("" + exc.getMessage());
             exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                closePst();
+                closeConnections();
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -413,6 +464,7 @@ public class SvcMaintenance extends Dao {
     public List<Producto> getAllProducts(boolean includeInactive) {
 //            System.out.println("getAllProducts() ");
         List<Producto> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = (includeInactive) ? "" : " AND p.estado = 'A' ";
             query = "SELECT p.producto_id, p.nombre, p.codigo, p.tipo_id, p.orden_pos, p.estado, p.codigo_num, p.presentacion, p.codigo_barras, p.id_marca, p.codigo_envoy "
@@ -422,7 +474,7 @@ public class SvcMaintenance extends Dao {
                     + "WHERE p.tipo_id = t.tipo_id "
                     + query;
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Producto producto;
             List<Producto> lstProd = getAllProductsWhitCountry();
             while (rst.next()) {
@@ -444,19 +496,27 @@ public class SvcMaintenance extends Dao {
             }
         } catch (Exception exc) {
             exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Producto> getAllProductsWhitCountry() {
         List<Producto> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "select p2.PRODUCTO_ID,p.PAIS_ID,p.NOMBRE from pais p join pais_producto p2 \n"
                     + " on\n"
                     + " p.pais_id=p2.PAIS_ID order by P2.PRODUCTO_ID";
 //            System.out.println("paises "+query);
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Producto p_ant = new Producto();
             Producto p;
             p_ant.setProductoId(-99);
@@ -478,42 +538,56 @@ public class SvcMaintenance extends Dao {
             }
         } catch (Exception exc) {
             exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Tipoproducto> getAllTipoproducto(boolean includeInactives) {
         List<Tipoproducto> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = (includeInactives) ? "" : " WHERE estado = 'A' ";
             query = "SELECT tipo_id, nombre, estado, creado_por, creado_el "
                     + "FROM tipoproducto "
                     + " ORDER BY nombre";
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Tipoproducto(rst.getInt(1), rst.getString(2), rst.getString(3)));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Mediopago> getAllMediosPago(boolean includeInactives, int idPais) {
         List<Mediopago> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = (includeInactives) ? "" : " AND m.estado = 'A' ";
             query = "SELECT m.mediopago_id, m.nombre, m.tipo, m.estado, m.orden, m.pais_id, m.tipoprod_id, p.nombre, m.partidacont_por, m.partidacont, m.is_tcredito, p.codigo " //12
                     + "FROM mediopago m, pais p "
-                    + "WHERE m.pais_id = p.pais_id and m.pais_id = "+idPais+" "
+                    + "WHERE m.pais_id = p.pais_id and m.pais_id = " + idPais + " "
                     + query
                     + " ORDER BY p.nombre, m.nombre";
-            System.out.println("query.,.,., "+query);
+            System.out.println("query.,.,., " + query);
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Mediopago mediopago;
             while (rst.next()) {
                 mediopago = new Mediopago(rst.getInt(1), rst.getString(2), rst.getInt(3), null, rst.getInt(5), rst.getString(8), rst.getBoolean(11), rst.getString(4));
@@ -531,6 +605,8 @@ public class SvcMaintenance extends Dao {
         } finally {
             try {
                 pst.close();
+                rst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -539,11 +615,12 @@ public class SvcMaintenance extends Dao {
 
     public Producto doActionProduct(String action, Producto product) {
         Producto result = new Producto();
+        ResultSet rst = null;
         try {
-            if (action.equals(Dao.ACTION_ADD)) {
+            if (action.equals(ACTION_ADD)) {
                 query = "SELECT producto_seq.NEXTVAL FROM DUAL";
                 pst = getConnection().prepareStatement(query);
-                ResultSet rst = pst.executeQuery();
+                rst = pst.executeQuery();
                 product.setProductoId((rst.next()) ? rst.getInt(1) : 0);
                 closePst();
                 query = "INSERT INTO producto (nombre, codigo, tipo_id, orden_pos, estado, codigo_num, presentacion, codigo_barras, id_marca, codigo_envoy, creado_por, creado_el, producto_id, sku) "
@@ -564,7 +641,7 @@ public class SvcMaintenance extends Dao {
                 pst.setObject(13, product.getSku());
                 pst.executeUpdate();
                 result = product;
-            } else if (action.equals(Dao.ACTION_UPDATE)) {
+            } else if (action.equals(ACTION_UPDATE)) {
                 query = "UPDATE producto "
                         + "SET nombre = ?, codigo = ?, tipo_id = ?, orden_pos = ?, estado = ?, codigo_num = ?, presentacion = ?, "
                         + "     codigo_barras = ?, id_marca = ?, codigo_envoy = ?, modificado_por = ?, sku =  ?, modificado_el = SYSDATE "
@@ -590,7 +667,12 @@ public class SvcMaintenance extends Dao {
             result.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -613,6 +695,7 @@ public class SvcMaintenance extends Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -624,6 +707,8 @@ public class SvcMaintenance extends Dao {
         try {
             pst = getConnection().prepareStatement(query);
             pst.executeUpdate();
+            closePst();
+            closeConnections(); //asg
         } catch (SQLException ex) {
             Logger.getLogger(SvcMaintenance.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -638,6 +723,8 @@ public class SvcMaintenance extends Dao {
                     pst.setObject(2, product.getProductoId());
                     pst.setObject(3, product.getCreadoPor());
                     pst.executeUpdate();
+                    pst.close();
+                    closeConnections(); //asg
                 } catch (SQLException ex) {
                     Logger.getLogger(SvcMaintenance.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -662,6 +749,7 @@ public class SvcMaintenance extends Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -684,6 +772,7 @@ public class SvcMaintenance extends Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -693,7 +782,7 @@ public class SvcMaintenance extends Dao {
     public List<Tanque> getAllTanques() {
         List<Tanque> result = new ArrayList();
         //result = null;
-
+        ResultSet rst = null;
         try {
             miQuery = "select a.IDTANQUE, a.PRODUCTO_ID, a.ESTACION_ID, a.DESCRIPCION,\n"
                     + "       a.USUARIO_CREACION, a.FECHA_CREACION, a.USUARIO_MODIFICACION, a.FECHA_MODIFICACION,\n"
@@ -703,7 +792,7 @@ public class SvcMaintenance extends Dao {
                     + "  and a.PRODUCTO_ID = c.PRODUCTO_ID";
 
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 Producto prod = new Producto();
                 prod.setProductoId(rst.getInt(2));
@@ -716,7 +805,9 @@ public class SvcMaintenance extends Dao {
             exc.printStackTrace();
         } finally {
             try {
-                pst.close();
+                rst.close();
+                closePst();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -726,12 +817,12 @@ public class SvcMaintenance extends Dao {
     public List<Producto> getProductsToTanques() {
         List<Producto> result = new ArrayList();
         //result = null;
-
+        ResultSet rst = null;
         try {
             miQuery = "select PRODUCTO_ID, NOMBRE from PRODUCTO where TIPO_ID = 1 and ESTADO = 'A'";
             System.out.println("MiQuery   " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Producto(rst.getInt(1), rst.getString(2)));
             }
@@ -741,6 +832,8 @@ public class SvcMaintenance extends Dao {
         } finally {
             try {
                 pst.close();
+                rst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -750,12 +843,12 @@ public class SvcMaintenance extends Dao {
     public List<Estacion> getEstacionToTanques() {
         List<Estacion> result = new ArrayList();
         //result = null;
-
+        ResultSet rst = null;
         try {
             miQuery = "select ESTACION_ID, NOMBRE from ESTACION";
             System.out.println("MiQuery   " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Estacion(rst.getInt(1), rst.getString(2)));
             }
@@ -764,7 +857,9 @@ public class SvcMaintenance extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -773,14 +868,17 @@ public class SvcMaintenance extends Dao {
 
     public Tanque doActionTanque(String action, Tanque tanque) {
         Tanque result = new Tanque();
+        ResultSet rst = null;
         try {
-            if (action.equals(Dao.ACTION_ADD)) {
+            if (action.equals(ACTION_ADD)) {
                 System.out.println("ingresa metodo guardar");
                 query = "SELECT seq_tanque.nextval FROM DUAL";
                 pst = getConnection().prepareStatement(query);
-                ResultSet rst = pst.executeQuery();
+                rst = pst.executeQuery();
                 tanque.setIdtanque((rst.next()) ? rst.getInt(1) : 0);
+                rst.close();
                 closePst();
+                closeConnections(); //asg
                 query = "INSERT INTO tanque (idtanque, producto_id, estacion_id, descripcion, usuario_creacion, fecha_creacion) "
                         + "VALUES (?, ?, ?, ?, ?, SYSDATE)";
 
@@ -794,7 +892,7 @@ public class SvcMaintenance extends Dao {
 
                 pst.executeUpdate();
                 result = tanque;
-            } else if (action.equals(Dao.ACTION_UPDATE)) {
+            } else if (action.equals(ACTION_UPDATE)) {
                 System.out.println("ingresa metodo actualizar");
                 query = "UPDATE tanque "
                         + "SET producto_id = ?, estacion_id = ?, descripcion = ?, "
@@ -815,7 +913,12 @@ public class SvcMaintenance extends Dao {
             // result.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -828,7 +931,7 @@ public class SvcMaintenance extends Dao {
                     + "SET clave = ?, "
                     + "  modificado_por = ?, modificado_el = SYSDATE"
                     + " WHERE usuario_id = ?";
-            
+
             pst = getConnection().prepareStatement(query);
             pst.setObject(1, usuario.getClave());
             pst.setObject(2, usuario.getModificadoPor());
@@ -842,13 +945,15 @@ public class SvcMaintenance extends Dao {
             exc.printStackTrace();
         } finally {
             closePst();
+            closeConnections(); //asg
         }
         return result;
     }
+
     public int recuperaIdPais() {
         int paisId = 0;
         miQuery = "SELECT pais_id FROM pais where rownum=1";
-        System.out.println("mi query "+miQuery);
+        System.out.println("mi query " + miQuery);
         ResultSet rst = null;
         try {
             rst = getConnection().prepareStatement(miQuery).executeQuery();
@@ -860,16 +965,19 @@ public class SvcMaintenance extends Dao {
         } finally {
             try {
                 rst.close();
+                closePst();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
         return paisId;
     }
+
     public boolean updateUsuario(int usuarioId, String clave) {
         boolean result = true;
         ResultSet rst = null;
-        try {             
-            miQuery = "update usuario set clave = '"+clave+"' WHERE usuario_id="+usuarioId+"";
+        try {
+            miQuery = "update usuario set clave = '" + clave + "' WHERE usuario_id=" + usuarioId + "";
             System.out.println("update " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
             pst.executeUpdate();
@@ -881,22 +989,24 @@ public class SvcMaintenance extends Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
         return result;
     }
-    
+
     public List<GenericSMTP> getSMTP() {
         List<GenericSMTP> result = new ArrayList();
+        ResultSet rst = null;
         try {
             miQuery = "select nombre,valor from PARAMETRO";
             System.out.println("MiQuery   " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             GenericSMTP ec;
             while (rst.next()) {
-                ec = new GenericSMTP(rst.getString(1),rst.getString(2));
+                ec = new GenericSMTP(rst.getString(1), rst.getString(2));
                 result.add(ec);
             }
             closePst();
@@ -904,20 +1014,23 @@ public class SvcMaintenance extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
         return result;
     }
-    
+
     public String getMensaje() {
         String mensaje = "";
+        ResultSet rst = null;
         try {
             miQuery = "select valor from parametro where nombre='MENSAJE'";
             System.out.println("MiQuery   " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 mensaje = rst.getString(1);
             }
@@ -926,7 +1039,9 @@ public class SvcMaintenance extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }

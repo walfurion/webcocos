@@ -5,7 +5,7 @@ import com.fundamental.model.Bomba;
 import com.fundamental.model.Dia;
 import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Estacion;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.dto.DtoLectura;
 import com.sisintegrados.generic.bean.Lectura;
 import com.fundamental.model.LecturaDetalle;
@@ -17,11 +17,11 @@ import com.fundamental.model.Turno;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoPrecio;
-import com.fundamental.services.SvcEstacion;
 import com.fundamental.services.SvcReading;
 import com.fundamental.services.SvcRepCuadrePistero;
 import com.fundamental.services.SvcTurno;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanContainer;
@@ -134,7 +134,7 @@ public class PrReading extends VerticalLayout implements View {
 
         user = (Usuario) VaadinSession.getCurrent().getAttribute(Usuario.class.getName());
 
-        action = Dao.ACTION_ADD;
+        action = DaoImp.ACTION_ADD;
 
         HorizontalLayout hlTitle = utils.buildHeader("Ingreso lecturas", true, true);
         addComponent(hlTitle);
@@ -292,7 +292,7 @@ public class PrReading extends VerticalLayout implements View {
         listEmpleados = new ArrayList(); //service.getEmpleadosByTurnoid(turno.getTurnoId());
 
         uniqueStation = service.getUniqueStation(user.getUsuarioId());
-        service.closeConnections();
+//        service.closeConnections();
 
         bcrBombas.setBeanIdProperty("id");
         bcrBombas.removeAllItems();
@@ -349,9 +349,9 @@ public class PrReading extends VerticalLayout implements View {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
                 pais = (Pais) cbxCountry.getValue();
-                SvcEstacion svcEstacion = new SvcEstacion();
+                Dao svcEstacion = new DaoImp();
                 List<Estacion> listStations = svcEstacion.getStationsByCountryUser(pais.getPaisId(), user.getUsuarioId());
-                svcEstacion.closeConnections();
+//                svcEstacion.closeConnections();
                 cbxEstacion.setContainerDataSource(new ListContainer<>(Estacion.class, listStations));
                 //limpiar
                 dfdFecha.setValue(null);
@@ -407,7 +407,7 @@ public class PrReading extends VerticalLayout implements View {
                 }
                 contTurnos = new ListContainer<>(Turno.class, misTurnos);
 
-                service.closeConnections();
+//                service.closeConnections();
                 buildLabelInfo();
 
                 labelStation.setContentMode(ContentMode.HTML);
@@ -449,7 +449,7 @@ public class PrReading extends VerticalLayout implements View {
                     dia.setFecha((dia.getFecha() == null) ? dfdFecha.getValue() : dia.getFecha());  //dia es siempre el mismo que lo seleccionado en el control
 //                    List<Turno> listTurno = svcTurno.getTurnosByEstacionidDia_lectura(estacion.getEstacionId(), dfdFecha.getValue());
                     List<Turno> listTurno = svcTurno.getTurnosByEstacionidDiaNolectura(estacion.getEstacionId(), dfdFecha.getValue());
-                    svcTurno.closeConnections();
+//                    svcTurno.closeConnections();
                     contTurnos = new ListContainer<Turno>(Turno.class, listTurno);
                     cbxTurno.setContainerDataSource(contTurnos);
                     cbxTurno.setValue(null);
@@ -536,7 +536,7 @@ public class PrReading extends VerticalLayout implements View {
             lecturasUltimaElectronicas = service.getLecturasfinales(estacion.getEstacionId(), "E");
             listEmpleados = service.getEmpleadosByTurnoid(turno.getTurnoId());
             cbxEmpleado.setContainerDataSource(new ListContainer<>(Empleado.class, listEmpleados));
-            service.closeConnections();
+//            service.closeConnections();
             bcrBombas.removeAllItems();
             bcrBombas.addAll(allBombas);
             bcrPrecios.removeAllItems();
@@ -602,7 +602,7 @@ public class PrReading extends VerticalLayout implements View {
                         }
                     }
 
-                    Dao dao = new Dao();
+                    Dao dao = new DaoImp();
                     Parametro parametro = dao.getParameterByName("LECTURAS_OBLIGATORIAS_ME");
                     if (parametro != null) {
                         if ("true".equals(parametro.getValor())) {
@@ -701,7 +701,7 @@ public class PrReading extends VerticalLayout implements View {
                     }
 
                     SvcReading svcLectura = new SvcReading();
-                    if (action.equals(Dao.ACTION_ADD)) {
+                    if (action.equals(DaoImp.ACTION_ADD)) {
 //                        Bomba bomba;
 //                        String bombasStringList = "";
 //                        for (Integer id : (List<Integer>) tableBombas.getItemIds()) {
@@ -741,7 +741,7 @@ public class PrReading extends VerticalLayout implements View {
                     if (crearNuevaLectura) {
                         lectura.setNumeroCaso(txtNumeroCaso.getValue());
 //                        if (crear) { //ASG Matriz seguridad
-                        lectura = svcLectura.doActionLectura(Dao.ACTION_ADD, lectura);
+                        lectura = svcLectura.doActionLectura(DaoImp.ACTION_ADD, lectura);
 //                        }
                     } else {
                         //ASG
@@ -749,26 +749,26 @@ public class PrReading extends VerticalLayout implements View {
                         lectura.setNumeroCaso(txtNumeroCaso.getValue());
                         //FIN ASG
 //                        if (modificar) {//ASG Matriz seguridad
-                        lectura = svcLectura.doActionLectura(Dao.ACTION_UPDATE, lectura);
+                        lectura = svcLectura.doActionLectura(DaoImp.ACTION_UPDATE, lectura);
 //                        }
                     }
                     for (LecturaDetalle lde : lectura.getLecturaDetalle()) {
                         if (lde.getEsNueva()) {
                             lde.setLecturaId(lectura.getLecturaId());
 //                            if (crear) { //ASG Matriz seguridad
-                            svcLectura.doActionLecturaDetalle(Dao.ACTION_ADD, lde);
+                            svcLectura.doActionLecturaDetalle(DaoImp.ACTION_ADD, lde);
 //                            }
                         } else {
 //                            if (modificar) {  //ASG Matriz seguridad
-                            svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, lde);
+                            svcLectura.doActionLecturaDetalle(DaoImp.ACTION_UPDATE, lde);
                             //Si existe una lectura siguiente, se actualiza la lectura inicial de esa siguiente.
                             LecturaDetalle ldeNext = svcLectura.getLecturaDetalleSiguiente(lde.getEstacionId(), lde.getLecturaId(), lde.getBombaId(), lde.getProductoId());
                             if (ldeNext.getLecturaId() != null) {
                                 ldeNext.setLecturaInicial(lde.getLecturaFinal());
-                                svcLectura.doActionLecturaDetalle(Dao.ACTION_UPDATE, ldeNext);
+                                svcLectura.doActionLecturaDetalle(DaoImp.ACTION_UPDATE, ldeNext);
                             } else {
                                 Lecturafinal lfinal = new Lecturafinal(lde.getEstacionId(), lde.getBombaId(), lde.getProductoId(), lde.getTipo(), lde.getLecturaInicial(), lde.getLecturaFinal(), user.getUsername(), user.getNombreLogin());
-                                svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfinal);
+                                svcLectura.doActionLecturaFinal(DaoImp.ACTION_UPDATE, lfinal);
                             }
 //                            }
                         }
@@ -787,11 +787,11 @@ public class PrReading extends VerticalLayout implements View {
                         }
                         if (existeMecanica) {
 //                            if (modificar) {//ASG Matriz seguridad
-                            svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+                            svcLectura.doActionLecturaFinal(DaoImp.ACTION_UPDATE, lfl);
 //                            }
                         } else {
 //                            if (crear) { //ASG Matriz seguridad
-                            svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+                            svcLectura.doActionLecturaFinal(DaoImp.ACTION_ADD, lfl);
 //                            }
                         }
                     }
@@ -808,18 +808,18 @@ public class PrReading extends VerticalLayout implements View {
                         }
                         if (existeElectronica) {
 //                            if (modificar) {//ASG Matriz seguridad
-                            svcLectura.doActionLecturaFinal(Dao.ACTION_UPDATE, lfl);
+                            svcLectura.doActionLecturaFinal(DaoImp.ACTION_UPDATE, lfl);
 //                            }
                         } else {
 //                            if (crear) { //ASG Matriz seguridad
-                            svcLectura.doActionLecturaFinal(Dao.ACTION_ADD, lfl);
+                            svcLectura.doActionLecturaFinal(DaoImp.ACTION_ADD, lfl);
 //                            }
                         }
                     }
 
                     tmpString = (user.getPaisLogin() != null) ? user.getPaisLogin().getNombre() : ((Pais) cbxCountry.getValue()).getNombre();
                     Parametro parametro = svcLectura.getParameterByName("CORREO_CALIBRACIONES_" + tmpString.toUpperCase().replaceAll(" ", ""));
-                    svcLectura.closeConnections();
+//                    svcLectura.closeConnections();
 
                     if (contador > 0) {
                         // ----------17/10/2019 se omite correo
@@ -1552,13 +1552,13 @@ public class PrReading extends VerticalLayout implements View {
         System.out.println("item " + itemId);
         System.out.println("isselected " + isselected);
         System.out.println("action " + action);
-        if (action.equals(Dao.ACTION_UPDATE)) {
+        if (action.equals(DaoImp.ACTION_UPDATE)) {
             bcrElectronicas.removeAllItems();
             bcrManuales.removeAllItems();
 //                            cbxTurno.setValue(null);
         }
 
-        action = Dao.ACTION_ADD;
+        action = DaoImp.ACTION_ADD;
 //                        cbxTurno.setValue(null);
         Bomba bomba = (Bomba) ((BeanItem) tableBombas.getItem(itemId)).getBean();
         String nameBombaSuffix = bomba.getNombre();
@@ -1746,7 +1746,7 @@ public class PrReading extends VerticalLayout implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         if (acceso.isCambiar() || acceso.isAgregar()) {

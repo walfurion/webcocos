@@ -1,7 +1,9 @@
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.Mediopago;
 import com.fundamental.model.Producto;
+import com.sisintegrados.daoimp.DaoImp;
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -16,7 +18,7 @@ import java.util.Map.Entry;
 /**
  * @author Henry Barrientos
  */
-public class SvcReporte_bak extends Dao {
+public class SvcReporte_bak extends DaoImp {
 
     String query;
     SimpleDateFormat sdf_ddmmyyyy = new SimpleDateFormat("dd/MM/yyyy");

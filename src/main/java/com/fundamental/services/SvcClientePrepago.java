@@ -5,12 +5,14 @@
  */
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.Cliente;
 import com.fundamental.model.Dia;
 import com.fundamental.model.Precio;
 import com.fundamental.model.Producto;
 import com.fundamental.model.Turno;
 import com.fundamental.model.dto.DtoProducto;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.EmpleadoBombaTurno;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItemContainer;
@@ -19,12 +21,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Allan G.
  */
-public class SvcClientePrepago extends Dao {
+public class SvcClientePrepago extends DaoImp {
 
     private String query;
 
@@ -43,6 +47,9 @@ public class SvcClientePrepago extends Dao {
             closePst();
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+            pst.close();
+            closeConnections(); //asg
         }
 
         /*Asigna detalle clientes prepago al arqueo*/
@@ -65,6 +72,7 @@ public class SvcClientePrepago extends Dao {
         } finally {
             if (pst != null) {
                 pst.close();
+                closeConnections(); //asg
             }
         }
         return result;
@@ -89,16 +97,23 @@ public class SvcClientePrepago extends Dao {
                 id++;
                 DtoProducto dto = new DtoProducto();
                 dto.setValor(rst.getDouble(2));
-                dto.setCliente(new Cliente(rst.getInt(5),rst.getString(6),rst.getString(7),rst.getInt(8),rst.getString(9),rst.getString(10),rst.getDate(11),rst.getString(12),rst.getString(13),rst.getString(14)));
+                dto.setCliente(new Cliente(rst.getInt(5), rst.getString(6), rst.getString(7), rst.getInt(8), rst.getString(9), rst.getString(10), rst.getDate(11), rst.getString(12), rst.getString(13), rst.getString(14)));
                 bcrPrepaid.addItem(id, dto);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcClientePrepago.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return bcrPrepaid;
     }
-    
-  
+
     public boolean CreaClienteDetalleCredito(Integer idarqueocaja, BeanContainer<Integer, DtoProducto> bcrClientes, String usuario) throws SQLException {
         boolean result = false;
         PreparedStatement pst = null;
@@ -111,6 +126,9 @@ public class SvcClientePrepago extends Dao {
             closePst();
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+            pst.close();
+            closeConnections(); //asg
         }
 
         /*Asigna detalle clientes prepago al arqueo*/
@@ -133,11 +151,12 @@ public class SvcClientePrepago extends Dao {
         } finally {
             if (pst != null) {
                 pst.close();
+                closeConnections(); //asg
             }
         }
         return result;
     }
-    
+
     public BeanContainer<Integer, DtoProducto> getDetalleCredito(Integer idarqueocaja) {
         BeanContainer<Integer, DtoProducto> bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
         ResultSet rst = null;
@@ -157,12 +176,19 @@ public class SvcClientePrepago extends Dao {
                 id++;
                 DtoProducto dto = new DtoProducto();
                 dto.setValor(rst.getDouble(2));
-                dto.setCliente(new Cliente(rst.getInt(5),rst.getString(6),rst.getString(7),rst.getInt(8),rst.getString(9),rst.getString(10),rst.getDate(11),rst.getString(12),rst.getString(13),rst.getString(14)));
+                dto.setCliente(new Cliente(rst.getInt(5), rst.getString(6), rst.getString(7), rst.getInt(8), rst.getString(9), rst.getString(10), rst.getDate(11), rst.getString(12), rst.getString(13), rst.getString(14)));
                 bcrClientes.addItem(id, dto);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return bcrClientes;
-    }   
+    }
 }

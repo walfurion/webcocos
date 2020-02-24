@@ -8,9 +8,10 @@ import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Producto;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcGeneral;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.view.form.FormUploadTarjetas;
 import com.vaadin.addon.tableexport.DefaultTableHolder;
 import com.vaadin.addon.tableexport.ExcelExport;
@@ -124,7 +125,7 @@ public class MntLubricantPrice extends Panel implements View {
     List<Lubricanteprecio> listProducts = new ArrayList();
     List<Producto> allLubricants = new ArrayList();
     List<Marca> listBrands = new ArrayList();
-    String action = Dao.ACTION_ADD;
+    String action = DaoImp.ACTION_ADD;
 
 //template
     private final VerticalLayout vlRoot;
@@ -360,7 +361,7 @@ public class MntLubricantPrice extends Panel implements View {
             public void valueChange(Property.ValueChangeEvent event) {
                 if (tblProduct.getValue() != null) {
                     btnSave.setEnabled(true);
-                    action = Dao.ACTION_UPDATE;
+                    action = DaoImp.ACTION_UPDATE;
                     lubricante = bcrProduct.getItem(tblProduct.getValue()).getBean();
                     lubricante_log = (Lubricanteprecio) lubricante.clone();
                     if (lubricante_log.getModificadoEl() == null) {
@@ -410,7 +411,7 @@ public class MntLubricantPrice extends Panel implements View {
         btnAdd.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                action = Dao.ACTION_ADD;
+                action = DaoImp.ACTION_ADD;
                 tblProduct.setValue(null);
                 lubricante = new Lubricanteprecio();
                 btnSave.setEnabled(true);
@@ -577,7 +578,7 @@ public class MntLubricantPrice extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnAdd.setEnabled(acceso.isAgregar());

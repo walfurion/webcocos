@@ -3,10 +3,10 @@ package com.vaadin.demo.dashboard.view;
 import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
-import com.fundamental.services.SvcEstacion;
-import com.fundamental.services.SvcPais;
 import com.fundamental.services.SvcUsuario;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.dao.Dao;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.demo.dashboard.event.DashboardEvent.UserLoginRequestedEvent;
@@ -107,7 +107,7 @@ public class _LoginView extends VerticalLayout {
         cbEstacion.setNullSelectionAllowed(false);
         cbEstacion.setFilteringMode(FilteringMode.CONTAINS);
 
-        SvcPais svcPais = new SvcPais();
+        Dao svcPais = new DaoImp();
         List<Pais> paises = svcPais.getAllPaises();
         svcPais.closeConnections();
         final ComboBox cbPais = new ComboBox("País", new ListContainer<Pais>(Pais.class, paises));
@@ -120,7 +120,7 @@ public class _LoginView extends VerticalLayout {
             @Override
             public void valueChange(final Property.ValueChangeEvent event) {
                 Pais pais = (Pais) cbPais.getValue();
-                SvcEstacion svcEstacion = new SvcEstacion();
+                Dao svcEstacion = new DaoImp();
                 List<Estacion> estaciones = svcEstacion.getStationsByCountry(pais.getPaisId(), true);
                 svcEstacion.closeConnections();
                 Container estacionContainer = new ListContainer<Estacion>(Estacion.class, estaciones);

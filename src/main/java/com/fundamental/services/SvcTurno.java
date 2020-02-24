@@ -14,9 +14,11 @@ import com.fundamental.model.Precio;
 import com.fundamental.model.Turno;
 import com.sisintegrados.generic.bean.TurnoEmpleadoBomba;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.EmpleadoBombaTurno;
 import com.sisintegrados.generic.bean.Pais;
 import com.vaadin.data.util.BeanItemContainer;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,11 +26,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Henry Barrientos
  */
-public class SvcTurno extends Dao {
+public class SvcTurno extends DaoImp {
 
     private String query;
 
@@ -39,18 +43,21 @@ public class SvcTurno extends Dao {
         Boolean result = false;
         query = "SELECT * FROM turno "
                 + "WHERE hora_fin = ? AND TRUNC(creado_el) = TO_DATE(?, 'dd/mm/yyyy') AND estado_id = ?";
+        ResultSet rst = null;
         try {
             pst = getConnection().prepareStatement(query);
             pst.setInt(1, horafin);
             pst.setString(2, new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
             pst.setInt(3, 1);   //Estado abierto
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             result = !rst.next();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -59,15 +66,18 @@ public class SvcTurno extends Dao {
 
     public Arqueocaja saveArqueo(String action, Arqueocaja arqueo) {
         Arqueocaja result = new Arqueocaja();
+        ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
                 query = "SELECT arqueocaja_seq.NEXTVAL FROM DUAL";
                 pst = getConnection().prepareStatement(query);
-                ResultSet rst = pst.executeQuery();
+                rst = pst.executeQuery();
                 Integer arqueoId = (rst.next()) ? rst.getInt(1) : 0;
                 arqueo.setArqueocajaId(arqueoId);
                 try {
+                    rst.close();
                     pst.close();
+                    closeConnections(); //asg
                 } catch (Exception ignore) {
                 }
 
@@ -86,7 +96,9 @@ public class SvcTurno extends Dao {
                 pst.setString(10, arqueo.getNombrePistero());
                 pst.executeUpdate();
                 result = arqueo;
-            } else if (action.equals(Dao.ACTION_UPDATE)) {
+                closePst();
+                closeConnections(); //asg
+            } else if (action.equals(ACTION_UPDATE)) {
                 query = "UPDATE arqueocaja "
                         + "SET estado_id = ?, modificado_por = ?, modificado_persona = ?, estacion_id = ?, turno_id = ?, modificado_el = SYSDATE, nombre_jefe = ?, nombre_pistero = ? "
                         + "WHERE arqueocaja_id = ?";
@@ -101,13 +113,17 @@ public class SvcTurno extends Dao {
                 pst.setInt(8, arqueo.getArqueocajaId());
                 pst.executeUpdate();
                 result = arqueo;
+                closePst();
+                closeConnections(); //asg
             }
         } catch (Exception exc) {
             arqueo.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -128,7 +144,9 @@ public class SvcTurno extends Dao {
                 pst.setString(5, arqueod.getCreadoPor());
                 pst.executeUpdate();
                 result = arqueod;
-            } else if (action.equals(Dao.ACTION_UPDATE)) {
+                closePst();
+                closeConnections(); //asg
+            } else if (action.equals(ACTION_UPDATE)) {
                 query = "UPDATE arqueocaja_detalle "
                         + "SET doctos = ?, monto = ?, modificado_por = ?, modificado_el = SYSDATE "
                         + "WHERE arqueocaja_id = ? AND mediopago_id = ?";
@@ -140,13 +158,17 @@ public class SvcTurno extends Dao {
                 pst.setInt(5, arqueod.getMediopagoId());
                 pst.executeUpdate();
                 result = arqueod;
-            } else if (action.equals(Dao.ACTION_DELETE)) {
+                closePst();
+                closeConnections(); //asg
+            } else if (action.equals(ACTION_DELETE)) {
                 query = "DELETE FROM arqueocaja_detalle "
                         + "WHERE arqueocaja_id = ?";
                 pst = getConnection().prepareStatement(query);
                 pst.setInt(1, arqueod.getArqueocajaId());
                 pst.executeUpdate();
                 result = arqueod;
+                closePst();
+                closeConnections(); //asg
             }
         } catch (Exception exc) {
             arqueod.setDescError(exc.getMessage());
@@ -154,6 +176,7 @@ public class SvcTurno extends Dao {
         } finally {
             try {
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -172,9 +195,11 @@ public class SvcTurno extends Dao {
                 pst.setInt(3, objeto.getTurnoId());
                 pst.executeUpdate();
                 result = objeto;
-            } else if (action.equals(Dao.ACTION_UPDATE)) {
+                closePst();
+                closeConnections(); //asg
+            } else if (action.equals(ACTION_UPDATE)) {
                 //Nothing to do here.
-            } else if (action.equals(Dao.ACTION_DELETE)) {
+            } else if (action.equals(ACTION_DELETE)) {
                 if (objeto.getArqueocajaId() != null) {
                     query = "DELETE FROM arqueocaja_bomba "
                             + "WHERE arqueocaja_id = ?";
@@ -189,6 +214,8 @@ public class SvcTurno extends Dao {
                 }
                 pst.executeUpdate();
                 result = objeto;
+                closePst();
+                closeConnections(); //asg
             }
         } catch (Exception exc) {
             objeto.setDescError(exc.getMessage());
@@ -196,6 +223,7 @@ public class SvcTurno extends Dao {
         } finally {
             try {
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -204,6 +232,7 @@ public class SvcTurno extends Dao {
 
     public ArqueocajaProducto saveArqueoProducto(String action, ArqueocajaProducto arqueoProd) {
         ArqueocajaProducto result = new ArqueocajaProducto();
+        ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
                 query = "INSERT INTO arqueocaja_producto (arqueocaja_id, producto_id, monto) "
@@ -214,7 +243,9 @@ public class SvcTurno extends Dao {
                 pst.setDouble(3, arqueoProd.getMonto());
                 pst.executeUpdate();
                 result = arqueoProd;
-            } else if (action.equals(Dao.ACTION_UPDATE)) {
+                closePst();
+                closeConnections(); //asg
+            } else if (action.equals(ACTION_UPDATE)) {
                 query = "UPDATE arqueocaja_producto "
                         + "SET monto = ? "
                         + "WHERE arqueocaja_id = ? AND producto_id = ? ";
@@ -224,13 +255,17 @@ public class SvcTurno extends Dao {
                 pst.setInt(3, arqueoProd.getProductoId());
                 pst.executeUpdate();
                 result = arqueoProd;
-            } else if (action.equals(Dao.ACTION_DELETE)) {
+                closePst();
+                closeConnections(); //asg
+            } else if (action.equals(ACTION_DELETE)) {
                 query = "DELETE FROM arqueocaja_producto "
                         + "WHERE arqueocaja_id = ?";
                 pst = getConnection().prepareStatement(query);
                 pst.setInt(1, arqueoProd.getArqueocajaId());
                 pst.executeUpdate();
                 result = arqueoProd;
+                closePst();
+                closeConnections(); //asg
             }
         } catch (Exception exc) {
             arqueoProd.setDescError(exc.getMessage());
@@ -238,6 +273,7 @@ public class SvcTurno extends Dao {
         } finally {
             try {
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -246,6 +282,7 @@ public class SvcTurno extends Dao {
 
     public Efectivo doActionEfectivo(String action, Efectivo efectivo) {
         Efectivo result = new Efectivo();
+        ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
                 query = "INSERT INTO efectivo (efectivo_id, arqueocaja_id, mediopago_id, orden, monto, tasa, mon_extranjera) "
@@ -259,6 +296,8 @@ public class SvcTurno extends Dao {
                 pst.setObject(6, efectivo.getMonExtranjera());
                 pst.executeUpdate();
                 result = efectivo;
+                closePst();
+                closeConnections(); //asg
             } //            else if (action.equals(ACTION_UPDATE)) {
             //                query = "UPDATE efectivo "
             //                        + "SET orden = ?, monto = ? "
@@ -278,6 +317,8 @@ public class SvcTurno extends Dao {
                 pst.setInt(1, efectivo.getArqueocajaId());
                 pst.executeUpdate();
                 result = efectivo;
+                closePst();
+                closeConnections(); //asg
             }
         } catch (Exception exc) {
             result.setDescError(exc.getMessage());
@@ -285,6 +326,7 @@ public class SvcTurno extends Dao {
         } finally {
             try {
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -293,6 +335,7 @@ public class SvcTurno extends Dao {
 
     public FactelectronicaPos doActionFactelectronicaPos(String action, FactelectronicaPos fepos) {
         FactelectronicaPos result = new FactelectronicaPos();
+        ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
                 query = "INSERT INTO factelectronica_pos (arqueocaja_id, producto_id, galones, monto) "
@@ -304,6 +347,9 @@ public class SvcTurno extends Dao {
                 pst.setDouble(4, fepos.getMonto());
                 pst.executeUpdate();
                 result = fepos;
+                rst.close();
+                closePst();
+                closeConnections(); //asg
             } else if (action.equals(ACTION_UPDATE)) {
                 //nothing to do here
             }
@@ -312,7 +358,9 @@ public class SvcTurno extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -321,12 +369,13 @@ public class SvcTurno extends Dao {
 
     public List<Precio> getPreciosByTurnoid(Integer turnoId) {
         List<Precio> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT turno_id, producto_id, tipodespacho_id, precio "
                     + "FROM precio "
                     + "WHERE turno_id = " + turnoId;
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Precio(rst.getInt(1), rst.getInt(2), rst.getInt(3), rst.getDouble(4), null, null));
             }
@@ -334,7 +383,9 @@ public class SvcTurno extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -343,12 +394,13 @@ public class SvcTurno extends Dao {
 
     public List<TurnoEmpleadoBomba> getTurnoEmpBombaByTurnoid(Integer turnoId) {
         List<TurnoEmpleadoBomba> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "SELECT teb.turno_id, teb.empleado_id, teb.bomba_id, teb.creado_por, e.nombre, b.nombre "
                     + "FROM turno_empleado_bomba teb, empleado e, bomba b "
                     + "WHERE teb.bomba_id = b.bomba_id AND teb.empleado_id = e.empleado_id AND teb.turno_id = " + turnoId;
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             int fakeId = 1;
             TurnoEmpleadoBomba item;
             while (rst.next()) {
@@ -361,7 +413,9 @@ public class SvcTurno extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -379,6 +433,11 @@ public class SvcTurno extends Dao {
                     + " GROUP BY e.nombre,e.empleado_id,TEB.TURNO_ID ORDER BY e.empleado_id";
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
+
+//            rst.close();
+//            closePst();
+//            closeConnections(); //asg
+
             EmpleadoBombaTurno item;
 
             String Vquery = "SELECT max(teb.bomba_id) MaxBomba "
@@ -452,6 +511,7 @@ public class SvcTurno extends Dao {
                 result.add(item);
                 rstB.close();
                 pstB.close();
+//                closeConnections(); //asg
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -464,6 +524,8 @@ public class SvcTurno extends Dao {
                 if (rst != null) {
                     rst.close();
                 }
+                closePst();
+                closeConnections(); //asg
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -473,55 +535,70 @@ public class SvcTurno extends Dao {
 
     public List<Empleado> getEmpleados(boolean onlyActive) {
         List<Empleado> result = new ArrayList();
+        ResultSet rst = null;
         try {
             miQuery = (onlyActive) ? " AND e.estado = 'A' " : "";
             miQuery = "SELECT e.empleado_id, e.nombre, e.estado "
                     + "FROM empleado e "
                     + "WHERE 1 = 1 " + miQuery;
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Empleado(rst.getInt(1), rst.getString(2)));
             }
             closePst();
+            closeConnections(); //asg
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Empleado> getEmpleados2(boolean onlyActive) {
         List<Empleado> result = new ArrayList();
+        ResultSet rst = null;
         try {
             miQuery = (onlyActive) ? " AND e.estado = 'A' " : "";
             miQuery = "SELECT e.empleado_id, e.nombre, e.estado "
                     + "FROM empleado e "
                     + "WHERE 1 = 1 " + miQuery;
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Empleado(rst.getInt(1), rst.getString(2), rst.getString(3)));
             }
             closePst();
+            closeConnections(); //asg
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Bomba> getBombasByEstacionConfheadId(int estacionConfheadId, int idstation) {
         List<Bomba> result = new ArrayList();
+        ResultSet rst = null;
         try {
             miQuery = "SELECT b.bomba_id, b.nombre, b.estado, b.creado_por, b.creado_el "
                     + "FROM estacion_conf ec, bomba b "
                     + "WHERE ec.bomba_id = b.bomba_id AND ec.estacionconfhead_id = " + estacionConfheadId
                     + "AND ec.estacion_id = " + idstation; //ASG   
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Bomba(rst.getInt(1), rst.getString(2), null, null, null, null));
             }
@@ -529,7 +606,12 @@ public class SvcTurno extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -537,12 +619,15 @@ public class SvcTurno extends Dao {
     public boolean doCreateTurn2(boolean crearDia, Dia dia, Turno turno, List<Precio> listPrice, BeanItemContainer<EmpleadoBombaTurno> listTurnoEmpPump, String creadoPor) {
         boolean result = false;
         ArrayList<EmpleadoBombaTurno> listAsigna = new ArrayList<EmpleadoBombaTurno>();
+        ResultSet rst = null;
+        Connection cnn = null;
+        cnn = getConnection();
         try {
-            getConnection().setAutoCommit(false);
+            cnn.setAutoCommit(false);
             if (crearDia) {
                 miQuery = "INSERT INTO dia (estado_id, creado_por, creado_persona, estacion_id, fecha, creado_el) "
                         + "VALUES (?, ?, ?, ?, ?, SYSDATE)";
-                pst = getConnection().prepareStatement(miQuery);
+                pst = cnn.prepareStatement(miQuery);
                 pst.setInt(1, dia.getEstadoId());
                 pst.setString(2, dia.getCreadoPor());
                 pst.setString(3, dia.getCreadoPersona());
@@ -553,13 +638,13 @@ public class SvcTurno extends Dao {
             }
 
             miQuery = "SELECT turno_seq.NEXTVAL FROM DUAL";
-            pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            pst = cnn.prepareStatement(miQuery);
+            rst = pst.executeQuery();
             Integer turnoId = (rst.next()) ? rst.getInt(1) : 0;
             closePst();
             miQuery = "INSERT INTO turno (turno_id, estacion_id, usuario_id, estado_id, creado_por, creado_persona, turno_fusion, estacionconfhead_id, fecha, horario_id) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            pst = getConnection().prepareStatement(miQuery);
+            pst = cnn.prepareStatement(miQuery);
             pst.setInt(1, turnoId);
             pst.setInt(2, turno.getEstacionId());
             pst.setInt(3, turno.getUsuarioId());
@@ -577,7 +662,7 @@ public class SvcTurno extends Dao {
                     + "VALUES (?, ?, ?, ?, ?, ?, SYSDATE)";
 
             for (Precio precio : listPrice) {
-                pst = getConnection().prepareStatement(miQuery);
+                pst = cnn.prepareStatement(miQuery);
                 pst.setInt(1, turnoId);
                 pst.setInt(2, precio.getProductoId());
                 pst.setInt(3, precio.getTipodespachoId());
@@ -631,7 +716,7 @@ public class SvcTurno extends Dao {
             miQuery = "INSERT INTO turno_empleado_bomba (turno_id, empleado_id, bomba_id, creado_por) "
                     + "VALUES (?, ?, ?, ?)";
             for (EmpleadoBombaTurno item : listAsigna) {
-                pst = getConnection().prepareStatement(miQuery);
+                pst = cnn.prepareStatement(miQuery);
                 pst.setInt(1, turnoId);
                 pst.setInt(2, item.getEmpleadoid());
                 pst.setInt(3, item.getBombaid());
@@ -641,12 +726,20 @@ public class SvcTurno extends Dao {
             }
 
             result = true;
-            getConnection().commit();
+            cnn.commit();
         } catch (Exception exc) {
             try {
-                getConnection().rollback();
+                cnn.rollback();
             } catch (SQLException ex) {
 //                Logger.getLogger(SvcTurno.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    rst.close();
+                    closePst();
+                    cnn.close();
+                    closeConnections(); //asg
+                } catch (SQLException ex) {
+                }
             }
             exc.printStackTrace();
         }
@@ -657,13 +750,16 @@ public class SvcTurno extends Dao {
         ArrayList<EmpleadoBombaTurno> listAsigna = new ArrayList<EmpleadoBombaTurno>();
 
         PreparedStatement pst = null;
-
+        ResultSet rst = null;
+        
         /*Elimina antes de volver asignar*/
         try {
             miQuery = "DELETE FROM turno_empleado_bomba WHERE turno_id = " + idturno;
             pst = getConnection().prepareStatement(miQuery);
             pst.executeUpdate();
+            rst.close();
             closePst();
+            closeConnections(); //asg
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -718,17 +814,22 @@ public class SvcTurno extends Dao {
             pst.setString(4, usuario);
             pst.executeUpdate();
             closePst();
+            closeConnections(); //asg
         }
     }
 
     public boolean doCreateTurn(boolean crearDia, Dia dia, Turno turno, List<Precio> listPrice, List<TurnoEmpleadoBomba> listTurnoEmpPump) {
         boolean result = false;
+        ResultSet rst = null;
+        Connection cnn = null;
+        cnn = getConnection();
+              
         try {
-            getConnection().setAutoCommit(false);
+            cnn.setAutoCommit(false);
             if (crearDia) {
                 miQuery = "INSERT INTO dia (estado_id, creado_por, creado_persona, estacion_id, fecha, creado_el) "
                         + "VALUES (?, ?, ?, ?, ?, SYSDATE)";
-                pst = getConnection().prepareStatement(miQuery);
+                pst = cnn.prepareStatement(miQuery);
                 pst.setInt(1, dia.getEstadoId());
                 pst.setString(2, dia.getCreadoPor());
                 pst.setString(3, dia.getCreadoPersona());
@@ -739,13 +840,13 @@ public class SvcTurno extends Dao {
             }
 
             miQuery = "SELECT turno_seq.NEXTVAL FROM DUAL";
-            pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            pst = cnn.prepareStatement(miQuery);
+            rst = pst.executeQuery();
             Integer turnoId = (rst.next()) ? rst.getInt(1) : 0;
             closePst();
             miQuery = "INSERT INTO turno (turno_id, estacion_id, usuario_id, estado_id, creado_por, creado_persona, turno_fusion, estacionconfhead_id, fecha, horario_id) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            pst = getConnection().prepareStatement(miQuery);
+            pst = cnn.prepareStatement(miQuery);
             pst.setInt(1, turnoId);
             pst.setInt(2, turno.getEstacionId());
             pst.setInt(3, turno.getUsuarioId());
@@ -762,7 +863,7 @@ public class SvcTurno extends Dao {
             miQuery = "INSERT INTO precio (turno_id, producto_id, tipodespacho_id, precio, creado_por, creado_persona, creado_el) "
                     + "VALUES (?, ?, ?, ?, ?, ?, SYSDATE)";
             for (Precio precio : listPrice) {
-                pst = getConnection().prepareStatement(miQuery);
+                pst = cnn.prepareStatement(miQuery);
                 pst.setInt(1, turnoId);
                 pst.setInt(2, precio.getProductoId());
                 pst.setInt(3, precio.getTipodespachoId());
@@ -776,7 +877,7 @@ public class SvcTurno extends Dao {
             miQuery = "INSERT INTO turno_empleado_bomba (turno_id, empleado_id, bomba_id, creado_por) "
                     + "VALUES (?, ?, ?, ?)";
             for (TurnoEmpleadoBomba item : listTurnoEmpPump) {
-                pst = getConnection().prepareStatement(miQuery);
+                pst = cnn.prepareStatement(miQuery);
                 pst.setInt(1, turnoId);
                 pst.setInt(2, item.getEmployee().getEmpleadoId());
                 pst.setInt(3, item.getPump().getId());
@@ -786,12 +887,21 @@ public class SvcTurno extends Dao {
             }
 
             result = true;
-            getConnection().commit();
+            cnn.commit();
         } catch (Exception exc) {
             try {
-                getConnection().rollback();
+                cnn.rollback();
             } catch (SQLException ex) {
 //                Logger.getLogger(SvcTurno.class.getName()).log(Level.SEVERE, null, ex);
+            }finally{
+                try {
+                    rst.close();
+                    closePst();
+                    cnn.close();
+                    closeConnections(); //asg
+                } catch (SQLException ex) {
+                    Logger.getLogger(SvcTurno.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             exc.printStackTrace();
         }
@@ -804,9 +914,10 @@ public class SvcTurno extends Dao {
                 + "FROM estacion_horario eh, horario h "
                 + "WHERE eh.horario_id = h.horario_id AND h.estado = 'A' AND eh.estacion_id = " + estationId
                 + " ORDER BY h.hora_inicio";
+        ResultSet rst = null;
         try {
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Horario schedule;
             while (rst.next()) {
                 schedule = new Horario(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getString(6));
@@ -817,7 +928,12 @@ public class SvcTurno extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -829,9 +945,10 @@ public class SvcTurno extends Dao {
                 + "WHERE eh.horario_id = h.horario_id AND h.estado = 'A' AND eh.estacion_id = " + estationId
                 + "and eh.paisestacion_id = " + idpais
                 + " ORDER BY h.hora_inicio";
+        ResultSet rst = null;
         try {
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Horario schedule;
             while (rst.next()) {
                 schedule = new Horario(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getString(6));
@@ -842,7 +959,12 @@ public class SvcTurno extends Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -879,6 +1001,9 @@ public class SvcTurno extends Dao {
             if (rst != null) {
                 rst.close();
             }
+            rst.close();
+            closePst();
+            closeConnections(); //asg
         }
         return pais;
     }
@@ -909,6 +1034,9 @@ public class SvcTurno extends Dao {
                 if (rst != null) {
                     rst.close();
                 }
+                rst.close();
+                closePst();
+                closeConnections(); //asg
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -939,6 +1067,8 @@ public class SvcTurno extends Dao {
                 if (rst != null) {
                     rst.close();
                 }
+                closePst();
+                closeConnections(); //asg
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -968,6 +1098,8 @@ public class SvcTurno extends Dao {
                 if (rst != null) {
                     rst.close();
                 }
+                closePst();
+                closeConnections(); //asg
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -978,9 +1110,9 @@ public class SvcTurno extends Dao {
     public Integer getExistHorario(Integer idestacion, Integer idconfhead, Integer idhorario, String fecha) {
         Integer id = -1;
         query = "select count(*) from turno where estacion_id = " + idestacion
-                + " and estacionconfhead_id = "+idconfhead
-                + " and HORARIO_ID = "+idhorario
-                + " and fecha = to_date('"+fecha+"','dd/mm/yyyy')";
+                + " and estacionconfhead_id = " + idconfhead
+                + " and HORARIO_ID = " + idhorario
+                + " and fecha = to_date('" + fecha + "','dd/mm/yyyy')";
         ResultSet rst = null;
         try {
             pst = getConnection().prepareStatement(query);
@@ -998,27 +1130,36 @@ public class SvcTurno extends Dao {
                 if (rst != null) {
                     rst.close();
                 }
+                closePst();
+                closeConnections(); //asg
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
         return id;
     }
+
     public int countTurnOpen(int idEstacion) {
         int result = 0;
+        ResultSet rst = null;
         try {
             miQuery = "SELECT count(*) FROM dia "
-                    + "WHERE estado_id =1 AND estacion_id = "+idEstacion;
-            System.out.println("mi ueryryry "+miQuery);
+                    + "WHERE estado_id =1 AND estacion_id = " + idEstacion;
+            System.out.println("mi ueryryry " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             if (rst.next()) {
                 result = rst.getInt(1);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }

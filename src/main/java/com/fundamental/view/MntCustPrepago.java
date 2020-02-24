@@ -5,9 +5,10 @@ import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcConfBombaEstacion;
 import com.fundamental.services.SvcGeneral;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Item;
@@ -53,7 +54,7 @@ public class MntCustPrepago extends Panel implements View {
 
     List<Pais> listCountries = new ArrayList();
     List<Estacion> listStations = new ArrayList();
-    String action = Dao.ACTION_ADD;
+    String action = DaoImp.ACTION_ADD;
 
 //template
     private final VerticalLayout vlRoot;
@@ -116,7 +117,7 @@ public class MntCustPrepago extends Panel implements View {
         SvcGeneral service = new SvcGeneral();
         listCountries = service.getAllPaises();
         bcrCustomer.addAll(service.getCustomersByStationidType("P")); //Prepago
-        service.closeConnections();
+//        service.closeConnections(); //ASG
     }
 
     private void buildControls() {
@@ -180,7 +181,7 @@ public class MntCustPrepago extends Panel implements View {
                 if (cbxCountry.getValue() != null) {
                     SvcConfBombaEstacion service = new SvcConfBombaEstacion();
                     listStations = service.getStationsByCountry(((Pais) cbxCountry.getValue()).getPaisId(), true);
-                    service.closeConnections();
+//                    service.closeConnections(); //ASG
                     cbxStation.setContainerDataSource(new ListContainer<Estacion>(Estacion.class, listStations));
                 }
             }
@@ -208,7 +209,7 @@ public class MntCustPrepago extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (tblCustomer.getValue() != null) {
-                    action = Dao.ACTION_UPDATE;
+                    action = DaoImp.ACTION_UPDATE;
                     int itemid = Integer.parseInt(tblCustomer.getValue().toString());
                     Cliente cliente = bcrCustomer.getItem(itemid).getBean();
                     tfdCode.setValue(cliente.getCodigo());
@@ -250,7 +251,7 @@ public class MntCustPrepago extends Panel implements View {
         btnAdd.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                action = Dao.ACTION_ADD;
+                action = DaoImp.ACTION_ADD;
                 tblCustomer.setValue(null);
                 tfdCode.setValue(null);
                 tfdName.setValue(null);
@@ -279,11 +280,11 @@ public class MntCustPrepago extends Panel implements View {
                     }
                 }
 
-                int custId = (action.equals(Dao.ACTION_ADD)) ? 0 : Integer.parseInt(tblCustomer.getValue().toString());
+                int custId = (action.equals(DaoImp.ACTION_ADD)) ? 0 : Integer.parseInt(tblCustomer.getValue().toString());
                 cliente = new Cliente(custId, tfdCode.getValue(), tfdName.getValue(), ((Estacion) cbxStation.getValue()).getEstacionId(), "A", user.getUsername(), new java.util.Date(), "P", null, null);
                 SvcGeneral service = new SvcGeneral();
                 boolean everythingOk = service.doActionCustomer(action, cliente);
-                service.closeConnections();
+//                service.closeConnections(); //ASG
                 if (everythingOk) {
                     Notification.show("La acción se ha ejecutado con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                     UI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_CUST_PREPAGO.getViewName());

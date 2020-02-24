@@ -9,12 +9,13 @@ import com.fundamental.model.Cliente;
 import com.fundamental.model.Lubricanteprecio;
 import com.fundamental.model.Marca;
 import com.fundamental.model.Producto;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcGeneral;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.CreateComponents;
 import com.jain.addon.resource.DefaultI18NResourceProvider;
 import com.jain.addon.resource.I18NProvider;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.GenericClientes;
 import com.sisintegrados.generic.bean.GenericLubricantePrecio;
@@ -163,7 +164,7 @@ public class FormUploadClientes extends Window {
                                         c.setNombre(t.getNombre());
                                         c.setTipo(t.getTipo().equals("Prepago")?"P":"C");
                                         c.setCodigoEnvoy(t.getCodigoEnvoy());
-                                        if(service.doActionCustomer(Dao.ACTION_UPDATE, c)){
+                                        if(service.doActionCustomer(DaoImp.ACTION_UPDATE, c)){
                                             u = u + 1 ;                         
                                         }   
                                     }
@@ -172,7 +173,7 @@ public class FormUploadClientes extends Window {
                                     c = new Cliente(0, codigoE1, t.getNombre(),estacion.getEstacionId(),
                                             t.getEstado().equals("Activo")?"A":"I",
                                             usuario.getUsername(), new java.util.Date(),  t.getTipo().equals("Prepago")?"P":"C", codigoEn, "");
-                                    if(service.doActionCustomer(Dao.ACTION_ADD,c)){
+                                    if(service.doActionCustomer(DaoImp.ACTION_ADD,c)){
                                         i = i+ 1;
                                     }
                                 }

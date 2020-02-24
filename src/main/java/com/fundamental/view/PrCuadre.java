@@ -8,7 +8,7 @@ import com.fundamental.model.ArqueocajaProducto;
 import com.fundamental.model.Bomba;
 import com.fundamental.model.Cliente;
 import com.fundamental.model.Dia;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.Efectivo;
 import com.sisintegrados.generic.bean.Empleado;
 import com.sisintegrados.generic.bean.Estacion;
@@ -39,6 +39,7 @@ import com.fundamental.utils.CreateComponents;
 import com.fundamental.utils.ExcelGenerator;
 import com.fundamental.utils.Util;
 import com.fundamental.utils.Zip;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.GenericTarjeta;
 import com.sisintegrados.generic.bean.LitroCalibracion;
 import com.sisintegrados.generic.bean.RepCuadrePistero;
@@ -471,7 +472,7 @@ public class PrCuadre extends Panel implements View {
             listEmpleados = service.getEmpleadosByTurnoid(turno.getTurnoId());
         }
         uniqueStation = service.getUniqueStation(user.getUsuarioId());
-        service.closeConnections();
+//        service.closeConnections();
 
         bcrBombas.setBeanIdProperty("id");
         bcrBombas.removeAllItems();
@@ -518,7 +519,7 @@ public class PrCuadre extends Panel implements View {
                 Container estacionContainer = new ListContainer<Estacion>(Estacion.class, listStations);
                 bcrMediopago.addAll(service.getMediospagoByPaisidTipoid(pais.getPaisId(), 1));   //genericos
                 mediosPagoEfectivo = service.getMediospagoByPaisidTipoid(pais.getPaisId(), 2);
-                service.closeConnections();
+//                service.closeConnections();
                 cbxEstacion.setContainerDataSource(estacionContainer);
                 //limpiar
                 dfdFecha.setValue(null);
@@ -569,7 +570,7 @@ public class PrCuadre extends Panel implements View {
                 bcrPrepaid.removeAllItems();
                 bcrLubs.removeAllItems();
 
-                service.closeConnections();
+//                service.closeConnections();
 //                determinarPermisos();
 
             }
@@ -598,7 +599,7 @@ public class PrCuadre extends Panel implements View {
                     dia = svcTurno.getDiaByEstacionidFecha(estacion.getEstacionId(), dfdFecha.getValue());
                     dia.setFecha((dia.getFecha() == null) ? dfdFecha.getValue() : dia.getFecha());  //dia es siempre el mismo que lo seleccionado en el control
                     List<Turno> listTurno = svcTurno.getTurnosByEstacionidDiaNolectura(estacion.getEstacionId(), dfdFecha.getValue());
-                    svcTurno.closeConnections();
+//                    svcTurno.closeConnections();
                     contTurnos = new ListContainer<>(Turno.class, listTurno);
                     cbxTurno = (cbxTurno == null) ? new ComboBox("Turno:") : cbxTurno;
                     cbxTurno.setContainerDataSource(contTurnos);
@@ -817,7 +818,7 @@ public class PrCuadre extends Panel implements View {
 
             tasacambio = service.getTasacambioByPaisFecha(pais.getPaisId(), turno.getFecha());
 
-            service.closeConnections();
+//            service.closeConnections();
 
             if (!user.isGerente() && !user.isAdministrativo()) {
                 Arqueocaja acaja = new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), new Date(), 1, null, null, null, null, null);
@@ -946,7 +947,7 @@ public class PrCuadre extends Panel implements View {
 
 //TODO: Considerar hacer con commit y rollback este conjunto de interacciones a base de datos.
                                 Arqueocaja arqueo = ((Empleado) cbxEmpleado.getValue()).getArqueo();
-                                String myAction = (arqueo == null || arqueo.getArqueocajaId() == null) ? Dao.ACTION_ADD : Dao.ACTION_UPDATE;
+                                String myAction = (arqueo == null || arqueo.getArqueocajaId() == null) ? DaoImp.ACTION_ADD : DaoImp.ACTION_UPDATE;
                                 arqueo = (arqueo == null || arqueo.getArqueocajaId() == null)
                                         ? new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), turno.getFecha(), 1, user.getUsername(), user.getNombreLogin(), ((Empleado) cbxEmpleado.getValue()).getEmpleadoId())/*Retire nombre jefe y pistero ASG*/
                                         : arqueo;
@@ -959,46 +960,46 @@ public class PrCuadre extends Panel implements View {
                                 List<Integer> lecturasIds = (List<Integer>) tblMediospago.getItemIds();
                                 Mediopago medio;
                                 ArqueocajaDetalle ad = new ArqueocajaDetalle(arqueo.getArqueocajaId(), null, null, null, null);
-                                svcTurno.saveArqueoDetalle(Dao.ACTION_DELETE, ad);
+                                svcTurno.saveArqueoDetalle(DaoImp.ACTION_DELETE, ad);
                                 for (Integer id : lecturasIds) {
                                     medio = (Mediopago) ((BeanItem) tblMediospago.getItem(id)).getBean();
                                     if (medio.getValue() > 0) {
                                         ad = new ArqueocajaDetalle(arqueo.getArqueocajaId(), medio.getMediopagoId(), medio.getCantidad(), medio.getValue(), user.getUsername());
                                         ad.setModificadoPor(user.getUsername());
-                                        svcTurno.saveArqueoDetalle(Dao.ACTION_ADD, ad);
+                                        svcTurno.saveArqueoDetalle(DaoImp.ACTION_ADD, ad);
                                     }
                                 }
 
-                                svcTurno.saveArqueoBomba(Dao.ACTION_DELETE, new ArqueocajaBomba(arqueo.getArqueocajaId(), null, null)); //las bombas que pertenecen al arqueo.
+                                svcTurno.saveArqueoBomba(DaoImp.ACTION_DELETE, new ArqueocajaBomba(arqueo.getArqueocajaId(), null, null)); //las bombas que pertenecen al arqueo.
                                 for (Integer bid : (List<Integer>) bcrBombas.getItemIds()) {
                                     if (bcrBombas.getItem(bid).getBean().getSelected()) {
-                                        svcTurno.saveArqueoBomba(Dao.ACTION_DELETE, new ArqueocajaBomba(null, bid, turno.getTurnoId()));    //las agregadas pero ya pertenecian a otro turno.
-                                        svcTurno.saveArqueoBomba(Dao.ACTION_ADD, new ArqueocajaBomba(arqueo.getArqueocajaId(), bid, turno.getTurnoId()));
+                                        svcTurno.saveArqueoBomba(DaoImp.ACTION_DELETE, new ArqueocajaBomba(null, bid, turno.getTurnoId()));    //las agregadas pero ya pertenecian a otro turno.
+                                        svcTurno.saveArqueoBomba(DaoImp.ACTION_ADD, new ArqueocajaBomba(arqueo.getArqueocajaId(), bid, turno.getTurnoId()));
                                     }
                                 }
 
                                 lecturasIds = (List<Integer>) tblProd.getItemIds();
                                 Producto producto;
-                                svcTurno.saveArqueoProducto(Dao.ACTION_DELETE, new ArqueocajaProducto(arqueo.getArqueocajaId(), null, null));
+                                svcTurno.saveArqueoProducto(DaoImp.ACTION_DELETE, new ArqueocajaProducto(arqueo.getArqueocajaId(), null, null));
                                 for (Integer id : lecturasIds) {
                                     producto = (Producto) ((BeanItem) tblProd.getItem(id)).getBean();
                                     if (producto.getValue() > 0) {
                                         ArqueocajaProducto apo = new ArqueocajaProducto(arqueo.getArqueocajaId(), producto.getProductoId(), producto.getValue());
-                                        svcTurno.saveArqueoProducto(Dao.ACTION_ADD, apo);
+                                        svcTurno.saveArqueoProducto(DaoImp.ACTION_ADD, apo);
                                     }
                                 }
 
                                 lecturasIds = (List<Integer>) tblEfectivo.getItemIds();
                                 DtoEfectivo dtoE;
                                 Efectivo efectivo;
-                                svcTurno.doActionEfectivo(Dao.ACTION_DELETE, new Efectivo(arqueo.getArqueocajaId(), null, null, null));
+                                svcTurno.doActionEfectivo(DaoImp.ACTION_DELETE, new Efectivo(arqueo.getArqueocajaId(), null, null, null));
                                 for (Integer id : lecturasIds) {
                                     dtoE = (DtoEfectivo) ((BeanItem) tblEfectivo.getItem(id)).getBean();
                                     if (dtoE.getValue() > 0 && dtoE.getMedioPago() != null) {
                                         efectivo = new Efectivo(arqueo.getArqueocajaId(), dtoE.getMedioPago().getMediopagoId(), 0, dtoE.getValue());
                                         efectivo.setTasa(dtoE.getTasa());
                                         efectivo.setMonExtranjera(dtoE.getMonExtranjera());
-                                        svcTurno.doActionEfectivo(Dao.ACTION_ADD, efectivo);
+                                        svcTurno.doActionEfectivo(DaoImp.ACTION_ADD, efectivo);
                                     }
                                 }
 
@@ -1017,7 +1018,7 @@ public class PrCuadre extends Panel implements View {
                                 tmpString = (user.getPaisLogin() != null) ? user.getPaisLogin().getNombre() : ((Pais) cbxPais.getValue()).getNombre();
 //                                Parametro parametro = svcTurno.getParameterByName("CORREO_CALIBRACIONES_" + tmpString.toUpperCase().replaceAll(" ", "")); //COMENTADO CORREO NO SE USA  ASG
 
-                                svcTurno.closeConnections();
+//                                svcTurno.closeConnections();
 
                                 if (arqueo.getArqueocajaId() != null) {
 
@@ -1065,7 +1066,7 @@ public class PrCuadre extends Panel implements View {
                                     }
                                     /*fin registro detalle*/
 
-                                    myAction = (myAction.equals(Dao.ACTION_ADD)) ? "cuadrado" : "actualizado";
+                                    myAction = (myAction.equals(DaoImp.ACTION_ADD)) ? "cuadrado" : "actualizado";
                                     Notification notif = new Notification("ÉXITO:", "Se ha " + myAction + " las bombas con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                                     notif.setDelayMsec(3000);
                                     notif.setPosition(Position.MIDDLE_CENTER);
@@ -2370,7 +2371,7 @@ public class PrCuadre extends Panel implements View {
         if (selected) {
             boolean bombaConLectura = svcArqueo.bombaTieneLecturaByTurnoid(turno.getTurnoId(), Integer.parseInt(itemId.toString()));
             if (!bombaConLectura) {
-                svcArqueo.closeConnections();
+//                svcArqueo.closeConnections();
                 for (Bomba bmb : allBombas) {
                     if (bmb.getId() == Integer.parseInt(itemId.toString())) {
                         bmb.setSelected(false);
@@ -2405,7 +2406,7 @@ public class PrCuadre extends Panel implements View {
         if (!bombasIds.isEmpty()) {
             allArqueo = svcArqueo.getArqueo(turno.getTurnoId().toString(), bombasIds, "M");
             arqueoElec = svcArqueo.getArqueo(turno.getTurnoId().toString(), bombasIds, "E");
-            svcArqueo.closeConnections();
+//            svcArqueo.closeConnections();
             totalArqueoElectronico = 0D;
 //                            for (DtoArqueo dao : allArqueo) {
             for (DtoArqueo dao : arqueoElec) {
@@ -2462,7 +2463,7 @@ public class PrCuadre extends Panel implements View {
             tblEfectivo.setColumnFooter("colMonto", currencySymbol + numberFmt.format(totalEfectivo));
 
             updateTotalPagos(0D);
-            svcArqueo.closeConnections();
+//            svcArqueo.closeConnections();
 
         }
 
@@ -2576,7 +2577,7 @@ public class PrCuadre extends Panel implements View {
                 );
             }
 
-            svcTC.closeConnections();
+//            svcTC.closeConnections();
         } else {
             for (Integer bid : bcrBombas.getItemIds()) {
                 bcrBombas.getItem(bid).getItemProperty("selected").setValue(Boolean.FALSE);
@@ -2591,7 +2592,7 @@ public class PrCuadre extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         modificar = acceso.isCambiar();

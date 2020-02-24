@@ -5,6 +5,8 @@
  */
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.GenericEstacion;
 import com.sisintegrados.generic.bean.GenericRprControlMediosPago;
 import java.sql.CallableStatement;
@@ -17,17 +19,18 @@ import java.util.Date;
  *
  * @author Mery
  */
-public class SvcReporteControlMediosPago extends Dao {
+public class SvcReporteControlMediosPago extends DaoImp {
 
     private String query;
 
     public ArrayList<GenericEstacion> getCheckEstacionesM(Integer idpais) {
         ArrayList<GenericEstacion> result = new ArrayList<GenericEstacion>();
         GenericEstacion gnestacion = new GenericEstacion();
+        ResultSet rst = null;
         try {
             query = "Select estacion_id,nombre from estacion where pais_id =" + idpais;
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 gnestacion = new GenericEstacion();
                 gnestacion.setEstacionid(rst.getInt(1));
@@ -38,7 +41,9 @@ public class SvcReporteControlMediosPago extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -47,10 +52,12 @@ public class SvcReporteControlMediosPago extends Dao {
 
     public String getEstacion(Integer idestacion) {
         String result = "";
+        ResultSet rst = null;
+        
         query = "SELECT NOMBRE FROM ESTACION WHERE ESTACION_ID =" + idestacion;
         try {
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result = rst.getString(1);
             }
@@ -58,7 +65,9 @@ public class SvcReporteControlMediosPago extends Dao {
             ex.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -68,13 +77,14 @@ public class SvcReporteControlMediosPago extends Dao {
     public ArrayList<GenericRprControlMediosPago> getCtlMediosPago() {
         ArrayList<GenericRprControlMediosPago> result = new ArrayList<GenericRprControlMediosPago>();
         GenericRprControlMediosPago genctl = new GenericRprControlMediosPago();
+        ResultSet rst = null;
         try {
             query = "Select FECHA, MEDIOPAGO_ID, LOTE, MONTO_BRUTO, COMISION, \n"
                     + "                MONTO_NETO, COMENTARIOS, CODIGO, ESTACION, BANCO, NODEPOSITO, MONTOCH, MONTOUSD, CLIENTE, COD_CLIENTE, TIPO_CLIENTE "
                     + "from CTRL_MEDIOS_PAGO order by fecha asc";
 //            System.out.println("QUERY " + query);
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Integer ii=0;
             while (rst.next()) {
                 genctl = new GenericRprControlMediosPago(ii,rst.getDate(1), rst.getDouble(2),
@@ -99,7 +109,9 @@ public class SvcReporteControlMediosPago extends Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -122,14 +134,17 @@ public class SvcReporteControlMediosPago extends Dao {
         cst.setString(3, estaciones);
         cst.setString(4, paisid);
         cst.execute();
+        cst.close();
+        closeConnections();
     }
 
     public String getPaisId(Integer idestacion) {
         String result = "";
+        ResultSet rst = null;
         query = "SELECT PAIS_ID FROM ESTACION WHERE ESTACION_ID = " + idestacion;
         try {
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result = rst.getString(1);
             }
@@ -137,11 +152,12 @@ public class SvcReporteControlMediosPago extends Dao {
             ex.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
         return result;
     }
-
 }

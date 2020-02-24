@@ -5,110 +5,129 @@
  */
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.ComVenLubricantes;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author m
  */
-public class SvcComVenLubricantes extends Dao{
+public class SvcComVenLubricantes extends DaoImp {
+
     private String query;
-    
+
     public List<ComVenLubricantes> getComVenLub(int countryId, int brandId, Date fecha, Integer ESTACIONID) {
-        List<ComVenLubricantes> result = new ArrayList();        
+        List<ComVenLubricantes> result = new ArrayList();
         Calendar ayer = Calendar.getInstance();
         ayer.setTime(fecha);
-        ayer.add(Calendar.DATE, -1);        
-        try {   
-            query = "SELECT p.producto_id,p.nombre,m.id_marca, c.pais_id, (select inv_inicial from compra_venta_lubricante " 
-                    +  "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('"+Constant.SDF_ddMMyyyy.format(fecha)+"','dd/mm/yyyy')) as inv_inicial, "
+        ayer.add(Calendar.DATE, -1);
+        ResultSet rst = null;
+        try {
+            query = "SELECT p.producto_id,p.nombre,m.id_marca, c.pais_id, (select inv_inicial from compra_venta_lubricante "
+                    + "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy')) as inv_inicial, "
                     + "(select compra from compra_venta_lubricante "
-                    +  "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('"+Constant.SDF_ddMMyyyy.format(fecha)+"','dd/mm/yyyy')) as compra "
+                    + "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy')) as compra "
                     + "FROM lubricanteprecio l, pais c, producto p, marca m "
                     + "WHERE l.pais_id = c.pais_id AND p.id_marca = m.id_marca and p.TIPO_ID=2 "
-                    + "AND l.producto_id = p.producto_id and p.ESTADO='A' AND l.pais_id = "+countryId+" "
-                    + "AND p.id_marca = "+brandId+ "";
-            System.out.println("query "+query);
+                    + "AND l.producto_id = p.producto_id and p.ESTADO='A' AND l.pais_id = " + countryId + " "
+                    + "AND p.id_marca = " + brandId + "";
+            System.out.println("query " + query);
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();            
+            rst = pst.executeQuery();
             ComVenLubricantes lub;
             while (rst.next()) {
-                Double valFinal = valorFinal(countryId, brandId, fecha, rst.getInt(1),ESTACIONID); //ASG ESTACION
-                int count = countLub(rst.getInt(1), fecha, countryId,ESTACIONID);
-                if(valFinal!=null && count ==0){
+                Double valFinal = valorFinal(countryId, brandId, fecha, rst.getInt(1), ESTACIONID); //ASG ESTACION
+                int count = countLub(rst.getInt(1), fecha, countryId, ESTACIONID);
+                if (valFinal != null && count == 0) {
                     valFinal = valFinal;
-                }else{
+                } else {
                     valFinal = rst.getDouble(5);
                 }
-                lub = new ComVenLubricantes(rst.getInt(3), rst.getInt(1), rst.getInt(4), fecha, valFinal, rst.getString(2),ESTACIONID);
+                lub = new ComVenLubricantes(rst.getInt(3), rst.getInt(1), rst.getInt(4), fecha, valFinal, rst.getString(2), ESTACIONID);
                 lub.setCompra(rst.getDouble(6));
                 result.add(lub);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcComVenLubricantes.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return result;
     }
-    
-    public List<ComVenLubricantes> getComVenLubAnterior(int countryId, int brandId, Date fecha,Integer ESTACIONID) {
+
+    public List<ComVenLubricantes> getComVenLubAnterior(int countryId, int brandId, Date fecha, Integer ESTACIONID) {
         List<ComVenLubricantes> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = "select l.PRODUCTO_ID, p.NOMBRE, l.FECHA, "
                     + "l.INV_INICIAL, l.COMPRA, l.VENTA, l.INV_FINAL, l.PAIS_ID "
                     + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p "
                     + "where l.PRODUCTO_ID = p.PRODUCTO_ID "
-                    + "AND l.PAIS_ID="+countryId+" and l.MARCA_ID="+brandId+" "
-                    + "and l.FECHA = to_date('"+Constant.SDF_ddMMyyyy.format(fecha)+"','dd/mm/yyyy') AND l.ESTACION_ID = "+ESTACIONID; //ASG ESTACION
-            System.out.println("query,.,.,. "+query);
+                    + "AND l.PAIS_ID=" + countryId + " and l.MARCA_ID=" + brandId + " "
+                    + "and l.FECHA = to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy') AND l.ESTACION_ID = " + ESTACIONID; //ASG ESTACION
+            System.out.println("query,.,.,. " + query);
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             ComVenLubricantes lub;
             while (rst.next()) {
-                lub = new ComVenLubricantes(rst.getInt(1),rst.getInt(8), rst.getDate(3), rst.getDouble(4), rst.getDouble(5), rst.getDouble(6), rst.getDouble(7), rst.getString(2));
+                lub = new ComVenLubricantes(rst.getInt(1), rst.getInt(8), rst.getDate(3), rst.getDouble(4), rst.getDouble(5), rst.getDouble(6), rst.getDouble(7), rst.getString(2));
                 result.add(lub);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                closePst();
+                rst.close();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
-    
+
     public ComVenLubricantes insertCompra(ComVenLubricantes lub) {
         ComVenLubricantes result = new ComVenLubricantes();
-        ResultSet rst = null;  
+        ResultSet rst = null;
         Calendar ayer = Calendar.getInstance();
         ayer.setTime(lub.getFecha());
         ayer.add(Calendar.DATE, -1);
         try {
-            int val = countLub(lub.getProductoId(),lub.getFecha(),lub.getPaisId(),lub.getEstacionid());//ASG ESTACION
-            if(val>0){
+            int val = countLub(lub.getProductoId(), lub.getFecha(), lub.getPaisId(), lub.getEstacionid());//ASG ESTACION
+            if (val > 0) {
                 miQuery = "UPDATE COMPRA_VENTA_LUBRICANTE "
-                    + "SET INV_INICIAL=?,COMPRA=?, INV_FINAL=?, MODIFICADO_POR=?, MODIFICADO_EL=SYSDATE "
-                    + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy') AND ESTACION_ID = ?"; //ASG ESTACION
+                        + "SET INV_INICIAL=?,COMPRA=?, INV_FINAL=?, MODIFICADO_POR=?, MODIFICADO_EL=SYSDATE "
+                        + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy') AND ESTACION_ID = ?"; //ASG ESTACION
                 pst = getConnection().prepareStatement(miQuery);
                 pst.setDouble(1, lub.getInvInicial());
                 pst.setDouble(2, lub.getCompra());
                 pst.setDouble(3, lub.getInvfinal());
                 pst.setString(4, lub.getModificadopor());
                 pst.setInt(5, lub.getProductoId());
-                pst.setString(6,Constant.SDF_ddMMyyyy.format(lub.getFecha()));
-                pst.setInt(7,lub.getEstacionid()); ///ASG ESTACION
+                pst.setString(6, Constant.SDF_ddMMyyyy.format(lub.getFecha()));
+                pst.setInt(7, lub.getEstacionid()); ///ASG ESTACION
                 pst.executeUpdate();
                 result = lub;
-            }else{
+            } else {
                 miQuery = "INSERT INTO COMPRA_VENTA_LUBRICANTE(COMPRA_ID, MARCA_ID, PRODUCTO_ID, "
-                    + "FECHA, INV_INICIAL, COMPRA, INV_FINAL, CREADO_POR, PAIS_ID, CREADO_EL, ESTACION_ID) " /*ASG ESTACION*/
-                    + "VALUES(COMPRA_VENTA_LUBRICANTE_SEQ.NEXTVAL, ?, ?, ?,?, ?, ?, ?, ?, SYSDATE,?)";
+                        + "FECHA, INV_INICIAL, COMPRA, INV_FINAL, CREADO_POR, PAIS_ID, CREADO_EL, ESTACION_ID) " /*ASG ESTACION*/
+                        + "VALUES(COMPRA_VENTA_LUBRICANTE_SEQ.NEXTVAL, ?, ?, ?,?, ?, ?, ?, ?, SYSDATE,?)";
                 pst = getConnection().prepareStatement(miQuery);
                 pst.setInt(1, lub.getMarcaId());
                 pst.setInt(2, lub.getProductoId());
@@ -119,10 +138,10 @@ public class SvcComVenLubricantes extends Dao{
                 pst.setString(7, lub.getCreadopor());
                 pst.setInt(8, lub.getPaisId());
                 pst.setInt(9, lub.getEstacionid()); //ASG ESTACION
-                pst.executeQuery();
+                pst.executeUpdate();
                 result = lub;
             }
-            
+
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
@@ -130,53 +149,54 @@ public class SvcComVenLubricantes extends Dao{
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
         return result;
-    }    
-    
-    public boolean insertVenta(int productoId, int paisId, Double venta, Date fecha,Integer ESTACIONID) {
+    }
+
+    public boolean insertVenta(int productoId, int paisId, Double venta, Date fecha, Integer ESTACIONID) {
         boolean result = true;
-        ResultSet rst = null;  
+        ResultSet rst = null;
         Calendar ayer = Calendar.getInstance();
         ayer.setTime(fecha);
         ayer.add(Calendar.DATE, -1);
         try {
             int idMarca = recuperaMarca(productoId);
-            Date fec = fechaMax(productoId,fecha,paisId,ESTACIONID);
+            Date fec = fechaMax(productoId, fecha, paisId, ESTACIONID);
 //            Double valFinal = valorFinal(paisId, idMarca, fecha, productoId);
-            Double valFinalAnt = valorFinal(paisId, idMarca, ayer.getTime(),productoId,ESTACIONID);
-            Double compra = compra(paisId, idMarca, productoId, fecha,ESTACIONID);
-            Double valInicial = valorInicial(paisId, idMarca, productoId, fecha,ESTACIONID);
-            if(fec!=null){                
+            Double valFinalAnt = valorFinal(paisId, idMarca, ayer.getTime(), productoId, ESTACIONID);
+            Double compra = compra(paisId, idMarca, productoId, fecha, ESTACIONID);
+            Double valInicial = valorInicial(paisId, idMarca, productoId, fecha, ESTACIONID);
+            if (fec != null) {
                 miQuery = "UPDATE COMPRA_VENTA_LUBRICANTE "
-                    + "SET VENTA=?, INV_FINAL=?, MODIFICADO_EL=SYSDATE "
-                    + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy') AND ESTACION_ID = "+ESTACIONID; //ASG ESTACION
-                System.out.println(" venta "+venta);
-                System.out.println("producto id "+productoId);
+                        + "SET VENTA=?, INV_FINAL=?, MODIFICADO_EL=SYSDATE "
+                        + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy') AND ESTACION_ID = " + ESTACIONID; //ASG ESTACION
+                System.out.println(" venta " + venta);
+                System.out.println("producto id " + productoId);
                 pst = getConnection().prepareStatement(miQuery);
                 pst.setDouble(1, venta);
                 pst.setDouble(2, valInicial + compra - venta);
-                pst.setInt(3,productoId);
+                pst.setInt(3, productoId);
                 pst.setString(4, Constant.SDF_ddMMyyyy.format(fec));
                 pst.executeUpdate();
-            }else{
+            } else {
                 miQuery = "INSERT INTO COMPRA_VENTA_LUBRICANTE(COMPRA_ID, MARCA_ID, PRODUCTO_ID, "
-                    + "FECHA, INV_INICIAL, VENTA, INV_FINAL, PAIS_ID, CREADO_EL, ESTACION_ID) "
-                    + "VALUES(COMPRA_VENTA_LUBRICANTE_SEQ.NEXTVAL, ?, ?, ?,?, ?, ?, ?, SYSDATE ?)";
+                        + "FECHA, INV_INICIAL, VENTA, INV_FINAL, PAIS_ID, CREADO_EL, ESTACION_ID) "
+                        + "VALUES(COMPRA_VENTA_LUBRICANTE_SEQ.NEXTVAL, ?, ?, ?,?, ?, ?, ?, SYSDATE ?)";
                 pst = getConnection().prepareStatement(miQuery);
                 pst.setInt(1, idMarca);
                 pst.setInt(2, productoId);
                 pst.setDate(3, new java.sql.Date(fecha.getTime()));
                 pst.setDouble(4, valFinalAnt);
                 pst.setDouble(5, venta);
-                pst.setDouble(6, (valFinalAnt-venta));
+                pst.setDouble(6, (valFinalAnt - venta));
                 pst.setInt(7, paisId);
                 pst.setInt(8, ESTACIONID);  //ASG ESTACION
-                pst.executeQuery();
+                pst.executeUpdate();
             }
-            
+
         } catch (Exception exc) {
             exc.printStackTrace();
             return false;
@@ -185,31 +205,32 @@ public class SvcComVenLubricantes extends Dao{
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
         return result;
     }
-    
-    public boolean reversarVenta(int productoId, int paisId, Double venta, Date fecha,Integer ESTACIONID) {
+
+    public boolean reversarVenta(int productoId, int paisId, Double venta, Date fecha, Integer ESTACIONID) {
         boolean result = true;
-        ResultSet rst = null;  
+        ResultSet rst = null;
         Calendar ayer = Calendar.getInstance();
         ayer.setTime(fecha);
         ayer.add(Calendar.DATE, -1);
         try {
-            Date fec = fechaMax(productoId,fecha,paisId,ESTACIONID);
+            Date fec = fechaMax(productoId, fecha, paisId, ESTACIONID);
             int idMarca = recuperaMarca(productoId);
-            Double valFinalAnt = valorFinal(paisId, idMarca, ayer.getTime(),productoId,ESTACIONID);
-            Double compra = compra(paisId, idMarca, productoId, fecha,ESTACIONID);
-            Double valInicial = valorInicial(paisId, idMarca, productoId, fecha,ESTACIONID);                
+            Double valFinalAnt = valorFinal(paisId, idMarca, ayer.getTime(), productoId, ESTACIONID);
+            Double compra = compra(paisId, idMarca, productoId, fecha, ESTACIONID);
+            Double valInicial = valorInicial(paisId, idMarca, productoId, fecha, ESTACIONID);
             miQuery = "UPDATE COMPRA_VENTA_LUBRICANTE "
-                + "SET VENTA=0, INV_FINAL=?, MODIFICADO_EL=SYSDATE "
-                + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy') AND ESTACION_ID = "+ESTACIONID;  //ASG ESTACION ID
+                    + "SET VENTA=0, INV_FINAL=?, MODIFICADO_EL=SYSDATE "
+                    + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy') AND ESTACION_ID = " + ESTACIONID;  //ASG ESTACION ID
             System.out.println("PRUEBA MERY " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
             pst.setDouble(1, valInicial + compra);
-            pst.setInt(2,productoId);
+            pst.setInt(2, productoId);
             pst.setString(3, Constant.SDF_ddMMyyyy.format(fec));
             pst.executeUpdate();
         } catch (Exception exc) {
@@ -220,85 +241,102 @@ public class SvcComVenLubricantes extends Dao{
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
         return result;
     }
-    
+
     public int countLub(int idProducto, Date fecha, int idPais, Integer ESTACIONID) {
         int result = 0;
         String dateString = Constant.SDF_ddMMyyyy.format(fecha);
+        ResultSet rst = null;
         try {
-            miQuery = "SELECT count(*) FROM COMPRA_VENTA_LUBRICANTE where PRODUCTO_ID="+idProducto+" "
-                    + "and trunc(FECHA) =  to_date('"+dateString+"','dd/mm/yyyy') and PAIS_ID= "+idPais +" AND ESTACION_ID = "+ESTACIONID;  //ASG ESTACION
+            miQuery = "SELECT count(*) FROM COMPRA_VENTA_LUBRICANTE where PRODUCTO_ID=" + idProducto + " "
+                    + "and trunc(FECHA) =  to_date('" + dateString + "','dd/mm/yyyy') and PAIS_ID= " + idPais + " AND ESTACION_ID = " + ESTACIONID;  //ASG ESTACION
 //            System.out.println("mi ueryryry "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             if (rst.next()) {
                 result = rst.getInt(1);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
-    
-    public Date fechaMax(int idProducto, Date fecha, int idPais,Integer ESTACIONID) {
+
+    public Date fechaMax(int idProducto, Date fecha, int idPais, Integer ESTACIONID) {
         Date result = null;
         String fecha1 = Constant.SDF_ddMMyyyy.format(fecha);
         String fecha2 = Constant.SDF_ddMMyyyy.format(fecha);
-        fecha1 = fecha2.substring(3,5);
+        fecha1 = fecha2.substring(3, 5);
         fecha2 = fecha2.substring(6);
+        ResultSet rst = null;
         try {
-            miQuery = "SELECT fecha FROM COMPRA_VENTA_LUBRICANTE " +
-                      "where PRODUCTO_ID="+idProducto+" and PAIS_ID="+idPais+" AND ESTACION_ID = " +ESTACIONID+  /*ASG ESTACION*/
-                      " and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.PAIS_ID="+idPais+" " +
-                      "and b.producto_id="+idProducto+" and "+fecha1+"=extract(MONTH from b.fecha) " +
-                      "AND "+fecha2+"=extract(YEAR from b.fecha))  order by FECHA desc ";
+            miQuery = "SELECT fecha FROM COMPRA_VENTA_LUBRICANTE "
+                    + "where PRODUCTO_ID=" + idProducto + " and PAIS_ID=" + idPais + " AND ESTACION_ID = " + ESTACIONID
+                    + /*ASG ESTACION*/ " and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.PAIS_ID=" + idPais + " "
+                    + "and b.producto_id=" + idProducto + " and " + fecha1 + "=extract(MONTH from b.fecha) "
+                    + "AND " + fecha2 + "=extract(YEAR from b.fecha))  order by FECHA desc ";
 //            System.out.println("mi ueryryry "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             if (rst.next()) {
                 result = rst.getDate(1);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
-    
-    
-    private Double valorFinal(int countryId, int brandId, Date fecha, int productId, Integer ESTACIONID){        
+
+    private Double valorFinal(int countryId, int brandId, Date fecha, int productId, Integer ESTACIONID) {
         ResultSet rst = null;
         Double valor = 0.00;
         String fecha1 = Constant.SDF_ddMMyyyy.format(fecha);
         String fecha2 = Constant.SDF_ddMMyyyy.format(fecha);
-        fecha1 = fecha2.substring(3,5);
+        fecha1 = fecha2.substring(3, 5);
         fecha2 = fecha2.substring(6);
-            try{        
-                query = "select INV_FINAL "
-                        + "from COMPRA_VENTA_LUBRICANTE "
-                        + "where PAIS_ID="+countryId+" and MARCA_ID="+brandId+" and producto_id="+productId+" AND ESTACION_ID = "+ESTACIONID  /*ASG ESTACION*/
-                        + " and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.PAIS_ID="+countryId+" "
-                        + "and b.MARCA_ID="+brandId+" and b.producto_id="+productId+" and "+fecha1+"=extract(MONTH from b.fecha) "
-                        + "AND "+fecha2+"=extract(YEAR from b.fecha))  order by FECHA desc ";
+        try {
+            query = "select INV_FINAL "
+                    + "from COMPRA_VENTA_LUBRICANTE "
+                    + "where PAIS_ID=" + countryId + " and MARCA_ID=" + brandId + " and producto_id=" + productId + " AND ESTACION_ID = " + ESTACIONID /*ASG ESTACION*/
+                    + " and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.PAIS_ID=" + countryId + " "
+                    + "and b.MARCA_ID=" + brandId + " and b.producto_id=" + productId + " and " + fecha1 + "=extract(MONTH from b.fecha) "
+                    + "AND " + fecha2 + "=extract(YEAR from b.fecha))  order by FECHA desc ";
 //                System.out.println("query inv final "+query);
-                pst = getConnection().prepareStatement(query);                
-                rst = pst.executeQuery();            
-                while (rst.next()) {         
-                    System.out.println("fsdfsd "+rst.getDouble(1));
-                    valor = rst.getDouble(1);
-                }
-            }catch(Exception exc){
-                exc.printStackTrace();
-            }finally {
-                closePst();
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            while (rst.next()) {
+                System.out.println("fsdfsd " + rst.getDouble(1));
+                valor = rst.getDouble(1);
             }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
+        }
         return valor;
     }
 //    private Double valorFinal(int countryId, int brandId, Date fecha, double productId){        
@@ -324,81 +362,96 @@ public class SvcComVenLubricantes extends Dao{
 //            }
 //        return valor;
 //    }
-    
-    private Double valorInicial(int countryId, int brandId, int productId, Date fecha,Integer ESTACIONID){        
+
+    private Double valorInicial(int countryId, int brandId, int productId, Date fecha, Integer ESTACIONID) {
         ResultSet rst = null;
         Double valor = 0.00;
         String fecha1 = Constant.SDF_ddMMyyyy.format(fecha);
         String fecha2 = Constant.SDF_ddMMyyyy.format(fecha);
-        fecha1 = fecha2.substring(3,5);
+        fecha1 = fecha2.substring(3, 5);
         fecha2 = fecha2.substring(6);
-            try{        
-                query = "select l.INV_INICIAL "
-                        + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p "
-                        + "where l.PRODUCTO_ID = p.PRODUCTO_ID AND l.ESTACION_ID = "+ESTACIONID  /*asg estacion*/
-                        + " AND l.PAIS_ID="+countryId+" and l.MARCA_ID="+brandId+" and l.PRODUCTO_ID="+productId+" "
-                        + "and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.PAIS_ID="+countryId+" " 
-                        + "and b.producto_id="+productId+" and "+fecha1+"=extract(MONTH from b.fecha) " 
-                        + "AND "+fecha2+"=extract(YEAR from b.fecha))  order by FECHA desc ";
-                pst = getConnection().prepareStatement(query);
-                rst = pst.executeQuery();            
-                while (rst.next()) {         
-                    System.out.println("INV_INICIAL "+rst.getDouble(1));
-                    valor = rst.getDouble(1);
-                }
-            }catch(Exception exc){
-                exc.printStackTrace();
-            }finally {
-                closePst();
+        try {
+            query = "select l.INV_INICIAL "
+                    + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p "
+                    + "where l.PRODUCTO_ID = p.PRODUCTO_ID AND l.ESTACION_ID = " + ESTACIONID /*asg estacion*/
+                    + " AND l.PAIS_ID=" + countryId + " and l.MARCA_ID=" + brandId + " and l.PRODUCTO_ID=" + productId + " "
+                    + "and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.PAIS_ID=" + countryId + " "
+                    + "and b.producto_id=" + productId + " and " + fecha1 + "=extract(MONTH from b.fecha) "
+                    + "AND " + fecha2 + "=extract(YEAR from b.fecha))  order by FECHA desc ";
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            while (rst.next()) {
+                System.out.println("INV_INICIAL " + rst.getDouble(1));
+                valor = rst.getDouble(1);
             }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
+        }
         return valor;
     }
-    
-    private Double compra(int countryId, int brandId, int productId, Date fecha, Integer ESTACIONID){        
+
+    private Double compra(int countryId, int brandId, int productId, Date fecha, Integer ESTACIONID) {
         ResultSet rst = null;
         Double valor = 0.00;
         String fecha1 = Constant.SDF_ddMMyyyy.format(fecha);
         String fecha2 = Constant.SDF_ddMMyyyy.format(fecha);
-        fecha1 = fecha2.substring(3,5);
+        fecha1 = fecha2.substring(3, 5);
         fecha2 = fecha2.substring(6);
-            try{        
-                query = "select l.COMPRA "
-                        + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p "
-                        + "where l.PRODUCTO_ID = p.PRODUCTO_ID AND l.ESTACION_ID = "+ESTACIONID  /*asg estacion*/
-                        + " AND l.PAIS_ID="+countryId+" and l.MARCA_ID="+brandId+" and l.PRODUCTO_ID="+productId+" "
-                        + "and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.PAIS_ID="+countryId+" " 
-                        + "and b.producto_id="+productId+" and "+fecha1+"=extract(MONTH from b.fecha) " 
-                        + "AND "+fecha2+"=extract(YEAR from b.fecha)) ";
-                pst = getConnection().prepareStatement(query);
-                rst = pst.executeQuery();            
-                while (rst.next()) {         
-                    System.out.println("fsdfsd "+rst.getDouble(1));
-                    valor = rst.getDouble(1);
-                }
-            }catch(Exception exc){
-                exc.printStackTrace();
-            }finally{
-                closePst();
+        try {
+            query = "select l.COMPRA "
+                    + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p "
+                    + "where l.PRODUCTO_ID = p.PRODUCTO_ID AND l.ESTACION_ID = " + ESTACIONID /*asg estacion*/
+                    + " AND l.PAIS_ID=" + countryId + " and l.MARCA_ID=" + brandId + " and l.PRODUCTO_ID=" + productId + " "
+                    + "and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.PAIS_ID=" + countryId + " "
+                    + "and b.producto_id=" + productId + " and " + fecha1 + "=extract(MONTH from b.fecha) "
+                    + "AND " + fecha2 + "=extract(YEAR from b.fecha)) ";
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+            while (rst.next()) {
+                System.out.println("fsdfsd " + rst.getDouble(1));
+                valor = rst.getDouble(1);
             }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
+        }
         return valor;
     }
-    
-    private int recuperaMarca(int productId){        
+
+    private int recuperaMarca(int productId) {
         ResultSet rst = null;
         int valor = 0;
-            try{        
-                query = "select ID_MARCA from PRODUCTO where producto_id = ?";
-                pst = getConnection().prepareStatement(query);
-                pst.setInt(1, productId);
-                rst = pst.executeQuery();            
-                while (rst.next()) {         
-                    valor = rst.getInt(1);
-                }
-            }catch(Exception exc){
-                exc.printStackTrace();
-            }finally {
-                closePst();
+        try {
+            query = "select ID_MARCA from PRODUCTO where producto_id = ?";
+            pst = getConnection().prepareStatement(query);
+            pst.setInt(1, productId);
+            rst = pst.executeQuery();
+            while (rst.next()) {
+                valor = rst.getInt(1);
             }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
+        }
         return valor;
     }
 }

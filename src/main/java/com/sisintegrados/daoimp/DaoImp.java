@@ -1,19 +1,21 @@
-package com.fundamental.services;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.sisintegrados.daoimp;
 
 import com.fundamental.model.Acceso;
 import com.fundamental.model.Arqueocaja;
 import com.fundamental.model.Bomba;
 import com.fundamental.model.BombaEstacion;
 import com.fundamental.model.Dia;
-import com.sisintegrados.generic.bean.Empleado;
-import com.sisintegrados.generic.bean.Estacion;
 import com.fundamental.model.EstacionConf;
 import com.fundamental.model.EstacionConfHead;
 import com.fundamental.model.Horario;
 import com.fundamental.model.Lecturafinal;
 import com.fundamental.model.Marca;
 import com.fundamental.model.Mediopago;
-import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Parametro;
 import com.fundamental.model.Precio;
 import com.fundamental.model.Producto;
@@ -21,9 +23,13 @@ import com.fundamental.model.Rol;
 import com.fundamental.model.Turno;
 import com.fundamental.model.dto.DtoArqueo;
 import com.fundamental.model.dto.DtoGenericBean;
+import com.fundamental.services.SvcMaintenance;
 import com.fundamental.utils.Constant;
+import com.sisintegrados.dao.Dao;
+import com.sisintegrados.generic.bean.Empleado;
+import com.sisintegrados.generic.bean.Estacion;
+import com.sisintegrados.generic.bean.Pais;
 import com.sisintegrados.generic.bean.Usuario;
-import com.vaadin.data.util.ListSet;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.CheckBox;
 import java.sql.Connection;
@@ -41,37 +47,35 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 /**
- * @author Henry Barrientos..
+ *
+ * @author Allan G.
  */
-public class Dao {
+public class DaoImp implements Dao {
 
-//    public static final String JNDI_NAME = "jdbc/cocos_dev";    //DEVELOPMENT
-//    public static final String JNDI_NAME = "jdbc/cocos";      //PRODUCTION
     public static final String JNDI_NAME = "java:/comp/env/jdbc/cocos_dev";      //TomeeDesa
-
     public static final String ACTION_ADD = "ADD";
     public static final String ACTION_UPDATE = "UPDATE";
     public static final String ACTION_DELETE = "DELETE";
     public String miQuery, tmpString;
-
-    protected Connection conn = null;
-    protected PreparedStatement pst = null;
-    protected PreparedStatement pst2 = null;
+    public Connection conn = null;
+    public PreparedStatement pst = null;
+    public PreparedStatement pst2 = null;
 
     public Connection getConnection() {
         try {
-//            conn = (conn == null || conn.isClosed()) ? ((DataSource) new InitialContext().lookup(JNDI_NAME)).getConnection() : conn;
+            conn = (conn == null || conn.isClosed()) ? ((DataSource) new InitialContext().lookup(JNDI_NAME)).getConnection() : conn;
 
-            if (VaadinSession.getCurrent().getAttribute(Constant.SESSION_CONNECTION) == null
-                    || ((Connection) VaadinSession.getCurrent().getAttribute(Constant.SESSION_CONNECTION)).isClosed()) {
-
-                conn = (conn == null || conn.isClosed()) ? ((DataSource) new InitialContext().lookup(JNDI_NAME)).getConnection() : conn;
-                VaadinSession.getCurrent().setAttribute(Constant.SESSION_CONNECTION, conn);
-
-            } else {
-                conn = (Connection) VaadinSession.getCurrent().getAttribute(Constant.SESSION_CONNECTION);
-            }
-
+//            if (VaadinSession.getCurrent().getAttribute(Constant.SESSION_CONNECTION) == null
+//                    || ((Connection) VaadinSession.getCurrent().getAttribute(Constant.SESSION_CONNECTION)).isClosed()) {
+//                conn = (conn == null || conn.isClosed()) ? ((DataSource) new InitialContext().lookup(JNDI_NAME)).getConnection() : conn;
+//                VaadinSession.getCurrent().setAttribute(Constant.SESSION_CONNECTION, conn);
+//
+//            } else {
+//                conn = (Connection) VaadinSession.getCurrent().getAttribute(Constant.SESSION_CONNECTION);
+//            }
+//            if (conn == null) {
+//                conn = (conn == null || conn.isClosed()) ? ((DataSource) new InitialContext().lookup(JNDI_NAME)).getConnection() : conn;
+//            }
         } catch (Exception exc) {
             System.out.println("EXCEPTION: DaoAccess.getConnection - " + exc.getMessage());
         }
@@ -89,15 +93,15 @@ public class Dao {
     public void closeConnections() {
         try {
             if (pst2 != null) {
-                pst.close();
+                pst2.close();
             }
             if (pst != null) {
                 pst.close();
             }
-//            if (conn != null) {
+            if (conn != null) {
 //                conn.commit();
-//                conn.close();
-//            }
+                conn.close();
+            }
         } catch (Exception exc) {
             System.out.println("EXCEPTION DaoAccess.closeConnection - " + exc.getMessage());
         } finally {
@@ -108,7 +112,7 @@ public class Dao {
     public void closePst() {
         try {
             if (pst2 != null) {
-                pst.close();
+                pst2.close();
             }
             if (pst != null) {
                 pst.close();
@@ -121,7 +125,7 @@ public class Dao {
     /*
     * FUNCIONES COMUNES A TODOS LOS SERVICIOS *
      */
-    protected List<Rol> getRolesByUserid(Integer userId) {
+    public List<Rol> getRolesByUserid(Integer userId) {
         List<Rol> result = new ArrayList();
         ResultSet rst = null;
         SvcMaintenance maintenace = new SvcMaintenance();
@@ -148,6 +152,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -177,6 +182,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -224,105 +230,13 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
         return result;
     }
 
-//    public List<Turno> getTurnosActivosByEstacionid(Integer estacionId) {
-//        List<Turno> result = new ArrayList();
-//        ResultSet rst = null; ResultSet rst = null; try {
-//            miQuery = "SELECT turno_id, estacion_id, usuario_id, estado_id, creado_persona "
-//                    + "FROM turno "
-//                    + "WHERE estado_id = 1 AND estacion_id = " + estacionId
-//                    + " ORDER BY turno_id DESC";
-//            pst = getConnection().prepareStatement(miQuery);
-//            rst = pst.executeQuery();
-//            while (rst.next()) {
-//                result.add(new Turno(rst.getInt(1), rst.getInt(2), rst.getInt(3), rst.getInt(4), null, rst.getString(5)));
-//            }
-//        } catch (Exception exc) {
-//            exc.printStackTrace();
-//        }
-//        return result;
-//    }
-//    public List<Turno> getTurnosByHorarioid(Integer horarioId) {
-//        List<Turno> result = new ArrayList();
-//        ResultSet rst = null; ResultSet rst = null; try {
-//            miQuery = "SELECT turno_id, estacion_id, usuario_id, estado_id, creado_persona "
-//                    + "FROM turno "
-//                    + "WHERE horario_id = " + horarioId
-//                    + " ORDER BY turno_id DESC";
-//            pst = getConnection().prepareStatement(miQuery);
-//            rst = pst.executeQuery();
-////            result = (rst.next()) ? new Turno(rst.getInt(1), rst.getInt(2), rst.getInt(3), rst.getInt(6), rst.getInt(4), null, rst.getString(5)) : result;
-//            while (rst.next()) {
-//                result.add(new Turno(rst.getInt(1), rst.getInt(2), rst.getInt(3), rst.getInt(4), null, rst.getString(5)));
-//            }
-//        } catch (Exception exc) {
-//            exc.printStackTrace();
-//        }
-//        return result;
-//    }
-//    public Horario getHorarioActivoByEstacionid(Integer stationId) {
-//        Horario result = new Horario();
-//        ResultSet rst = null; try {
-//            miQuery = "SELECT horario_id, estacion_id, hora_fin, fecha, estado_id "
-//                    + "FROM horario "
-//                    + "WHERE estado_id = 1 AND estacion_id = " + stationId
-//                    + " ORDER BY horario_id DESC";
-//            pst = getConnection().prepareStatement(miQuery);
-//            rst = pst.executeQuery();
-//            result = (rst.next()) ? new Horario(rst.getInt(1), rst.getInt(2), rst.getInt(3), rst.getDate(4), rst.getInt(5)) : result;
-//        } catch (Exception exc) {
-//            exc.printStackTrace();
-//        } finally {
-//            
-//                try { rst.close(); pst.close(); } catch (Exception ignore) {
-//            }
-//        }
-//        return result;
-//    }
-//    public Horario doActionHorario(String action, Horario horario) {
-//        Horario result = new Horario();
-//        ResultSet rst = null; try {
-//            if (action.equals(ACTION_ADD)) {
-//                miQuery = "SELECT horario_seq.NEXTVAL FROM DUAL";
-//                pst = getConnection().prepareStatement(miQuery);
-//                rst = pst.executeQuery();
-//                int horarioId = (rst.next()) ? rst.getInt(1) : 0;
-//                horario.setHorarioId(horarioId);
-//
-//                miQuery = "INSERT INTO horario (horario_id, estacion_id, hora_fin, fecha, estado_id, creado_por, creado_persona) "
-//                        + "VALUES (?, ?, ?, ?, ?, ?, ?)";
-//                pst = getConnection().prepareStatement(miQuery);
-//                pst.setInt(1, horario.getHorarioId());
-//                pst.setInt(2, horario.getEstacionId());
-//                pst.setInt(3, horario.getHoraFin());
-//                pst.setDate(4, new java.sql.Date(horario.getFecha().getTime()));
-//                pst.setInt(5, horario.getEstadoId());
-//                pst.setString(6, horario.getCreadoPor());
-//                pst.setString(7, horario.getCreadoPersona());
-//                pst.executeUpdate();
-//                result = horario;
-//            } else if (action.equals(ACTION_UPDATE)) {
-//                miQuery = "UPDATE horario "
-//                        + "SET estado_id = ?, modificado_por = ?, modificado_persona = ?, modificado_el = SYSDATE "
-//                        + "WHERE horario_id = " + horario.getHorarioId();
-//                pst = getConnection().prepareStatement(miQuery);
-//                pst.setInt(1, horario.getEstadoId());
-//                pst.setString(2, horario.getModificadoPor());
-//                pst.setString(3, horario.getModificadoPersona());
-//                pst.executeUpdate();
-//                result = horario;
-//            }
-//        } catch (Exception exc) {
-//            result.setDescError(exc.getMessage());
-//            exc.printStackTrace();
-//        }
-//        return result;
-//    }
     public List<Pais> getAllPaises() {
         List<Pais> result = new ArrayList<Pais>();
         miQuery = "SELECT pais_id, nombre, codigo, moneda_simbolo, estado, vol_simbolo "
@@ -338,7 +252,9 @@ public class Dao {
         } finally {
             try {
                 rst.close();
-                pst.close();
+//                pst.close();
+                closePst();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -361,6 +277,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -385,6 +302,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -408,6 +326,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -430,7 +349,13 @@ public class Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
+
         }
         return result;
     }
@@ -461,6 +386,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -494,6 +420,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -528,6 +455,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -564,13 +492,14 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
         return result;
     }
 
-    protected List<BombaEstacion> getBombaEstacionByEstacionid(Integer estacionId) {
+    public List<BombaEstacion> getBombaEstacionByEstacionid(Integer estacionId) {
         List<BombaEstacion> result = new ArrayList();
         ResultSet rst = null;
         try {
@@ -589,6 +518,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -619,6 +549,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -650,6 +581,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -676,6 +608,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -687,33 +620,6 @@ public class Dao {
         ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
-//                miQuery = "SELECT turno_seq.NEXTVAL FROM DUAL";
-//                pst = getConnection().prepareStatement(miQuery);
-//                rst = pst.executeQuery();
-//                Integer turnoId = (rst.next()) ? rst.getInt(1) : 0;
-//                turno.setTurnoId(turnoId);
-//                miQuery = "INSERT INTO turno (turno_id, estacion_id, usuario_id, estado_id, creado_por, creado_persona, turno_fusion, estacionconfhead_id, fecha) "
-//                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-//                pst = getConnection().prepareStatement(miQuery);
-//                pst.setInt(1, turno.getTurnoId());
-//                pst.setInt(2, turno.getEstacionId());
-//                pst.setInt(3, turno.getUsuarioId());
-//                pst.setInt(4, turno.getEstadoId());
-//                pst.setString(5, turno.getCreadoPor());
-//                pst.setString(6, turno.getCreadoPersona());
-//                pst.setString(7, turno.getTurnoFusion());
-//                pst.setObject(8, turno.getEstacionconfheadId());    //setObject, puesto que puede ser NULL.
-//                pst.setDate(9, new java.sql.Date(turno.getFecha().getTime()));
-//                pst.executeUpdate();
-
-//                for (BombaestacionTurno bet : turno.getBombaestacionTurno()) {
-//                    miQuery = "INSERT INTO bombaestacion_turno(estacion_id, bomba_id, turno_id) VALUES (?, ?, ?)";
-//                    pst = getConnection().prepareStatement(miQuery);
-//                    pst.setInt(1, bet.getEstacionId());
-//                    pst.setInt(2, bet.getBombaId());
-//                    pst.setInt(3, turnoId);
-//                    pst.executeUpdate();
-//                }
                 result = turno;
             } else if (action.equals(ACTION_UPDATE)) {
                 miQuery = "UPDATE turno "
@@ -731,7 +637,7 @@ public class Dao {
                 pst.setInt(4, turno.getTurnoId());
                 pst.executeUpdate();
                 result = turno;
-            } else if (action.equals(Dao.ACTION_DELETE)) {
+            } else if (action.equals(ACTION_DELETE)) {
                 miQuery = "DELETE FROM turno WHERE turno_id = ?";
                 pst = getConnection().prepareStatement(miQuery);
                 pst.setInt(1, turno.getTurnoId());
@@ -746,6 +652,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -778,6 +685,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -850,6 +758,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -922,6 +831,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -953,6 +863,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -987,6 +898,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1020,6 +932,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1030,18 +943,6 @@ public class Dao {
         Dia result = new Dia();
         ResultSet rst = null;
         try {
-//            if (action.equals(ACTION_ADD)) {
-//                miQuery = "INSERT INTO dia (estado_id, creado_por, creado_persona, estacion_id, fecha, creado_el) "
-//                        + "VALUES (?, ?, ?, ?, ?, SYSDATE)";
-//                pst = getConnection().prepareStatement(miQuery);
-//                pst.setInt(1, dia.getEstadoId());
-//                pst.setString(2, dia.getCreadoPor());
-//                pst.setString(3, dia.getCreadoPersona());
-//                pst.setInt(4, dia.getEstacionId());
-//                pst.setDate(5, new java.sql.Date(dia.getFecha().getTime()));
-//                pst.executeQuery();
-//                result = dia;
-//            } else 
             if (action.equals(ACTION_UPDATE)) {
                 miQuery = "UPDATE dia SET estado_id = ?, modificado_por = ?, modificado_persona = ?, modificado_el = SYSDATE "
                         + "WHERE estacion_id = ? AND fecha = ?";
@@ -1061,6 +962,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1071,26 +973,6 @@ public class Dao {
         Precio result = new Precio();
         ResultSet rst = null;
         try {
-//            if (action.equals(ACTION_ADD)) {
-////                miQuery = "SELECT precio_seq.NEXTVAL FROM DUAL";
-////                pst = getConnection().prepareStatement(miQuery);
-////                rst = pst.executeQuery();
-////                Integer precioId = (rst.next()) ? rst.getInt(1) : 0;
-////                precio.setPrecioId(precioId);
-//                miQuery = "INSERT INTO precio (turno_id, producto_id, tipodespacho_id, precio, creado_por, creado_persona, creado_el) "
-//                        + "VALUES (?, ?, ?, ?, ?, ?, SYSDATE)";
-//                pst = getConnection().prepareStatement(miQuery, Statement.RETURN_GENERATED_KEYS);
-////                pst.setInt(1, precio.getPrecioId());
-//                pst.setInt(1, precio.getTurnoId());
-//                pst.setInt(2, precio.getProductoId());
-//                pst.setInt(3, precio.getTipodespachoId());
-//                pst.setDouble(4, precio.getPrecio());
-//                pst.setString(5, precio.getCreadoPor());
-//                pst.setString(6, precio.getCreadoPersona());
-//                pst.executeUpdate();
-//                rst = pst.getGeneratedKeys();
-//                result = (rst.next()) ? precio : null;
-//            } else 
             if (action.equals(ACTION_UPDATE)) {
                 miQuery = "UPDATE precio "
                         + "SET precio = ?, modificado_por = ?, modificado_persona = ?, modificado_el = SYSDATE "
@@ -1113,6 +995,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1137,6 +1020,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1164,6 +1048,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1188,6 +1073,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1259,6 +1145,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1306,6 +1193,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1333,6 +1221,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1363,6 +1252,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1393,6 +1283,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1426,6 +1317,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1437,22 +1329,31 @@ public class Dao {
         miQuery = "SELECT parametro_id, nombre, valor, descripcion, estado, creado_por, creado_el "
                 + "FROM parametro "
                 + "WHERE nombre = ?";
-        System.out.println("parametro " + miQuery);
+//        System.out.println("parametro " + miQuery);
+        ResultSet rst = null;
         try {
             pst = getConnection().prepareStatement(miQuery);
             pst.setString(1, name);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             if (rst.next()) {
                 result = new Parametro(rst.getShort(1), rst.getString(2), rst.getString(3), rst.getString(5), rst.getString(6), new java.util.Date(rst.getDate(7).getTime()));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
+        } finally {
+            try {
+                rst.close();
+                pst.close();
+                closeConnections(); //asg
+            } catch (Exception ignore) {
+            }
+            return result;
         }
-        return result;
     }
 
     public List<Empleado> getEmpleadosByTurnoid(int turnoId) {
         List<Empleado> result = new ArrayList();
+        ResultSet rst = null;
         try {
             miQuery = "SELECT DISTINCT e.empleado_id, e.nombre, e.estado, a.arqueocaja_id, a.estacion_id, a.turno_id, a.fecha, a.estado_id, a.nombre_pistero, a.nombre_jefe "
                     + "FROM empleado e, turno_empleado_bomba teb "
@@ -1460,7 +1361,7 @@ public class Dao {
                     + "WHERE teb.empleado_id = e.empleado_id AND teb.turno_id = " + turnoId
                     + " ORDER BY e.nombre";
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Empleado emp;
             while (rst.next()) {
                 emp = new Empleado(rst.getInt(1), rst.getString(2));
@@ -1485,13 +1386,19 @@ public class Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                closePst();
+                rst.close();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Empleado> getEmpleadosByTurnoid2(int turnoId) {
         List<Empleado> result = new ArrayList();
+        ResultSet rst = null;
         try {
             miQuery = "SELECT DISTINCT e.empleado_id, e.nombre, e.estado, a.arqueocaja_id, a.estacion_id, a.turno_id, a.fecha, a.estado_id "
                     + "FROM empleado e, turno_empleado_bomba teb "
@@ -1499,7 +1406,7 @@ public class Dao {
                     + "WHERE teb.empleado_id = e.empleado_id AND teb.turno_id = " + turnoId
                     + " ORDER BY e.nombre";
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Empleado emp;
             while (rst.next()) {
                 emp = new Empleado(rst.getInt(1), rst.getString(2));
@@ -1524,13 +1431,19 @@ public class Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                closePst();
+                rst.close();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
 
     public List<Bomba> getAllBombas(boolean includeInactive) {
         List<Bomba> result = new ArrayList();
+        ResultSet rst = null;
         try {
             miQuery = (includeInactive) ? "" : " WHERE estado = 'A' ";
             miQuery = "SELECT bomba_id, nombre, estado "
@@ -1538,7 +1451,7 @@ public class Dao {
                     + miQuery
                     + " ORDER BY isla, bomba_id";
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Bomba(rst.getInt(1), rst.getString(2), rst.getString(3), null, null, null));
             }
@@ -1546,7 +1459,9 @@ public class Dao {
             exc.printStackTrace();
         } finally {
             try {
+                rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1576,7 +1491,8 @@ public class Dao {
         } finally {
             try {
                 rst.close();
-                pst.close();
+                closePst();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1610,43 +1526,13 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
         return result;
     }
 
-//    public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int type, Integer brandId, boolean includeInactive) {
-//        List<Producto> result = new ArrayList();
-//        ResultSet rst = null;
-//        try {
-//            tmpString = (brandId == null) ? "" : " AND p.id_marca = " + brandId;
-//            miQuery = (includeInactive) ? "" : " AND p.estado = 'A' ";
-//            miQuery = "SELECT p.producto_id, p.nombre, p.codigo, p.estado, p.creado_por, p.orden_pos, NVL(m.id_marca, 0), NVL(m.nombre, '') "
-//                    + "FROM producto p "
-//                    + "LEFT JOIN estacion_producto ep ON ep.producto_id = p.producto_id "
-//                    + "LEFT JOIN marca m ON p.id_marca = m.id_marca "
-//                    + "LEFT JOIN estacion e ON e.estacion_id = ep.estacion_id AND e.pais_id = " + countryId
-//                    + " WHERE p.tipo_id = " + type
-//                    + miQuery
-//                    + tmpString
-//                    + " ORDER BY m.nombre, p.nombre";
-//            System.out.println("getAllProductosByCountryTypeBrand "+miQuery);
-//            pst = getConnection().prepareStatement(miQuery);
-//            rst = pst.executeQuery();
-//            Producto producto;
-//            while (rst.next()) {
-//                producto = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getInt(6));
-//                producto.setMarca(new Marca(rst.getInt(7), rst.getString(8), null));
-//                result.add(producto);
-//            }
-//        } catch (Exception exc) {
-//            exc.printStackTrace();
-//        } finally {
-//            closePst();
-//        }
-//        return result;
-//    }
     public List<Producto> getAllProductosByCountryTypeBrand(Integer countryId, int type, Integer brandId, boolean includeInactive) {
         List<Producto> result = new ArrayList();
         ResultSet rst = null;
@@ -1676,7 +1562,12 @@ public class Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                closePst();
+                rst.close();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -1684,27 +1575,35 @@ public class Dao {
     public List<Marca> getAllBrands(boolean includeInactive) {
         List<Marca> result = new ArrayList();
         miQuery = (includeInactive) ? "" : " WHERE estado = 'A' ";
+        ResultSet rst = null;
         try {
             miQuery = "SELECT id_marca, nombre, estado FROM marca" + miQuery;
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Marca(rst.getInt(1), rst.getString(2), rst.getString(3)));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                closePst();
+                rst.close();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+                Logger.getLogger(DaoImp.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return result;
     }
 
     public List<Producto> getAllProducts() {
         List<Producto> result = new ArrayList();
+        ResultSet rst = null;
         try {
             miQuery = "select PRODUCTO_ID,NOMBRE,CODIGO from PRODUCTO where TIPO_ID=2 and ESTADO='A' AND ID_MARCA=100";
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             Producto pro;
             while (rst.next()) {
                 pro = new Producto();
@@ -1716,7 +1615,12 @@ public class Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -1739,11 +1643,11 @@ public class Dao {
                 if (rst != null) {
                     rst.close();
                 }
+                closePst();
+                closeConnections(); //asg
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-
-            closePst();
         }
         return result;
     }
@@ -1766,17 +1670,24 @@ public class Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
+
         }
         return result;
     }
 
     public String[] getUniqueStation(int userId) {
         String[] result = null;
+        ResultSet rst = null;
         try {
             miQuery = "SELECT COUNT(*) FROM estacion_usuario eu, estacion e, pais p WHERE eu.estacion_id = e.estacion_id AND e.pais_id = p.pais_id AND eu.usuario_id = " + userId;
             pst = getConnection().prepareStatement(miQuery);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             if (rst.next()) {
                 if (rst.getInt(1) == 1) {
                     closePst();
@@ -1793,7 +1704,12 @@ public class Dao {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            closePst();
+            try {
+                rst.close();
+                closePst();
+                closeConnections(); //asg
+            } catch (SQLException ex) {
+            }
         }
         return result;
     }
@@ -1824,6 +1740,7 @@ public class Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -1846,4 +1763,5 @@ public class Dao {
         }
         return acceso;
     }
+
 }

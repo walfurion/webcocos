@@ -1,7 +1,7 @@
 package com.fundamental.view;
 
 import com.fundamental.model.Acceso;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.model.Mediopago;
 import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Tipoproducto;
@@ -12,6 +12,7 @@ import com.fundamental.services.SvcMaintenance;
 import com.fundamental.services.SvcMntMedioPago;
 import com.fundamental.utils.Constant;
 import com.fundamental.utils.Util;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Item;
@@ -172,7 +173,7 @@ public class MntMediosPago extends Panel implements View {
         }        
         productTypes = service.getAllTipoproducto(true);
         bcrMediopago.addAll(service.getAllMediosPago(true,idPais));
-        service.closeConnections();
+//        service.closeConnections();
         if(bcrMediopago.size()>0){
             int firstItemId = bcrMediopago.getItemIds().get(0);
             mediopago = bcrMediopago.getItem(firstItemId).getBean();
@@ -291,7 +292,7 @@ public class MntMediosPago extends Panel implements View {
                 chxTCredito.setVisible(true);
 //                binder.bindMemberFields(this);
                 binder.setItemDataSource(mediopago);
-                action = Dao.ACTION_ADD;
+                action = DaoImp.ACTION_ADD;
                 nombre.focus();
                 tblData.setValue(null);
             }
@@ -328,9 +329,9 @@ public class MntMediosPago extends Panel implements View {
                 for (Integer id : bcrMediopago.getItemIds()) {
                     item = bcrMediopago.getItem(id).getBean();
                     item.setPartidacont(mediopago.getPartidacontPor() != null);
-                    service.doAction(Dao.ACTION_UPDATE, item);
+                    service.doAction(DaoImp.ACTION_UPDATE, item);
                 }
-                service.closeConnections();
+//                service.closeConnections();
                 if (mediopago.getMediopagoId() != null) {
                     Notification notif = new Notification("¡Exito!", "La acción se ha ejecutado correctamente.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);
@@ -360,7 +361,7 @@ public class MntMediosPago extends Panel implements View {
                     mediopago = bcrMediopago.getItem(tblData.getValue()).getBean();
                     binder.setItemDataSource(mediopago);
 //                    defineSelectedPaises();
-                    action = Dao.ACTION_UPDATE;
+                    action = DaoImp.ACTION_UPDATE;
                     cbxTipo.setValue(Constant.TIPOS_EFECTIVO.get(mediopago.getTipo() - 1));
 //                    for (Pais item : paises) {
 //                        if (item.getPaisId().equals( mediopago.getPaisId() )) {
@@ -423,7 +424,7 @@ public class MntMediosPago extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnAdd.setEnabled(acceso.isAgregar());

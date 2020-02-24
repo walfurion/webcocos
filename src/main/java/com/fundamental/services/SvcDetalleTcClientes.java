@@ -5,6 +5,8 @@
  */
 package com.fundamental.services;
 
+import com.sisintegrados.dao.Dao;
+import com.sisintegrados.daoimp.DaoImp;
 import com.sisintegrados.generic.bean.Estacion;
 import com.sisintegrados.generic.bean.GenericBeanCliente;
 import com.sisintegrados.generic.bean.GenericBeanMedioPago;
@@ -23,7 +25,7 @@ import java.util.List;
  *
  * @author Allan G.
  */
-public class SvcDetalleTcClientes extends Dao {
+public class SvcDetalleTcClientes extends DaoImp {
 
     private String query;
 
@@ -39,6 +41,9 @@ public class SvcDetalleTcClientes extends Dao {
             closePst();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }finally{
+            pst.close();
+            closeConnections(); //asg
         }
 
         /*Asigna detalle clientes tc al turno*/
@@ -64,6 +69,7 @@ public class SvcDetalleTcClientes extends Dao {
         } finally {
             if (pst != null) {
                 pst.close();
+                closeConnections(); //asg
             }
         }
         return result;
@@ -81,6 +87,9 @@ public class SvcDetalleTcClientes extends Dao {
             closePst();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }finally{
+            pst.close();
+            closeConnections(); //asg
         }
 
         /*Asigna detalle clientes tc al turno*/
@@ -106,6 +115,7 @@ public class SvcDetalleTcClientes extends Dao {
         } finally {
             if (pst != null) {
                 pst.close();
+                closeConnections(); //asg
             }
         }
         return result;
@@ -113,7 +123,7 @@ public class SvcDetalleTcClientes extends Dao {
 
     public List<GenericDetalleFM> getDetalleByMedioPago(Integer estacionid, Integer turnoid, Integer mediopagoid) {
         List<GenericDetalleFM> result = new ArrayList();
-
+        ResultSet rst = null;
         try {
             query = "SELECT A.IDDET,A.CLIENTE,A.VENTA,A.COMENTARIO,       \n"
                     + "       B.ESTACION_ID,B.NOMBRE,\n"
@@ -136,7 +146,7 @@ public class SvcDetalleTcClientes extends Dao {
             pst.setInt(3, estacionid);
             pst.setInt(4, turnoid);
             pst.setInt(5, mediopagoid);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
 
             while (rst.next()) {
                 result.add(new GenericDetalleFM(rst.getInt(1), new Estacion(rst.getInt(5), rst.getString(6)), new GenericBeanMedioPago(rst.getInt(7), rst.getString(8)), new GenericLote(rst.getInt(9), rst.getInt(10)), rst.getString(2), rst.getDouble(3), rst.getString(4)));
@@ -147,6 +157,7 @@ public class SvcDetalleTcClientes extends Dao {
         } finally {
             try {
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -179,6 +190,7 @@ public class SvcDetalleTcClientes extends Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -221,6 +233,7 @@ public class SvcDetalleTcClientes extends Dao {
             try {
                 rst.close();
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -229,6 +242,7 @@ public class SvcDetalleTcClientes extends Dao {
 
     public List<GenericBeanMedioPago> getAllMediosPago(boolean includeInactives, Integer paisid) {
         List<GenericBeanMedioPago> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = (includeInactives) ? "" : " AND m.estado = 'A' ";
             query = "SELECT m.mediopago_id, m.nombre "
@@ -238,7 +252,7 @@ public class SvcDetalleTcClientes extends Dao {
                     + query
                     + " ORDER BY m.nombre";
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             GenericBeanMedioPago mediopago;
             while (rst.next()) {
                 mediopago = new GenericBeanMedioPago(rst.getInt(1), rst.getString(2));
@@ -249,6 +263,7 @@ public class SvcDetalleTcClientes extends Dao {
         } finally {
             try {
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -303,6 +318,7 @@ public class SvcDetalleTcClientes extends Dao {
         } finally {
             try {
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }
@@ -321,6 +337,9 @@ public class SvcDetalleTcClientes extends Dao {
             closePst();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }finally{
+            pst.close();
+            closeConnections(); //asg
         }
 
         /*Asigna detalle clientes tc al turno*/
@@ -346,6 +365,7 @@ public class SvcDetalleTcClientes extends Dao {
         } finally {
             if (pst != null) {
                 pst.close();
+                closeConnections(); //asg
             }
         }
         return result;
@@ -353,6 +373,7 @@ public class SvcDetalleTcClientes extends Dao {
 
     public List<GenericBeanCliente> getAllCustomers(boolean includeInactives, Integer estacionid) {
         List<GenericBeanCliente> result = new ArrayList();
+        ResultSet rst = null;
         try {
             query = (includeInactives) ? "" : " AND m.estado = 'A' ";
             query = "select cliente_id, codigo, nombre "
@@ -362,7 +383,7 @@ public class SvcDetalleTcClientes extends Dao {
                     + query;
                
             pst = getConnection().prepareStatement(query);
-            ResultSet rst = pst.executeQuery();
+            rst = pst.executeQuery();
             GenericBeanCliente customer;
             while (rst.next()) {
                 customer = new GenericBeanCliente(rst.getInt(1), rst.getInt(2), rst.getString(3));
@@ -373,6 +394,7 @@ public class SvcDetalleTcClientes extends Dao {
         } finally {
             try {
                 pst.close();
+                closeConnections(); //asg
             } catch (Exception ignore) {
             }
         }

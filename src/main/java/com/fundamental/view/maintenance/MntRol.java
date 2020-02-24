@@ -5,8 +5,9 @@ import com.fundamental.model.Rol;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoGenericBean;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcMaintenance;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -171,7 +172,7 @@ public class MntRol extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (tblRoles.getValue() != null) {
-                    action = Dao.ACTION_UPDATE;
+                    action = DaoImp.ACTION_UPDATE;
                     rol = bcrRol.getItem(tblRoles.getValue()).getBean();
                     binder.setItemDataSource(rol);
                     bcrAccess.removeAllItems();
@@ -281,7 +282,7 @@ public class MntRol extends Panel implements View {
         btnAdd.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                action = Dao.ACTION_ADD;
+                action = DaoImp.ACTION_ADD;
                 rol = new Rol();
                 binder.setItemDataSource(rol);
                 bcrAccess.removeAllItems();
@@ -383,7 +384,7 @@ public class MntRol extends Panel implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnAdd.setEnabled(acceso.isAgregar());

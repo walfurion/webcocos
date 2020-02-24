@@ -7,11 +7,12 @@ import com.sisintegrados.generic.bean.Pais;
 import com.fundamental.model.Producto;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
-import com.fundamental.services.Dao;
+import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcChangeLastRead;
 import com.fundamental.services.SvcMedioPago;
 import com.fundamental.services.SvcReporte;
 import com.fundamental.utils.XlsxReportGenerator;
+import com.sisintegrados.daoimp.DaoImp;
 import com.vaadin.data.Property;
 import com.vaadin.demo.dashboard.component.LoadingWindow;
 import com.vaadin.demo.dashboard.event.DashboardEvent;
@@ -145,7 +146,7 @@ public class RptWSM extends Panel implements View {
         } else {
             paises = svcMP.getAllPaises();
         }
-        svcMP.closeConnections();
+//        svcMP.closeConnections();
     }
 
     private void buildButtons() {
@@ -174,7 +175,7 @@ public class RptWSM extends Panel implements View {
                 } else {
                     SvcChangeLastRead svcCLR = new SvcChangeLastRead();
                     estaciones = svcCLR.getStationsByCountry(((Pais) cbxPais.getValue()).getPaisId(), true);
-                    svcCLR.closeConnections();
+//                    svcCLR.closeConnections();
                 }
                 cbxEstacion.setContainerDataSource(new ListContainer<Estacion>(Estacion.class, estaciones));
                 cbxEstacion.setValue((user.getEstacionLogin() != null) ? user.getEstacionLogin() : null);
@@ -699,7 +700,7 @@ System.out.println("*** getExcelStreamResource 2 - "+ new Date());
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Dao dao = new Dao();
+        Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnGenerar.setEnabled(acceso.isAgregar());
