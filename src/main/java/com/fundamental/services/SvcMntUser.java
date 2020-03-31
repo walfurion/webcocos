@@ -18,11 +18,13 @@ import java.util.logging.Logger;
  * @author Henry Barrientos
  */
 public class SvcMntUser extends DaoImp {
-    
+
     private String query;
-    public SvcMntUser() {}
-    
-/*    public List<Usuario> getAllUsuarios(boolean onlyActive) {
+
+    public SvcMntUser() {
+    }
+
+    /*    public List<Usuario> getAllUsuarios(boolean onlyActive) {
         List<Usuario> result = new ArrayList();
         query = (onlyActive) ? " WHERE u.estado = 'A' " : "";
         query = "SELECT u.usuario_id, u.username, u.clave, u.nombre, u.apellido, u.estado, es.nombre, pa.NOMBRE, es.estacion_id "
@@ -66,8 +68,7 @@ public class SvcMntUser extends DaoImp {
         }
         return result;
     }
-*/
-    
+     */
     public List<Usuario> getAllUsuarios(boolean onlyActive) {
         List<Usuario> result = new ArrayList();
         ResultSet rst = null;
@@ -84,7 +85,7 @@ public class SvcMntUser extends DaoImp {
             while (rst.next()) {
                 user = new Usuario(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getString(6), null, null, null);
                 //TODO: Hacer mas eficiente la llamada siguiente, obteniendo previamente el listado de roles asignados.
-                user.setRoles(getRolesByUserid(rst.getInt(1)));
+                user.setRoles(getRolesByUserid(rst.getInt(1), false));
                 user.setStations(new ArrayList());
                 for (Estacion est : associated) {
                     if (rst.getString(1).equals(est.getCreadoPor())) {   //idUser
@@ -101,10 +102,10 @@ public class SvcMntUser extends DaoImp {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
             } catch (Exception ignore) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -113,7 +114,7 @@ public class SvcMntUser extends DaoImp {
         List<Rol> result = new ArrayList();
         query = (onlyActive) ? " WHERE estado = 'A' " : "";
         query = "SELECT rol_id, nombre, descripcion, rolpadre_id, estado "
-                + "FROM rol " 
+                + "FROM rol "
                 + query
                 + "ORDER BY nombre";
         ResultSet rst = null;
@@ -121,7 +122,7 @@ public class SvcMntUser extends DaoImp {
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             while (rst.next()) {
-                result.add(new Rol(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5) ));
+                result.add(new Rol(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getString(5)));
             }
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -135,7 +136,7 @@ public class SvcMntUser extends DaoImp {
         }
         return result;
     }
-    
+
     public List<Estacion> getStationsAssignedUser() {
         List<Estacion> result = new ArrayList();
         query = "SELECT e.estacion_id, e.nombre, e.codigo, e.bu, e.deposito, e.pais_id, e.codigo_envoy, e.fact_electronica, e.estado, e.id_marca, eu.usuario_id "

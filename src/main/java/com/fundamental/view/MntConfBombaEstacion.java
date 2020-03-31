@@ -357,7 +357,7 @@ public class MntConfBombaEstacion extends Panel implements View {
                 if (cbxEstacion.getValue() != null) {
                     configuracion = new EstacionConfHead();
                     SvcConfBombaEstacion service = new SvcConfBombaEstacion();
-                    List<Bomba> bombas = service.getBombasByEstacionid(((Estacion) cbxEstacion.getValue()).getEstacionId());
+                    List<Bomba> bombas = service.getBombasByEstacionid(((Estacion) cbxEstacion.getValue()).getEstacionId(),true);
 //                    service.closeConnections(); //ASG
                     EstacionConf ecf;
                     int index = 1;

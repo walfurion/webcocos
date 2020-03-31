@@ -39,15 +39,12 @@ public class SvcRepCuadrePistero extends DaoImp {
             while (rst.next()) {
                 bomba = rst.getString(1);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
+                closePst();
                 closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
         }
         return bomba;
     }
@@ -78,15 +75,12 @@ public class SvcRepCuadrePistero extends DaoImp {
             while (rst.next()) {
                 calibracion.add(new LitroCalibracion(rst.getString(1), rst.getDouble(2), rst.getDouble(3), rst.getDouble(4)));
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return calibracion;
     }
@@ -101,15 +95,12 @@ public class SvcRepCuadrePistero extends DaoImp {
             while (rst.next()) {
                 result = rst.getInt(1);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
+                closePst();
                 closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
         }
 
         return result;
@@ -129,15 +120,12 @@ public class SvcRepCuadrePistero extends DaoImp {
             while (rst.next()) {
                 result = rst.getInt(1);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
+                closePst();
                 closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
         }
 
         return result;
@@ -155,23 +143,17 @@ public class SvcRepCuadrePistero extends DaoImp {
                     + "where estado_id = 2 \n"
                     + " and fecha = TO_DATE('" + sqlDateIni + "','yyyy/mm/dd') and estacion_id = " + idestacion;
 
-            PreparedStatement cst = getConnection().prepareStatement(query);
-
-            System.out.println("SQL DATE " + query);
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             while (rst.next()) {
                 result = rst.getInt(1);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
+                closePst();
                 closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
         }
         return result;
     }

@@ -44,7 +44,7 @@ public class SvcClientePrepago extends DaoImp {
             query = "DELETE FROM arqueocaja_det_cxcprep WHERE arqueocaja_id = " + idarqueocaja;
             pst = getConnection().prepareStatement(query);
             pst.executeUpdate();
-            closePst();
+            pst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
@@ -64,16 +64,14 @@ public class SvcClientePrepago extends DaoImp {
                 pst.setDouble(3, bcrPrepaid.getItem(itemId).getBean().getValor());
                 pst.setString(4, usuario);
                 pst.executeUpdate();
-                closePst();
+                pst.close();
             }
             result = true;
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            if (pst != null) {
-                pst.close();
-                closeConnections(); //asg
-            }
+            pst.close();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -100,16 +98,16 @@ public class SvcClientePrepago extends DaoImp {
                 dto.setCliente(new Cliente(rst.getInt(5), rst.getString(6), rst.getString(7), rst.getInt(8), rst.getString(9), rst.getString(10), rst.getDate(11), rst.getString(12), rst.getString(13), rst.getString(14)));
                 bcrPrepaid.addItem(id, dto);
             }
+            rst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
             try {
-                rst.close();
                 pst.close();
-                closeConnections(); //asg
             } catch (SQLException ex) {
                 Logger.getLogger(SvcClientePrepago.class.getName()).log(Level.SEVERE, null, ex);
             }
+            closeConnections(); //asg
         }
         return bcrPrepaid;
     }
@@ -123,7 +121,7 @@ public class SvcClientePrepago extends DaoImp {
             query = "DELETE FROM ARQUEOCAJA_DET_CLI_CR WHERE arqueocaja_id = " + idarqueocaja;
             pst = getConnection().prepareStatement(query);
             pst.executeUpdate();
-            closePst();
+            pst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
@@ -143,16 +141,14 @@ public class SvcClientePrepago extends DaoImp {
                 pst.setDouble(3, bcrClientes.getItem(itemId).getBean().getValor());
                 pst.setString(4, usuario);
                 pst.executeUpdate();
-                closePst();
+                pst.close();
             }
             result = true;
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            if (pst != null) {
-                pst.close();
-                closeConnections(); //asg
-            }
+            pst.close();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -179,15 +175,15 @@ public class SvcClientePrepago extends DaoImp {
                 dto.setCliente(new Cliente(rst.getInt(5), rst.getString(6), rst.getString(7), rst.getInt(8), rst.getString(9), rst.getString(10), rst.getDate(11), rst.getString(12), rst.getString(13), rst.getString(14)));
                 bcrClientes.addItem(id, dto);
             }
+            rst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
             try {
-                rst.close();
                 pst.close();
-                closeConnections(); //asg
             } catch (SQLException ex) {
             }
+            closeConnections(); //asg
         }
         return bcrClientes;
     }

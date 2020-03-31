@@ -78,20 +78,16 @@ public class SvcDeposito extends DaoImp {
             while (rst.next()) {
                 result.add(new GenericMedioPago(rst.getInt(1), new Estacion(rst.getInt(5), rst.getString(6)), new GenericBeanMedioPago(rst.getInt(7), rst.getString(8)), rst.getString(4), rst.getString(3), rst.getDouble(2), rst.getDouble(9)));
             }
+            rst.close();
             closePst();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
-
 
     public List<Estacion> getAllEstaciones(boolean includeInactive) {
         List<Estacion> result = new ArrayList();
@@ -111,16 +107,12 @@ public class SvcDeposito extends DaoImp {
                 estacion = new Estacion(rst.getInt(1), rst.getString(2));
                 result.add(estacion);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -144,15 +136,12 @@ public class SvcDeposito extends DaoImp {
                 mediopago = new GenericBeanMedioPago(rst.getInt(1), rst.getString(2));
                 result.add(mediopago);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -172,15 +161,12 @@ public class SvcDeposito extends DaoImp {
             while (rst.next()) {
                 result = rst.getDouble(1);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -205,13 +191,10 @@ public class SvcDeposito extends DaoImp {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
-        
+
         return respuesta;
 
     }
@@ -228,21 +211,21 @@ public class SvcDeposito extends DaoImp {
                 double montoDolar = 0;
                 double totalDolar = 0;
                 montoDolar = bcrDeposito.getItem(itemId).getBean().getMontousd();
-                if(montoDolar!=0){
+                if (montoDolar != 0) {
                     totalDolar = montoDolar * tasacambio;
                     bcrDeposito.getItem(itemId).getBean().setMonto(totalDolar);
                 }
                 query = "INSERT INTO DEPOSITO_DET (IDDEPOSITODET, FECHA, ESTACION_ID, MEDIOPAGO_ID, NOBOLETA, COMENTARIOS, MONTO, MONTOUSD) "
                         + " VALUES (seq_deposito_det.nextval, "
-                        + " to_date('" +sqlDateIni+ "', 'yyyy-mm-dd'),"
+                        + " to_date('" + sqlDateIni + "', 'yyyy-mm-dd'),"
                         //+ sqlDateIni + ","
                         + estacionid + ","
                         + bcrDeposito.getItem(itemId).getBean().getMediopago().getMediopagoid() + ","
                         + "'" + bcrDeposito.getItem(itemId).getBean().getNoboleta() + "',"
                         + "'" + bcrDeposito.getItem(itemId).getBean().getComentarios() + "',"
                         + bcrDeposito.getItem(itemId).getBean().getMonto() + ","
-                        + montoDolar + ")";                               
-                System.out.println("query,.,.,. "+query);
+                        + montoDolar + ")";
+                System.out.println("query,.,.,. " + query);
                 pst = getConnection().prepareStatement(query);
                 pst.executeUpdate();
             }
@@ -251,17 +234,14 @@ public class SvcDeposito extends DaoImp {
         } catch (Exception e) {
             e.printStackTrace();
             respuesta = 0;
-        }finally{
-            try {
-                pst.close();
+        } finally {
+                closePst();
                 closeConnections(); //asg
-            } catch (SQLException ex) {
-            }
         }
 
         return bcrDeposito;
     }
-    
+
     public List<GenericBeanMedioPago> getAllMediosPago(boolean includeInactives) {
         List<GenericBeanMedioPago> result = new ArrayList();
         ResultSet rst = null;
@@ -281,15 +261,12 @@ public class SvcDeposito extends DaoImp {
                 mediopago = new GenericBeanMedioPago(rst.getInt(1), rst.getString(2));
                 result.add(mediopago);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
+                closePst();
                 closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
         }
         return result;
     }

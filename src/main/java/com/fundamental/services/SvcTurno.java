@@ -51,15 +51,12 @@ public class SvcTurno extends DaoImp {
             pst.setInt(3, 1);   //Estado abierto
             rst = pst.executeQuery();
             result = !rst.next();
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -74,12 +71,9 @@ public class SvcTurno extends DaoImp {
                 rst = pst.executeQuery();
                 Integer arqueoId = (rst.next()) ? rst.getInt(1) : 0;
                 arqueo.setArqueocajaId(arqueoId);
-                try {
-                    rst.close();
-                    pst.close();
-                    closeConnections(); //asg
-                } catch (Exception ignore) {
-                }
+                rst.close();
+                closePst();
+                closeConnections(); //asg
 
                 query = "INSERT INTO arqueocaja (arqueocaja_id, estado_id, creado_por, creado_persona, estacion_id, turno_id, fecha, empleado_id, nombre_jefe, nombre_pistero) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -120,12 +114,8 @@ public class SvcTurno extends DaoImp {
             arqueo.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -174,11 +164,8 @@ public class SvcTurno extends DaoImp {
             arqueod.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            try {
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -221,18 +208,14 @@ public class SvcTurno extends DaoImp {
             objeto.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            try {
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
 
     public ArqueocajaProducto saveArqueoProducto(String action, ArqueocajaProducto arqueoProd) {
         ArqueocajaProducto result = new ArqueocajaProducto();
-        ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
                 query = "INSERT INTO arqueocaja_producto (arqueocaja_id, producto_id, monto) "
@@ -271,18 +254,14 @@ public class SvcTurno extends DaoImp {
             arqueoProd.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            try {
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
 
     public Efectivo doActionEfectivo(String action, Efectivo efectivo) {
         Efectivo result = new Efectivo();
-        ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
                 query = "INSERT INTO efectivo (efectivo_id, arqueocaja_id, mediopago_id, orden, monto, tasa, mon_extranjera) "
@@ -324,18 +303,14 @@ public class SvcTurno extends DaoImp {
             result.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            try {
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
 
     public FactelectronicaPos doActionFactelectronicaPos(String action, FactelectronicaPos fepos) {
         FactelectronicaPos result = new FactelectronicaPos();
-        ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
                 query = "INSERT INTO factelectronica_pos (arqueocaja_id, producto_id, galones, monto) "
@@ -347,7 +322,6 @@ public class SvcTurno extends DaoImp {
                 pst.setDouble(4, fepos.getMonto());
                 pst.executeUpdate();
                 result = fepos;
-                rst.close();
                 closePst();
                 closeConnections(); //asg
             } else if (action.equals(ACTION_UPDATE)) {
@@ -357,12 +331,8 @@ public class SvcTurno extends DaoImp {
             result.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -379,15 +349,12 @@ public class SvcTurno extends DaoImp {
             while (rst.next()) {
                 result.add(new Precio(rst.getInt(1), rst.getInt(2), rst.getInt(3), rst.getDouble(4), null, null));
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -409,15 +376,12 @@ public class SvcTurno extends DaoImp {
                 item.setPump(new Bomba(rst.getInt(3), rst.getString(6), null, null, null, null));
                 result.add(item);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -437,7 +401,6 @@ public class SvcTurno extends DaoImp {
 //            rst.close();
 //            closePst();
 //            closeConnections(); //asg
-
             EmpleadoBombaTurno item;
 
             String Vquery = "SELECT max(teb.bomba_id) MaxBomba "
@@ -513,22 +476,12 @@ public class SvcTurno extends DaoImp {
                 pstB.close();
 //                closeConnections(); //asg
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                if (pst != null) {
-                    pst.close();
-                }
-
-                if (rst != null) {
-                    rst.close();
-                }
-                closePst();
-                closeConnections(); //asg
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -546,17 +499,14 @@ public class SvcTurno extends DaoImp {
             while (rst.next()) {
                 result.add(new Empleado(rst.getInt(1), rst.getString(2)));
             }
+            rst.close();
             closePst();
             closeConnections(); //asg
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                closePst();
-                closeConnections(); //asg
-            } catch (SQLException ex) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -574,17 +524,14 @@ public class SvcTurno extends DaoImp {
             while (rst.next()) {
                 result.add(new Empleado(rst.getInt(1), rst.getString(2), rst.getString(3)));
             }
+            rst.close();
             closePst();
             closeConnections(); //asg
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                closePst();
-                closeConnections(); //asg
-            } catch (SQLException ex) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -602,16 +549,12 @@ public class SvcTurno extends DaoImp {
             while (rst.next()) {
                 result.add(new Bomba(rst.getInt(1), rst.getString(2), null, null, null, null));
             }
-            closePst();
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                closePst();
-                closeConnections(); //asg
-            } catch (SQLException ex) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -641,6 +584,7 @@ public class SvcTurno extends DaoImp {
             pst = cnn.prepareStatement(miQuery);
             rst = pst.executeQuery();
             Integer turnoId = (rst.next()) ? rst.getInt(1) : 0;
+            rst.close();
             closePst();
             miQuery = "INSERT INTO turno (turno_id, estacion_id, usuario_id, estado_id, creado_por, creado_persona, turno_fusion, estacionconfhead_id, fecha, horario_id) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -732,32 +676,28 @@ public class SvcTurno extends DaoImp {
                 cnn.rollback();
             } catch (SQLException ex) {
 //                Logger.getLogger(SvcTurno.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                try {
-                    rst.close();
-                    closePst();
-                    cnn.close();
-                    closeConnections(); //asg
-                } catch (SQLException ex) {
-                }
             }
             exc.printStackTrace();
+        } finally {
+            try {
+                cnn.close();
+            } catch (SQLException ex) {
+            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
 
     public void modificarTurno(Integer idturno, BeanItemContainer<EmpleadoBombaTurno> listTurnoEmpPump, String usuario) throws SQLException {
         ArrayList<EmpleadoBombaTurno> listAsigna = new ArrayList<EmpleadoBombaTurno>();
-
         PreparedStatement pst = null;
-        ResultSet rst = null;
-        
+
         /*Elimina antes de volver asignar*/
         try {
             miQuery = "DELETE FROM turno_empleado_bomba WHERE turno_id = " + idturno;
             pst = getConnection().prepareStatement(miQuery);
             pst.executeUpdate();
-            rst.close();
             closePst();
             closeConnections(); //asg
         } catch (Exception ex) {
@@ -823,7 +763,7 @@ public class SvcTurno extends DaoImp {
         ResultSet rst = null;
         Connection cnn = null;
         cnn = getConnection();
-              
+
         try {
             cnn.setAutoCommit(false);
             if (crearDia) {
@@ -835,7 +775,7 @@ public class SvcTurno extends DaoImp {
                 pst.setString(3, dia.getCreadoPersona());
                 pst.setInt(4, dia.getEstacionId());
                 pst.setDate(5, new java.sql.Date(dia.getFecha().getTime()));
-                pst.executeQuery();
+                pst.executeUpdate();
                 closePst();
             }
 
@@ -843,6 +783,7 @@ public class SvcTurno extends DaoImp {
             pst = cnn.prepareStatement(miQuery);
             rst = pst.executeQuery();
             Integer turnoId = (rst.next()) ? rst.getInt(1) : 0;
+            rst.close();
             closePst();
             miQuery = "INSERT INTO turno (turno_id, estacion_id, usuario_id, estado_id, creado_por, creado_persona, turno_fusion, estacionconfhead_id, fecha, horario_id) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -893,17 +834,16 @@ public class SvcTurno extends DaoImp {
                 cnn.rollback();
             } catch (SQLException ex) {
 //                Logger.getLogger(SvcTurno.class.getName()).log(Level.SEVERE, null, ex);
-            }finally{
-                try {
-                    rst.close();
-                    closePst();
-                    cnn.close();
-                    closeConnections(); //asg
-                } catch (SQLException ex) {
-                    Logger.getLogger(SvcTurno.class.getName()).log(Level.SEVERE, null, ex);
-                }
             }
             exc.printStackTrace();
+        } finally {
+            try {
+                cnn.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(SvcTurno.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -925,15 +865,12 @@ public class SvcTurno extends DaoImp {
                 schedule.setNombreHoras(rst.getString(3) + " - " + rst.getString(4));
                 result.add(schedule);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                closePst();
-                closeConnections(); //asg
-            } catch (SQLException ex) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -956,15 +893,12 @@ public class SvcTurno extends DaoImp {
                 schedule.setNombreHoras(rst.getString(3) + " - " + rst.getString(4));
                 result.add(schedule);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                closePst();
-                closeConnections(); //asg
-            } catch (SQLException ex) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -992,16 +926,10 @@ public class SvcTurno extends DaoImp {
                 pais.setModificadoEl(rst.getDate(9));
                 pais.setVolSimbolo(rst.getString(10));
             }
+            rst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
-            if (pst != null) {
-                pst.close();
-            }
-            if (rst != null) {
-                rst.close();
-            }
-            rst.close();
             closePst();
             closeConnections(); //asg
         }
@@ -1024,22 +952,12 @@ public class SvcTurno extends DaoImp {
             if (rst.next()) {
                 cant = rst.getInt(1);
             }
+            rst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
-            try {
-                if (pst != null) {
-                    pst.close();
-                }
-                if (rst != null) {
-                    rst.close();
-                }
-                rst.close();
-                closePst();
-                closeConnections(); //asg
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return cant;
     }
@@ -1057,21 +975,12 @@ public class SvcTurno extends DaoImp {
             if (rst.next()) {
                 id = rst.getInt(1);
             }
+            rst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
-            try {
-                if (pst != null) {
-                    pst.close();
-                }
-                if (rst != null) {
-                    rst.close();
-                }
-                closePst();
-                closeConnections(); //asg
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return id;
     }
@@ -1088,21 +997,12 @@ public class SvcTurno extends DaoImp {
             if (rst.next()) {
                 id = rst.getInt(1);
             }
+            rst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
-            try {
-                if (pst != null) {
-                    pst.close();
-                }
-                if (rst != null) {
-                    rst.close();
-                }
-                closePst();
-                closeConnections(); //asg
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return id;
     }
@@ -1120,21 +1020,12 @@ public class SvcTurno extends DaoImp {
             if (rst.next()) {
                 id = rst.getInt(1);
             }
+            rst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
-            try {
-                if (pst != null) {
-                    pst.close();
-                }
-                if (rst != null) {
-                    rst.close();
-                }
-                closePst();
-                closeConnections(); //asg
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return id;
     }
@@ -1151,15 +1042,12 @@ public class SvcTurno extends DaoImp {
             if (rst.next()) {
                 result = rst.getInt(1);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                closePst();
-                closeConnections(); //asg
-            } catch (SQLException ex) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }

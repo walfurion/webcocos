@@ -46,6 +46,7 @@ public class SvcMaintenance extends DaoImp {
                 rst = pst.executeQuery();
                 Integer userId = (rst.next()) ? rst.getInt(1) : 0;
                 usuario.setUsuarioId(userId);
+                rst.close();
                 closePst();
 
                 query = "INSERT INTO usuario (username, clave, nombre, apellido, creado_por, usuario_id, pais_id, correo) "
@@ -167,12 +168,12 @@ public class SvcMaintenance extends DaoImp {
             exc.printStackTrace();
         } finally {
             try {
-                rst.close();
-                closePst();
                 cnn.close();
-                closeConnections(); //ASG
             } catch (SQLException ex) {
+                ex.printStackTrace();
             }
+            closePst();
+            closeConnections(); //ASG
         }
         return result;
     }
@@ -312,6 +313,7 @@ public class SvcMaintenance extends DaoImp {
                 pst = cnn.prepareStatement(query);
                 rst = pst.executeQuery();
                 rol.setRolId(rst.next() ? rst.getInt(1) : 0);
+                rst.close();
                 closePst();
                 query = "INSERT INTO rol (nombre, descripcion, estado, creado_por, rol_id) "
                         + "VALUES (?, ?, ?, ?, ?)";
@@ -398,12 +400,11 @@ public class SvcMaintenance extends DaoImp {
             exc.printStackTrace();
         } finally {
             try {
-                rst.close();
                 closePst();
                 cnn.close();
-                closeConnections();
             } catch (SQLException ex) {
             }
+            closeConnections();
         }
         return result;
     }
@@ -476,7 +477,7 @@ public class SvcMaintenance extends DaoImp {
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             Producto producto;
-            List<Producto> lstProd = getAllProductsWhitCountry();
+            List<Producto> lstProd = getAllProductsWhitCountry(false);
             while (rst.next()) {
                 producto = new Producto(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getInt(4), rst.getInt(5), rst.getString(6), rst.getInt(7), rst.getString(8), rst.getString(9), rst.getInt(10), rst.getString(11), rst.getString(16));
                 producto.setTypeProd(new Tipoproducto(rst.getInt(12), rst.getString(13), "A"));
@@ -499,15 +500,15 @@ public class SvcMaintenance extends DaoImp {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
             } catch (SQLException ex) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
 
-    public List<Producto> getAllProductsWhitCountry() {
+    public List<Producto> getAllProductsWhitCountry(boolean cerrarConexion) {
         List<Producto> result = new ArrayList();
         ResultSet rst = null;
         try {
@@ -541,9 +542,11 @@ public class SvcMaintenance extends DaoImp {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
             } catch (SQLException ex) {
+            }
+            closePst();
+            if (cerrarConexion) {
+                closeConnections(); //asg
             }
         }
         return result;

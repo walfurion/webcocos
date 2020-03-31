@@ -1281,8 +1281,7 @@ public class PrCuadre extends Panel implements View {
 
             formTarjetasCredito = new FormTarjetasCredito(simboloMoneda, bcrCreditC, pais.getPaisId());
             formTarjetasCredito.addCloseListener((e) -> {
-                bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class
-                );
+                bcrCreditC = new BeanContainer<Integer, GenericTarjeta>(GenericTarjeta.class);
                 bcrCreditC = (BeanContainer<Integer, GenericTarjeta>) VaadinSession.getCurrent().getAttribute("detalleTarjetaCredito");
                 tmpDoubleTarjetaCredito = (Double) VaadinSession.getCurrent().getAttribute("totalTarjetaCredito");
                 tmpTotal = 0.00;
@@ -1294,9 +1293,11 @@ public class PrCuadre extends Panel implements View {
                         listaIDSDepurados.put(bcrMediopago.getItem(itemId).getBean().getMediopagoId(), genDep);
 //                        System.out.println("###PADRE### " + bcrMediopago.getItem(itemId).getBean().getMediopagoId() + " " + bcrMediopago.getItem(itemId).getBean().getNombre());
                         for (Integer idmedio : bcrCreditC.getItemIds()) {
+                            Integer id = bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id();
 //                            System.out.println("HIJO " + bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id() + " " + bcrCreditC.getItem(idmedio).getBean().getTarjeta().getNombre());
-                            if (bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id() == bcrMediopago.getItem(itemId).getBean().getMediopagoId()) {
-//                                System.out.println("VALOR DEL HIJO ENCONTRADO " + bcrCreditC.getItem(idmedio).getBean().getMonto());
+//                            if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id()) {
+                            if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == id) {
+                                System.out.println("VALOR DEL HIJO ENCONTRADO " + bcrCreditC.getItem(idmedio).getBean().getMonto());
                                 genericMedioTarjeta genEnc = new genericMedioTarjeta();
                                 genEnc.setIdmedio(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id());
                                 genEnc.setMonto(bcrCreditC.getItem(idmedio).getBean().getMonto());

@@ -38,10 +38,10 @@ public class SvcDetalleTcClientes extends DaoImp {
             query = "DELETE FROM TARJETA_DETALLE_FM WHERE IDMEDIOPAGO = " + mediopagoid + " AND TURNOID = " + turnoid;
             pst = getConnection().prepareStatement(query);
             pst.executeUpdate();
-            closePst();
+            pst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
-        }finally{
+        } finally {
             pst.close();
             closeConnections(); //asg
         }
@@ -67,10 +67,8 @@ public class SvcDetalleTcClientes extends DaoImp {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            if (pst != null) {
-                pst.close();
-                closeConnections(); //asg
-            }
+            pst.close();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -84,10 +82,10 @@ public class SvcDetalleTcClientes extends DaoImp {
             query = "DELETE FROM TARJETA_DETALLE_FM WHERE IDMEDIOPAGO = " + mediopagoid + " AND TURNOID = " + turnoid;
             pst = getConnection().prepareStatement(query);
             pst.executeUpdate();
-            closePst();
+            pst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
-        }finally{
+        } finally {
             pst.close();
             closeConnections(); //asg
         }
@@ -113,10 +111,8 @@ public class SvcDetalleTcClientes extends DaoImp {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            if (pst != null) {
-                pst.close();
-                closeConnections(); //asg
-            }
+            pst.close();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -151,15 +147,13 @@ public class SvcDetalleTcClientes extends DaoImp {
             while (rst.next()) {
                 result.add(new GenericDetalleFM(rst.getInt(1), new Estacion(rst.getInt(5), rst.getString(6)), new GenericBeanMedioPago(rst.getInt(7), rst.getString(8)), new GenericLote(rst.getInt(9), rst.getInt(10)), rst.getString(2), rst.getDouble(3), rst.getString(4)));
             }
+            rst.close();
             closePst();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -183,16 +177,12 @@ public class SvcDetalleTcClientes extends DaoImp {
                 estacion = new Estacion(rst.getInt(1), rst.getString(2));
                 result.add(estacion);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -226,16 +216,12 @@ public class SvcDetalleTcClientes extends DaoImp {
                 lote = new GenericLote(rst.getInt(1), rst.getInt(2));
                 result.add(lote);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -258,14 +244,12 @@ public class SvcDetalleTcClientes extends DaoImp {
                 mediopago = new GenericBeanMedioPago(rst.getInt(1), rst.getString(2));
                 result.add(mediopago);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -312,15 +296,13 @@ public class SvcDetalleTcClientes extends DaoImp {
                                 rst.getDouble(3),
                                 rst.getString(4)));
             }
+            rst.close();
             closePst();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -337,7 +319,7 @@ public class SvcDetalleTcClientes extends DaoImp {
             closePst();
         } catch (Exception ex) {
             ex.printStackTrace();
-        }finally{
+        } finally {
             pst.close();
             closeConnections(); //asg
         }
@@ -363,10 +345,8 @@ public class SvcDetalleTcClientes extends DaoImp {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            if (pst != null) {
                 pst.close();
                 closeConnections(); //asg
-            }
         }
         return result;
     }
@@ -381,7 +361,7 @@ public class SvcDetalleTcClientes extends DaoImp {
                     + " where "
                     + " ESTACION_ID = " + estacionid
                     + query;
-               
+
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             GenericBeanCliente customer;
@@ -389,14 +369,12 @@ public class SvcDetalleTcClientes extends DaoImp {
                 customer = new GenericBeanCliente(rst.getInt(1), rst.getInt(2), rst.getString(3));
                 result.add(customer);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                pst.close();
+                closePst();
                 closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
         }
         return result;
     }

@@ -44,15 +44,12 @@ public class SvcTurnoCierre extends DaoImp {
             while (rst.next()) {
                 result.add(new Bomba(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), null, new CheckBox()));
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -74,15 +71,12 @@ public class SvcTurnoCierre extends DaoImp {
                 producto.setValue(rst.getDouble(7));
                 result.add(producto);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -105,15 +99,12 @@ public class SvcTurnoCierre extends DaoImp {
                 mediopago.setValue(rst.getDouble(5));
                 result.add(mediopago);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -137,15 +128,12 @@ public class SvcTurnoCierre extends DaoImp {
                 mediopago.setEfectivoId(rst.getInt(6));
                 result.add(mediopago);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -167,15 +155,12 @@ public class SvcTurnoCierre extends DaoImp {
                 atc.setId(count++);
                 result.add(atc);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -195,15 +180,12 @@ public class SvcTurnoCierre extends DaoImp {
                 apo.setNombreProducto(rst.getString(4));
                 result.add(apo);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -223,12 +205,8 @@ public class SvcTurnoCierre extends DaoImp {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -250,15 +228,12 @@ public class SvcTurnoCierre extends DaoImp {
                 ad.setIdTable(count++);
                 result.add(ad);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -283,15 +258,12 @@ public class SvcTurnoCierre extends DaoImp {
                 efe.setNombreMedioPago(rst.getString(5));
                 result.add(efe);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -313,15 +285,12 @@ public class SvcTurnoCierre extends DaoImp {
                 producto.setValue(rst.getDouble(7));
                 result.add(producto);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -344,15 +313,12 @@ public class SvcTurnoCierre extends DaoImp {
                 mediopago.setValue(rst.getDouble(5));
                 result.add(mediopago);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -376,15 +342,12 @@ public class SvcTurnoCierre extends DaoImp {
                 mediopago.setEfectivoId(rst.getInt(6));
                 result.add(mediopago);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -411,15 +374,12 @@ public class SvcTurnoCierre extends DaoImp {
             while (rst.next()) {
                 result.add(new String[]{rst.getString(1), rst.getString(2), rst.getString(3)});
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -431,13 +391,14 @@ public class SvcTurnoCierre extends DaoImp {
             //calibraciones por dia
             List<String[]> calibraciones = getCalibracionByFechaEstacion(fecha, estacionId);
 
-            query = "SELECT 'rownum', p.nombre, i.fecha, i.estacion_id, i.producto_id, i.inicial, i.final, i.compras, "
-                    + "i.INV_FISICO, i.COMPARTIMIENTO, i.GALONES, t.DESCRIPCION "
-                    + "FROM RECEPCION_INVENTARIO_DETALLE i, producto p "
-                    + "left join TANQUE t on t.PRODUCTO_ID=p.PRODUCTO_ID "
-                    + "WHERE i.producto_id = p.producto_id "
-                    + "AND i.fecha = TO_DATE(?, 'dd/mm/yyyy') AND i.estacion_id = ? "
-                    + "ORDER BY p.producto_id";
+            query = "SELECT 'rownum', p.nombre, i.fecha, i.estacion_id, i.producto_id, i.inicial, i.final, i.compras,\n"
+                    + " i.INV_FISICO, i.COMPARTIMIENTO, i.GALONES, t.DESCRIPCION\n"
+                    + " FROM RECEPCION_INVENTARIO_DETALLE i, producto p, tanque t                     \n"
+                    + " WHERE i.producto_id = p.producto_id \n"
+                    + " --AND p.producto_id = t.producto_id \n"
+                    + " AND i.ESTACION_ID = t.ESTACION_ID (+)\n"
+                    + " AND i.fecha = TO_DATE(?, 'dd/mm/yyyy') AND i.estacion_id = ? \n"
+                    + " ORDER BY p.producto_id";
             pst = getConnection().prepareStatement(query);
             pst.setString(1, Constant.SDF_ddMMyyyy.format(fecha));
             pst.setInt(2, estacionId);
@@ -462,15 +423,12 @@ public class SvcTurnoCierre extends DaoImp {
                 }
                 result.add(invdto);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -486,16 +444,13 @@ public class SvcTurnoCierre extends DaoImp {
             while (rst.next()) {
                 idInv = rst.getInt(1);
             }
+            rst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
-        }
-        try {
-            rst.close();
+        } finally {
             closePst();
             closeConnections();//ASG
-        } catch (Exception ex) {
         }
-        
         try {
             if (action.equals(ACTION_ADD)) {
                 query = "INSERT INTO RECEPCION_INVENTARIO_DETALLE (INVRECEPCION_DET_ID,INVRECEPCION_ID, inicial, "
@@ -556,12 +511,8 @@ public class SvcTurnoCierre extends DaoImp {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections();//ASG
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections();//ASG
         }
         return result;
     }
@@ -586,11 +537,8 @@ public class SvcTurnoCierre extends DaoImp {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                closePst();
-                closeConnections();//ASG
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections();//ASG
         }
         return result;
     }
@@ -613,16 +561,12 @@ public class SvcTurnoCierre extends DaoImp {
 //                rec.setFactura(rst.getString(4));
                 result.add(rec);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
-                closeConnections();//ASG
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections();//ASG
         }
         return result;
     }
@@ -639,17 +583,12 @@ public class SvcTurnoCierre extends DaoImp {
             while (rst.next()) {
                 valor = rst.getInt(1);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                if (rst != null) {
-                    rst.close();
-                }
-                pst.close();
-                closeConnections();//ASG
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections();//ASG
         }
         return valor;
     }

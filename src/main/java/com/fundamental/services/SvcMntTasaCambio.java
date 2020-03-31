@@ -24,7 +24,7 @@ public class SvcMntTasaCambio extends DaoImp {
         ResultSet rst = null;
         query = "SELECT t.tasacambio_id, t.pais_id, t.fecha_inicio, t.fecha_fin, t.tasa, t.creado_por, p.nombre "
                 + "FROM tasacambio t, pais p WHERE t.pais_id = p.pais_id AND t.fecha_inicio >= ?"
-                +" AND p.pais_id = "+paisid;
+                + " AND p.pais_id = " + paisid;
         try {
             Calendar todayMinusSix = Calendar.getInstance();
             todayMinusSix.add(Calendar.MONTH, -6);
@@ -37,18 +37,16 @@ public class SvcMntTasaCambio extends DaoImp {
                 cambio.setPaisNombre(rst.getString(7));
                 result.add(cambio);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
                 closePst();
                 closeConnections(); //asg
-            } catch (SQLException ex) {
-            }
         }
         return result;
     }
+
     public List<TasaCambio> getAllRates() {
         List<TasaCambio> result = new ArrayList();
         query = "SELECT t.tasacambio_id, t.pais_id, t.fecha_inicio, t.fecha_fin, t.tasa, t.creado_por, p.nombre "
@@ -66,15 +64,12 @@ public class SvcMntTasaCambio extends DaoImp {
                 cambio.setPaisNombre(rst.getString(7));
                 result.add(cambio);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
                 closePst();
                 closeConnections(); //asg
-            } catch (SQLException ex) {
-            }
         }
         return result;
     }
@@ -87,22 +82,19 @@ public class SvcMntTasaCambio extends DaoImp {
                 + "estacion_usuario c \n"
                 + "WHERE a.pais_id = b.pais_id \n"
                 + "and b.ESTACION_ID = c.ESTACION_ID \n"
-                + "and c.USUARIO_ID = "+idusuario;
+                + "and c.USUARIO_ID = " + idusuario;
         ResultSet rst = null;
         try {
             rst = getConnection().prepareStatement(miQuery).executeQuery();
             while (rst.next()) {
                 result.add(new Pais(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(6), rst.getString(5), null));
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -161,7 +153,9 @@ public class SvcMntTasaCambio extends DaoImp {
                 rst = pst.executeQuery();
                 int changeRateId = (rst.next()) ? rst.getInt(1) : 0;
                 tasa.setTasacambioId(changeRateId);
+                rst.close();
                 closePst();
+                closeConnections();
 
                 query = "INSERT INTO tasacambio (tasa, creado_por, creado_el, pais_id, tasacambio_id, fecha_inicio, fecha_fin) "
                         + "VALUES (?, ?, SYSDATE, ?, ?, ?, ?)";
@@ -174,6 +168,8 @@ public class SvcMntTasaCambio extends DaoImp {
                 pst.setDate(6, new java.sql.Date(tasa.getFechaFin().getTime()));
                 pst.executeUpdate();
                 result = tasa;
+                closePst();
+                closeConnections();
             } else if (action.equals(ACTION_UPDATE)) {
                 query = "UPDATE tasacambio "
                         + "SET tasa = ?, modificado_por = ?, pais_id = ?, modificado_el = SYSDATE, fecha_inicio = ?, fecha_fin = ? "
@@ -187,19 +183,16 @@ public class SvcMntTasaCambio extends DaoImp {
                 pst.setInt(6, tasa.getTasacambioId());
                 pst.executeUpdate();
                 result = tasa;
+                closePst();
+                closeConnections();
             } else if (action.equals(ACTION_DELETE)) {
             }
         } catch (Exception exc) {
             exc.printStackTrace();
             tasa.setDescError(exc.getMessage());
         } finally {
-            try {
-                rst.close();
-                closePst();
-                closeConnections(); //asg
-            } catch (SQLException ex) {
-                Logger.getLogger(SvcMntTasaCambio.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }

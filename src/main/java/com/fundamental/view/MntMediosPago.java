@@ -101,6 +101,7 @@ public class MntMediosPago extends Panel implements View {
     String action;
     private List<DtoGenericBean> listStatus;
     Acceso acceso = new Acceso();
+    boolean flag = false;
 
     public MntMediosPago() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -161,23 +162,25 @@ public class MntMediosPago extends Panel implements View {
         bcrMediopago.removeAllItems();
         SvcMaintenance service = new SvcMaintenance();
         paises = service.getAllPaises();
-        int idPais = 0;
-        if(cbxPais!=null){
-            Pais pais = new Pais();
-            pais = (Pais) cbxPais.getValue();
-            idPais = pais.getPaisId();
-            System.out.println("entra al combo "+idPais);
-        }else{
-            idPais = service.recuperaIdPais();
-            System.out.println("entra al else "+idPais);
-        }        
+        System.out.println("FLAG " + flag);
+        if (!flag) {
+            int idPais = 0;
+            if (cbxPais != null) {
+                Pais pais = new Pais();
+                pais = (Pais) cbxPais.getValue();
+                idPais = pais.getPaisId();
+                System.out.println("entra al combo " + idPais);
+            } else {
+                idPais = service.recuperaIdPais();
+                System.out.println("entra al else " + idPais);
+            }
+            bcrMediopago.addAll(service.getAllMediosPago(true, idPais));
+            if (bcrMediopago.size() > 0) {
+                int firstItemId = bcrMediopago.getItemIds().get(0);
+                mediopago = bcrMediopago.getItem(firstItemId).getBean();
+            }
+        }
         productTypes = service.getAllTipoproducto(true);
-        bcrMediopago.addAll(service.getAllMediosPago(true,idPais));
-//        service.closeConnections();
-        if(bcrMediopago.size()>0){
-            int firstItemId = bcrMediopago.getItemIds().get(0);
-            mediopago = bcrMediopago.getItem(firstItemId).getBean();
-        }        
         listStatus = Arrays.asList(new DtoGenericBean("I", "Inactivo"), new DtoGenericBean("A", "Activo"));
     }
 
@@ -281,6 +284,8 @@ public class MntMediosPago extends Panel implements View {
         btnAdd.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
+                tblData.setValue(null);
+                flag = true; //ACTIVO LA BANDERA 
                 mediopago = new Mediopago();
                 cbxTipoproducto.setValue(null);
                 cbxTipo.setValue(null);
@@ -294,7 +299,7 @@ public class MntMediosPago extends Panel implements View {
                 binder.setItemDataSource(mediopago);
                 action = DaoImp.ACTION_ADD;
                 nombre.focus();
-                tblData.setValue(null);
+                System.out.println("FLAG " + flag);
             }
         });
 
@@ -307,7 +312,7 @@ public class MntMediosPago extends Panel implements View {
                     Notification.show("Por favor, todos los campos son requeridos.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
-                if(ut.isNumber(tfdOrden.getValue())==0){
+                if (ut.isNumber(tfdOrden.getValue()) == 0) {
                     Notification.show("El campo Orden debe ser numerico.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
@@ -316,6 +321,9 @@ public class MntMediosPago extends Panel implements View {
                 mediopago.setTipo(((DtoGenericBean) cbxTipo.getValue()).getId());
                 mediopago.setCreadoPor(user.getUsername());
                 mediopago.setModificadoPor(user.getUsername());
+                mediopago.setIsTCredito(chxTCredito.getValue());//asg
+                mediopago.setOrden(Integer.parseInt(tfdOrden.getValue().trim()));
+                mediopago.setNombre(nombre.getValue().trim());
                 try {
                     binder.commit();
                 } catch (FieldGroup.CommitException ex) {
@@ -325,6 +333,7 @@ public class MntMediosPago extends Panel implements View {
 
                 SvcMntMedioPago service = new SvcMntMedioPago();
                 mediopago = service.doAction(action, mediopago);
+                flag = false; //devuelvo la bandera a su estado original
                 Mediopago item;
                 for (Integer id : bcrMediopago.getItemIds()) {
                     item = bcrMediopago.getItem(id).getBean();
@@ -358,6 +367,7 @@ public class MntMediosPago extends Panel implements View {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 if (tblData.getValue() != null) {
+                    flag = false; //FALSO...
                     mediopago = bcrMediopago.getItem(tblData.getValue()).getBean();
                     binder.setItemDataSource(mediopago);
 //                    defineSelectedPaises();

@@ -34,20 +34,19 @@ public class SvcComVenLubricantes extends DaoImp {
         ResultSet rst = null;
         try {
             query = "SELECT p.producto_id,p.nombre,m.id_marca, c.pais_id, (select inv_inicial from compra_venta_lubricante "
-                    + "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy')) as inv_inicial, "
+                    + "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy') AND ESTACION_ID = " + ESTACIONID + ") as inv_inicial, "
                     + "(select compra from compra_venta_lubricante "
-                    + "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy')) as compra "
+                    + "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy') AND ESTACION_ID = " + ESTACIONID + ") as compra "
                     + "FROM lubricanteprecio l, pais c, producto p, marca m "
                     + "WHERE l.pais_id = c.pais_id AND p.id_marca = m.id_marca and p.TIPO_ID=2 "
                     + "AND l.producto_id = p.producto_id and p.ESTADO='A' AND l.pais_id = " + countryId + " "
                     + "AND p.id_marca = " + brandId + "";
-            System.out.println("query " + query);
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             ComVenLubricantes lub;
             while (rst.next()) {
                 Double valFinal = valorFinal(countryId, brandId, fecha, rst.getInt(1), ESTACIONID); //ASG ESTACION
-                int count = countLub(rst.getInt(1), fecha, countryId, ESTACIONID);
+                int count = countLub(rst.getInt(1), fecha, countryId, ESTACIONID, false);
                 if (valFinal != null && count == 0) {
                     valFinal = valFinal;
                 } else {
@@ -62,11 +61,11 @@ public class SvcComVenLubricantes extends DaoImp {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
             } catch (SQLException ex) {
                 Logger.getLogger(SvcComVenLubricantes.class.getName()).log(Level.SEVERE, null, ex);
             }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -82,7 +81,7 @@ public class SvcComVenLubricantes extends DaoImp {
                     + "AND l.PAIS_ID=" + countryId + " and l.MARCA_ID=" + brandId + " "
                     + "and l.FECHA = to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy') AND l.ESTACION_ID = " + ESTACIONID; //ASG ESTACION
             System.out.println("query,.,.,. " + query);
-            pst = getConnection().prepareStatement(query);
+//            pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             ComVenLubricantes lub;
             while (rst.next()) {
@@ -93,11 +92,11 @@ public class SvcComVenLubricantes extends DaoImp {
             exc.printStackTrace();
         } finally {
             try {
-                closePst();
                 rst.close();
-                closeConnections(); //asg
             } catch (SQLException ex) {
             }
+            closeConnections(); //asg
+            closePst();
         }
         return result;
     }
@@ -108,8 +107,9 @@ public class SvcComVenLubricantes extends DaoImp {
         Calendar ayer = Calendar.getInstance();
         ayer.setTime(lub.getFecha());
         ayer.add(Calendar.DATE, -1);
+
         try {
-            int val = countLub(lub.getProductoId(), lub.getFecha(), lub.getPaisId(), lub.getEstacionid());//ASG ESTACION
+            int val = countLub(lub.getProductoId(), lub.getFecha(), lub.getPaisId(), lub.getEstacionid(), true);//ASG ESTACION
             if (val > 0) {
                 miQuery = "UPDATE COMPRA_VENTA_LUBRICANTE "
                         + "SET INV_INICIAL=?,COMPRA=?, INV_FINAL=?, MODIFICADO_POR=?, MODIFICADO_EL=SYSDATE "
@@ -141,17 +141,15 @@ public class SvcComVenLubricantes extends DaoImp {
                 pst.executeUpdate();
                 result = lub;
             }
-
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
             try {
                 rst.close();
-                pst.close();
-                closeConnections(); //asg
             } catch (Exception ignore) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -204,10 +202,10 @@ public class SvcComVenLubricantes extends DaoImp {
 
             try {
                 rst.close();
-                pst.close();
-                closeConnections(); //asg
             } catch (Exception ignore) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -240,22 +238,22 @@ public class SvcComVenLubricantes extends DaoImp {
 
             try {
                 rst.close();
-                pst.close();
-                closeConnections(); //asg
             } catch (Exception ignore) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
 
-    public int countLub(int idProducto, Date fecha, int idPais, Integer ESTACIONID) {
+    public int countLub(int idProducto, Date fecha, int idPais, Integer ESTACIONID, boolean CerrarConexion) {
         int result = 0;
         String dateString = Constant.SDF_ddMMyyyy.format(fecha);
         ResultSet rst = null;
         try {
             miQuery = "SELECT count(*) FROM COMPRA_VENTA_LUBRICANTE where PRODUCTO_ID=" + idProducto + " "
                     + "and trunc(FECHA) =  to_date('" + dateString + "','dd/mm/yyyy') and PAIS_ID= " + idPais + " AND ESTACION_ID = " + ESTACIONID;  //ASG ESTACION
-//            System.out.println("mi ueryryry "+miQuery);
+//            System.out.println("mi ueryryry COUNT LUB "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             if (rst.next()) {
@@ -266,9 +264,12 @@ public class SvcComVenLubricantes extends DaoImp {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
             } catch (SQLException ex) {
+            }
+            closePst();
+            if (CerrarConexion) {
+                System.out.println("ENTRA A CERRAR LA CONEXION " + CerrarConexion);
+                closeConnections(); //asg
             }
         }
         return result;
@@ -286,7 +287,7 @@ public class SvcComVenLubricantes extends DaoImp {
                     + "where PRODUCTO_ID=" + idProducto + " and PAIS_ID=" + idPais + " AND ESTACION_ID = " + ESTACIONID
                     + /*ASG ESTACION*/ " and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.PAIS_ID=" + idPais + " "
                     + "and b.producto_id=" + idProducto + " and " + fecha1 + "=extract(MONTH from b.fecha) "
-                    + "AND " + fecha2 + "=extract(YEAR from b.fecha))  order by FECHA desc ";
+                    + "AND " + fecha2 + "=extract(YEAR from b.fecha) AND b.ESTACION_ID = "+ ESTACIONID +")  order by FECHA desc ";
 //            System.out.println("mi ueryryry "+miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
@@ -298,10 +299,10 @@ public class SvcComVenLubricantes extends DaoImp {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
             } catch (SQLException ex) {
             }
+            closePst();
+            closeConnections(); //asg            
         }
         return result;
     }
@@ -319,7 +320,7 @@ public class SvcComVenLubricantes extends DaoImp {
                     + "where PAIS_ID=" + countryId + " and MARCA_ID=" + brandId + " and producto_id=" + productId + " AND ESTACION_ID = " + ESTACIONID /*ASG ESTACION*/
                     + " and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.PAIS_ID=" + countryId + " "
                     + "and b.MARCA_ID=" + brandId + " and b.producto_id=" + productId + " and " + fecha1 + "=extract(MONTH from b.fecha) "
-                    + "AND " + fecha2 + "=extract(YEAR from b.fecha))  order by FECHA desc ";
+                    + "AND " + fecha2 + "=extract(YEAR from b.fecha) AND b.ESTACION_ID = "+ ESTACIONID +")  order by FECHA desc ";
 //                System.out.println("query inv final "+query);
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
@@ -332,10 +333,10 @@ public class SvcComVenLubricantes extends DaoImp {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
+//                closeConnections(); //asg
             } catch (SQLException ex) {
             }
+            closePst();
         }
         return valor;
     }
@@ -377,7 +378,7 @@ public class SvcComVenLubricantes extends DaoImp {
                     + " AND l.PAIS_ID=" + countryId + " and l.MARCA_ID=" + brandId + " and l.PRODUCTO_ID=" + productId + " "
                     + "and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.PAIS_ID=" + countryId + " "
                     + "and b.producto_id=" + productId + " and " + fecha1 + "=extract(MONTH from b.fecha) "
-                    + "AND " + fecha2 + "=extract(YEAR from b.fecha))  order by FECHA desc ";
+                    + "AND " + fecha2 + "=extract(YEAR from b.fecha) AND b.ESTACION_ID = "+ ESTACIONID +")  order by FECHA desc ";
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             while (rst.next()) {
@@ -389,10 +390,10 @@ public class SvcComVenLubricantes extends DaoImp {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
             } catch (SQLException ex) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return valor;
     }
@@ -411,7 +412,7 @@ public class SvcComVenLubricantes extends DaoImp {
                     + " AND l.PAIS_ID=" + countryId + " and l.MARCA_ID=" + brandId + " and l.PRODUCTO_ID=" + productId + " "
                     + "and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.PAIS_ID=" + countryId + " "
                     + "and b.producto_id=" + productId + " and " + fecha1 + "=extract(MONTH from b.fecha) "
-                    + "AND " + fecha2 + "=extract(YEAR from b.fecha)) ";
+                    + "AND " + fecha2 + "=extract(YEAR from b.fecha) AND b.ESTACION_ID = "+ ESTACIONID +")";
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             while (rst.next()) {
@@ -423,10 +424,10 @@ public class SvcComVenLubricantes extends DaoImp {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
             } catch (SQLException ex) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return valor;
     }
@@ -447,10 +448,10 @@ public class SvcComVenLubricantes extends DaoImp {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
             } catch (SQLException ex) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return valor;
     }

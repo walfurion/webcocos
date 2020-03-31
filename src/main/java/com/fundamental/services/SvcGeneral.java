@@ -60,9 +60,9 @@ public class SvcGeneral extends DaoImp {
             try {
                 rst.close();
                 closePst();
-                closeConnections(); //asg
             } catch (SQLException ex) {
             }
+            closeConnections(); //asg
         }
         return result;
     }
@@ -94,9 +94,9 @@ public class SvcGeneral extends DaoImp {
             try {
                 rst.close();
                 closePst();
-                closeConnections(); //asg
             } catch (SQLException ex) {
             }
+            closeConnections(); //asg
         }
         return result;
     }
@@ -180,10 +180,11 @@ public class SvcGeneral extends DaoImp {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
+
             } catch (SQLException ex) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -222,10 +223,10 @@ public class SvcGeneral extends DaoImp {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
             } catch (SQLException ex) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -278,12 +279,8 @@ public class SvcGeneral extends DaoImp {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                closePst();
-                closeConnections(); //asg
-            } catch (SQLException ex) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -405,12 +402,11 @@ public class SvcGeneral extends DaoImp {
             result.setDescError(exc.getMessage());
         } finally {
             try {
-                rst.close();
                 closePst();
                 cnn.close();
-                closeConnections(); //asg
             } catch (SQLException ex) {
             }
+            closeConnections(); //asg
         }
         return result;
     }
@@ -477,6 +473,7 @@ public class SvcGeneral extends DaoImp {
                 int lubprecioId = (rst.next()) ? rst.getInt(1) : 0;
                 System.out.println("lub precio " + lubprecioId);
                 lub.setLubricanteprecio(lubprecioId);
+                rst.close();
                 closePst();
                 query = "INSERT INTO lubricanteprecio (pais_id, producto_id, fecha_inicio, fecha_fin, precio, creado_por, lubricanteprecio) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -503,7 +500,7 @@ public class SvcGeneral extends DaoImp {
                 pst.setObject(6, lub.getModificadoPor());
                 pst.setObject(7, lub.getLubricanteprecio());
                 pst.executeUpdate();
-                doActionLubprecioLog(lubricante_log);
+                doActionLubprecioLog(lubricante_log, false);
             }
             result = lub;
             cnn.commit();
@@ -516,13 +513,11 @@ public class SvcGeneral extends DaoImp {
             exc.printStackTrace();
         } finally {
             try {
-                rst.close();
-                pst.close();
+                closePst();
                 cnn.close();
-                closeConnections();
             } catch (SQLException ex) {
             }
-
+            closeConnections();
         }
         return result;
     }
@@ -609,7 +604,7 @@ public class SvcGeneral extends DaoImp {
         return result;
     }
 
-    public void doActionLubprecioLog(Lubricanteprecio lub) {
+    public void doActionLubprecioLog(Lubricanteprecio lub, boolean closeConexion) {
         Connection cnn = null;
         try {
             cnn = getConnection();
@@ -638,11 +633,14 @@ public class SvcGeneral extends DaoImp {
             exc.printStackTrace();
         } finally {
             try {
-                pst.close();
-                cnn.close();
-                closeConnections(); //Asg
+                closePst();
+                if (closeConexion) {
+                    cnn.close();
+                    closeConnections(); //Asg
+                }
             } catch (SQLException ex) {
             }
+//            closeConnections(); //Asg
         }
     }
 
@@ -686,10 +684,10 @@ public class SvcGeneral extends DaoImp {
         ResultSet rst = null;
         Connection cnn = null;
         cnn = getConnection();
-        
+
         try {
             cnn.setAutoCommit(false);
-            
+
             if (action.equals(ACTION_ADD)) {
                 query = "SELECT lubricanteprecio_seq.NEXTVAL FROM DUAL";
                 pst = cnn.prepareStatement(query);
@@ -697,6 +695,7 @@ public class SvcGeneral extends DaoImp {
                 int lubprecioId = (rst.next()) ? rst.getInt(1) : 0;
 
                 lub.setLubricanteprecio(lubprecioId);
+                rst.close();
                 closePst();
                 query = "INSERT INTO lubricanteprecio (lubricanteprecio, pais_id, producto_id, fecha_inicio, fecha_fin, precio, creado_por, creado_el) "
                         + "VALUES (" + lubprecioId + ",?, ?, to_date(?,'dd/mm/yyyy'), to_date(?,'dd/mm/yyyy'), ?, ?, sysdate)";
@@ -725,7 +724,7 @@ public class SvcGeneral extends DaoImp {
                 pst.setObject(6, lub.getModificadoPor());
                 pst.setObject(7, lub.getLubricanteprecio());
                 pst.executeUpdate();
-                doActionLubprecioLog(lubAnterior);
+                doActionLubprecioLog(lubAnterior, false);
             }
             result = lub;
             cnn.commit();
@@ -736,14 +735,13 @@ public class SvcGeneral extends DaoImp {
             }
             result.setDescError(exc.getMessage());
             exc.printStackTrace();
-        }finally{
+        } finally {
             try {
-                rst.close();
-                pst.close();
+                closePst();
                 cnn.close();
-                closeConnections(); //Asg
             } catch (SQLException ex) {
             }
+            closeConnections(); //Asg
         }
         return result;
     }

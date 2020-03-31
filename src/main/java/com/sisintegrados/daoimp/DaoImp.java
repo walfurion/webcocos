@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.sisintegrados.daoimp;
 
 import com.fundamental.model.Acceso;
@@ -125,7 +120,7 @@ public class DaoImp implements Dao {
     /*
     * FUNCIONES COMUNES A TODOS LOS SERVICIOS *
      */
-    public List<Rol> getRolesByUserid(Integer userId) {
+    public List<Rol> getRolesByUserid(Integer userId, boolean closeConexion) {
         List<Rol> result = new ArrayList();
         ResultSet rst = null;
         SvcMaintenance maintenace = new SvcMaintenance();
@@ -151,15 +146,17 @@ public class DaoImp implements Dao {
         } finally {
             try {
                 rst.close();
-                pst.close();
-                closeConnections(); //asg
             } catch (Exception ignore) {
+            }
+            closePst();
+            if (closeConexion) {
+                closeConnections(); //asg
             }
         }
         return result;
     }
 
-    public List<Bomba> getBombasByEstacionid(Integer estacionId) {
+    public List<Bomba> getBombasByEstacionid(Integer estacionId, boolean cierraConexion) {
         List<Bomba> result = new ArrayList<Bomba>();
         ResultSet rst = null;
         try {
@@ -181,9 +178,11 @@ public class DaoImp implements Dao {
 
             try {
                 rst.close();
-                pst.close();
-                closeConnections(); //asg
             } catch (Exception ignore) {
+            }
+            closePst();
+            if (cierraConexion) {
+                closeConnections(); //asg
             }
         }
         return result;
@@ -481,7 +480,7 @@ public class DaoImp implements Dao {
             Bomba bomba;
             while (rst.next()) {
                 bomba = new Bomba(rst.getInt(1), rst.getString(2), rst.getString(3), null, null, new CheckBox("", false));
-                bomba.setBombaEstacion(getBombaEstacionByEstacionid(estacionId));
+                bomba.setBombaEstacion(getBombaEstacionByEstacionid(estacionId, false));
                 bomba.setTipoDespachoName(rst.getString(4));
                 bomba.setTipoDespachoId(rst.getInt(5));
                 result.add(bomba);
@@ -491,15 +490,15 @@ public class DaoImp implements Dao {
         } finally {
             try {
                 rst.close();
-                pst.close();
-                closeConnections(); //asg
             } catch (Exception ignore) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
 
-    public List<BombaEstacion> getBombaEstacionByEstacionid(Integer estacionId) {
+    public List<BombaEstacion> getBombaEstacionByEstacionid(Integer estacionId, boolean cerrarConexion) {
         List<BombaEstacion> result = new ArrayList();
         ResultSet rst = null;
         try {
@@ -517,9 +516,11 @@ public class DaoImp implements Dao {
 
             try {
                 rst.close();
-                pst.close();
-                closeConnections(); //asg
             } catch (Exception ignore) {
+            }
+            closePst();
+            if (cerrarConexion) {
+                closeConnections(); //asg
             }
         }
         return result;
@@ -548,10 +549,10 @@ public class DaoImp implements Dao {
 
             try {
                 rst.close();
-                pst.close();
-                closeConnections(); //asg
             } catch (Exception ignore) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -617,7 +618,6 @@ public class DaoImp implements Dao {
 
     public Turno doActionTurno(String action, Turno turno) {
         Turno result = new Turno();
-        ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
                 result = turno;
@@ -648,13 +648,8 @@ public class DaoImp implements Dao {
             turno.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -678,16 +673,12 @@ public class DaoImp implements Dao {
                 mediopago.setPartidacont(rst.getBoolean(7));
                 result.add(mediopago);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -710,7 +701,7 @@ public class DaoImp implements Dao {
                 acaja.setNombre("Cuadre " + indexId++);
                 result.add(acaja);
             }
-
+            rst.close();
             miQuery = "M";
             miQuery
                     = "SELECT tabl.arqueocaja_id, SUM(tabl.monto) "
@@ -750,17 +741,12 @@ public class DaoImp implements Dao {
                     }
                 }
             }
-
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
+                closePst();
                 closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
         }
         return result;
     }
@@ -783,7 +769,7 @@ public class DaoImp implements Dao {
                 acaja.setNombre("Cuadre " + rst.getInt(1));
                 result.add(acaja);
             }
-
+            rst.close();
             miQuery = "E";
             miQuery
                     = "SELECT tabl.arqueocaja_id, SUM(tabl.monto) "
@@ -824,16 +810,12 @@ public class DaoImp implements Dao {
                     }
                 }
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
+                closePst();
                 closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
         }
         return result;
     }
@@ -856,16 +838,12 @@ public class DaoImp implements Dao {
                 turno.setNombre("Turno " + count++);
                 result.add(turno);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
+                closePst();
                 closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
         }
         return result;
     }
@@ -891,16 +869,12 @@ public class DaoImp implements Dao {
                 turno.setEstacionconfheadId(rst.getInt(8));
                 result.add(turno);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -925,23 +899,18 @@ public class DaoImp implements Dao {
                 turno.setNombre("Turno " + count++);
                 result.add(turno);
             }
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
+                closePst();
                 closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
         }
         return result;
     }
 
     public Dia doActionDia(String action, Dia dia) {
         Dia result = new Dia();
-        ResultSet rst = null;
         try {
             if (action.equals(ACTION_UPDATE)) {
                 miQuery = "UPDATE dia SET estado_id = ?, modificado_por = ?, modificado_persona = ?, modificado_el = SYSDATE "
@@ -952,26 +921,20 @@ public class DaoImp implements Dao {
                 pst.setString(3, dia.getModificadoPersona());
                 pst.setInt(4, dia.getEstacionId());
                 pst.setDate(5, new java.sql.Date(dia.getFecha().getTime()));
-                pst.executeQuery();
+                pst.executeUpdate();
                 result = dia;
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
+                closePst();
                 closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
         }
         return result;
     }
 
     public Precio doActionPrecio(String action, Precio precio) {
         Precio result = new Precio();
-        ResultSet rst = null;
         try {
             if (action.equals(ACTION_UPDATE)) {
                 miQuery = "UPDATE precio "
@@ -991,13 +954,8 @@ public class DaoImp implements Dao {
             result.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -1041,16 +999,12 @@ public class DaoImp implements Dao {
             pst.setDate(2, (fecha == null) ? null : new java.sql.Date(fecha.getTime()));
             rst = pst.executeQuery();
             result = (rst.next()) ? new Dia(rst.getInt(1), rst.getDate(2), rst.getInt(3), rst.getString(4), rst.getString(5)) : result;
+            rst.close();
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-
-            try {
-                rst.close();
-                pst.close();
-                closeConnections(); //asg
-            } catch (Exception ignore) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -1175,8 +1129,8 @@ public class DaoImp implements Dao {
                 estacion.setPais(new Pais(rst.getInt(4), rst.getString(6), rst.getString(8), "", "", "", null));
                 estacion.setBombas(new ArrayList());
                 estacion.setProductos(new ArrayList());
-                estacion.getBombas().addAll(getBombasByEstacionid(rst.getInt(1)));
-                estacion.getProductos().addAll(getProductosByEstacionid(rst.getInt(1)));
+                estacion.getBombas().addAll(getBombasByEstacionid(rst.getInt(1), false));
+                estacion.getProductos().addAll(getProductosByEstacionid(rst.getInt(1), false));
                 estacion.setBu(rst.getString(9));
                 estacion.setDeposito(rst.getString(10));
                 statusName = (rst.getString(5).equals("A")) ? "Activo" : "Inactivo";
@@ -1192,15 +1146,15 @@ public class DaoImp implements Dao {
 
             try {
                 rst.close();
-                pst.close();
-                closeConnections(); //asg
             } catch (Exception ignore) {
             }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
 
-    public List<Producto> getProductosByEstacionid(Integer estacionId) {
+    public List<Producto> getProductosByEstacionid(Integer estacionId, boolean cierraConexion) {
         List<Producto> result = new ArrayList();
         ResultSet rst = null;
         try {
@@ -1220,9 +1174,11 @@ public class DaoImp implements Dao {
 
             try {
                 rst.close();
-                pst.close();
-                closeConnections(); //asg
             } catch (Exception ignore) {
+            }
+            closePst();
+            if (cierraConexion) {
+                closeConnections(); //asg
             }
         }
         return result;
@@ -1243,7 +1199,7 @@ public class DaoImp implements Dao {
             EstacionConfHead estacionConfHead;
             while (rst.next()) {
                 estacionConfHead = new EstacionConfHead(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getString(4), rst.getString(5), rst.getString(6), rst.getString(7));
-                estacionConfHead.setEstacionConf(getConfiguracionByEstconfhead(rst.getInt(1)));
+                estacionConfHead.setEstacionConf(getConfiguracionByEstconfhead(rst.getInt(1), false));
                 result.add(estacionConfHead);
             }
         } catch (Exception exc) {
@@ -1274,7 +1230,7 @@ public class DaoImp implements Dao {
             EstacionConfHead estacionConfHead;
             while (rst.next()) {
                 estacionConfHead = new EstacionConfHead(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getString(4), rst.getString(5), rst.getString(6), rst.getString(7));
-                estacionConfHead.setEstacionConf(getConfiguracionByEstconfhead(rst.getInt(1)));
+                estacionConfHead.setEstacionConf(getConfiguracionByEstconfhead(rst.getInt(1), false));
                 result.add(estacionConfHead);
             }
         } catch (Exception exc) {
@@ -1290,7 +1246,7 @@ public class DaoImp implements Dao {
         return result;
     }
 
-    public List<EstacionConf> getConfiguracionByEstconfhead(Integer estconfhead) {
+    public List<EstacionConf> getConfiguracionByEstconfhead(Integer estconfhead, boolean cerrarConexion) {
         List<EstacionConf> result = new ArrayList();
         ResultSet rst = null;
         try {
@@ -1316,9 +1272,11 @@ public class DaoImp implements Dao {
         } finally {
             try {
                 rst.close();
-                pst.close();
-                closeConnections(); //asg
             } catch (Exception ignore) {
+            }
+            closePst();
+            if (cerrarConexion) {
+                closeConnections(); //asg
             }
         }
         return result;
@@ -1483,7 +1441,7 @@ public class DaoImp implements Dao {
             EstacionConfHead estacionConfHead;
             while (rst.next()) {
                 estacionConfHead = new EstacionConfHead(rst.getInt(1), rst.getString(2), rst.getInt(3), rst.getString(4), rst.getString(5), rst.getString(6), rst.getString(7));
-                estacionConfHead.setEstacionConf(getConfiguracionByEstconfhead(rst.getInt(1)));
+                estacionConfHead.setEstacionConf(getConfiguracionByEstconfhead(rst.getInt(1), false));
                 result.add(estacionConfHead);
             }
         } catch (Exception exc) {
@@ -1491,10 +1449,11 @@ public class DaoImp implements Dao {
         } finally {
             try {
                 rst.close();
-                closePst();
-                closeConnections(); //asg
             } catch (Exception ignore) {
             }
+            closePst();
+            closeConnections(); //asg
+
         }
         return result;
     }

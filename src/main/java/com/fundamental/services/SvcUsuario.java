@@ -41,7 +41,7 @@ public class SvcUsuario extends DaoImp {
             if (rst.next()) {
                 result = new Usuario(rst.getInt(1), rst.getString(2), rst.getString(3), rst.getString(4), rst.getString(5), rst.getString(6), null);
                 result.setPaisId(rst.getInt(7));
-                List<Rol> misRoles = getRolesByUserid(rst.getInt(1));
+                List<Rol> misRoles = getRolesByUserid(rst.getInt(1), false);
                 result.setRoles(misRoles);
                 for (Rol r : misRoles) {
                     if (r.getRolId().equals(Constant.ROL_PERMISSION_SYSADMIN)) {
@@ -68,10 +68,10 @@ public class SvcUsuario extends DaoImp {
         } finally {
             try {
                 rst.close();
-                pst.close();
-                closeConnections();//ASG
             } catch (Exception ignore) {
             }
+            closePst();
+            closeConnections();//ASG
         }
 
         return result;
@@ -155,10 +155,10 @@ public class SvcUsuario extends DaoImp {
         } finally {
             try {
                 rst.close();
-                pst.close();
-                closeConnections();//ASG
             } catch (Exception ignore) {
             }
+            closePst();
+            closeConnections();//ASG
         }
         return user;
     }

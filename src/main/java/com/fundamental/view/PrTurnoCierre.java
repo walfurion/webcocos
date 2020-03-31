@@ -1070,7 +1070,6 @@ public class PrTurnoCierre extends Panel implements View {
                                         dao.CreaClienteBCR(turno.getTurnoId(), 107, bcrDetalleCliCredomatic); // CREDOMATIC
                                         dao.CreaClienteBCR(turno.getTurnoId(), 123, bcrDetalleCliDavivienda); // DAVIVIENDA
                                         dao.CreaClienteBCR(turno.getTurnoId(), 7, bcrDetalleCliNacional); // DAVIVIENDA
-
                                         dao.CreaClienteBCR(turno.getTurnoId(), 121, bcrDetalleCliFloBac); // FLOTA BAC
 
                                     } catch (SQLException ex) {

@@ -25,6 +25,7 @@ public class SvcMntMedioPago extends DaoImp {
                 rst = pst.executeQuery();
                 Integer mpId = (rst.next()) ? rst.getInt(1) : null;
                 mediopago.setMediopagoId(mpId);
+                rst.close();
                 closePst();
 
                 query = "INSERT INTO mediopago (nombre, tipo, creado_por, mediopago_id, pais_id "
@@ -79,13 +80,8 @@ public class SvcMntMedioPago extends DaoImp {
             mediopago.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                closePst();
-                closeConnections(); //asg
-            } catch (SQLException ex) {
-                Logger.getLogger(SvcMntMedioPago.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }

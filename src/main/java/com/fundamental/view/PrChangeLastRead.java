@@ -328,7 +328,7 @@ public class PrChangeLastRead extends Panel implements View {
             public void valueChange(final Property.ValueChangeEvent event) {
                 estacion = ((Estacion) cbxEstacion.getValue());
                 SvcChangeLastRead svcCLR = new SvcChangeLastRead();
-                List<Bomba> bombas = svcCLR.getBombasByEstacionid(((Estacion) cbxEstacion.getValue()).getEstacionId());
+                List<Bomba> bombas = svcCLR.getBombasByEstacionid(((Estacion) cbxEstacion.getValue()).getEstacionId(),true);
                 bcBombas.removeAllItems();
                 bcBombas.addAll(bombas);
 //                svcCLR.closeConnections();

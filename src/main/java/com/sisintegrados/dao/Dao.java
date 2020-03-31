@@ -41,9 +41,9 @@ public interface Dao {
     /*
     * FUNCIONES COMUNES A TODOS LOS SERVICIOS *
      */
-    public List<Rol> getRolesByUserid(Integer userId);
+    public List<Rol> getRolesByUserid(Integer userId, boolean closeConexion);
 
-    public List<Bomba> getBombasByEstacionid(Integer estacionId);
+    public List<Bomba> getBombasByEstacionid(Integer estacionId, boolean cierraConexion);
 
     public List<DtoArqueo> getArqueo(String turnosIds, String bombasIds, String tipo);
 
@@ -67,7 +67,7 @@ public interface Dao {
 
     public List<Bomba> getBombasByEstacionidTurnoid(Integer estacionId, Integer turnoId);
 
-    public List<BombaEstacion> getBombaEstacionByEstacionid(Integer estacionId);
+    public List<BombaEstacion> getBombaEstacionByEstacionid(Integer estacionId,boolean cerrarConexion);
 
     public List<Producto> getCombustiblesByEstacionid(Integer estacionId);
 
@@ -105,13 +105,13 @@ public interface Dao {
 
     public List<Estacion> getAllEstaciones(boolean includeInactive);
 
-    public List<Producto> getProductosByEstacionid(Integer estacionId);
+    public List<Producto> getProductosByEstacionid(Integer estacionId, boolean cierraConexion);
 
     public List<EstacionConfHead> getConfiguracionHeadByEstacionid(Integer estacionId, boolean addInactive);
 
     public List<EstacionConfHead> getAllConfiguracionHead(boolean addInactive);
 
-    public List<EstacionConf> getConfiguracionByEstconfhead(Integer estconfhead);
+    public List<EstacionConf> getConfiguracionByEstconfhead(Integer estconfhead,boolean cerrarConexion);
 
     public Parametro getParameterByName(String name);
 

@@ -44,24 +44,21 @@ public class SvcTarjetaCredito extends DaoImp {
             miQuery = "select mediopago_id,nombre"
                     + " from mediopago"
                     + " where is_tcredito = 1"
-                    + " and pais_id = " + idpais 
+                    + " and pais_id = " + idpais
                     + " and estado = 'A'";
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             while (rst.next()) {
                 result.add(new Tarjeta(rst.getInt(1), rst.getString(2)));
             }
+            rst.close();
             closePst();
+
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                closePst();
-                closeConnections();
-            } catch (SQLException ex) {
-                Logger.getLogger(SvcTarjetaCredito.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            closePst();
+            closeConnections();
         }
         return result;
     }
@@ -75,13 +72,13 @@ public class SvcTarjetaCredito extends DaoImp {
             query = "DELETE FROM arqueocaja_tc WHERE arqueocaja_id = " + idarqueocaja;
             pst = getConnection().prepareStatement(query);
             pst.executeUpdate();
-            closePst();
+            pst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+            pst.close();
+            closeConnections(); //asg
         }
-        pst.close();
-        closeConnections(); //asg
-
         /*Asigna detalle clientes prepago al arqueo*/
         try {
             query = "INSERT INTO arqueocaja_tc (arqueocaja_id, tarjeta_id, lote, monto, creado_por,creado_el) "
@@ -95,16 +92,14 @@ public class SvcTarjetaCredito extends DaoImp {
                 pst.setDouble(4, bcrCreditC.getItem(itemId).getBean().getMonto());
                 pst.setString(5, usuario);
                 pst.executeUpdate();
-                closePst();
+                pst.close();
             }
             result = true;
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            if (pst != null) {
-                pst.close();
-                closeConnections(); //asg
-            }
+            pst.close();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -132,16 +127,16 @@ public class SvcTarjetaCredito extends DaoImp {
                 dto.setTarjeta(new Tarjeta(rst.getInt(2), rst.getString(1)));
                 bcrTarjetaCredito.addItem(id, dto);
             }
+            rst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
-        }finally{
+        } finally {
             try {
-                rst.close();
                 pst.close();
-                closeConnections(); //asg
             } catch (SQLException ex) {
                 Logger.getLogger(SvcTarjetaCredito.class.getName()).log(Level.SEVERE, null, ex);
             }
+            closeConnections(); //asg
         }
         return bcrTarjetaCredito;
     }

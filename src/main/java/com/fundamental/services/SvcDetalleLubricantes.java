@@ -39,7 +39,7 @@ public class SvcDetalleLubricantes extends DaoImp {
             query = "DELETE FROM arqueocaja_det_lub WHERE arqueocaja_id = " + idarqueocaja;
             pst = getConnection().prepareStatement(query);
             pst.executeUpdate();
-            closePst();
+            pst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
@@ -66,10 +66,8 @@ public class SvcDetalleLubricantes extends DaoImp {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            if (pst != null) {
-                pst.close();
-                closeConnections(); //asg
-            }
+            pst.close();
+            closeConnections(); //asg
         }
         return result;
     }
@@ -99,16 +97,16 @@ public class SvcDetalleLubricantes extends DaoImp {
                 dto.setProducto(new Producto(rst.getInt(6), rst.getString(7), null, rst.getInt(8), null, rst.getDouble(2), null));
                 bcrLubs.addItem(id, dto);
             }
+            rst.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
             try {
-                rst.close();
                 pst.close();
-                closeConnections(); //asg;
             } catch (SQLException ex) {
                 Logger.getLogger(SvcDetalleLubricantes.class.getName()).log(Level.SEVERE, null, ex);
             }
+            closeConnections(); //asg;
         }
         return bcrLubs;
     }

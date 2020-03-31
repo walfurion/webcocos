@@ -165,6 +165,7 @@ public class SvcReading extends DaoImp {
                 rst = pst.executeQuery();
                 Integer lecturaId = (rst.next()) ? rst.getInt(1) : 0;
                 lectura.setLecturaId(lecturaId);
+                rst.close();
                 closePst();
                 query = "INSERT INTO lectura (lectura_id, estacion_id, turno_id, creado_por, creado_persona, nombre_pistero, nombre_jefe, empleado_id, numerocaso) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -228,12 +229,8 @@ public class SvcReading extends DaoImp {
             result.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
                 closePst();
                 closeConnections(); //asg
-            } catch (SQLException ex) {
-            }
         }
         return result;
     }
@@ -296,28 +293,24 @@ public class SvcReading extends DaoImp {
                 if (rst.next() && rst.getInt(1) > 0) {
                     query = "DELETE FROM lectura l WHERE l.lectura_id = " + lecturaDet.getLecturaId();
                     pst = getConnection().prepareStatement(query);
-                    pst.executeQuery();
+                    pst.executeUpdate();
                     closePst();
                 }
+                rst.close();
 
             }
         } catch (Exception exc) {
             result.setDescError(exc.getMessage());
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
-                closePst();
-                closeConnections(); //asg
-            } catch (SQLException ex) {
-            }
+            closePst();
+            closeConnections(); //asg
         }
         return result;
     }
 
     public Lecturafinal doActionLecturaFinal(String action, Lecturafinal objeto) {
         Lecturafinal result = new Lecturafinal();
-        ResultSet rst = null;
         try {
             if (action.equals(ACTION_ADD)) {
                 query = "INSERT INTO lecturafinal (estacion_id, bomba_id, producto_id, tipo, lectura_final, modificado_por, modificado_el, modificado_persona, lectura_inicial) "
@@ -353,13 +346,8 @@ public class SvcReading extends DaoImp {
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
-            try {
-                rst.close();
                 closePst();
                 closeConnections(); //asg
-            } catch (SQLException ex) {
-                Logger.getLogger(SvcReading.class.getName()).log(Level.SEVERE, null, ex);
-            }
         }
         return result;
     }
@@ -450,7 +438,7 @@ public class SvcReading extends DaoImp {
         ResultSet rst = null;
         try {
             query = "select lectura_id from lectura where turno_id = " + turnoid + " and empleado_id = " + idempleado;
-            System.out.println("QUERY "+query);
+            System.out.println("QUERY " + query);
             rst = getConnection().prepareStatement(query).executeQuery();
             if (rst.next()) {
                 result = rst.getInt(1);

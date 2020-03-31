@@ -498,7 +498,7 @@ public class MntServiceMode extends Panel implements View {
                     }
                     if (bcrEstConf.size() == 0) {  //Cuando no haya configuraciones asociadas.
                         SvcMaintenance service = new SvcMaintenance();
-                        List<Bomba> pumps = service.getBombasByEstacionid(Integer.parseInt(tblStations.getValue().toString()));
+                        List<Bomba> pumps = service.getBombasByEstacionid(Integer.parseInt(tblStations.getValue().toString()),true);
 //                        service.closeConnections();
                         EstacionConf ecf;
                         int index = 1;
@@ -520,7 +520,7 @@ public class MntServiceMode extends Panel implements View {
                     action = DaoImp.ACTION_UPDATE;
                 } else if (action.equals(DaoImp.ACTION_ADD) && tblConfiguracion.getValue() == null && tblStations.getValue() != null) {
                     SvcMaintenance service = new SvcMaintenance();
-                    List<Bomba> pumps = service.getBombasByEstacionid(Integer.parseInt(tblStations.getValue().toString()));
+                    List<Bomba> pumps = service.getBombasByEstacionid(Integer.parseInt(tblStations.getValue().toString()),true);
 //                    service.closeConnections();
                     EstacionConf ecf;
                     int index = 1;

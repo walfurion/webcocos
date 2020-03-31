@@ -453,6 +453,7 @@ public class MntLubricantPrice extends Panel implements View {
                     notif.setPosition(Position.MIDDLE_CENTER);
                     notif.show(Page.getCurrent());
                     UI.getCurrent().getNavigator().navigateTo(DashboardViewType.MNT_PRICE_LUBS.getViewName());
+//                    btnSave.setEnabled(false);
                 } else {
                     Notification.show("Ocurrió un error al ejecutar la acción. \n" + lubricante.getDescError(), Notification.Type.ERROR_MESSAGE);
                 }
