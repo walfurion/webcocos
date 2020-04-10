@@ -311,7 +311,7 @@ DateField dfdFecha = new DateField("Fecha:");
                     public void buttonClick(Button.ClickEvent event) {
                         SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();      
                         if(bcrLubs.getItem(itemId).getBean().getProducto()!= null){
-                            daoVentaLubs.reversarVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), fechaQuery,usuario.getEstacionid());//asg estacion
+                            //daoVentaLubs.reversarVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), fechaQuery,usuario.getEstacionid());//asg estacion
                         }
                         bcrLubs.removeItem(itemId);
                         List<DtoProducto> tempList = new ArrayList();

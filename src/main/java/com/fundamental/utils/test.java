@@ -5,6 +5,9 @@
  */
 package com.fundamental.utils;
 
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  *
  * @author Allan G.
@@ -12,6 +15,13 @@ package com.fundamental.utils;
 public class test {
 
     public static void main(String[] args) {
+        Calendar ayer = Calendar.getInstance();
+        ayer.setTime(new Date());
+        ayer.add(Calendar.DATE, -1);
+        System.out.println("FECHA " + ayer.getTime());
+    }
+
+    public static void main2(String[] args) {
         String algo = "";
         System.out.println("NEW PASS: " + PasswordGenerator.getPassword(8));
 
@@ -64,11 +74,10 @@ public class test {
                 + "	</p>\n"
                 + "</body>\n"
                 + "</html>";
-        
-        
+
         String var2 = msg.replaceAll("XXXXX", "ALLAN");
         String varf = var2.replaceAll("YYYYY", "ALLAN");
-        System.out.println(" NUEVO "+varf);
+        System.out.println(" NUEVO " + varf);
 
     }
 
