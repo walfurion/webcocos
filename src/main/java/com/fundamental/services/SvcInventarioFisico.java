@@ -33,8 +33,6 @@ public class SvcInventarioFisico extends DaoImp {
         String fechaString = Constant.SDF_ddMMyyyy.format(fecha);
         fecha1 = fecha2.substring(3, 5);
         fecha2 = fecha2.substring(6);
-        System.out.println("fecha1 " + fecha1);
-        System.out.println("fecha2 " + fecha2);
         try {
 //            Date fecha2 = recuperaFecha(countryId,brandId)
             query = "select rownum as numero,p.NOMBRE,p.PRESENTACION,lp.PRECIO, "
@@ -45,25 +43,32 @@ public class SvcInventarioFisico extends DaoImp {
                     + "(select UNIDAD_FIS_PISTA from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('" + fechaString + "','dd/mm/yyyy') AND ESTACION_ID = "+ ESTACIONID +") as uniPista, "
                     + "(select TOTAL_UNIDAD_FISICA from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('" + fechaString + "','dd/mm/yyyy') AND ESTACION_ID = "+ ESTACIONID +") as totalFis, "
                     + "(select DIFERENCIA_INV from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('" + fechaString + "','dd/mm/yyyy') AND ESTACION_ID = "+ ESTACIONID +") as difInv, "
-                    + "(select COMENTARIO from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('" + fechaString + "','dd/mm/yyyy') AND ESTACION_ID = "+ ESTACIONID +") as Comentario "
+                    + "(select COMENTARIO from INVENTARIO_FISICO_LUB where PRODUCTO_ID=p.PRODUCTO_ID and FECHA = to_date('" + fechaString + "','dd/mm/yyyy') AND ESTACION_ID = "+ ESTACIONID +") as Comentario, "
+                    +"l.CREADO_EL,l.MODIFICADO_EL, l.COMPRA_ID "
                     + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p, LUBRICANTEPRECIO lp "
                     + "where l.PRODUCTO_ID = p.PRODUCTO_ID and l.PRODUCTO_ID = lp.PRODUCTO_ID "
                     + "and l.MARCA_ID = " + brandId + " and l.ESTACION_ID = " + ESTACIONID + " " /*asg adiciona estacion*/
-                    + "and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.MARCA_ID=" + brandId + " and b.ESTACION_ID = " + ESTACIONID + " and " + fecha1 + "=extract(MONTH from b.fecha)"
-                    + "and " + fecha2 + "=extract(YEAR from b.fecha))  order by numero ";
-            System.out.println("query "+query);
+                    + "and " + fecha1 + "=extract(MONTH from fecha) "
+                    + "and " + fecha2 + "=extract(YEAR from fecha) "
+                    + "order by numero "; 
+//                    + "and FECHA = (select max(b.fecha) from COMPRA_VENTA_LUBRICANTE b where b.MARCA_ID=" + brandId + " and b.ESTACION_ID = " + ESTACIONID + " and " + fecha1 + "=extract(MONTH from b.fecha)"
+//                    + "and " + fecha2 + "=extract(YEAR from b.fecha))  order by numero ";
+            System.out.println("QUERY LUB INVENTARIO FISICO "+query);
 //            System.out.println("brandId "+brandId);
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             ComInventarioFisico inv;
             while (rst.next()) {
-                inv = new ComInventarioFisico(rst.getInt(7), rst.getInt(1), rst.getDouble(5), rst.getString(2), rst.getString(3), rst.getDouble(4));
+                inv = new ComInventarioFisico(rst.getInt(17),rst.getInt(7), rst.getInt(1), rst.getDouble(5), rst.getString(2), rst.getString(3), rst.getDouble(4));
                 inv.setUnidad_fis_tienda(rst.getDouble(9));
                 inv.setUnidad_fis_bodega(rst.getDouble(10));
                 inv.setUnidad_fis_pista(rst.getDouble(11));
                 inv.setTotal_unidad_fisica(rst.getDouble(9) + rst.getDouble(10) + rst.getDouble(11));
                 inv.setDiferencia_inv(rst.getDouble(5) - inv.getTotal_unidad_fisica());
                 inv.setComentario(rst.getString(14));
+                inv.setCreado_el(rst.getDate(15)); //asg
+                inv.setModificado_el(rst.getDate(16)); //asg
+//                inv.setInventario_id(rst.getInt(17)); //asg
                 result.add(inv);
             }
         } catch (Exception exc) {

@@ -79,11 +79,12 @@ public class MntInventarioFisico extends Panel implements View {
     Acceso acceso = new Acceso();
     BeanItemContainer<Pais> contPais = new BeanItemContainer<Pais>(Pais.class);
     BeanContainer<Integer, ComInventarioFisico> contLub = new BeanContainer<Integer, ComInventarioFisico>(ComInventarioFisico.class);
+    BeanContainer<Integer, ComInventarioFisico> contLubOld = new BeanContainer<Integer, ComInventarioFisico>(ComInventarioFisico.class);
     SvcTurno dao = new SvcTurno();
     List<Producto> allLubricants = new ArrayList();
     List<Marca> listBrands = new ArrayList();
     List<ComInventarioFisico> list = new ArrayList();
-    List<ComInventarioFisico> listProducts = new ArrayList();       
+    List<ComInventarioFisico> listProducts = new ArrayList();
     Table tblProduct = new Table();
     boolean bloqueo = true;
 
@@ -138,17 +139,24 @@ public class MntInventarioFisico extends Panel implements View {
     private Component buildToolbar2() {
         toolbarContainerTables = new CssLayout();
         return components.createHorizontal(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainer(toolbarContainerTables)});
-    }     
-    
-    private void getAllData(){
+    }
+
+    private void getAllData() {
         contLub.removeAllItems();
         contLub.setBeanIdProperty("producto_id");
         toolbarContainerTables.removeAllComponents();
         toolbarContainerTables.addComponent(buildTableContent());
         SvcInventarioFisico service = new SvcInventarioFisico();
         int countryId = ((Pais) cmbPais.getValue()).getPaisId();
-        int brandId = ((Marca) cmbMarca.getValue()).getIdMarca();        
-        contLub.addAll(service.getLubricantes(brandId, cmbFecha.getValue(),usuario.getEstacionid())); //ASG ESTACION ID  
+        int brandId = ((Marca) cmbMarca.getValue()).getIdMarca();
+
+        contLubOld.removeAllItems();
+        contLubOld.setBeanIdProperty("inventario_id");
+
+        contLubOld.addAll(service.getLubricantes(brandId, cmbFecha.getValue(), usuario.getEstacionid())); //ASG 
+        depuraColeccion();
+
+        //contLub.addAll(service.getLubricantes(brandId, cmbFecha.getValue(),usuario.getEstacionid())); //ASG ESTACION ID  
 //        ComInventarioFisico fis;
 //        for(ComInventarioFisico c: list){
 //            fis.setProductoNombre(c.getProductoNombre());
@@ -156,6 +164,42 @@ public class MntInventarioFisico extends Panel implements View {
 //        }
 //        listProducts.add(fis);
 //        contLub.addAll(listProducts);  
+    }
+
+    private void depuraColeccion() {
+        ComInventarioFisico cominvfisico;
+        ComInventarioFisico idprodAnt = new ComInventarioFisico();
+        idprodAnt.setProducto_id(0);
+        BeanContainer<Integer, ComInventarioFisico> contLubRepetidos = new BeanContainer<Integer, ComInventarioFisico>(ComInventarioFisico.class);
+        contLubRepetidos.removeAllItems();
+        contLubRepetidos.setBeanIdProperty("inventario_id");
+
+        for (Integer pid : contLubOld.getItemIds()) {
+            cominvfisico = new ComInventarioFisico();
+            cominvfisico = contLubOld.getItem(pid).getBean();
+            if (cominvfisico.getProducto_id() == idprodAnt.getProducto_id()) {
+                contLubRepetidos.addBean(idprodAnt);
+                contLubRepetidos.addBean(cominvfisico);
+            }
+            idprodAnt = cominvfisico;
+        }
+        for (Integer pid : contLubRepetidos.getItemIds()) {
+            cominvfisico = new ComInventarioFisico();
+            cominvfisico = contLubRepetidos.getItem(pid).getBean();
+            if (cominvfisico.getProducto_id() == idprodAnt.getProducto_id()) {
+                if (idprodAnt.getInventario_id() > cominvfisico.getInventario_id()) {
+                    contLub.addBean(idprodAnt);
+                } else {
+                    contLub.addBean(cominvfisico);
+                }
+            }
+            idprodAnt = cominvfisico;
+        }
+        for (Integer pid : contLubOld.getItemIds()) {
+            cominvfisico = new ComInventarioFisico();
+            cominvfisico = contLubOld.getItem(pid).getBean();
+            contLub.addBean(cominvfisico);
+        }
     }
 
     private Component buildHeader() {
@@ -221,7 +265,7 @@ public class MntInventarioFisico extends Panel implements View {
                     getAllData();
                 }
             }
-        });        
+        });
 
         Component toolBar = components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, false, false, true, new Component[]{utils.vlContainer(cmbPais), utils.vlContainer(cmbMarca), utils.vlContainer(cmbFecha)});
         VerticalLayout v = new VerticalLayout(toolBar);
@@ -252,7 +296,7 @@ public class MntInventarioFisico extends Panel implements View {
                         Double fisBodega = invdto.getUnidad_fis_bodega() == null ? 0.0 : invdto.getUnidad_fis_bodega();
                         Double fisPista = invdto.getUnidad_fis_pista() == null ? 0.0 : invdto.getUnidad_fis_pista();
 
-                        invdto.setTotal_unidad_fisica(fisTienda+fisBodega+fisPista);
+                        invdto.setTotal_unidad_fisica(fisTienda + fisBodega + fisPista);
                         contLub.getItem(itemId).getItemProperty("total_unidad_fisica").setValue(invdto.getTotal_unidad_fisica());
                     }
                 });
@@ -277,13 +321,13 @@ public class MntInventarioFisico extends Panel implements View {
                         Double fisBodega = invdto.getUnidad_fis_bodega() == null ? 0.0 : invdto.getUnidad_fis_bodega();
                         Double fisPista = invdto.getUnidad_fis_pista() == null ? 0.0 : invdto.getUnidad_fis_pista();
 
-                        invdto.setTotal_unidad_fisica(fisTienda+fisBodega+fisPista);
+                        invdto.setTotal_unidad_fisica(fisTienda + fisBodega + fisPista);
                         contLub.getItem(itemId).getItemProperty("total_unidad_fisica").setValue(invdto.getTotal_unidad_fisica());
                     }
                 });
                 return tfdValue;
             }
-        }); 
+        });
         tblProduct.removeGeneratedColumn("uniFisPista");
         tblProduct.addGeneratedColumn("uniFisPista", new Table.ColumnGenerator() {
             @Override
@@ -302,13 +346,13 @@ public class MntInventarioFisico extends Panel implements View {
                         Double fisBodega = invdto.getUnidad_fis_bodega() == null ? 0.0 : invdto.getUnidad_fis_bodega();
                         Double fisPista = invdto.getUnidad_fis_pista() == null ? 0.0 : invdto.getUnidad_fis_pista();
 
-                        invdto.setTotal_unidad_fisica(fisTienda+fisBodega+fisPista);
+                        invdto.setTotal_unidad_fisica(fisTienda + fisBodega + fisPista);
                         contLub.getItem(itemId).getItemProperty("total_unidad_fisica").setValue(invdto.getTotal_unidad_fisica());
                     }
                 });
                 return tfdValue;
             }
-        }); 
+        });
         tblProduct.removeGeneratedColumn("totalInvUniFis");
         tblProduct.addGeneratedColumn("totalInvUniFis", new Table.ColumnGenerator() {
             @Override
@@ -325,7 +369,7 @@ public class MntInventarioFisico extends Panel implements View {
                         Double invFinal = invdto.getInv_final() == null ? 0.0 : invdto.getInv_final();
                         Double totalUniFis = invdto.getTotal_unidad_fisica() == null ? 0.0 : invdto.getTotal_unidad_fisica();
 
-                        invdto.setDiferencia_inv(invFinal-totalUniFis);
+                        invdto.setDiferencia_inv(invFinal - totalUniFis);
                         contLub.getItem(itemId).getItemProperty("diferencia_inv").setValue(invdto.getDiferencia_inv());
                     }
                 });
@@ -356,22 +400,26 @@ public class MntInventarioFisico extends Panel implements View {
                 tfdValue.setNullRepresentation("");
                 return tfdValue;
             }
-        }); 
+        });
 //        tblProduct.setVisibleColumns(new Object[]{"numero","productoNombre", "presentacion",  "precio", "inv_final", "uniFisTienda", "uniFisBodega", "uniFisPista","totalInvUniFis","difInvFinal","colComentario"});
 //        tblProduct.setColumnHeaders(new String[]{"#","Descripcion", "Presentacion", "Precio </br> de venta", "Inventario </br> final", "Unidades </br> fisicas </br> en tienda", "Unidades </br> fisicas </br> en Bodega", "Unidades </br> fisicas </br> en Pista","Total </br> unidades </br> fisicas","Diferencia </br> inv. final en </br> mov. vrs toma","Comentarios"});
-        tblProduct.setVisibleColumns(new Object[]{"productoNombre", "presentacion",  "precio", "inv_final", "uniFisTienda", "uniFisBodega", "uniFisPista","totalInvUniFis","difInvFinal","colComentario"});
-        tblProduct.setColumnHeaders(new String[]{"Descripcion", "Presentacion", "Precio </br> de venta", "Inventario </br> final", "Unidades </br> fisicas </br> en tienda", "Unidades </br> fisicas </br> en Bodega", "Unidades </br> fisicas </br> en Pista","Total </br> unidades </br> fisicas","Diferencia </br> inv. final en </br> mov. vrs toma","Comentarios"});
+        tblProduct.setVisibleColumns(new Object[]{"productoNombre", "presentacion", "precio", "inv_final", "uniFisTienda", "uniFisBodega", "uniFisPista", "totalInvUniFis", "difInvFinal", "colComentario"});
+        tblProduct.setColumnHeaders(new String[]{"Descripcion", "Presentacion", "Precio </br> de venta", "Inventario </br> final", "Unidades </br> fisicas </br> en tienda", "Unidades </br> fisicas </br> en Bodega", "Unidades </br> fisicas </br> en Pista", "Total </br> unidades </br> fisicas", "Diferencia </br> inv. final en </br> mov. vrs toma", "Comentarios"});
 //        tblProduct.setColumnAlignments(new Table.Align[]{Table.Align.LEFT, Table.Align.LEFT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT, Table.Align.RIGHT});
+
+//Ordena lista final en base al nombre del producto
+        tblProduct.sort(new Object[]{tblProduct.getSortableContainerPropertyIds()}, new boolean[]{tblProduct.isSortAscending()});
+//        contLub.sort(new Object[]{contLub.getSortableContainerPropertyIds()}, new boolean[]{false});
         return components.createCssLayout(Constant.styleToolbar, Constant.sizeFull, true, false, true, new Component[]{utils.vlContainerTable(tblProduct)});
     }
-    
+
     private Component buildButtons() {
         btnGuardar.addStyleName(ValoTheme.BUTTON_FRIENDLY);
         btnGuardar.setIcon(FontAwesome.SAVE);
         btnGuardar.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                if (!cmbPais.isValid() || !cmbMarca.isValid() || !cmbFecha.isValid())  {
+                if (!cmbPais.isValid() || !cmbMarca.isValid() || !cmbFecha.isValid()) {
                     Notification.show("Los campos marcados son requeridos.", Notification.Type.ERROR_MESSAGE);
                     return;
                 }
@@ -380,13 +428,13 @@ public class MntInventarioFisico extends Panel implements View {
                 ComInventarioFisico inv;
                 for (Integer i : (List<Integer>) tblProduct.getItemIds()) {
                     ComInventarioFisico lub;
-                    lub = (ComInventarioFisico) ((BeanItem) tblProduct.getItem(i)).getBean();     
+                    lub = (ComInventarioFisico) ((BeanItem) tblProduct.getItem(i)).getBean();
                     comInv.setProductoNombre(lub.getProductoNombre());
                     comInv.setPresentacion(lub.getPresentacion());
                     comInv.setPrecio(lub.getPrecio());
                     comInv.setInv_final(lub.getInv_final());
                     comInv.setProducto_id(lub.getProducto_id());
-                    comInv.setFecha(cmbFecha.getValue());                
+                    comInv.setFecha(cmbFecha.getValue());
                     comInv.setCreado_por(usuario.getUsername());
                     comInv.setCreado_el(usuario.getCreadoEl());
                     comInv.setUnidad_fis_tienda(lub.getUnidad_fis_tienda());
@@ -396,14 +444,14 @@ public class MntInventarioFisico extends Panel implements View {
                     comInv.setTotal_unidad_fisica(lub.getTotal_unidad_fisica());
                     comInv.setComentario(lub.getComentario());
                     comInv.setEstacionid(usuario.getEstacionid());
-                    System.out.println("total unidad fisica "+comInv.getDiferencia_inv());
-                    if (comInv.getDiferencia_inv()>=0.0) {
+                    System.out.println("total unidad fisica " + comInv.getDiferencia_inv());
+                    if (comInv.getDiferencia_inv() >= 0.0) {
                         service.insertCompra(comInv);
                     } else {
                         Notification.show("El valor final no puede ser negativo. \n", Notification.Type.ERROR_MESSAGE);
                         return;
                     }
-                    
+
                 }
 //                for (Integer pid : contLub.getItemIds()) {
 //                    inv = contLub.getItem(pid).getBean();
@@ -412,7 +460,7 @@ public class MntInventarioFisico extends Panel implements View {
 //                }                
 //                service.insertVenta(123, 188, 150.00, cmbFecha.getValue());
 //                service.closeConnections();
-                if (comInv.getProducto_id()>0) {
+                if (comInv.getProducto_id() > 0) {
                     Notification notif = new Notification("ÉXITO:", "El registro se realizó con éxito.", Notification.Type.HUMANIZED_MESSAGE);
                     notif.setDelayMsec(3000);
                     notif.setPosition(Position.MIDDLE_CENTER);
@@ -424,7 +472,7 @@ public class MntInventarioFisico extends Panel implements View {
                 }
             }
         });
-        
+
 //        btnModificar.setStyleName(ValoTheme.BUTTON_PRIMARY);
 //        btnModificar.addClickListener(new Button.ClickListener() {
 //            @Override
@@ -453,18 +501,18 @@ public class MntInventarioFisico extends Panel implements View {
 //            }
 //        });
         HorizontalLayout footer = (HorizontalLayout) components.createHorizontal(ValoTheme.WINDOW_BOTTOM_TOOLBAR, "", true, false, false, new Component[]{btnGuardar});
-        
+
         footer.setComponentAlignment(btnGuardar, Alignment.TOP_CENTER);
         footer.setWidth(
                 100.0f, Unit.PERCENTAGE);
         return footer;
     }
-    
+
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         Dao dao = new DaoImp();
         acceso = dao.getAccess(event.getViewName());
         dao.closeConnections();
         btnGuardar.setEnabled(acceso.isAgregar());
-    } 
+    }
 }

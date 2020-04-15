@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor(access = AccessLevel.PUBLIC, force = true)
 public class ComInventarioFisico {
+
     private int numero;
     private int inventario_id;
     private int producto_id;
@@ -46,5 +47,14 @@ public class ComInventarioFisico {
         this.precio = precio;
     }
 
-    
+    public ComInventarioFisico(int inventario_id,int producto_id, int numero, Double inv_final, String productoNombre, String presentacion, Double precio) {
+        this.inventario_id = inventario_id;
+        this.producto_id = producto_id;
+        this.numero = numero;
+        this.inv_final = inv_final;
+        this.productoNombre = productoNombre;
+        this.presentacion = presentacion;
+        this.precio = precio;
+    }
+
 }
