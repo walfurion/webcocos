@@ -159,6 +159,9 @@ DateField dfdFecha = new DateField("Fecha:");
                 disponibilidad = daoDispInve.recuperaDisponibilidadInventario(fechaQuery,bcrLubs.getItem(itemId).getBean().getProducto().getProductoId());
                 diferencia = disponibilidad - bcrLubs.getItem(itemId).getBean().getCantidad();
                 SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();
+                
+                //METODO NUEVO
+//                System.out.println("DIA "+daoVentaLubs.validaInvInicial(fechaQuery,idpais,usuario.getEstacionid()));
                 daoVentaLubs.insertVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), fechaQuery,usuario.getEstacionid()); //asg estacion
                 if(diferencia < 0){  
                     Notification.show("VENTA LUBRICANTE CON INVENTARIO NEGATIVO.\n", Notification.Type.ERROR_MESSAGE);

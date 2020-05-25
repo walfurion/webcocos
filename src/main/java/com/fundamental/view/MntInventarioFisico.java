@@ -198,6 +198,8 @@ public class MntInventarioFisico extends Panel implements View {
         for (Integer pid : contLubOld.getItemIds()) {
             cominvfisico = new ComInventarioFisico();
             cominvfisico = contLubOld.getItem(pid).getBean();
+            cominvfisico.setDiferencia_inv(cominvfisico.getTotal_unidad_fisica()-cominvfisico.getInv_final());
+//            System.out.println("COM INV " + cominvfisico.getDiferencia_inv());
             contLub.addBean(cominvfisico);
         }
     }
@@ -369,7 +371,8 @@ public class MntInventarioFisico extends Panel implements View {
                         Double invFinal = invdto.getInv_final() == null ? 0.0 : invdto.getInv_final();
                         Double totalUniFis = invdto.getTotal_unidad_fisica() == null ? 0.0 : invdto.getTotal_unidad_fisica();
 
-                        invdto.setDiferencia_inv(invFinal - totalUniFis);
+//                        invdto.setDiferencia_inv(invFinal - totalUniFis);//ASG
+                        invdto.setDiferencia_inv(totalUniFis - invFinal);
                         contLub.getItem(itemId).getItemProperty("diferencia_inv").setValue(invdto.getDiferencia_inv());
                     }
                 });
@@ -381,11 +384,18 @@ public class MntInventarioFisico extends Panel implements View {
             @Override
             public Object generateCell(Table source, final Object itemId, Object columnId) {
                 Property pro = source.getItem(itemId).getItemProperty("diferencia_inv");  //Atributo del bean
-                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
-                lbl.setWidth("85px");
-                lbl.addStyleName(ValoTheme.LABEL_SMALL);
-                lbl.addStyleName("align-right");
-                return lbl;
+//                Label lbl = new Label(utils.getPropertyFormatterDouble(pro));
+                TextField tfdValue = new TextField(utils.getPropertyFormatterDouble(pro));
+//                TextField tfdValue = new TextField(pro);
+                tfdValue.setWidth("85px");
+                tfdValue.setStyleName(ValoTheme.TEXTFIELD_SMALL);
+                tfdValue.setNullRepresentation("0.00");
+                tfdValue.addStyleName("align-right");
+                tfdValue.setReadOnly(true);
+//                lbl.setWidth("85px");
+//                lbl.addStyleName(ValoTheme.LABEL_SMALL);
+//                lbl.addStyleName("align-right");
+                return tfdValue;
             }
         });
         tblProduct.removeGeneratedColumn("colComentario");
@@ -445,12 +455,12 @@ public class MntInventarioFisico extends Panel implements View {
                     comInv.setComentario(lub.getComentario());
                     comInv.setEstacionid(usuario.getEstacionid());
                     System.out.println("total unidad fisica " + comInv.getDiferencia_inv());
-                    if (comInv.getDiferencia_inv() >= 0.0) {
-                        service.insertCompra(comInv);
-                    } else {
-                        Notification.show("El valor final no puede ser negativo. \n", Notification.Type.ERROR_MESSAGE);
-                        return;
-                    }
+//                    if (comInv.getDiferencia_inv() >= 0.0) { //ASG COMENTO TODA LA VALIDACION DE NOTIFICACION MENOS EL INSERT
+                    service.insertCompra(comInv);
+//                    } else {
+//                        Notification.show("El valor final no puede ser negativo. \n", Notification.Type.ERROR_MESSAGE);
+//                        return;
+//                    }
 
                 }
 //                for (Integer pid : contLub.getItemIds()) {

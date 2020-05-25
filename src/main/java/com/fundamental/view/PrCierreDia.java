@@ -11,6 +11,7 @@ import com.fundamental.model.Turno;
 import com.sisintegrados.generic.bean.Usuario;
 import com.fundamental.model.Utils;
 import com.fundamental.model.dto.DtoArqueo;
+import com.fundamental.services.SvcComVenLubricantes;
 
 import com.sisintegrados.dao.Dao;
 import com.fundamental.services.SvcDeposito;
@@ -1264,6 +1265,14 @@ public class PrCierreDia extends Panel implements View {
                                     //notif.setIcon(new ThemeResource("img/reindeer.png"));
                                     notif.show(Page.getCurrent());
                                     UI.getCurrent().getNavigator().navigateTo(DashboardViewType.PR_DAY_CLOSE.getViewName());
+                                    
+                                    //LLAMA AL EVENTO MIGRA SALDO
+                                    SvcComVenLubricantes krdex = new SvcComVenLubricantes();
+                                    Pais pais = new Pais();
+                                    pais = (Pais) cbxPais.getValue();
+                                    System.out.println("SALDO "+dfdFecha.getValue()+"  "+pais.getPaisId()+" "+usuario.getEstacionid());
+                                    krdex.migraSaldo(dfdFecha.getValue(),pais.getPaisId(), usuario.getEstacionid());
+                                    
                                 } else {
                                     Notification.show("Ocurrió un cerrar el turno.\n" + dia.getDescError(), Notification.Type.ERROR_MESSAGE);
                                     return;

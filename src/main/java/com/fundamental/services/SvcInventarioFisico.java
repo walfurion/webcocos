@@ -105,7 +105,7 @@ public class SvcInventarioFisico extends DaoImp {
                 pst.setString(8, lub.getModificado_por());
                 pst.setInt(9, lub.getProducto_id());
                 pst.setString(10, Constant.SDF_ddMMyyyy.format(lub.getFecha()));
-                pst.setInt(10, lub.getEstacionid()); //asg
+                pst.setInt(11, lub.getEstacionid()); //asg
                 pst.executeUpdate();
                 result = lub;
             } else {
@@ -115,7 +115,7 @@ public class SvcInventarioFisico extends DaoImp {
                 pst = getConnection().prepareStatement(miQuery);
                 Double fisTienda = lub.getUnidad_fis_tienda() == null ? 0.0 : lub.getUnidad_fis_tienda();
                 Double fisBodega = lub.getUnidad_fis_bodega() == null ? 0.0 : lub.getUnidad_fis_bodega();
-                Double fisPista = lub.getUnidad_fis_pista() == null ? 0.0 : lub.getUnidad_fis_tienda();
+                Double fisPista = lub.getUnidad_fis_pista() == null ? 0.0 : lub.getUnidad_fis_pista();
                 Double totalUniFis = lub.getTotal_unidad_fisica() == null ? 0.0 : lub.getTotal_unidad_fisica();
                 Double diferencia = lub.getDiferencia_inv() == null ? 0.0 : lub.getDiferencia_inv();
                 pst.setInt(1, lub.getProducto_id());
@@ -154,7 +154,7 @@ public class SvcInventarioFisico extends DaoImp {
         try {
             miQuery = "SELECT count(*) FROM INVENTARIO_FISICO_LUB where PRODUCTO_ID=" + idProducto + " "
                     + "and FECHA =  to_date('" + dateString + "','dd/mm/yyyy') AND ESTACION_ID = " + ESTACIONID;  //ASG ESATACION
-            System.out.println("mi ueryryry " + miQuery);
+//            System.out.println("COUNT LUB " + miQuery);
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
             if (rst.next()) {

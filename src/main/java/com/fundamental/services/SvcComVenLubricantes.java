@@ -12,6 +12,8 @@ import com.sisintegrados.generic.bean.ComVenLubricantes;
 import com.sisintegrados.generic.bean.compraGeneric;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,6 +29,52 @@ public class SvcComVenLubricantes extends DaoImp {
 
     private String query;
 
+    public void migraSaldo(Date fecha, Integer idpais, Integer idestacion) {
+        LocalDate localDate = fecha.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        String month = Integer.toString(localDate.getMonthValue()).length() == 1 ? "0".concat(Integer.toString(localDate.getMonthValue())) : Integer.toString(localDate.getMonthValue());
+        String day = Integer.toString(localDate.getDayOfMonth()).length() == 1 ? "0".concat(Integer.toString(localDate.getDayOfMonth())) : Integer.toString(localDate.getDayOfMonth());
+        try {
+            query = "INSERT INTO COMPRA_VENTA_LUBRICANTE(SELECT COMPRA_VENTA_LUBRICANTE_SEQ.nextval COMPRA_ID,a.MARCA_ID,a.producto_id,a.FECHA+1 NEWFECHA,a.INV_FINAL INV_INICIAL,0 COMPRA,0 VENTA,a.INV_FINAL,a.CREADO_POR,sysdate,null,null,a.PAIS_ID,a.ESTACION_ID \n"
+                    + "FROM COMPRA_VENTA_LUBRICANTE a\n"
+                    + "WHERE a.ESTACION_ID = " + idestacion
+                    + " AND TO_CHAR(a.FECHA,'DD') = " + day
+                    + " AND TO_CHAR(a.FECHA,'MM') = " + month
+                    + "AND a.PAIS_ID = " + idpais + ")";
+            pst = getConnection().prepareStatement(query);
+            pst.executeUpdate();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            closePst();
+            closeConnections(); //asg
+        }
+    }
+    
+
+    public String validaInvInicial(Date fecha, Integer idpais, Integer idestacion) {
+        String result = "";
+        ResultSet rst = null;
+        LocalDate localDate = fecha.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        String month = Integer.toString(localDate.getMonthValue()).length() == 1 ? "0".concat(Integer.toString(localDate.getMonthValue())) : Integer.toString(localDate.getMonthValue());
+        String day = Integer.toString(localDate.getDayOfMonth()).length() == 1 ? "0".concat(Integer.toString(localDate.getDayOfMonth())) : Integer.toString(localDate.getDayOfMonth());
+        try {
+            query = "SELECT TO_CHAR(MAX(FECHA), 'DD') DIA \n"
+                    + "FROM COMPRA_VENTA_LUBRICANTE \n"
+                    + "WHERE ESTACION_ID = " + idestacion
+                    + " AND TO_CHAR(FECHA,'MM') = " + month
+                    + " AND PAIS_ID = " + idpais;
+            pst = getConnection().prepareStatement(query);
+            rst = pst.executeQuery();
+
+            while (rst.next()) {
+                result = rst.getString(1);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return result;
+    }
+
     public List<ComVenLubricantes> getComVenLub(int countryId, int brandId, Date fecha, Integer ESTACIONID) {
         List<ComVenLubricantes> result = new ArrayList();
         Calendar ayer = Calendar.getInstance();
@@ -34,7 +82,7 @@ public class SvcComVenLubricantes extends DaoImp {
         ayer.add(Calendar.DATE, -1);
         ResultSet rst = null;
         try {
-            query = "SELECT p.producto_id,p.nombre,m.id_marca, c.pais_id, (select inv_inicial from compra_venta_lubricante "
+            query = "SELECT p.producto_id,p.nombre,m.id_marca, c.pais_id, (select inv_final from compra_venta_lubricante "
                     + "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy') AND ESTACION_ID = " + ESTACIONID + ") as inv_inicial, "
                     + "(select compra from compra_venta_lubricante "
                     + "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy') AND ESTACION_ID = " + ESTACIONID + ") as compra "
@@ -123,14 +171,14 @@ public class SvcComVenLubricantes extends DaoImp {
                 if (lub.getInvInicial() > 0) {
                     invFinalTotal = lub.getInvInicial();
                     pst.setDouble(1, invFinalTotal);
-                }else{
+                } else {
                     invFinalTotal = Double.valueOf(comp.getInv_final());
                     pst.setDouble(1, comp.getInv_inicial());
                 }
 
-                pst.setDouble(2, lub.getCompra()+comp.getCompra());
+                pst.setDouble(2, lub.getCompra() + comp.getCompra());
 //                pst.setDouble(3, lub.getInvfinal());
-                pst.setDouble(3, invFinalTotal+lub.getCompra()+comp.getCompra()); //ASG
+                pst.setDouble(3, invFinalTotal + lub.getCompra() + comp.getCompra()); //ASG
                 pst.setString(4, lub.getModificadopor());
                 pst.setInt(5, lub.getProductoId());
                 pst.setString(6, Constant.SDF_ddMMyyyy.format(lub.getFecha()));
@@ -201,8 +249,8 @@ public class SvcComVenLubricantes extends DaoImp {
                 pst.setInt(1, idMarca);
                 pst.setInt(2, productoId);
                 pst.setDate(3, new java.sql.Date(fecha.getTime()));
-                pst.setDouble(4, valFinalAnt);
-                pst.setDouble(5, venta);
+                pst.setDouble(4, valFinalAnt);  //0
+                pst.setDouble(5, venta); // 
                 pst.setDouble(6, (valFinalAnt - venta));
                 pst.setInt(7, paisId);
                 pst.setInt(8, ESTACIONID);  //ASG ESTACION
@@ -306,6 +354,7 @@ public class SvcComVenLubricantes extends DaoImp {
                     + "and trunc(FECHA) =  to_date('" + dateString + "','dd/mm/yyyy') and PAIS_ID= " + idPais + " AND ESTACION_ID = " + ESTACIONID;  //ASG ESTACION
             pst = getConnection().prepareStatement(miQuery);
             rst = pst.executeQuery();
+            System.out.println("COUNT LUBRICANTES " + miQuery);
             if (rst.next()) {
                 result = rst.getInt(1);
             }
