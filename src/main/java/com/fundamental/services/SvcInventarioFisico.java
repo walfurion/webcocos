@@ -30,9 +30,14 @@ public class SvcInventarioFisico extends DaoImp {
         List<ComInventarioFisico> result = new ArrayList();
         String fecha1 = Constant.SDF_ddMMyyyy.format(fecha);
         String fecha2 = Constant.SDF_ddMMyyyy.format(fecha);
+        String fecha3 = Constant.SDF_ddMMyyyy.format(fecha);
         String fechaString = Constant.SDF_ddMMyyyy.format(fecha);
         fecha1 = fecha2.substring(3, 5);
         fecha2 = fecha2.substring(6);
+        System.out.println(" FECHA 2 "+fecha3);
+        fecha3 = fecha3.substring(0, 2);
+        System.out.println(" FECHA 3 "+fecha3);
+        
         try {
 //            Date fecha2 = recuperaFecha(countryId,brandId)
             query = "select rownum as numero,p.NOMBRE,p.PRESENTACION,lp.PRECIO, "
@@ -48,6 +53,7 @@ public class SvcInventarioFisico extends DaoImp {
                     + "from COMPRA_VENTA_LUBRICANTE l, PRODUCTO p, LUBRICANTEPRECIO lp "
                     + "where l.PRODUCTO_ID = p.PRODUCTO_ID and l.PRODUCTO_ID = lp.PRODUCTO_ID "
                     + "and l.MARCA_ID = " + brandId + " and l.ESTACION_ID = " + ESTACIONID + " " /*asg adiciona estacion*/
+                    + "and " + fecha3 + "=extract(DAY from fecha) "
                     + "and " + fecha1 + "=extract(MONTH from fecha) "
                     + "and " + fecha2 + "=extract(YEAR from fecha) "
                     + "order by numero "; 
