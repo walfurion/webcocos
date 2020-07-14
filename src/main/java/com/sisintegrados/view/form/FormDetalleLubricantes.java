@@ -142,13 +142,13 @@ DateField dfdFecha = new DateField("Fecha:");
         btnguardar.addClickListener((Button.ClickListener) event -> {
 //        int idPro = 0;
         //retorna los valores guardados anteriormente
-            for (DtoProducto itemId : listAnt) {
-                itemId.getProductoId();
-                itemId.getCantidad();
-                //fechaQuery
-                SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();
-                daoVentaLubs.reversarVenta(itemId.getProductoId(), idpais, Double.valueOf(itemId.getCantidad()), fechaQuery,usuario.getEstacionid()); //asg estacion
-            }
+//            for (DtoProducto itemId : listAnt) {
+//                itemId.getProductoId();
+//                itemId.getCantidad();
+//                //fechaQuery
+//                SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();
+//                daoVentaLubs.reversarVenta(itemId.getProductoId(), idpais, Double.valueOf(itemId.getCantidad()), fechaQuery,usuario.getEstacionid()); //asg estacion
+//            }
             for (Integer itemId : bcrLubs.getItemIds()) {
 //                if(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId()==idPro){
 //                    bcrLubs.getItem(itemId).getBean().getProducto().setValue(cantidad+bcrLubs.getItem(itemId).getBean().getProducto().getValue());
@@ -162,7 +162,7 @@ DateField dfdFecha = new DateField("Fecha:");
                 
                 //METODO NUEVO
 //                System.out.println("DIA "+daoVentaLubs.validaInvInicial(fechaQuery,idpais,usuario.getEstacionid()));
-                daoVentaLubs.insertVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), fechaQuery,usuario.getEstacionid()); //asg estacion
+//                daoVentaLubs.insertVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), idpais, Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), fechaQuery,usuario.getEstacionid()); //asg estacion
                 if(diferencia < 0){  
                     Notification.show("VENTA LUBRICANTE CON INVENTARIO NEGATIVO.\n", Notification.Type.ERROR_MESSAGE);
                 }

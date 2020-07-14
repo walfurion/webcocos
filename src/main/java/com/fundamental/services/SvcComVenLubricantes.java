@@ -85,11 +85,14 @@ public class SvcComVenLubricantes extends DaoImp {
             query = "SELECT p.producto_id,p.nombre,m.id_marca, c.pais_id, (select inv_final from compra_venta_lubricante "
                     + "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy') AND ESTACION_ID = " + ESTACIONID + ") as inv_inicial, "
                     + "(select compra from compra_venta_lubricante "
-                    + "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy') AND ESTACION_ID = " + ESTACIONID + ") as compra "
+                    + "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy') AND ESTACION_ID = " + ESTACIONID + ") as compra, "
+                    + "(select venta from compra_venta_lubricante "
+                    + "where producto_id=p.PRODUCTO_ID and pais_id=c.PAIS_ID and FECHA=to_date('" + Constant.SDF_ddMMyyyy.format(fecha) + "','dd/mm/yyyy') AND ESTACION_ID = " + ESTACIONID + ") as venta "
                     + "FROM lubricanteprecio l, pais c, producto p, marca m "
                     + "WHERE l.pais_id = c.pais_id AND p.id_marca = m.id_marca and p.TIPO_ID=2 "
                     + "AND l.producto_id = p.producto_id and p.ESTADO='A' AND l.pais_id = " + countryId + " "
                     + "AND p.id_marca = " + brandId + "";
+            System.out.println("***GET COM VEN LUB ***"+query);
             pst = getConnection().prepareStatement(query);
             rst = pst.executeQuery();
             ComVenLubricantes lub;
@@ -103,6 +106,7 @@ public class SvcComVenLubricantes extends DaoImp {
                 }
                 lub = new ComVenLubricantes(rst.getInt(3), rst.getInt(1), rst.getInt(4), fecha, valFinal, rst.getString(2), ESTACIONID);
                 lub.setCompra(rst.getDouble(6));
+                lub.setVenta(rst.getDouble(7));
                 result.add(lub);
             }
         } catch (Exception exc) {
@@ -166,19 +170,23 @@ public class SvcComVenLubricantes extends DaoImp {
                 miQuery = "UPDATE COMPRA_VENTA_LUBRICANTE "
                         + "SET INV_INICIAL=?,COMPRA=?, INV_FINAL=?, MODIFICADO_POR=?, MODIFICADO_EL=SYSDATE "
                         + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy') AND ESTACION_ID = ?"; //ASG ESTACION
+//                System.out.println("****UPDATE COMPRA LUBRICANTE**** "+miQuery);
+                lub.getVenta();
+//                System.out.println("****lub.getVenta**** "+lub.getVenta());
                 pst = getConnection().prepareStatement(miQuery);
                 /*New ASG*/
                 if (lub.getInvInicial() > 0) {
-                    invFinalTotal = lub.getInvInicial();
+                    invFinalTotal = lub.getInvInicial()+lub.getVenta();
                     pst.setDouble(1, invFinalTotal);
+//                    pst.setDouble(1, inv);
                 } else {
-                    invFinalTotal = Double.valueOf(comp.getInv_final());
+                    invFinalTotal = Double.valueOf(comp.getInv_inicial());
                     pst.setDouble(1, comp.getInv_inicial());
                 }
 
                 pst.setDouble(2, lub.getCompra() + comp.getCompra());
 //                pst.setDouble(3, lub.getInvfinal());
-                pst.setDouble(3, invFinalTotal + lub.getCompra() + comp.getCompra()); //ASG
+                pst.setDouble(3, invFinalTotal + lub.getCompra() + comp.getCompra()-lub.getVenta()); //ASG
                 pst.setString(4, lub.getModificadopor());
                 pst.setInt(5, lub.getProductoId());
                 pst.setString(6, Constant.SDF_ddMMyyyy.format(lub.getFecha()));
@@ -189,6 +197,7 @@ public class SvcComVenLubricantes extends DaoImp {
                 miQuery = "INSERT INTO COMPRA_VENTA_LUBRICANTE(COMPRA_ID, MARCA_ID, PRODUCTO_ID, "
                         + "FECHA, INV_INICIAL, COMPRA, INV_FINAL, CREADO_POR, PAIS_ID, CREADO_EL, ESTACION_ID) " /*ASG ESTACION*/
                         + "VALUES(COMPRA_VENTA_LUBRICANTE_SEQ.NEXTVAL, ?, ?, ?,?, ?, ?, ?, ?, SYSDATE,?)";
+//                System.out.println("****INSERT COMPRA LUBRICANTE**** "+miQuery);
                 pst = getConnection().prepareStatement(miQuery);
                 pst.setInt(1, lub.getMarcaId());
                 pst.setInt(2, lub.getProductoId());
@@ -288,8 +297,8 @@ public class SvcComVenLubricantes extends DaoImp {
             miQuery = "UPDATE COMPRA_VENTA_LUBRICANTE "
                     + "SET VENTA=?, INV_FINAL=?, MODIFICADO_EL=SYSDATE "
                     + "where PRODUCTO_ID=? and FECHA=to_date(?,'dd/mm/yyyy') AND ESTACION_ID = " + ESTACIONID;  //ASG ESTACION ID
-            System.out.println("REVERSA VENTA " + miQuery);
-            System.out.println("VENTA  " + ventAcu + "  " + venta);
+//            System.out.println("REVERSA VENTA " + miQuery);
+//            System.out.println("VENTA  " + ventAcu + "  " + venta);
             pst = getConnection().prepareStatement(miQuery);
             pst.setDouble(1, ventAcu - Math.abs(venta));//asg
             pst.setDouble(2, valInicial + Math.abs(venta));//asg   

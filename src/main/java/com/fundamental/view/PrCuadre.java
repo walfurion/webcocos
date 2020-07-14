@@ -252,6 +252,10 @@ public class PrCuadre extends Panel implements View {
 
     Integer tolerancia;
 
+    /*FIX DUPLICADOS KARDEX LUBRICANTES*///MG
+    BeanContainer<Integer, DtoProducto> bcrLubs_ant = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
+    List<DtoProducto> listAnt = new ArrayList();
+
     /*FIN*/
     public PrCuadre() {
         addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -572,7 +576,6 @@ public class PrCuadre extends Panel implements View {
 
 //                service.closeConnections();
 //                determinarPermisos();
-
             }
         });
 
@@ -590,8 +593,8 @@ public class PrCuadre extends Panel implements View {
                         if (daoRep.getIdRol(user.getUsuarioId()) == 1) {
                             btnSave.setEnabled(true);
                         }
-                    }else{
-                            btnSave.setEnabled(true);
+                    } else {
+                        btnSave.setEnabled(true);
                     }
 
                     SvcTurno svcTurno = new SvcTurno();
@@ -718,6 +721,10 @@ public class PrCuadre extends Panel implements View {
                     /*Recupera Detalle Lubricantes*/ //JLopez
                     bcrLubs = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
                     bcrLubs = daoLubs.getDetalleProducto(arqueocaja.getArqueocajaId());
+                    if (bcrLubs.size() > 0) {
+                        bcrLubs_ant = bcrLubs;
+                        setProductsAnt();
+                    }
 
                     /*Recupera Detalle Cliente Credito*/ //MAG
                     bcrClientes = new BeanContainer<Integer, DtoProducto>(DtoProducto.class);
@@ -739,7 +746,37 @@ public class PrCuadre extends Panel implements View {
 
             }
         });
+    }
 
+    private void setProductsAnt() {
+        for (Integer itemId : bcrLubs_ant.getItemIds()) {
+            bcrLubs_ant.getItem(itemId).getBean().getProducto().getProductoId();
+            bcrLubs_ant.getItem(itemId).getBean().getCantidad(); //Venta
+            //fechaQuery
+            //     System.out.println("datos " + bcrLubs_ant.getItem(itemId).getBean().getProducto().getProductoId() + " " + bcrLubs_ant.getItem(itemId).getBean().getCantidad());
+            DtoProducto p = new DtoProducto();
+            p.setProductoId(bcrLubs_ant.getItem(itemId).getBean().getProducto().getProductoId());
+            p.setCantidad(bcrLubs_ant.getItem(itemId).getBean().getCantidad() * -1);
+            //       System.out.println("cantidad.,.,., " + bcrLubs_ant.getItem(itemId).getBean().getCantidad() * +1);
+            listAnt.add(p);
+        }
+    }
+
+    private void guardarKardexLubricante() {
+        //retorna los valores guardados anteriormente
+        for (DtoProducto itemId : listAnt) {
+            itemId.getProductoId();
+            itemId.getCantidad();
+            //fechaQuery
+            SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();
+            daoVentaLubs.reversarVenta(itemId.getProductoId(), pais.getPaisId(), Double.valueOf(itemId.getCantidad()), dfdFecha.getValue(), estacion.getEstacionId()); //asg estacion
+        }
+        for (Integer itemId : bcrLubs.getItemIds()) {
+            SvcComVenLubricantes daoVentaLubs = new SvcComVenLubricantes();
+            //METODO NUEVO
+//                System.out.println("DIA "+daoVentaLubs.validaInvInicial(fechaQuery,idpais,usuario.getEstacionid()));
+            daoVentaLubs.insertVenta(bcrLubs.getItem(itemId).getBean().getProducto().getProductoId(), pais.getPaisId(), Double.valueOf(bcrLubs.getItem(itemId).getBean().getCantidad()), dfdFecha.getValue(), estacion.getEstacionId()); //asg estacion
+        }
     }
 
     private void determinarPermisos() {
@@ -819,7 +856,6 @@ public class PrCuadre extends Panel implements View {
             tasacambio = service.getTasacambioByPaisFecha(pais.getPaisId(), turno.getFecha());
 
 //            service.closeConnections();
-
             if (!user.isGerente() && !user.isAdministrativo()) {
                 Arqueocaja acaja = new Arqueocaja(null, estacion.getEstacionId(), turno.getTurnoId(), new Date(), 1, null, null, null, null, null);
                 acaja.setNombre("Nuevo cuadre");
@@ -1019,7 +1055,6 @@ public class PrCuadre extends Panel implements View {
 //                                Parametro parametro = svcTurno.getParameterByName("CORREO_CALIBRACIONES_" + tmpString.toUpperCase().replaceAll(" ", "")); //COMENTADO CORREO NO SE USA  ASG
 
 //                                svcTurno.closeConnections();
-
                                 if (arqueo.getArqueocajaId() != null) {
 
                                     //COMENTADO YA NO EXISTE CORREOS ASG
@@ -1037,6 +1072,7 @@ public class PrCuadre extends Panel implements View {
                                         dao.CreaClienteDetalle(arqueo.getArqueocajaId(), bcrPrepaid, user.getUsername());
                                         dao.CreaClienteDetalleCredito(arqueo.getArqueocajaId(), bcrClientes, user.getUsername());//Clientes Credito
                                         daoTrC.CreaDetalleTarjetaCredito(arqueo.getArqueocajaId(), bcrCreditC, user.getUsername());//Clientes Tarjeta credito
+                                        guardarKardexLubricante(); //Fix Kardex Lubricante MAG
                                     } catch (SQLException ex) {
                                         ex.printStackTrace();
                                     }
@@ -1297,7 +1333,7 @@ public class PrCuadre extends Panel implements View {
 //                            System.out.println("HIJO " + bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id() + " " + bcrCreditC.getItem(idmedio).getBean().getTarjeta().getNombre());
 //                            if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id()) {
                             if (bcrMediopago.getItem(itemId).getBean().getMediopagoId() == id) {
-                                System.out.println("VALOR DEL HIJO ENCONTRADO " + bcrCreditC.getItem(idmedio).getBean().getMonto());
+//                                System.out.println("VALOR DEL HIJO ENCONTRADO " + bcrCreditC.getItem(idmedio).getBean().getMonto());
                                 genericMedioTarjeta genEnc = new genericMedioTarjeta();
                                 genEnc.setIdmedio(bcrCreditC.getItem(idmedio).getBean().getTarjeta().getMediopago_id());
                                 genEnc.setMonto(bcrCreditC.getItem(idmedio).getBean().getMonto());
